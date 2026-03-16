@@ -8,7 +8,7 @@ import uuid
 from datetime import UTC, datetime
 
 import structlog
-from sqlalchemy import delete, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -277,7 +277,12 @@ async def sync_all_modules() -> None:
 
     async with session_factory() as session:
         result = await session.execute(
-            select(User).where(User.canvas_api_token_encrypted.isnot(None))
+            select(User).where(
+                or_(
+                    User.canvas_api_token_encrypted.isnot(None),
+                    User.ed_api_token_encrypted.isnot(None),
+                )
+            )
         )
         users = list(result.scalars().all())
 
