@@ -144,3 +144,10 @@ class NotFoundError(UniboardError):
             status_code=404,
         )
         self.resource = resource
+
+
+class ConflictError(UniboardError):
+    """Raised when a resource conflict occurs (e.g. duplicate entry)."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__("CONFLICT", message, 409)

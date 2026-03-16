@@ -49,13 +49,20 @@ class TokenEncryption:
             return False
 
 
+_encryption: TokenEncryption | None = None
+
+
 def get_encryption() -> TokenEncryption:
-    """Create TokenEncryption from Settings.encryption_key.
+    """Return cached TokenEncryption singleton from Settings.encryption_key.
 
     Supports two key formats:
     - 64-char hex string: decoded via bytes.fromhex() to 32 bytes
     - Raw string >= 32 chars: encoded and truncated to 32 bytes
     """
+    global _encryption  # noqa: PLW0603
+    if _encryption is not None:
+        return _encryption
+
     key_str = get_settings().encryption_key
     if not key_str:
         raise RuntimeError("encryption_key is not configured in settings")
@@ -63,13 +70,15 @@ def get_encryption() -> TokenEncryption:
     if len(key_str) == 64:
         try:
             key = bytes.fromhex(key_str)
-            return TokenEncryption(key)
+            _encryption = TokenEncryption(key)
+            return _encryption
         except ValueError:
             pass
 
     if len(key_str) >= 32:
         key = key_str.encode("utf-8")[:32]
-        return TokenEncryption(key)
+        _encryption = TokenEncryption(key)
+        return _encryption
 
     raise RuntimeError(
         "ENCRYPTION_KEY must be either a 64-char hex string or at least 32 characters"

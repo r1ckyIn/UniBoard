@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
 from src.models.user import User
-from src.schemas.common import SuccessResponse, UniboardError
+from src.schemas.common import SuccessResponse, TokenInvalidError, ValidationError
 from src.schemas.user import (
     TokenConfigRequest,
     TokenConfigResponse,
@@ -75,7 +75,7 @@ async def update_profile(
 
     if body.gpa_scale is not None:
         if body.gpa_scale not in ("wam", "gpa_4"):
-            raise UniboardError("VALIDATION_ERROR", "gpa_scale must be 'wam' or 'gpa_4'", 400)
+            raise ValidationError(detail="gpa_scale must be 'wam' or 'gpa_4'")
         current_user.gpa_scale = body.gpa_scale
 
     await session.flush()
@@ -96,10 +96,8 @@ async def configure_token(
 ) -> SuccessResponse[TokenConfigResponse]:
     """Validate and store an encrypted platform API token."""
     if platform not in VALID_PLATFORMS:
-        raise UniboardError(
-            "VALIDATION_ERROR",
-            f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
-            400,
+        raise ValidationError(
+            detail=f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
         )
 
     settings = get_settings()
@@ -114,11 +112,7 @@ async def configure_token(
                     headers={"Authorization": f"Bearer {body.token}"},
                 )
                 if resp.status_code != 200:
-                    raise UniboardError(
-                        "TOKEN_INVALID",
-                        f"{platform} token validation failed",
-                        422,
-                    )
+                    raise TokenInvalidError(platform=platform)
                 # Get course count
                 courses_resp = await client.get(
                     f"{settings.canvas_base_url}/courses",
@@ -136,11 +130,7 @@ async def configure_token(
                     headers={"Authorization": f"Bearer {body.token}"},
                 )
                 if resp.status_code != 200:
-                    raise UniboardError(
-                        "TOKEN_INVALID",
-                        f"{platform} token validation failed",
-                        422,
-                    )
+                    raise TokenInvalidError(platform=platform)
                 courses_data = resp.json()
                 if isinstance(courses_data, dict):
                     course_list: Any = courses_data.get("courses", [])
@@ -150,11 +140,7 @@ async def configure_token(
                     courses_found = len(courses_data)
 
     except httpx.HTTPError as exc:
-        raise UniboardError(
-            "TOKEN_INVALID",
-            f"{platform} token validation failed: connection error",
-            422,
-        ) from exc
+        raise TokenInvalidError(platform=platform) from exc
 
     # Encrypt and store
     encryption = get_encryption()
@@ -193,10 +179,8 @@ async def remove_token(
 ) -> SuccessResponse[dict[str, str]]:
     """Remove a stored platform API token."""
     if platform not in VALID_PLATFORMS:
-        raise UniboardError(
-            "VALIDATION_ERROR",
-            f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
-            400,
+        raise ValidationError(
+            detail=f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
         )
 
     if platform == "canvas":

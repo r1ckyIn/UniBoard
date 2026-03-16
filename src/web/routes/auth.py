@@ -16,7 +16,7 @@ from src.schemas.auth import (
     RegisterRequest,
     RegisterResponse,
 )
-from src.schemas.common import SuccessResponse, UniboardError
+from src.schemas.common import ConflictError, SuccessResponse, UniboardError
 from src.security.auth import (
     create_access_token,
     create_refresh_token,
@@ -42,7 +42,7 @@ async def register(
     result = await session.execute(stmt)
     existing = result.scalar_one_or_none()
     if existing is not None:
-        raise UniboardError("CONFLICT", "Email already registered", 409)
+        raise ConflictError("Email already registered")
 
     # Create user with hashed password
     user = User(

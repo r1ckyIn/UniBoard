@@ -14,6 +14,19 @@ import structlog
 
 logger = structlog.get_logger()
 
+# Block-level elements that should be on their own line
+BLOCK_TAGS = {
+    "paragraph",
+    "heading",
+    "code-block",
+    "callout",
+    "list-item",
+    "blockquote",
+}
+
+# Inline tags that just contribute text
+INLINE_TAGS = {"bold", "italic", "link", "code", "math", "underline", "strikethrough"}
+
 
 def _extract_text(element: ET.Element) -> str:
     """Recursively extract text from an XML element tree."""
@@ -21,20 +34,7 @@ def _extract_text(element: ET.Element) -> str:
 
     tag = element.tag
 
-    # Block-level elements that should be on their own line
-    block_tags = {
-        "paragraph",
-        "heading",
-        "code-block",
-        "callout",
-        "list-item",
-        "blockquote",
-    }
-
-    # Inline tags that just contribute text
-    inline_tags = {"bold", "italic", "link", "code", "math", "underline", "strikethrough"}
-
-    if tag in block_tags:
+    if tag in BLOCK_TAGS:
         # Collect text from this element and all children
         inner = _gather_inline_text(element)
         if inner.strip():
@@ -52,7 +52,7 @@ def _extract_text(element: ET.Element) -> str:
         if alt:
             parts.append(f"[Image: {alt}]")
 
-    elif tag in inline_tags:
+    elif tag in INLINE_TAGS:
         inner = _gather_inline_text(element)
         if inner.strip():
             parts.append(inner.strip())

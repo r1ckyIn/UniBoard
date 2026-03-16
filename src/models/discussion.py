@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Computed, Float, ForeignKey, Index, String, Text
-from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -31,11 +31,6 @@ class DiscussionThread(UUIDMixin, TimestampMixin, Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     ed_thread_id: Mapped[str] = mapped_column(String(50))
     title: Mapped[str] = mapped_column(String(255))

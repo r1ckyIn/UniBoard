@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, Index, String, Text
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -25,11 +24,6 @@ class UnifiedDeadline(UUIDMixin, TimestampMixin, Base):
         Index("ix_deadlines_dedup", "dedup_key", unique=True),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     title: Mapped[str] = mapped_column(String(255))
     due_date: Mapped[datetime] = mapped_column()

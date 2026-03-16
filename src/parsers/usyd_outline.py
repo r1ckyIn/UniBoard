@@ -41,15 +41,17 @@ class UnitOutlineParser:
         """Fetch a Unit Outline page and extract structured assessment data.
 
         Always stores raw_html in the result for future re-parsing.
+        Parses HTML once and passes the soup object to all extraction methods.
         """
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(url)
             response.raise_for_status()
             html = response.text
 
-        assessments = self.parse(html)
-        learning_outcomes = self._extract_learning_outcomes(html)
-        description = self._extract_description(html)
+        soup = BeautifulSoup(html, "lxml")
+        assessments = self._parse_soup(soup)
+        learning_outcomes = self._extract_learning_outcomes_soup(soup)
+        description = self._extract_description_soup(soup)
 
         return UnitOutlineParseResult(
             assessments=assessments,
@@ -65,6 +67,10 @@ class UnitOutlineParser:
         Skips rows that fail to parse (per-row error handling).
         """
         soup = BeautifulSoup(html, "lxml")
+        return self._parse_soup(soup)
+
+    def _parse_soup(self, soup: BeautifulSoup) -> list[AssessmentItem]:
+        """Extract assessment items from a pre-parsed BeautifulSoup object."""
 
         # Try #assessment-table first, then fall back to class selectors
         table = soup.find(id="assessment-table")
@@ -181,8 +187,12 @@ class UnitOutlineParser:
         return 0.95 <= total <= 1.05
 
     def _extract_learning_outcomes(self, html: str) -> list[str]:
-        """Extract learning outcomes section if present."""
+        """Extract learning outcomes section if present (public API)."""
         soup = BeautifulSoup(html, "lxml")
+        return self._extract_learning_outcomes_soup(soup)
+
+    def _extract_learning_outcomes_soup(self, soup: BeautifulSoup) -> list[str]:
+        """Extract learning outcomes from a pre-parsed soup object."""
         outcomes: list[str] = []
 
         # Look for learning outcomes section
@@ -206,9 +216,12 @@ class UnitOutlineParser:
         return outcomes
 
     def _extract_description(self, html: str) -> str:
-        """Extract course description section if present."""
+        """Extract course description section if present (public API)."""
         soup = BeautifulSoup(html, "lxml")
+        return self._extract_description_soup(soup)
 
+    def _extract_description_soup(self, soup: BeautifulSoup) -> str:
+        """Extract course description from a pre-parsed soup object."""
         section = soup.find(id="unit-description")
         if section is None:
             heading = soup.find(

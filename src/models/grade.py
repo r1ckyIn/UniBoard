@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Float, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -24,11 +23,6 @@ class Grade(UUIDMixin, TimestampMixin, Base):
         Index("ix_grades_course", "course_id", "graded_at"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     assessment_name: Mapped[str] = mapped_column(String(255))
     score: Mapped[float | None] = mapped_column(Float, nullable=True)

@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -21,11 +20,6 @@ class UnitOutline(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "unit_outlines"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     outline_url: Mapped[str] = mapped_column(String(500))
     assessments: Mapped[list | None] = mapped_column(  # type: ignore[type-arg]

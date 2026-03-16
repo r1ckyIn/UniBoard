@@ -6,7 +6,6 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -20,11 +19,6 @@ class Module(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "modules"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     canvas_module_id: Mapped[str] = mapped_column(String(50))
     name: Mapped[str] = mapped_column(String(255))
@@ -43,11 +37,6 @@ class ModuleItem(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "module_items"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     module_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("modules.id"))
     title: Mapped[str] = mapped_column(String(255))
     type: Mapped[str] = mapped_column(String(50))
