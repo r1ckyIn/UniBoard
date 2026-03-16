@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from src.logging import configure_logging
 from src.schemas.common import ErrorDetail, ErrorResponse, MetaInfo, UniboardError
-from src.web.routes import api_router
+from src.web.routes import api_router, health_router
 
 logger = structlog.get_logger()
 
@@ -67,6 +67,9 @@ def create_app() -> FastAPI:
 
     # Include API routes
     application.include_router(api_router)
+
+    # Health check at root level (not under /api/v1) per TRD SS12.10
+    application.include_router(health_router)
 
     return application
 
