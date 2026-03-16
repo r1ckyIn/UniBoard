@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### GPA Core
 
-- [ ] **GPA-01**: User can view real-time GPA/WAM for current semester, calculated from Canvas grades (data delay < 15 min)
-- [ ] **GPA-02**: User can perform What-if simulation by inputting hypothetical future assessment scores and seeing updated GPA in real-time
-- [ ] **GPA-03**: User can set a target GPA and see the minimum scores needed per remaining assessment to reach it
-- [ ] **GPA-04**: User can view assessment weight breakdown per course, parsed from Unit Outline HTML with visual donut chart
-- [ ] **GPA-05**: User can see per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage of course assessed
+- [x] **GPA-01**: User can view real-time GPA/WAM for current semester, calculated from Canvas grades (data delay < 15 min)
+- [x] **GPA-02**: User can perform What-if simulation by inputting hypothetical future assessment scores and seeing updated GPA in real-time
+- [x] **GPA-03**: User can set a target GPA and see the minimum scores needed per remaining assessment to reach it
+- [x] **GPA-04**: User can view assessment weight breakdown per course, parsed from Unit Outline HTML with visual donut chart
+- [x] **GPA-05**: User can see per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage of course assessed
 
 ### Deadlines
 
@@ -117,11 +117,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GPA-01 | Phase 2 | Pending |
-| GPA-02 | Phase 2 | Pending |
-| GPA-03 | Phase 2 | Pending |
-| GPA-04 | Phase 2 | Pending |
-| GPA-05 | Phase 2 | Pending |
+| GPA-01 | Phase 2 | Complete |
+| GPA-02 | Phase 2 | Complete |
+| GPA-03 | Phase 2 | Complete |
+| GPA-04 | Phase 2 | Complete |
+| GPA-05 | Phase 2 | Complete |
 | DL-01 | Phase 2 | Pending |
 | DL-02 | Phase 4 | Pending |
 | DL-03 | Phase 4 | Pending |

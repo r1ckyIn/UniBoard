@@ -49,7 +49,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — GPA/WAM service (Decimal calculation, What-if simulator, target path planner) + Pydantic schemas + 6 REST endpoints + Hypothesis property tests
+- [x] 02-01-PLAN.md — GPA/WAM service (Decimal calculation, What-if simulator, target path planner) + Pydantic schemas + 6 REST endpoints + Hypothesis property tests
 - [ ] 02-02-PLAN.md — Deadline aggregation (SHA-256 dedup + rapidfuzz), course materials (AI descriptions + tsvector search), Ed intelligence (rule-based), APScheduler sync engine + REST endpoints
 
 ### Phase 3: Frontend Dashboard
@@ -94,6 +94,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
-| 2. Core Services & API | 0/2 | Not started | - |
+| 2. Core Services & API | 1/2 | In Progress | - |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |
