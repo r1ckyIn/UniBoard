@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-16T22:19:32Z"
-last_activity: 2026-03-17 — Plan 03-01 executed (3 tasks, 18 tests, 45 files)
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-03-16T22:49:00Z"
+last_activity: 2026-03-17 -- Plan 03-03 executed (2 tasks, 11 tests, 16 files)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
-  percent: 55
+  completed_plans: 8
+  percent: 80
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 3 of 4 (Frontend Dashboard)
-Plan: 1 of 3 executed in current phase
-Status: Plan 03-01 complete -- Next.js scaffolding, design system, layout shell, auth, onboarding, 18 tests
-Last activity: 2026-03-17 — Plan 03-01 executed (3 tasks, 18 tests, 45 files)
+Plan: 3 of 3 executed in current phase
+Status: Plan 03-03 complete -- Predict page (What-if simulator), Digest page, Settings page, 11 tests
+Last activity: 2026-03-17 -- Plan 03-03 executed (2 tasks, 11 tests, 16 files)
 
-Progress: [██████░░░░] 55%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 13.7 min
-- Total execution time: 1.4 hours
+- Total plans completed: 8
+- Average duration: 15.4 min
+- Total execution time: 2.1 hours
 
 **By Phase:**
 
@@ -45,11 +45,11 @@ Progress: [██████░░░░] 55%
 |-------|-------|-------|----------|
 | 1 | 3/3 | 34 min | 11.3 min |
 | 2 | 2/2 | 34 min | 17.0 min |
-| 3 | 1/3 | 14 min | 14.0 min |
+| 3 | 3/3 | 63 min | 21.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (10 min), 01-03 (11 min), 02-01 (12 min), 02-02 (22 min), 03-01 (14 min)
-- Trend: Stable around 14 min average
+- Last 5 plans: 02-01 (12 min), 02-02 (22 min), 03-01 (14 min), 03-02 (26 min), 03-03 (23 min)
+- Trend: Frontend plans take ~20 min avg (more components per plan)
 
 *Updated after each plan completion*
 
@@ -90,6 +90,14 @@ Recent decisions affecting current work:
 - [03-01]: roughjs mocked in component tests (jsdom lacks full SVG support)
 - [03-01]: QueryProvider as separate client component for server/client boundary
 - [03-01]: Login uses URLSearchParams with username field (not email) per OAuth2PasswordRequestForm
+- [03-02]: CalendarGrid test uses timezone-agnostic assertion (date-fns format uses local time)
+- [03-02]: WeightDonut allows course selection via dropdown when multiple courses
+- [03-02]: DeadlineTimeline filters out past_due, shows only upcoming 7
+- [03-03]: Zustand store for predictor state -- enables real-time WAM updates without API round-trips
+- [03-03]: Memoized date range in DigestFeed to avoid re-renders from new Date() on every render
+- [03-03]: CourseLinking simplified -- manual linking deferred (backend API not available)
+- [03-03]: Digest is Phase 3 rule-engine version (AI-enhanced urgency scoring deferred to Phase 4)
+- [03-03]: Password change UI disabled with 'coming soon' (backend endpoint not yet available)
 
 ### Pending Todos
 
@@ -104,7 +112,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T22:19:32Z
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-frontend-dashboard/03-01-SUMMARY.md
-Next action: Execute Plan 03-02 (Dashboard page, Courses page, Deadlines page).
+Last session: 2026-03-16T22:50:17Z
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-frontend-dashboard/03-02-SUMMARY.md
+Next action: Phase 3 complete (all 3 plans done). Proceed to /pr-cycle or Phase 4.

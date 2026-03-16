@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment (completed 2026-03-16)
 - [x] **Phase 2: Core Services & API** - GPA engine, deadline aggregation, course materials, sync engine, REST API (completed 2026-03-16)
-- [ ] **Phase 3: Frontend Dashboard** - All 7 UI pages with Anthropic-inspired design, onboarding flow
+- [x] **Phase 3: Frontend Dashboard** - All 7 UI pages with Anthropic-inspired design, onboarding flow (completed 2026-03-17)
 - [ ] **Phase 4: Intelligence, Skills & MCP** - AI extraction, digests, notifications, skill system, MCP server
 
 ## Phase Details
@@ -66,7 +66,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Next.js 15 scaffolding, Tailwind v4 design system (Rough.js, paper texture, fonts), API client with JWT auth, TypeScript types, i18n (next-intl), sidebar + right panel layout, auth pages, 3-step onboarding, backend CORS
-- [ ] 03-02-PLAN.md — Dashboard page (100vh hero, stats row, course grades table, deadline timeline, weight donut), Courses page (card grid + detail with assessment/materials/posts), Deadlines page (calendar + filterable timeline)
+- [x] 03-02-PLAN.md — Dashboard page (100vh hero, stats row, course grades table, deadline timeline, weight donut), Courses page (card grid + detail with assessment/materials/posts), Deadlines page (calendar + filterable timeline)
 - [ ] 03-03-PLAN.md — Predict page (slider-based What-if simulator, target path, scenario management), Digest page (rule-based daily card feed), Settings page (token management, GPA target, profile)
 
 ### Phase 4: Intelligence, Skills & MCP
@@ -95,5 +95,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
 | 2. Core Services & API | 2/2 | Complete | 2026-03-16 |
-| 3. Frontend Dashboard | 1/3 | In progress | - |
+| 3. Frontend Dashboard | 3/3 | Complete | 2026-03-17 |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |
