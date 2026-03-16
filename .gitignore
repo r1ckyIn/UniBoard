@@ -63,3 +63,4 @@ logs/
 
 # Obsidian
 .obsidian/
+.hypothesis/
