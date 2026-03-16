@@ -35,6 +35,10 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [ ] 3-step onboarding (register → get tokens → paste tokens)
 - [ ] Zero-install web access (browser-only, no extensions)
 - [ ] MCP server entry point for Claude Desktop users
+- [ ] Skill-based agent system: auto-generate prompt template "skills" after first successful API exploration
+- [ ] Per-course skill differentiation (different courses organize materials differently)
+- [ ] Skill auto-generation: AI explores → succeeds → summarizes optimal steps into reusable skill file
+- [ ] ~50 skills covering data collection, data processing, AI analysis, and user actions
 
 ### Out of Scope
 
@@ -60,7 +64,21 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - **Existing docs**: BRD v2.6 (32KB), TRD v2.5 (113KB), frontend design brief, roadmap backlog
 - **API tokens**: Both Canvas and Ed tokens available for development/testing
 - **Design aesthetic**: Anthropic/Claude-inspired — warm, paper-textured, restrained. Colors: dark near-black (#141413), cream (#faf9f5), warm orange (#d97757), soft blue (#6a9bcc), olive green (#788c5d)
-- **Layout**: Three-column — narrow icon sidebar | main content | personal status panel
+- **Layout**: Three-column — narrow icon sidebar (68px→224px on hover) | main content | right panel (300px, sticky)
+- **Prototype**: `prototype/dashboard.html` — fully implemented dashboard page with Rough.js hand-drawn borders, paper grain texture, ruled lines background
+- **Design libraries**: Lucide Icons, Rough.js 4.6.6 (hand-drawn card borders), Rough Notation (hand-drawn text annotations like circle/underline)
+- **Fonts**: Inter (body/UI), Source Serif 4 (headings/display — serif, academic feel)
+- **CSS Variables**: --dark (#e8ddd0 sidebar bg), --cream (#faf9f5 page bg), --orange (#d97757), --blue (#6a9bcc), --green (#788c5d), --amber (#b08968), --card-bg (#f6f5f0), --radius (14px), --radius-sm (8px)
+- **Paper texture**: SVG fractalNoise grain overlay (opacity 0.12) + repeating ruled lines (opacity 0.02)
+- **7 pages defined by sidebar nav**: Dashboard (done), Timetable, Courses, Deadlines, Predict, Digest, Settings
+- **Dashboard components**: Hero welcome (greeting + date + encouragement), Stats row (WAM/Target/Alerts), Course Grades table, Deadline timeline (with urgency colors), Assessment weights donut chart, Right panel (Profile card, Calendar with deadline dots, Recent Activity feed)
+- **Design philosophy (103 iterations)**: "学生书桌上最顺手的那本笔记" — stress-relief first, data second. Hero welcome occupies 100vh first screen (students shouldn't face a wall of data). Encouragement tone: casual friend, not slogan ("The COMP2017 lab and the stats quiz are done and behind you now.")
+- **Rough.js usage**: Hand-drawn card borders, progress bars (roughCanvas.rectangle), donut chart (pure arc), timeline line, background doodles (stars, waves, dots — fixed layer, low opacity, notebook-margin-doodle feel)
+- **Rough Notation usage**: Animated text annotations — underline weekday, circle "Week 3", highlight encouragement text, circle WAM number on hover. Staggered playback sequence.
+- **Hero design decision**: Data pushed below fold. First screen = greeting + date + warm encouragement + "your dashboard ↓" scroll prompt with breathing text animation + bracket wrap + arrow bounce
+- **Course Grades table**: 4 columns (Course | Assessed progress bar + % | Earned weighted % | Target grade badge). Hover: Rough Notation circles the grade + fade-in "see predicted grade →" link
+- **Sidebar behavior**: Logo stays fixed position even when sidebar expands. Active item: orange-tinted background. Labels: opacity 0→1 on hover
+- **Right panel**: Sticky, doesn't scroll with main content. Current WAM with hand-drawn circle annotation. Mini calendar with deadline dot indicators (orange-soft background on deadline days)
 - **Competitive gap**: No existing product combines Canvas + Ed integration with GPA-focused information filtering
 - **Ed API note**: No public documentation; reference hschafer/edstem OSS library + curl testing. zsh export may escape special characters in tokens.
 - **Canvas Modules API**: Use `include[]=items` parameter to avoid N+1 requests
@@ -69,6 +87,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - **AI quality gate**: F1 < 75% auto-fallback to rule engine (is_endorsed + is_staff_answered)
 - **Sync frequencies**: Grades 15min, deadlines 1h, modules daily, Unit Outline once per semester
 - **Read-only policy**: System never writes to external platforms
+- **Skill system**: MCP server uses a skill-based agent pattern. Each "skill" is a prompt template that captures the optimal API call sequence for a specific operation (e.g., "collect deadlines for COMP2123"). Skills are auto-generated after the AI's first successful exploration of an operation, then reused deterministically. Different courses may need different skills because professors organize materials differently (Canvas Modules vs Ed Lessons, naming conventions, folder structures). ~50 skills expected across 4 dimensions: data collection, data processing, AI analysis, user actions.
 
 ## Constraints
 
@@ -96,6 +115,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Unit Outline from USYD HTML | Canvas may not have complete Unit Outline data | — Pending |
 | Rule-based + AI fallback for Ed posts | AI quality gate (F1 < 75% → fallback to rule engine) ensures reliability | — Pending |
 | Anthropic-inspired design | Warm, restrained, academic aesthetic — differentiates from typical EdTech | — Pending |
+| Skill-based MCP agent | Each MCP operation codified as a reusable prompt template after first exploration — avoids repeated trial-and-error, per-course customization | — Pending |
 
 ---
-*Last updated: 2026-03-16 after initialization*
+*Last updated: 2026-03-16 after initialization + skill system architecture decision*
