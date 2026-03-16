@@ -13,6 +13,7 @@ from src.models.base import Base, TimestampMixin, UUIDMixin
 if TYPE_CHECKING:
     from src.models.course import Course
     from src.models.push_record import PushRecord
+    from src.models.whatif import WhatIfScenario
 
 
 class User(UUIDMixin, TimestampMixin, Base):
@@ -28,6 +29,7 @@ class User(UUIDMixin, TimestampMixin, Base):
     ed_api_token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     gpa_target: Mapped[float | None] = mapped_column(Float, nullable=True)
     gpa_scale: Mapped[str] = mapped_column(String(10), default="wam")
+    target_gpa_7pt: Mapped[float | None] = mapped_column(Float, nullable=True)
     last_sync_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
     # Relationships
@@ -36,6 +38,10 @@ class User(UUIDMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
     push_records: Mapped[list[PushRecord]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    whatif_scenarios: Mapped[list[WhatIfScenario]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )

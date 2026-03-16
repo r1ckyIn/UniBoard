@@ -18,6 +18,9 @@ dependencies = [
     "pydantic>=2.10,<3.0",
     "pydantic-settings>=2.0,<3.0",
     "cryptography>=43,<45",
+    "apscheduler>=3.11,<4.0",
+    "anthropic>=0.84,<1.0",
+    "rapidfuzz>=3.14,<4.0",
 ]
 
 [project.optional-dependencies]
@@ -39,6 +42,7 @@ dev = [
     "mypy>=1.13,<2.0",
     "ruff>=0.8,<1.0",
     "psycopg2-binary>=2.9,<3.0",
+    "hypothesis>=6.151,<7.0",
 ]
 
 [build-system]
