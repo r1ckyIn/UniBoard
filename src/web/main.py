@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from src.logging import configure_logging
 from src.schemas.common import ErrorDetail, ErrorResponse, MetaInfo, UniboardError
+from src.web.routes import api_router
 
 logger = structlog.get_logger()
 
@@ -64,10 +65,8 @@ def create_app() -> FastAPI:
             ).model_dump(mode="json"),
         )
 
-    @application.get("/api/v1/health")
-    async def health_check() -> dict[str, str]:
-        """Health check endpoint."""
-        return {"status": "ok"}
+    # Include API routes
+    application.include_router(api_router)
 
     return application
 
