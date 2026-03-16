@@ -296,13 +296,10 @@ class GPAService:
         result_wam = self._calculate_cumulative_wam(graded_courses_data)
         result_gpa = self._calculate_cumulative_gpa(graded_courses_data)
 
-        # Build scores_json for persistence
-        scores_json = {s.assessment_id: s.hypothetical_score for s in request.scores}
-
         scenario = WhatIfScenario(
             user_id=user_id,
             name=request.name,
-            scores_json=scores_json,
+            scores_json=overrides,
             result_wam=float(result_wam),
             result_gpa=float(result_gpa),
         )
@@ -477,7 +474,10 @@ class GPAService:
         sorted_semesters = sorted(semester_courses.keys())
 
         trends: list[SemesterTrend] = []
-        cumulative_data: list[tuple[Decimal, int]] = []
+        # Running totals for O(n) cumulative calculation
+        cum_weighted = Decimal("0")
+        cum_gpa_weighted = Decimal("0")
+        cum_credits = Decimal("0")
 
         for semester in sorted_semesters:
             sem_courses = semester_courses[semester]
@@ -488,14 +488,27 @@ class GPAService:
                 graded = [g for g in course.grades if g.score is not None]
                 if graded:
                     course_wam, _ = self._calculate_course_wam(course.grades)
+                    d_cp = Decimal(str(course.credit_points))
                     sem_data.append((course_wam, course.credit_points))
-                    cumulative_data.append((course_wam, course.credit_points))
+                    # Update running cumulative totals
+                    cum_weighted += course_wam * d_cp
+                    _, gpa_point = self._mark_to_grade_band(course_wam)
+                    cum_gpa_weighted += Decimal(str(gpa_point)) * d_cp
+                    cum_credits += d_cp
                 sem_cp += course.credit_points
 
             sem_wam = self._calculate_cumulative_wam(sem_data)
             sem_gpa = self._calculate_cumulative_gpa(sem_data)
-            cum_wam = self._calculate_cumulative_wam(cumulative_data)
-            cum_gpa = self._calculate_cumulative_gpa(cumulative_data)
+            cum_wam = (
+                (cum_weighted / cum_credits).quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
+                if cum_credits > 0
+                else Decimal("0.00")
+            )
+            cum_gpa = (
+                (cum_gpa_weighted / cum_credits).quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
+                if cum_credits > 0
+                else Decimal("0.00")
+            )
 
             trends.append(
                 SemesterTrend(
