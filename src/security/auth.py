@@ -35,6 +35,7 @@ def create_access_token(
         expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
     to_encode["exp"] = datetime.now(UTC) + expires_delta
     to_encode["type"] = "access"
+    to_encode["jti"] = str(uuid.uuid4())
     encoded: str = jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
     return encoded
 
@@ -53,6 +54,7 @@ def create_refresh_token(data: dict[str, Any]) -> str:
     expires_delta = timedelta(days=settings.refresh_token_expire_days)
     to_encode["exp"] = datetime.now(UTC) + expires_delta
     to_encode["type"] = "refresh"
+    to_encode["jti"] = str(uuid.uuid4())
     encoded: str = jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
     return encoded
 
