@@ -38,7 +38,7 @@ Requirements: GPA-01, GPA-02, GPA-03, GPA-04, GPA-05, DL-01, INTEL-01, INTEL-05,
 - GPA target stored in User table: target_wam (Float|None), target_gpa (Float|None) — single target per user
 
 ### Sync Engine Architecture
-- Framework: APScheduler 4.x (async) embedded in FastAPI startup — mature, supports cron/interval triggers, built-in retry and task skip. Architecture designed with clean interface for future migration to distributed queue (Celery/Redis) when scaling
+- Framework: APScheduler 3.11.x (NOT 4.x alpha — 4.0.0a6 is still alpha as of March 2026) with AsyncIOScheduler embedded in FastAPI lifespan — mature, supports cron/interval triggers, built-in retry and task skip. Architecture designed with clean interface for future migration to distributed queue (Celery/Redis) when scaling
 - Scope: per-user sync — each user has independent sync tasks using their own API tokens. New user registration triggers immediate first sync
 - Startup behavior: trigger full sync for all active users on service start, then scheduled intervals
 - Failure handling: retry 3× (exponential backoff), then mark user/platform as "degraded" — next scheduled cycle retries
