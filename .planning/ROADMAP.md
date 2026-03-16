@@ -46,11 +46,11 @@ Plans:
   3. API returns a deduplicated unified deadline list from Canvas + Ed Lessons + Ed Discussion, with no duplicates (SHA-256 dedup verified)
   4. API returns course materials with AI-generated folder descriptions, and keyword search returns matching files with content snippets
   5. Background sync engine runs on configured intervals (grades 15min, deadlines 1h, modules daily) and token expiration warnings are surfaced
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: GPA/WAM service (calculation, What-if simulator, target path planner, assessment weights) + REST endpoints
-- [ ] 02-02: Deadline aggregation service, course materials service, Ed post filtering (rule-based), deduplication, sync engine + REST endpoints
+- [ ] 02-01-PLAN.md — GPA/WAM service (Decimal calculation, What-if simulator, target path planner) + Pydantic schemas + 6 REST endpoints + Hypothesis property tests
+- [ ] 02-02-PLAN.md — Deadline aggregation (SHA-256 dedup + rapidfuzz), course materials (AI descriptions + tsvector search), Ed intelligence (rule-based), APScheduler sync engine + REST endpoints
 
 ### Phase 3: Frontend Dashboard
 **Goal**: Students can access the complete UniBoard experience through a browser with all 7 pages following the Anthropic-inspired design system
