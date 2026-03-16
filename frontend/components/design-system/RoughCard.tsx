@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback, type ReactNode } from "react";
+import { useRef, useEffect, useCallback, type ReactNode, type CSSProperties } from "react";
 import rough from "roughjs";
 import clsx from "clsx";
 
@@ -8,6 +8,7 @@ interface RoughCardProps {
   children: ReactNode;
   className?: string;
   roughness?: number;
+  style?: CSSProperties;
 }
 
 /**
@@ -18,6 +19,7 @@ export default function RoughCard({
   children,
   className,
   roughness = 1.0,
+  style,
 }: RoughCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -68,6 +70,7 @@ export default function RoughCard({
     <div
       ref={containerRef}
       className={clsx("relative overflow-visible", className)}
+      style={style}
     >
       <svg
         ref={svgRef}
