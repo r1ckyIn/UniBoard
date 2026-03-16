@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 import time
 from typing import Any
@@ -10,7 +11,7 @@ import httpx
 import structlog
 
 from src.adapters.base import LMSAdapter
-from src.adapters.resilience import CanvasRateLimiter, CircuitBreaker
+from src.adapters.resilience import CanvasRateLimiter, CircuitBreaker, RetryConfig
 from src.schemas.common import (
     RateLimitedError,
     TokenInvalidError,
@@ -40,6 +41,7 @@ class CanvasAdapter(LMSAdapter):
         )
         self._rate_limiter = CanvasRateLimiter()
         self._circuit = CircuitBreaker()
+        self._retry = RetryConfig()
 
     async def _request(
         self,
@@ -47,44 +49,64 @@ class CanvasAdapter(LMSAdapter):
         path: str,
         params: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        """Execute a single Canvas API request with circuit breaker and rate limiting."""
-        if not self._circuit.can_execute():
-            raise UpstreamUnavailableError("Canvas circuit breaker is open")
+        """Execute a single Canvas API request with retry, circuit breaker and rate limiting."""
+        last_response: httpx.Response | None = None
+        for attempt in range(self._retry.max_attempts):
+            if not self._circuit.can_execute():
+                raise UpstreamUnavailableError("Canvas circuit breaker is open")
 
-        await self._rate_limiter.wait_if_needed()
+            await self._rate_limiter.wait_if_needed()
 
-        start = time.monotonic()
-        response = await self._client.request(method, path, params=params)
-        duration = time.monotonic() - start
+            start = time.monotonic()
+            response = await self._client.request(method, path, params=params)
+            duration = time.monotonic() - start
 
-        self._rate_limiter.update_from_headers(response.headers)
+            self._rate_limiter.update_from_headers(response.headers)
 
-        logger.debug(
-            "canvas_request",
-            method=method,
-            path=path,
-            status=response.status_code,
-            duration_ms=round(duration * 1000),
-            size=len(response.content),
-        )
-
-        if response.status_code in (401, 403):
-            self._circuit.record_failure()
-            raise TokenInvalidError("Canvas")
-
-        if response.status_code == 429:
-            self._circuit.record_failure()
-            retry_after = response.headers.get("retry-after", "10")
-            raise RateLimitedError(
-                f"Canvas rate limited, retry after {retry_after}s"
+            logger.debug(
+                "canvas_request",
+                method=method,
+                path=path,
+                status=response.status_code,
+                duration_ms=round(duration * 1000),
+                size=len(response.content),
+                attempt=attempt + 1,
             )
 
-        if response.status_code >= 500:
-            self._circuit.record_failure()
-            raise UpstreamAPIError("Canvas", f"HTTP {response.status_code}")
+            if response.status_code in (401, 403):
+                self._circuit.record_failure()
+                raise TokenInvalidError("Canvas")
 
-        self._circuit.record_success()
-        return response
+            # Retry on retryable status codes (429, 5xx)
+            if self._retry.is_retryable(response.status_code):
+                self._circuit.record_failure()
+                last_response = response
+                if attempt < self._retry.max_attempts - 1:
+                    delay = self._retry.get_delay(attempt)
+                    logger.warning(
+                        "canvas_request_retry",
+                        attempt=attempt + 1,
+                        status=response.status_code,
+                        delay=delay,
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                # Final attempt exhausted — raise appropriate error
+                break
+
+            self._circuit.record_success()
+            return response
+
+        # All retries exhausted — raise based on last response status
+        if last_response is not None:
+            if last_response.status_code == 429:
+                retry_after = last_response.headers.get("retry-after", "10")
+                raise RateLimitedError(
+                    f"Canvas rate limited, retry after {retry_after}s"
+                )
+            raise UpstreamAPIError("Canvas", f"HTTP {last_response.status_code}")
+
+        raise UpstreamAPIError("Canvas", "request failed after retries")
 
     async def _paginate(
         self,
@@ -129,6 +151,23 @@ class CanvasAdapter(LMSAdapter):
             )
 
             if response.status_code >= 400:
+                self._circuit.record_failure()
+                if response.status_code in (401, 403):
+                    raise TokenInvalidError("Canvas")
+                if response.status_code == 429:
+                    raise RateLimitedError(
+                        "Canvas rate limited during pagination"
+                    )
+                if response.status_code >= 500:
+                    raise UpstreamAPIError(
+                        "Canvas", f"HTTP {response.status_code}"
+                    )
+                # Other 4xx: client error, not retryable — stop pagination
+                logger.warning(
+                    "canvas_paginate_client_error",
+                    status=response.status_code,
+                    url=next_url,
+                )
                 break
 
             self._circuit.record_success()
@@ -189,7 +228,7 @@ class CanvasAdapter(LMSAdapter):
         try:
             response = await self._client.get("/users/self")
             return response.status_code == 200
-        except (httpx.RequestError, Exception):
+        except (httpx.RequestError, UpstreamUnavailableError):
             return False
 
     async def close(self) -> None:
