@@ -1,0 +1,141 @@
+"""Integration tests for course linking logic.
+
+These tests work entirely offline -- no API tokens required.
+Tests the regex-based course code extraction and cross-platform matching.
+"""
+
+from src.services.course_linking import (
+    LinkedCourse,
+    extract_course_code,
+    extract_semester,
+    link_courses,
+)
+
+
+async def test_extract_course_code_standard() -> None:
+    """Verify standard course code extraction."""
+    assert extract_course_code("COMP2017 Systems Programming") == "COMP2017"
+
+
+async def test_extract_course_code_with_extra() -> None:
+    """Verify extraction from name with semester info."""
+    assert (
+        extract_course_code("COMP3221 Distributed Systems (2026 S1)")
+        == "COMP3221"
+    )
+
+
+async def test_extract_course_code_missing() -> None:
+    """Verify None returned when no course code found."""
+    assert extract_course_code("General Studies") is None
+
+
+async def test_extract_course_code_edge_cases() -> None:
+    """Test edge cases for course code extraction."""
+    assert extract_course_code("EDGU1003 Diet and Nutrition") == "EDGU1003"
+    assert extract_course_code("MATH2021 Vector Calculus") == "MATH2021"
+    assert extract_course_code("STAT2011 Probability") == "STAT2011"
+    # Should not match lowercase
+    assert extract_course_code("comp2017 systems") is None
+    # Should not match partial codes
+    assert extract_course_code("COM201 short") is None
+
+
+async def test_extract_semester_various_formats() -> None:
+    """Test various semester patterns that Canvas/Ed might use."""
+    assert extract_semester("COMP2017 (2026 Semester 1)") == "2026-S1"
+    assert extract_semester("COMP3221 2026-S1") == "2026-S1"
+    assert extract_semester("S1 2026 COMP2017") == "2026-S1"
+    assert extract_semester("COMP2017 2026 Sem 2") == "2026-S2"
+    assert extract_semester("COMP2017 2026 S1") == "2026-S1"
+
+
+async def test_extract_semester_missing() -> None:
+    """Verify None returned when no semester pattern found."""
+    assert extract_semester("COMP2017 Systems Programming") is None
+
+
+async def test_link_courses_matching() -> None:
+    """Verify courses match by code + semester composite key."""
+    canvas_courses: list[dict[str, object]] = [
+        {"id": 69855, "name": "COMP2017 Systems Programming (2026 Semester 1)"},
+        {"id": 69874, "name": "COMP3221 Distributed Systems (2026 Semester 1)"},
+    ]
+    ed_courses: list[dict[str, object]] = [
+        {"id": 31567, "name": "COMP2017 (2026 Semester 1)"},
+        {"id": 30772, "name": "COMP3221 (2026 Semester 1)"},
+    ]
+
+    results = link_courses(canvas_courses, ed_courses)
+
+    linked = [r for r in results if r.is_linked]
+    assert len(linked) == 2
+
+    comp2017 = next(r for r in linked if r.course_code == "COMP2017")
+    assert comp2017.canvas_course_id == "69855"
+    assert comp2017.ed_course_id == "31567"
+    assert comp2017.is_linked is True
+
+    comp3221 = next(r for r in linked if r.course_code == "COMP3221")
+    assert comp3221.canvas_course_id == "69874"
+    assert comp3221.ed_course_id == "30772"
+
+
+async def test_link_courses_unmatched() -> None:
+    """Verify Canvas courses without Ed match produce unlinked entries."""
+    canvas_courses: list[dict[str, object]] = [
+        {"id": 69981, "name": "EDGU1003 Diet and Nutrition (2026 Semester 1)"},
+    ]
+    ed_courses: list[dict[str, object]] = []
+
+    results = link_courses(canvas_courses, ed_courses)
+    assert len(results) == 1
+    assert results[0].canvas_course_id == "69981"
+    assert results[0].ed_course_id is None
+    assert results[0].is_linked is False
+
+
+async def test_link_courses_ed_only() -> None:
+    """Verify Ed courses without Canvas match produce unlinked entries."""
+    canvas_courses: list[dict[str, object]] = []
+    ed_courses: list[dict[str, object]] = [
+        {"id": 31567, "name": "COMP2017 (2026 Semester 1)"},
+    ]
+
+    results = link_courses(canvas_courses, ed_courses)
+    assert len(results) == 1
+    assert results[0].ed_course_id == "31567"
+    assert results[0].canvas_course_id is None
+    assert results[0].is_linked is False
+
+
+async def test_link_courses_mixed() -> None:
+    """Verify mixed matching, unmatched, and Ed-only courses."""
+    canvas_courses: list[dict[str, object]] = [
+        {"id": 69855, "name": "COMP2017 (2026 Semester 1)"},
+        {"id": 69981, "name": "EDGU1003 (2026 Semester 1)"},
+    ]
+    ed_courses: list[dict[str, object]] = [
+        {"id": 31567, "name": "COMP2017 (2026 Semester 1)"},
+        {"id": 99999, "name": "COMP9999 (2026 Semester 1)"},
+    ]
+
+    results = link_courses(canvas_courses, ed_courses)
+    linked = [r for r in results if r.is_linked]
+    unlinked = [r for r in results if not r.is_linked]
+
+    assert len(linked) == 1
+    assert linked[0].course_code == "COMP2017"
+
+    # EDGU1003 (canvas-only) + COMP9999 (ed-only) = 2 unlinked
+    assert len(unlinked) == 2
+
+
+async def test_linked_course_dataclass() -> None:
+    """Verify LinkedCourse dataclass defaults."""
+    lc = LinkedCourse(course_code="COMP2017", semester="2026-S1")
+    assert lc.canvas_course_id is None
+    assert lc.ed_course_id is None
+    assert lc.canvas_name == ""
+    assert lc.ed_name is None
+    assert lc.is_linked is False

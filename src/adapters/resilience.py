@@ -1,6 +1,7 @@
 """Resilience utilities: circuit breaker, rate limiter, retry logic (TRD SS14.5, SS14.7)."""
 
 import asyncio
+import contextlib
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -73,10 +74,8 @@ class CanvasRateLimiter:
         """Read remaining quota from Canvas response headers."""
         raw = headers.get("x-rate-limit-remaining")
         if raw is not None:
-            try:
+            with contextlib.suppress(ValueError):
                 self.remaining = float(raw)
-            except ValueError:
-                pass
 
     async def wait_if_needed(self) -> None:
         """Throttle when remaining quota falls below safety buffer."""
