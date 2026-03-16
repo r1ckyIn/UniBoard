@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
+- [x] 01-01-PLAN.md — Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
 - [ ] 01-02-PLAN.md — JWT auth (PyJWT + bcrypt) and user registration endpoint
 - [ ] 01-03-PLAN.md — Platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline), resilience utilities, course linking, integration tests
 
@@ -93,7 +93,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Acquisition | 0/3 | Planned (ready to execute) | - |
+| 1. Foundation & Data Acquisition | 1/3 | Executing | - |
 | 2. Core Services & API | 0/2 | Not started | - |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |

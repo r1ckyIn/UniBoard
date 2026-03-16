@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planned
-stopped_at: Phase 1 plans verified
+status: executing
+stopped_at: Completed 01-01-PLAN.md
 last_updated: "2026-03-16"
-last_activity: 2026-03-16 — Phase 1 planned (3 plans, 15 tasks, 8 requirements, verified PASS_WITH_NOTES)
+last_activity: 2026-03-16 — Plan 01-01 complete (8/8 tasks, 21 tests, 13 min)
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 11
+  completed_plans: 1
+  percent: 9
 ---
 
 # Project State
@@ -26,28 +26,28 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 1 of 4 (Foundation & Data Acquisition)
-Plan: 0 of 3 in current phase
-Status: Planned — ready to execute (`/gsd:execute-phase 1`)
-Last activity: 2026-03-16 — Phase 1 planned (3 plans, 15 tasks, verified)
+Plan: 1 of 3 in current phase
+Status: Executing Phase 1
+Last activity: 2026-03-16 — Plan 01-01 complete (8 tasks, 21 tests passing)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 8%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 13 min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1 | 1/3 | 13 min | 13 min |
 
 **Recent Trend:**
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 01-01 (13 min)
+- Trend: First plan
 
 *Updated after each plan completion*
 
@@ -62,6 +62,10 @@ Recent decisions affecting current work:
 - [Roadmap]: Adapters in Phase 1 (not separate phase) — at coarse granularity, models without adapters are unverifiable
 - [Roadmap]: Services + API combined in Phase 2 — API layer is thin (FastAPI routes delegating to services)
 - [Roadmap]: Intelligence + Skills + MCP combined in Phase 4 — all are "differentiator" features with highest uncertainty
+- [01-01]: Lazy engine init to avoid import-time side effects and enable test fixture overrides
+- [01-01]: Single initial migration (001_initial_schema) for all 11 tables
+- [01-01]: DiscussionThread.search_vector uses SQLAlchemy Computed() for GENERATED ALWAYS
+- [01-01]: Session-scoped event loop for pytest-asyncio stability
 
 ### Pending Todos
 
@@ -77,5 +81,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Phase 1 plans verified, ready to execute
-Resume file: .planning/phases/01-foundation-data-acquisition/01-01-PLAN.md
+Stopped at: Completed 01-01-PLAN.md (Database & Infrastructure)
+Resume file: .planning/phases/01-foundation-data-acquisition/01-02-PLAN.md
