@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md — Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
 - [x] 01-02-PLAN.md — JWT auth (PyJWT + bcrypt) and user registration endpoint
-- [ ] 01-03-PLAN.md — Platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline), resilience utilities, course linking, integration tests
+- [x] 01-03-PLAN.md — Platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline), resilience utilities, course linking, integration tests
 
 ### Phase 2: Core Services & API
 **Goal**: Users can retrieve real-time GPA data, unified deadlines, and course materials through REST API endpoints
