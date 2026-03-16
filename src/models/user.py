@@ -29,6 +29,7 @@ class User(UUIDMixin, TimestampMixin, Base):
     )
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
+    display_name: Mapped[str] = mapped_column(String(100), default="")
     university_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     canvas_api_token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     ed_api_token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
