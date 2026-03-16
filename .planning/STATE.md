@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-03-16T10:34:00Z"
-last_activity: 2026-03-16 — Plan 02-02 executed (5 tasks, 46 tests, 28 files)
+status: in-progress
+stopped_at: Phase 3 verified, awaiting PR cycle
+last_updated: "2026-03-17T10:00:00Z"
+last_activity: 2026-03-17 -- Phase 3 verified (all 9 requirements PASS, 41 tests, 50+ files)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 45
+  total_plans: 8
+  completed_plans: 8
+  percent: 80
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 2 — Core Services & API (COMPLETE)
+**Current focus:** Phase 3 — Frontend Dashboard (IN PROGRESS)
 
 ## Current Position
 
-Phase: 2 of 4 (Core Services & API) -- COMPLETE
-Plan: 2 of 2 executed in current phase
-Status: Phase 2 complete -- all services, sync engine, 12 REST endpoints, 123 tests
-Last activity: 2026-03-16 — Plan 02-02 executed (5 tasks, 46 tests, 28 files)
+Phase: 3 of 4 (Frontend Dashboard)
+Plan: 3 of 3 executed in current phase
+Status: Plan 03-03 complete -- Predict page (What-if simulator), Digest page, Settings page, 11 tests
+Last activity: 2026-03-17 -- Plan 03-03 executed (2 tasks, 11 tests, 16 files)
 
-Progress: [█████░░░░░] 45%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 13.6 min
-- Total execution time: 1.1 hours
+- Total plans completed: 8
+- Average duration: 15.4 min
+- Total execution time: 2.1 hours
 
 **By Phase:**
 
@@ -45,10 +45,11 @@ Progress: [█████░░░░░] 45%
 |-------|-------|-------|----------|
 | 1 | 3/3 | 34 min | 11.3 min |
 | 2 | 2/2 | 34 min | 17.0 min |
+| 3 | 3/3 | 63 min | 21.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (13 min), 01-02 (10 min), 01-03 (11 min), 02-01 (12 min), 02-02 (22 min)
-- Trend: Slightly increasing (larger plans in Phase 2)
+- Last 5 plans: 02-01 (12 min), 02-02 (22 min), 03-01 (14 min), 03-02 (26 min), 03-03 (23 min)
+- Trend: Frontend plans take ~20 min avg (more components per plan)
 
 *Updated after each plan completion*
 
@@ -84,6 +85,19 @@ Recent decisions affecting current work:
 - [02-02]: UNIBOARD_DISABLE_SYNC env var in lifespan to prevent APScheduler during tests
 - [02-02]: mypy overrides for untyped APScheduler/Anthropic/rapidfuzz (follow_untyped_imports=false)
 - [02-02]: AI description reads cached Module.ai_description column, never calls AI inline during requests
+- [03-01]: Google Fonts @import before Tailwind @import to avoid CSS ordering warning in v4
+- [03-01]: ResizeObserver polyfilled in vitest setup for jsdom compatibility
+- [03-01]: roughjs mocked in component tests (jsdom lacks full SVG support)
+- [03-01]: QueryProvider as separate client component for server/client boundary
+- [03-01]: Login uses URLSearchParams with username field (not email) per OAuth2PasswordRequestForm
+- [03-02]: CalendarGrid test uses timezone-agnostic assertion (date-fns format uses local time)
+- [03-02]: WeightDonut allows course selection via dropdown when multiple courses
+- [03-02]: DeadlineTimeline filters out past_due, shows only upcoming 7
+- [03-03]: Zustand store for predictor state -- enables real-time WAM updates without API round-trips
+- [03-03]: Memoized date range in DigestFeed to avoid re-renders from new Date() on every render
+- [03-03]: CourseLinking simplified -- manual linking deferred (backend API not available)
+- [03-03]: Digest is Phase 3 rule-engine version (AI-enhanced urgency scoring deferred to Phase 4)
+- [03-03]: Password change UI disabled with 'coming soon' (backend endpoint not yet available)
 
 ### Pending Todos
 
@@ -93,12 +107,12 @@ None yet.
 
 - Ed API is undocumented and can break without notice — defensive parsing mandatory (Phase 1)
 - python-jose replaced with PyJWT in 01-02 -- RESOLVED
-- Tailwind v4 + shadcn/ui CLI v4 is a very recent combination — may need phase-specific testing (Phase 3)
+- Tailwind v4 + shadcn/ui CLI v4 is a very recent combination — RESOLVED (pure custom components, no shadcn/ui)
 - MCP SDK version churn (v1.0 to v1.25+ in 6 months) — pin version explicitly (Phase 4)
 
 ## Session Continuity
 
-Last session: 2026-03-16T10:34:00Z
-Stopped at: Completed 02-02-PLAN.md
-Resume file: .planning/phases/03-frontend-dashboard/03-01-PLAN.md
-Next action: Phase 2 complete. Run /pr-cycle, then proceed to Phase 3 (Frontend Dashboard).
+Last session: 2026-03-17T10:00:00Z
+Stopped at: Phase 3 verified, awaiting PR cycle
+Resume file: .planning/phases/03-frontend-dashboard/03-VERIFICATION.md
+Next action: Run /pr-cycle to merge feature/gsd-03-frontend-dashboard into main, then Phase 4.

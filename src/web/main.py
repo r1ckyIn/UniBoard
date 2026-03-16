@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 
 import structlog
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.logging import configure_logging
@@ -24,6 +25,16 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="University GPA Maximization Dashboard",
         lifespan=lifespan,
+    )
+
+    # CORS middleware -- allow frontend dev server to connect
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:3000"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["X-Request-ID"],
     )
 
     @application.middleware("http")
