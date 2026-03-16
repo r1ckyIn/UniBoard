@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 import httpx
@@ -9,7 +10,8 @@ import structlog
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from src.adapters.base import DiscussionAdapter
-from src.adapters.resilience import CircuitBreaker
+from src.adapters.resilience import CircuitBreaker, RetryConfig
+from src.schemas.common import UpstreamUnavailableError
 
 logger = structlog.get_logger()
 
@@ -60,6 +62,7 @@ class EdDiscussionAdapter(DiscussionAdapter):
             timeout=30.0,
         )
         self._circuit = CircuitBreaker()
+        self._retry = RetryConfig()
 
     async def _request(
         self,
@@ -67,19 +70,34 @@ class EdDiscussionAdapter(DiscussionAdapter):
         path: str,
         params: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        """Execute an Ed API request with circuit breaker."""
-        if not self._circuit.can_execute():
-            logger.warning("ed_discussion_circuit_open")
-            raise httpx.RequestError("Ed Discussion circuit breaker is open")
+        """Execute an Ed API request with retry and circuit breaker."""
+        for attempt in range(self._retry.max_attempts):
+            if not self._circuit.can_execute():
+                logger.warning("ed_discussion_circuit_open")
+                raise UpstreamUnavailableError("Ed Discussion circuit breaker is open")
 
-        response = await self._client.request(method, path, params=params)
+            response = await self._client.request(method, path, params=params)
 
-        if response.status_code >= 500:
-            self._circuit.record_failure()
-        else:
+            if self._retry.is_retryable(response.status_code):
+                self._circuit.record_failure()
+                if attempt < self._retry.max_attempts - 1:
+                    delay = self._retry.get_delay(attempt)
+                    logger.warning(
+                        "ed_discussion_request_retry",
+                        attempt=attempt + 1,
+                        status=response.status_code,
+                        delay=delay,
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                # Final attempt — return the response as-is for caller to handle
+                return response
+
             self._circuit.record_success()
+            return response
 
-        return response
+        # Unreachable, but satisfies mypy
+        raise UpstreamUnavailableError("Ed Discussion request failed after retries")
 
     def _parse_threads(self, items: list[dict[str, object]]) -> list[dict[str, object]]:
         """Parse thread items with per-item error handling.
@@ -131,7 +149,7 @@ class EdDiscussionAdapter(DiscussionAdapter):
             data = response.json()
             raw_threads: list[dict[str, object]] = data.get("threads", [])
             return self._parse_threads(raw_threads)
-        except (httpx.RequestError, Exception) as exc:
+        except (httpx.RequestError, UpstreamUnavailableError) as exc:
             logger.error("ed_threads_network_error", error=str(exc))
             return []
 
@@ -145,7 +163,7 @@ class EdDiscussionAdapter(DiscussionAdapter):
             raw_thread: dict[str, object] = data.get("thread", {})
             thread = EdThreadResponse.model_validate(raw_thread)
             return thread.model_dump()
-        except (httpx.RequestError, ValidationError, Exception) as exc:
+        except (httpx.RequestError, UpstreamUnavailableError, ValidationError) as exc:
             logger.error("ed_get_thread_error", thread_id=thread_id, error=str(exc))
             return {}
 
@@ -165,7 +183,7 @@ class EdDiscussionAdapter(DiscussionAdapter):
             data = response.json()
             raw_threads: list[dict[str, object]] = data.get("threads", [])
             return self._parse_threads(raw_threads)
-        except (httpx.RequestError, Exception) as exc:
+        except (httpx.RequestError, UpstreamUnavailableError) as exc:
             logger.error("ed_search_error", error=str(exc))
             return []
 
@@ -174,7 +192,7 @@ class EdDiscussionAdapter(DiscussionAdapter):
         try:
             response = await self._client.get("/courses")
             return response.status_code == 200
-        except (httpx.RequestError, Exception):
+        except (httpx.RequestError, UpstreamUnavailableError):
             return False
 
     async def close(self) -> None:
