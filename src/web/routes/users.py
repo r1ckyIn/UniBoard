@@ -149,12 +149,12 @@ async def configure_token(
                 elif isinstance(courses_data, list):
                     courses_found = len(courses_data)
 
-    except httpx.HTTPError:
+    except httpx.HTTPError as exc:
         raise UniboardError(
             "TOKEN_INVALID",
             f"{platform} token validation failed: connection error",
             422,
-        )
+        ) from exc
 
     # Encrypt and store
     encryption = get_encryption()

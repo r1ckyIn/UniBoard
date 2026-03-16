@@ -64,3 +64,8 @@ extend-exclude = ["alembic/versions/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# B008: FastAPI uses Depends() in function parameter defaults by design
+"src/web/**" = ["B008"]
+"src/security/auth.py" = ["B008"]
