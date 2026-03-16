@@ -29,12 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Canvas adapter can fetch courses, grades, assignments, and modules for a real Canvas token (with rate limiting and pagination)
   4. Ed Discussion and Ed Lessons adapters can fetch threads, posts, and lesson content for a real Ed token (with defensive Pydantic parsing)
   5. Unit Outline parser can extract assessment weights from a USYD Unit Outline HTML page with weight-sum validation
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
-- [ ] 01-02: JWT auth (PyJWT + bcrypt) and user registration endpoint
-- [ ] 01-03: All 4 platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline parser)
+- [ ] 01-01-PLAN.md — Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
+- [ ] 01-02-PLAN.md — JWT auth (PyJWT + bcrypt) and user registration endpoint
+- [ ] 01-03-PLAN.md — Platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline), resilience utilities, course linking, integration tests
 
 ### Phase 2: Core Services & API
 **Goal**: Users can retrieve real-time GPA data, unified deadlines, and course materials through REST API endpoints
