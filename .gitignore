@@ -1,0 +1,65 @@
+# Claude Code configuration (NEVER commit to GitHub)
+CLAUDE.md
+
+# Planning UI reviews
+.planning/ui-reviews/
+
+# Local Chinese documentation
+*_CN.md
+*.cn.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Environment variables
+.env
+.env.local
+.env.staging
+.env.production
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+.turbo/
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite3
+
+# Docker volumes
+docker-data/
+
+# Logs
+*.log
+logs/
+
+# Keys and certificates
+*.pem
+*.key
+*.crt
+
+# Obsidian
+.obsidian/
