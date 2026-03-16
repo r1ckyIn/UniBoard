@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Color palette from prototype */
+  --color-dark: #e8ddd0;
+  --color-cream: #faf9f5;
+  --color-orange: #d97757;
+  --color-orange-soft: rgba(217, 119, 87, 0.11);
+  --color-blue: #6a9bcc;
+  --color-blue-soft: rgba(106, 155, 204, 0.11);
+  --color-green: #788c5d;
+  --color-green-soft: rgba(120, 140, 93, 0.11);
+  --color-amber: #b08968;
+  --color-amber-soft: rgba(176, 137, 104, 0.11);
+
+  --color-card-bg: #f6f5f0;
+  --color-card-bg-hover: #efede6;
+  --color-card-border: #e8e5dd;
+  --color-text-1: #2d2d2a;
+  --color-text-2: #6b6b65;
+  --color-text-3: #9b9b94;
+  --color-divider: #eae7e0;
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, serif;
+
+  /* Spacing / Sizing */
+  --sidebar-w: 68px;
+  --sidebar-w-expanded: 224px;
+  --right-panel-w: 300px;
+  --header-h: 56px;
+
+  /* Radius */
+  --radius-card: 14px;
+  --radius-sm: 8px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(20, 20, 19, 0.04), 0 4px 14px rgba(20, 20, 19, 0.025);
+  --shadow-card-hover: 0 2px 8px rgba(20, 20, 19, 0.06), 0 8px 24px rgba(20, 20, 19, 0.04);
+
+  /* Transitions */
+  --ease: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-fast: 0.15s ease;
+}
+
+/* Base styles */
+html {
+  font-size: 15px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-cream);
+  color: var(--color-text-1);
+  line-height: 1.55;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Paper grain overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Ruled lines */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 31px,
+    rgba(139, 115, 85, 0.02) 31px,
+    rgba(139, 115, 85, 0.02) 32px
+  );
+}
+
+/* Headings use serif font */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-text-1);
+  letter-spacing: -0.01em;
+}
