@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Computed, ForeignKey, Index, String, Text
+from sqlalchemy import Computed, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -19,6 +19,9 @@ class Module(UUIDMixin, TimestampMixin, Base):
     """Canvas module containing structured course content."""
 
     __tablename__ = "modules"
+    __table_args__ = (
+        UniqueConstraint("course_id", "canvas_module_id", name="uq_modules_course_canvas"),
+    )
 
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     canvas_module_id: Mapped[str] = mapped_column(String(50))

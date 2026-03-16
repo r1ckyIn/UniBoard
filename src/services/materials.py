@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import PurePosixPath
 
 import structlog
@@ -174,6 +175,16 @@ class CourseMaterialService:
         user = await self._session.get(User, user_id)
         if user is None:
             return _rule_based_description(item_names)
+
+        # Reset daily counter if the date has changed
+        today_dt = datetime.now(UTC)
+        if (
+            user.ai_calls_reset_date is None
+            or user.ai_calls_reset_date.date() < today_dt.date()
+        ):
+            user.ai_calls_today = 0
+            user.ai_calls_reset_date = today_dt
+            await self._session.flush()
 
         if user.ai_calls_today >= settings.ai_daily_limit_per_user:
             return _rule_based_description(item_names)

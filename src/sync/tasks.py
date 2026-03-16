@@ -8,13 +8,19 @@ import uuid
 from datetime import UTC, datetime
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from src.config import get_settings
 from src.models.course import Course
 from src.models.grade import Grade
+from src.models.lesson import Lesson
 from src.models.module import Module, ModuleItem
 from src.models.user import User
 from src.schemas.common import TokenInvalidError
@@ -26,12 +32,20 @@ logger = structlog.get_logger()
 # Maximum retry attempts for transient failures
 _MAX_RETRIES = 3
 
+# Singleton engine to avoid leaking connection pools on repeated sync calls
+_sync_engine: AsyncEngine | None = None
+
 
 def _get_sync_session_factory() -> async_sessionmaker[AsyncSession]:
-    """Create a fresh session factory for sync tasks (outside HTTP request context)."""
-    settings = get_settings()
-    engine = create_async_engine(settings.database_url, pool_size=3)
-    return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    """Create a session factory for sync tasks (outside HTTP request context).
+
+    Reuses a single engine instance to avoid connection pool leaks.
+    """
+    global _sync_engine  # noqa: PLW0603
+    if _sync_engine is None:
+        settings = get_settings()
+        _sync_engine = create_async_engine(settings.database_url, pool_size=3)
+    return async_sessionmaker(_sync_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def _sync_user_grades(
@@ -186,72 +200,79 @@ async def sync_all_deadlines() -> None:
     encryption = get_encryption()
 
     for user in users:
-        try:
-            token = encryption.decrypt(str(user.canvas_api_token_encrypted))
+        for attempt in range(_MAX_RETRIES):
+            try:
+                token = encryption.decrypt(str(user.canvas_api_token_encrypted))
 
-            async with session_factory() as session:
-                user_in_session = await session.get(User, user.id)
-                if user_in_session is None:
-                    continue
+                async with session_factory() as session:
+                    user_in_session = await session.get(User, user.id)
+                    if user_in_session is None:
+                        break
 
-                # Get user courses
-                courses_result = await session.execute(
-                    select(Course).where(Course.user_id == user.id)
-                )
-                courses = list(courses_result.scalars().all())
+                    # Get user courses
+                    courses_result = await session.execute(
+                        select(Course).where(Course.user_id == user.id)
+                    )
+                    courses = list(courses_result.scalars().all())
 
-                from src.adapters.canvas import CanvasAdapter
+                    from src.adapters.canvas import CanvasAdapter
 
-                adapter = CanvasAdapter(token)
-                try:
-                    svc = DeadlineService(session)
+                    adapter = CanvasAdapter(token)
+                    try:
+                        svc = DeadlineService(session)
 
-                    for course in courses:
-                        if not course.canvas_course_id:
-                            continue
+                        for course in courses:
+                            if not course.canvas_course_id:
+                                continue
 
-                        try:
-                            assignments = await adapter.get_assignments(
-                                course.canvas_course_id
+                            try:
+                                assignments = await adapter.get_assignments(
+                                    course.canvas_course_id
+                                )
+                            except TokenInvalidError:
+                                user_in_session.canvas_token_status = "expired"
+                                user_in_session.canvas_sync_status = "degraded"
+                                await session.commit()
+                                break
+                            except Exception:
+                                logger.warning(
+                                    "sync_deadlines_course_error",
+                                    course=course.code,
+                                )
+                                continue
+
+                            await svc.aggregate_and_dedup(
+                                course,
+                                canvas_assignments=assignments,
+                                ed_lessons_data=[],
+                                ed_discussion_texts=[],
                             )
-                        except TokenInvalidError:
-                            user_in_session.canvas_token_status = "expired"
-                            user_in_session.canvas_sync_status = "degraded"
-                            await session.commit()
-                            break
-                        except Exception:
-                            logger.warning(
-                                "sync_deadlines_course_error",
-                                course=course.code,
-                            )
-                            continue
 
-                        await svc.aggregate_and_dedup(
-                            course,
-                            canvas_assignments=assignments,
-                            ed_lessons_data=[],
-                            ed_discussion_texts=[],
-                        )
+                        await session.commit()
+                    finally:
+                        await adapter.close()
 
-                    await session.commit()
-                finally:
-                    await adapter.close()
-
-        except TokenInvalidError:
-            logger.warning(
-                "sync_deadlines_token_expired",
-                user_id=str(user.id),
-            )
-        except Exception:
-            logger.error(
-                "sync_deadlines_failed",
-                user_id=str(user.id),
-                exc_info=True,
-            )
+                break  # Success
+            except TokenInvalidError:
+                break  # Don't retry on auth errors
+            except Exception:
+                if attempt < _MAX_RETRIES - 1:
+                    logger.warning(
+                        "sync_deadlines_retry",
+                        user_id=str(user.id),
+                        attempt=attempt + 1,
+                    )
+                    await asyncio.sleep(2 ** attempt)
+                else:
+                    logger.error(
+                        "sync_deadlines_failed",
+                        user_id=str(user.id),
+                        exc_info=True,
+                    )
 
 
 async def sync_all_modules() -> None:
-    """Sync course modules and Ed Lessons for all users."""
+    """Sync Canvas modules and Ed Lessons for all users."""
     session_factory = _get_sync_session_factory()
 
     async with session_factory() as session:
@@ -267,96 +288,198 @@ async def sync_all_modules() -> None:
     encryption = get_encryption()
 
     for user in users:
-        try:
-            token = encryption.decrypt(str(user.canvas_api_token_encrypted))
+        for attempt in range(_MAX_RETRIES):
+            try:
+                async with session_factory() as session:
+                    user_in_session = await session.get(User, user.id)
+                    if user_in_session is None:
+                        break
 
-            async with session_factory() as session:
-                courses_result = await session.execute(
-                    select(Course).where(Course.user_id == user.id)
-                )
-                courses = list(courses_result.scalars().all())
+                    courses_result = await session.execute(
+                        select(Course).where(Course.user_id == user.id)
+                    )
+                    courses = list(courses_result.scalars().all())
 
-                from src.adapters.canvas import CanvasAdapter
+                    # --- Canvas modules ---
+                    if user.canvas_api_token_encrypted:
+                        token = encryption.decrypt(str(user.canvas_api_token_encrypted))
+                        await _sync_canvas_modules(
+                            user_in_session, token, courses, session
+                        )
 
-                adapter = CanvasAdapter(token)
-                try:
-                    for course in courses:
-                        if not course.canvas_course_id:
-                            continue
-
-                        try:
-                            modules_data = await adapter.get_modules(
-                                course.canvas_course_id
-                            )
-                        except TokenInvalidError:
-                            break
-                        except Exception:
-                            logger.warning(
-                                "sync_modules_course_error",
-                                course=course.code,
-                            )
-                            continue
-
-                        for mod_data in modules_data:
-                            mod_name = str(mod_data.get("name", ""))
-                            mod_id_str = str(mod_data.get("id", ""))
-                            position = int(str(mod_data.get("position", 0)))
-
-                            # Upsert module
-                            mod_values = {
-                                "id": uuid.uuid4(),
-                                "course_id": course.id,
-                                "canvas_module_id": mod_id_str,
-                                "name": mod_name,
-                                "position": position,
-                            }
-                            mod_stmt = pg_insert(Module).values(**mod_values)
-                            mod_stmt = mod_stmt.on_conflict_do_update(
-                                index_elements=["id"],
-                                set_={
-                                    "name": mod_values["name"],
-                                    "position": mod_values["position"],
-                                },
-                            )
-                            await session.execute(mod_stmt)
-
-                            # Process items
-                            items = mod_data.get("items", [])
-                            if isinstance(items, list):
-                                for item_data in items:
-                                    if not isinstance(item_data, dict):
-                                        continue
-                                    item_values = {
-                                        "id": uuid.uuid4(),
-                                        "module_id": mod_values["id"],
-                                        "title": str(item_data.get("title", "")),
-                                        "type": str(item_data.get("type", "")),
-                                        "content_id": str(
-                                            item_data.get("content_id", "")
-                                        )
-                                        or None,
-                                        "url": str(item_data.get("html_url", ""))
-                                        or None,
-                                    }
-                                    item_stmt = pg_insert(ModuleItem).values(
-                                        **item_values
-                                    )
-                                    item_stmt = item_stmt.on_conflict_do_update(
-                                        index_elements=["id"],
-                                        set_={
-                                            "title": item_values["title"],
-                                            "type": item_values["type"],
-                                        },
-                                    )
-                                    await session.execute(item_stmt)
+                    # --- Ed Lessons ---
+                    if user.ed_api_token_encrypted:
+                        ed_token = encryption.decrypt(str(user.ed_api_token_encrypted))
+                        await _sync_ed_lessons(
+                            user_in_session, ed_token, courses, session
+                        )
 
                     await session.commit()
-                finally:
-                    await adapter.close()
 
-        except Exception:
-            logger.error(
-                "sync_modules_failed",
-                user_id=str(user.id),
-                exc_info=True,
-            )
+                break  # Success
+            except TokenInvalidError:
+                break  # Don't retry on auth errors
+            except Exception:
+                if attempt < _MAX_RETRIES - 1:
+                    logger.warning(
+                        "sync_modules_retry",
+                        user_id=str(user.id),
+                        attempt=attempt + 1,
+                    )
+                    await asyncio.sleep(2 ** attempt)
+                else:
+                    logger.error(
+                        "sync_modules_failed",
+                        user_id=str(user.id),
+                        exc_info=True,
+                    )
+
+
+async def _sync_canvas_modules(
+    user: User,
+    token: str,
+    courses: list[Course],
+    session: AsyncSession,
+) -> None:
+    """Sync Canvas modules and items for a user."""
+    from src.adapters.canvas import CanvasAdapter
+
+    adapter = CanvasAdapter(token)
+    try:
+        for course in courses:
+            if not course.canvas_course_id:
+                continue
+
+            try:
+                modules_data = await adapter.get_modules(course.canvas_course_id)
+            except TokenInvalidError:
+                user.canvas_token_status = "expired"
+                raise
+            except Exception:
+                logger.warning("sync_modules_course_error", course=course.code)
+                continue
+
+            for mod_data in modules_data:
+                mod_name = str(mod_data.get("name", ""))
+                mod_id_str = str(mod_data.get("id", ""))
+                position = int(str(mod_data.get("position", 0)))
+
+                # Upsert module by (course_id, canvas_module_id) natural key
+                mod_values = {
+                    "id": uuid.uuid4(),
+                    "course_id": course.id,
+                    "canvas_module_id": mod_id_str,
+                    "name": mod_name,
+                    "position": position,
+                }
+                mod_insert = pg_insert(Module).values(**mod_values)
+                mod_returning = mod_insert.on_conflict_do_update(
+                    constraint="uq_modules_course_canvas",
+                    set_={
+                        "name": mod_values["name"],
+                        "position": mod_values["position"],
+                    },
+                ).returning(Module.id)
+                result = await session.execute(mod_returning)
+                actual_module_id = result.scalar_one()
+
+                # Delete old items and re-insert (no stable external key for items)
+                await session.execute(
+                    delete(ModuleItem).where(ModuleItem.module_id == actual_module_id)
+                )
+
+                items = mod_data.get("items", [])
+                if isinstance(items, list):
+                    for item_data in items:
+                        if not isinstance(item_data, dict):
+                            continue
+                        item = ModuleItem(
+                            module_id=actual_module_id,
+                            title=str(item_data.get("title", "")),
+                            type=str(item_data.get("type", "")),
+                            content_id=str(item_data.get("content_id", "")) or None,
+                            url=str(item_data.get("html_url", "")) or None,
+                        )
+                        session.add(item)
+    finally:
+        await adapter.close()
+
+
+async def _sync_ed_lessons(
+    user: User,
+    ed_token: str,
+    courses: list[Course],
+    session: AsyncSession,
+) -> None:
+    """Sync Ed Lessons for a user, including slide content for tsvector."""
+    from src.adapters.ed_lessons import EdLessonsAdapter
+
+    adapter = EdLessonsAdapter(ed_token)
+    try:
+        for course in courses:
+            if not course.ed_course_id:
+                continue
+
+            try:
+                lessons_data, _ = await adapter.get_lessons(course.ed_course_id)
+            except Exception:
+                logger.warning("sync_ed_lessons_error", course=course.code)
+                continue
+
+            for lesson_data in lessons_data:
+                lesson_id_str = str(lesson_data.get("id", ""))
+                title = str(lesson_data.get("title", ""))
+                if not lesson_id_str or not title:
+                    continue
+
+                # Fetch full lesson with slides for text_content
+                text_content = None
+                slide_count = int(str(lesson_data.get("slide_count", 0)))
+                if slide_count > 0:
+                    detail = await adapter.get_lesson(lesson_id_str)
+                    slides = detail.get("slides", [])
+                    if isinstance(slides, list):
+                        slide_texts = [
+                            str(s.get("content", ""))
+                            for s in slides
+                            if isinstance(s, dict) and s.get("content")
+                        ]
+                        if slide_texts:
+                            text_content = "\n\n".join(slide_texts)
+
+                # Upsert lesson by (course_id, ed_lesson_id)
+                values = {
+                    "id": uuid.uuid4(),
+                    "course_id": course.id,
+                    "ed_lesson_id": lesson_id_str,
+                    "title": title,
+                    "number": lesson_data.get("number"),
+                    "kind": str(lesson_data.get("kind", "")),
+                    "state": str(lesson_data.get("state", "")),
+                    "slide_count": slide_count,
+                    "due_at": lesson_data.get("due_at"),
+                    "text_content": text_content,
+                }
+                lesson_stmt = pg_insert(Lesson).values(**values)
+                lesson_stmt = lesson_stmt.on_conflict_do_update(
+                    constraint="uq_lessons_course_ed",
+                    set_={
+                        "title": values["title"],
+                        "number": values["number"],
+                        "kind": values["kind"],
+                        "state": values["state"],
+                        "slide_count": values["slide_count"],
+                        "due_at": values["due_at"],
+                        "text_content": values["text_content"],
+                    },
+                )
+                await session.execute(lesson_stmt)
+
+        user.ed_sync_status = "success"
+        user.ed_last_synced_at = datetime.now(UTC)
+        user.ed_token_status = "active"
+
+    except TokenInvalidError:
+        user.ed_token_status = "expired"
+        user.ed_sync_status = "degraded"
+        logger.warning("sync_ed_token_expired", user_id=str(user.id))

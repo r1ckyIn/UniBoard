@@ -431,12 +431,18 @@ class GPAService:
                 reverse=True,
             )
             total_needed = target * total_weight_all - current_weighted
+            # Smart: score inversely proportional to credit_points
+            # High-cp courses need lower scores since each point counts more
+            sum_raw_weights = sum(
+                (Decimal(str(g.weight)) for g, _ in sorted_ungraded),
+                Decimal("0"),
+            )
+            if sum_raw_weights == 0:
+                sum_raw_weights = Decimal("1")
+
             for g, course in sorted_ungraded:
                 cp = Decimal(str(course.credit_points))
-                weight = Decimal(str(g.weight))
-                weighted_cp = weight * cp
-                portion = weighted_cp / remaining_weight
-                score_needed = (total_needed * portion) / weighted_cp * Decimal("100")
+                score_needed = total_needed / (sum_raw_weights * cp)
                 score_needed = score_needed.quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
                 clamped = min(max(score_needed, Decimal("0")), Decimal("100"))
                 required_scores.append(

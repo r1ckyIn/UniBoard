@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Computed, ForeignKey, Index, String, Text
+from sqlalchemy import Computed, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,6 +22,7 @@ class Lesson(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "lessons"
     __table_args__ = (
         Index("ix_lessons_search", "search_vector", postgresql_using="gin"),
+        UniqueConstraint("course_id", "ed_lesson_id", name="uq_lessons_course_ed"),
     )
 
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
