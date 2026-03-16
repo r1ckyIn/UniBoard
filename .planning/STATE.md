@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-16T12:34:53.203Z"
-last_activity: 2026-03-16 — Plan 02-02 executed (5 tasks, 46 tests, 28 files)
+status: in-progress
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-16T22:19:32Z"
+last_activity: 2026-03-17 — Plan 03-01 executed (3 tasks, 18 tests, 45 files)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 45
+  total_plans: 8
+  completed_plans: 6
+  percent: 55
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 2 — Core Services & API (COMPLETE)
+**Current focus:** Phase 3 — Frontend Dashboard (IN PROGRESS)
 
 ## Current Position
 
-Phase: 2 of 4 (Core Services & API) -- COMPLETE
-Plan: 2 of 2 executed in current phase
-Status: Phase 2 complete -- all services, sync engine, 12 REST endpoints, 123 tests
-Last activity: 2026-03-16 — Plan 02-02 executed (5 tasks, 46 tests, 28 files)
+Phase: 3 of 4 (Frontend Dashboard)
+Plan: 1 of 3 executed in current phase
+Status: Plan 03-01 complete -- Next.js scaffolding, design system, layout shell, auth, onboarding, 18 tests
+Last activity: 2026-03-17 — Plan 03-01 executed (3 tasks, 18 tests, 45 files)
 
-Progress: [█████░░░░░] 45%
+Progress: [██████░░░░] 55%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 13.6 min
-- Total execution time: 1.1 hours
+- Total plans completed: 6
+- Average duration: 13.7 min
+- Total execution time: 1.4 hours
 
 **By Phase:**
 
@@ -45,10 +45,11 @@ Progress: [█████░░░░░] 45%
 |-------|-------|-------|----------|
 | 1 | 3/3 | 34 min | 11.3 min |
 | 2 | 2/2 | 34 min | 17.0 min |
+| 3 | 1/3 | 14 min | 14.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (13 min), 01-02 (10 min), 01-03 (11 min), 02-01 (12 min), 02-02 (22 min)
-- Trend: Slightly increasing (larger plans in Phase 2)
+- Last 5 plans: 01-02 (10 min), 01-03 (11 min), 02-01 (12 min), 02-02 (22 min), 03-01 (14 min)
+- Trend: Stable around 14 min average
 
 *Updated after each plan completion*
 
@@ -84,6 +85,11 @@ Recent decisions affecting current work:
 - [02-02]: UNIBOARD_DISABLE_SYNC env var in lifespan to prevent APScheduler during tests
 - [02-02]: mypy overrides for untyped APScheduler/Anthropic/rapidfuzz (follow_untyped_imports=false)
 - [02-02]: AI description reads cached Module.ai_description column, never calls AI inline during requests
+- [03-01]: Google Fonts @import before Tailwind @import to avoid CSS ordering warning in v4
+- [03-01]: ResizeObserver polyfilled in vitest setup for jsdom compatibility
+- [03-01]: roughjs mocked in component tests (jsdom lacks full SVG support)
+- [03-01]: QueryProvider as separate client component for server/client boundary
+- [03-01]: Login uses URLSearchParams with username field (not email) per OAuth2PasswordRequestForm
 
 ### Pending Todos
 
@@ -93,12 +99,12 @@ None yet.
 
 - Ed API is undocumented and can break without notice — defensive parsing mandatory (Phase 1)
 - python-jose replaced with PyJWT in 01-02 -- RESOLVED
-- Tailwind v4 + shadcn/ui CLI v4 is a very recent combination — may need phase-specific testing (Phase 3)
+- Tailwind v4 + shadcn/ui CLI v4 is a very recent combination — RESOLVED (pure custom components, no shadcn/ui)
 - MCP SDK version churn (v1.0 to v1.25+ in 6 months) — pin version explicitly (Phase 4)
 
 ## Session Continuity
 
-Last session: 2026-03-16T12:34:53.198Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-frontend-dashboard/03-CONTEXT.md
-Next action: Phase 2 complete. Run /pr-cycle, then proceed to Phase 3 (Frontend Dashboard).
+Last session: 2026-03-16T22:19:32Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-frontend-dashboard/03-01-SUMMARY.md
+Next action: Execute Plan 03-02 (Dashboard page, Courses page, Deadlines page).

@@ -38,8 +38,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platform & Onboarding
 
-- [ ] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
-- [ ] **PLAT-02**: User can access the full dashboard via web browser without installing anything
+- [x] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
+- [x] **PLAT-02**: User can access the full dashboard via web browser without installing anything
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
 - [x] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
 
@@ -58,7 +58,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
 - [ ] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
 - [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
-- [ ] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
+- [x] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
 
 ### Infrastructure
 
@@ -134,8 +134,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-02 | Phase 2 | Complete |
 | FILE-03 | Phase 4 | Pending |
 | FILE-04 | Phase 4 | Pending |
-| PLAT-01 | Phase 3 | Pending |
-| PLAT-02 | Phase 3 | Pending |
+| PLAT-01 | Phase 3 | Complete |
+| PLAT-02 | Phase 3 | Complete |
 | PLAT-03 | Phase 4 | Pending |
 | PLAT-04 | Phase 2 | Complete |
 | SKILL-01 | Phase 4 | Pending |
@@ -148,7 +148,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-04 | Phase 3 | Pending |
 | UI-05 | Phase 3 | Pending |
 | UI-06 | Phase 3 | Pending |
-| UI-07 | Phase 3 | Pending |
+| UI-07 | Phase 3 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 2 | Complete |
 | INFRA-03 | Phase 1 | Complete |

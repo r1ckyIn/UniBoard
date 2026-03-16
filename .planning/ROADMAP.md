@@ -65,7 +65,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Next.js 15 scaffolding, Tailwind v4 design system (Rough.js, paper texture, fonts), API client with JWT auth, TypeScript types, i18n (next-intl), sidebar + right panel layout, auth pages, 3-step onboarding, backend CORS
+- [x] 03-01-PLAN.md — Next.js 15 scaffolding, Tailwind v4 design system (Rough.js, paper texture, fonts), API client with JWT auth, TypeScript types, i18n (next-intl), sidebar + right panel layout, auth pages, 3-step onboarding, backend CORS
 - [ ] 03-02-PLAN.md — Dashboard page (100vh hero, stats row, course grades table, deadline timeline, weight donut), Courses page (card grid + detail with assessment/materials/posts), Deadlines page (calendar + filterable timeline)
 - [ ] 03-03-PLAN.md — Predict page (slider-based What-if simulator, target path, scenario management), Digest page (rule-based daily card feed), Settings page (token management, GPA target, profile)
 
@@ -95,5 +95,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
 | 2. Core Services & API | 2/2 | Complete | 2026-03-16 |
-| 3. Frontend Dashboard | 0/3 | Planning complete | - |
+| 3. Frontend Dashboard | 1/3 | In progress | - |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |
