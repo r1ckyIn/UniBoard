@@ -55,9 +55,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **UI-01**: Dashboard page with hero welcome, stats row (WAM/Target/Alerts), course grades table, deadline timeline, assessment weight chart (prototype exists)
 - [x] **UI-02**: Courses page showing all enrolled courses with grade overview, assessment breakdown, and file navigation
 - [x] **UI-03**: Deadlines page with full calendar view and filterable timeline of all deadlines across courses
-- [ ] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
-- [ ] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
-- [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
+- [x] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
+- [x] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
+- [x] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
 - [x] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
 
 ### Infrastructure
@@ -145,9 +145,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-01 | Phase 3 | Complete |
 | UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 3 | Complete |
-| UI-04 | Phase 3 | Pending |
-| UI-05 | Phase 3 | Pending |
-| UI-06 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Complete |
+| UI-05 | Phase 3 | Complete |
+| UI-06 | Phase 3 | Complete |
 | UI-07 | Phase 3 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 2 | Complete |

@@ -67,7 +67,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Next.js 15 scaffolding, Tailwind v4 design system (Rough.js, paper texture, fonts), API client with JWT auth, TypeScript types, i18n (next-intl), sidebar + right panel layout, auth pages, 3-step onboarding, backend CORS
 - [x] 03-02-PLAN.md — Dashboard page (100vh hero, stats row, course grades table, deadline timeline, weight donut), Courses page (card grid + detail with assessment/materials/posts), Deadlines page (calendar + filterable timeline)
-- [ ] 03-03-PLAN.md — Predict page (slider-based What-if simulator, target path, scenario management), Digest page (rule-based daily card feed), Settings page (token management, GPA target, profile)
+- [x] 03-03-PLAN.md — Predict page (slider-based What-if simulator, target path, scenario management), Digest page (rule-based daily card feed), Settings page (token management, GPA target, profile)
 
 ### Phase 4: Intelligence, Skills & MCP
 **Goal**: UniBoard delivers proactive intelligence (AI-enhanced digests, risk alerts, notifications), AI-powered course material Q&A, and operates as an MCP server with a self-improving skill system
