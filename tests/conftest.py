@@ -1,5 +1,10 @@
 """Shared test fixtures for integration tests."""
 
+import os
+
+# Enable debug mode for tests so production-only validators (e.g. secret_key guard) don't fire
+os.environ.setdefault("DEBUG", "true")
+
 from collections.abc import AsyncGenerator
 
 import httpx

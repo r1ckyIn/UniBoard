@@ -1,5 +1,8 @@
 """Application configuration via pydantic-settings."""
 
+from typing import Self
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -36,6 +39,15 @@ class Settings(BaseSettings):
     # Debug
     debug: bool = False
     log_level: str = "INFO"
+
+    @model_validator(mode="after")
+    def _check_production_secret_key(self) -> Self:
+        """Reject default secret_key when running in production mode."""
+        if not self.debug and self.secret_key == "dev-secret-change-in-production":
+            raise ValueError(
+                "SECRET_KEY must be changed from default in production (debug=False)"
+            )
+        return self
 
 
 _settings: Settings | None = None
