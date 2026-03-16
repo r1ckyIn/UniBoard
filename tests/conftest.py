@@ -4,6 +4,8 @@ import os
 
 # Enable debug mode for tests so production-only validators (e.g. secret_key guard) don't fire
 os.environ.setdefault("DEBUG", "true")
+# Disable sync engine in tests to prevent APScheduler from starting
+os.environ.setdefault("UNIBOARD_DISABLE_SYNC", "true")
 
 from collections.abc import AsyncGenerator
 
