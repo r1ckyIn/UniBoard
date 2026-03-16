@@ -17,22 +17,22 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Deadlines
 
-- [ ] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas Assignments + Ed Lessons + Ed Discussion (deduplicated)
+- [x] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas Assignments + Ed Lessons + Ed Discussion (deduplicated)
 - [ ] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
 - [ ] **DL-03**: User receives risk alert when their grade trajectory in a course deviates from their target GPA threshold
 
 ### Intelligence
 
-- [ ] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
+- [x] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
 - [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes
 - [ ] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
 - [ ] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking
-- [ ] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
+- [x] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
 
 ### Files & Materials
 
-- [ ] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions explaining folder contents (Canvas Modules + Ed Lessons unified)
-- [ ] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
+- [x] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions explaining folder contents (Canvas Modules + Ed Lessons unified)
+- [x] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
 - [ ] **FILE-03**: User can ask AI questions about synced course materials and receive answers with cited sources (no hallucination)
 - [ ] **FILE-04**: User can select a course unit and view AI-generated structured review summary (key concepts, common mistakes, exam scope) plus downloadable community cheatsheets
 
@@ -41,7 +41,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
 - [ ] **PLAT-02**: User can access the full dashboard via web browser without installing anything
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
-- [ ] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
+- [x] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
 
 ### Skill System (MCP Agent)
 
@@ -63,7 +63,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Infrastructure
 
 - [x] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
-- [ ] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
+- [x] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
 - [x] **INFRA-03**: Canvas adapter with rate limiting (sliding window from X-Rate-Limit-Remaining header), pagination, and circuit breaker
 - [x] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
 - [x] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
@@ -122,22 +122,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GPA-03 | Phase 2 | Complete |
 | GPA-04 | Phase 2 | Complete |
 | GPA-05 | Phase 2 | Complete |
-| DL-01 | Phase 2 | Pending |
+| DL-01 | Phase 2 | Complete |
 | DL-02 | Phase 4 | Pending |
 | DL-03 | Phase 4 | Pending |
-| INTEL-01 | Phase 2 | Pending |
+| INTEL-01 | Phase 2 | Complete |
 | INTEL-02 | Phase 4 | Pending |
 | INTEL-03 | Phase 4 | Pending |
 | INTEL-04 | Phase 4 | Pending |
-| INTEL-05 | Phase 2 | Pending |
-| FILE-01 | Phase 2 | Pending |
-| FILE-02 | Phase 2 | Pending |
+| INTEL-05 | Phase 2 | Complete |
+| FILE-01 | Phase 2 | Complete |
+| FILE-02 | Phase 2 | Complete |
 | FILE-03 | Phase 4 | Pending |
 | FILE-04 | Phase 4 | Pending |
 | PLAT-01 | Phase 3 | Pending |
 | PLAT-02 | Phase 3 | Pending |
 | PLAT-03 | Phase 4 | Pending |
-| PLAT-04 | Phase 2 | Pending |
+| PLAT-04 | Phase 2 | Complete |
 | SKILL-01 | Phase 4 | Pending |
 | SKILL-02 | Phase 4 | Pending |
 | SKILL-03 | Phase 4 | Pending |
@@ -150,7 +150,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-06 | Phase 3 | Pending |
 | UI-07 | Phase 3 | Pending |
 | INFRA-01 | Phase 1 | Complete |
-| INFRA-02 | Phase 2 | Pending |
+| INFRA-02 | Phase 2 | Complete |
 | INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |
