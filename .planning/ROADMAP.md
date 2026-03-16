@@ -12,7 +12,7 @@ UniBoard delivers a GPA maximization dashboard in 4 coarse phases across 2 weeks
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment
+- [x] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment (completed 2026-03-16)
 - [ ] **Phase 2: Core Services & API** - GPA engine, deadline aggregation, course materials, sync engine, REST API
 - [ ] **Phase 3: Frontend Dashboard** - All 7 UI pages with Anthropic-inspired design, onboarding flow
 - [ ] **Phase 4: Intelligence, Skills & MCP** - AI extraction, digests, notifications, skill system, MCP server
@@ -93,7 +93,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Acquisition | 2/3 | Executing | - |
+| 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
 | 2. Core Services & API | 0/2 | Not started | - |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |
