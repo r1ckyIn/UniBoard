@@ -8,10 +8,10 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+from src.config import get_settings
 
 # Import all models so Base.metadata is populated
 from src.models import Base  # noqa: F401
-from src.config import get_settings
 
 # Alembic Config object
 config = context.config

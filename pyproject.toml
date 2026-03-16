@@ -49,6 +49,7 @@ packages = ["src"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
 timeout = 120
 
@@ -59,6 +60,7 @@ plugins = ["pydantic.mypy"]
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+extend-exclude = ["alembic/versions/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

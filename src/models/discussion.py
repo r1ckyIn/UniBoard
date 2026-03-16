@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Float, ForeignKey, Index, String, Text
+from sqlalchemy import Computed, Float, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -46,7 +46,13 @@ class DiscussionThread(UUIDMixin, TimestampMixin, Base):
     is_staff_post: Mapped[bool] = mapped_column(default=False)
     gpa_relevance_score: Mapped[float] = mapped_column(Float, default=0.0)
     search_vector: Mapped[Any | None] = mapped_column(  # noqa: ANN401
-        TSVECTOR, nullable=True
+        TSVECTOR,
+        Computed(
+            "setweight(to_tsvector('english', coalesce(title, '')), 'A') || "
+            "setweight(to_tsvector('english', coalesce(content, '')), 'B')",
+            persisted=True,
+        ),
+        nullable=True,
     )
     synced_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
