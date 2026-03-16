@@ -36,8 +36,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
-    # Debug
-    debug: bool = False
+    # Debug (default True for local dev; production sets DEBUG=false explicitly)
+    debug: bool = True
     log_level: str = "INFO"
 
     @model_validator(mode="after")
