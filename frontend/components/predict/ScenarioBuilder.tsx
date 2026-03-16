@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { ChevronDown, ChevronRight, Save, RotateCcw } from "lucide-react";
 import RoughCard from "@/components/design-system/RoughCard";
 import { RoughNotationItem } from "@/components/design-system/RoughNotationWrapper";
@@ -19,10 +19,11 @@ interface ScenarioBuilderProps {
  * Course section that fetches detailed assessments and renders sliders.
  * Calculates simulated course WAM purely client-side.
  */
-function CourseSection({ courseId, courseCode, currentWam }: {
+function CourseSection({ courseId, courseCode, currentWam, onSimulatedWamChange }: {
   courseId: string;
   courseCode: string;
   currentWam: number;
+  onSimulatedWamChange: (courseId: string, wam: number) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const { data: detail } = useGPACourseDetail(courseId);
@@ -43,6 +44,11 @@ function CourseSection({ courseId, courseCode, currentWam }: {
 
     return calculateCourseWAM(assessmentsWithHypothetical);
   }, [detail?.assessments, overrides, currentWam]);
+
+  // Report simulated WAM to parent for overall WAM calculation
+  useEffect(() => {
+    onSimulatedWamChange(courseId, simulatedWam);
+  }, [courseId, simulatedWam, onSimulatedWamChange]);
 
   const wamDiff = simulatedWam - currentWam;
   const hasChange = Math.abs(wamDiff) >= 0.1;
@@ -107,22 +113,29 @@ export default function ScenarioBuilder({ summary }: ScenarioBuilderProps) {
   const saveWhatIf = useSaveWhatIf();
   const [saveMessage, setSaveMessage] = useState("");
 
-  // Calculate overall simulated WAM across all courses
-  // This uses a simplified approach: recalculate per-course WAM from summary data
-  // For courses with overrides, this updates; for others, uses original WAM
+  // Track per-course simulated WAMs reported by CourseSection children
+  const simulatedWamsRef = useRef<Record<string, number>>({});
+  const [simulatedWamsVersion, setSimulatedWamsVersion] = useState(0);
+
+  const handleSimulatedWamChange = useCallback((courseId: string, wam: number) => {
+    if (simulatedWamsRef.current[courseId] !== wam) {
+      simulatedWamsRef.current[courseId] = wam;
+      setSimulatedWamsVersion((v) => v + 1);
+    }
+  }, []);
+
+  // Calculate overall simulated WAM using per-course simulated WAMs from children
   const simulatedOverallWam = useMemo(() => {
     if (!summary?.courses) return summary?.cumulative_wam ?? 0;
 
-    // Use per-course WAMs directly from summary (the individual CourseSection
-    // components show their own simulated WAMs, but for overall calculation
-    // we rely on the summary data since we don't have all course details here)
     const courses = summary.courses.map((c) => ({
-      wam: c.wam,
+      wam: simulatedWamsRef.current[c.course_id] ?? c.wam,
       credit_points: c.credit_points,
     }));
 
     return calculateWAM(courses);
-  }, [summary]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summary, simulatedWamsVersion]);
 
   const currentWam = summary?.cumulative_wam ?? 0;
   const wamDiff = simulatedOverallWam - currentWam;
@@ -213,6 +226,7 @@ export default function ScenarioBuilder({ summary }: ScenarioBuilderProps) {
             courseId={c.course_id}
             courseCode={c.course_code}
             currentWam={c.wam}
+            onSimulatedWamChange={handleSimulatedWamChange}
           />
         ))}
       </div>
