@@ -69,7 +69,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
 - [ ] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
 - [x] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
-- [ ] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
+- [x] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
 - [x] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
 
 ## v2 Requirements
@@ -156,7 +156,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-05 | Phase 1 | Pending |
 | INFRA-06 | Phase 1 | Pending |
 | INFRA-07 | Phase 1 | Complete |
-| INFRA-08 | Phase 1 | Pending |
+| INFRA-08 | Phase 1 | Complete |
 | INFRA-09 | Phase 1 | Complete |
 
 **Coverage:**
