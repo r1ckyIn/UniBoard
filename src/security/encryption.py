@@ -5,6 +5,8 @@ import os
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+from src.config import get_settings
+
 
 class TokenEncryption:
     """Encrypt and decrypt API tokens using AES-256-GCM.
@@ -48,15 +50,15 @@ class TokenEncryption:
 
 
 def get_encryption() -> TokenEncryption:
-    """Create TokenEncryption from ENCRYPTION_KEY environment variable.
+    """Create TokenEncryption from Settings.encryption_key.
 
     Supports two key formats:
     - 64-char hex string: decoded via bytes.fromhex() to 32 bytes
     - Raw string >= 32 chars: encoded and truncated to 32 bytes
     """
-    key_str = os.environ.get("ENCRYPTION_KEY", "")
+    key_str = get_settings().encryption_key
     if not key_str:
-        raise RuntimeError("ENCRYPTION_KEY environment variable is not set")
+        raise RuntimeError("encryption_key is not configured in settings")
 
     if len(key_str) == 64:
         try:
