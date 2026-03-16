@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from src.logging import configure_logging
 from src.schemas.common import ErrorDetail, ErrorResponse, MetaInfo, UniboardError
+from src.sync.engine import lifespan
 from src.web.routes import api_router, health_router
 
 logger = structlog.get_logger()
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
         title="UniBoard API",
         version="0.1.0",
         description="University GPA Maximization Dashboard",
+        lifespan=lifespan,
     )
 
     @application.middleware("http")

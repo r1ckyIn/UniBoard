@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Float, ForeignKey, Index, String
+from sqlalchemy import Float, ForeignKey, Index, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -21,6 +21,7 @@ class Grade(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "grades"
     __table_args__ = (
         Index("ix_grades_course", "course_id", "graded_at"),
+        UniqueConstraint("course_id", "assessment_name", name="uq_grades_course_assessment"),
     )
 
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))

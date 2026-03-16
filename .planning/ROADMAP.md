@@ -13,7 +13,7 @@ UniBoard delivers a GPA maximization dashboard in 4 coarse phases across 2 weeks
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment (completed 2026-03-16)
-- [ ] **Phase 2: Core Services & API** - GPA engine, deadline aggregation, course materials, sync engine, REST API
+- [x] **Phase 2: Core Services & API** - GPA engine, deadline aggregation, course materials, sync engine, REST API (completed 2026-03-16)
 - [ ] **Phase 3: Frontend Dashboard** - All 7 UI pages with Anthropic-inspired design, onboarding flow
 - [ ] **Phase 4: Intelligence, Skills & MCP** - AI extraction, digests, notifications, skill system, MCP server
 
@@ -46,11 +46,11 @@ Plans:
   3. API returns a deduplicated unified deadline list from Canvas + Ed Lessons + Ed Discussion, with no duplicates (SHA-256 dedup verified)
   4. API returns course materials with AI-generated folder descriptions, and keyword search returns matching files with content snippets
   5. Background sync engine runs on configured intervals (grades 15min, deadlines 1h, modules daily) and token expiration warnings are surfaced
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: GPA/WAM service (calculation, What-if simulator, target path planner, assessment weights) + REST endpoints
-- [ ] 02-02: Deadline aggregation service, course materials service, Ed post filtering (rule-based), deduplication, sync engine + REST endpoints
+- [x] 02-01-PLAN.md — GPA/WAM service (Decimal calculation, What-if simulator, target path planner) + Pydantic schemas + 6 REST endpoints + Hypothesis property tests
+- [x] 02-02-PLAN.md — Deadline aggregation (SHA-256 dedup + rapidfuzz), course materials (AI descriptions + tsvector search), Ed intelligence (rule-based), APScheduler sync engine + REST endpoints
 
 ### Phase 3: Frontend Dashboard
 **Goal**: Students can access the complete UniBoard experience through a browser with all 7 pages following the Anthropic-inspired design system
@@ -94,6 +94,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
-| 2. Core Services & API | 0/2 | Not started | - |
+| 2. Core Services & API | 2/2 | Complete | 2026-03-16 |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |

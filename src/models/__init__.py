@@ -10,6 +10,7 @@ from src.models.module import Module, ModuleItem
 from src.models.push_record import PushRecord
 from src.models.unit_outline import UnitOutline
 from src.models.user import User
+from src.models.whatif import WhatIfScenario
 
 __all__ = [
     "Base",
@@ -24,4 +25,5 @@ __all__ = [
     "UnifiedDeadline",
     "UnitOutline",
     "User",
+    "WhatIfScenario",
 ]

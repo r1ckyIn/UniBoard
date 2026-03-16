@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
+    # Sync engine intervals
+    sync_grades_interval_min: int = 15
+    sync_deadlines_interval_min: int = 60
+    sync_modules_cron_hour: int = 3
+
+    # AI (Anthropic)
+    anthropic_api_key: str = ""
+    ai_daily_limit_per_user: int = 100
+
     # Debug (default True for local dev; production sets DEBUG=false explicitly)
     debug: bool = True
     log_level: str = "INFO"
