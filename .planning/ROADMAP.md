@@ -12,7 +12,7 @@ UniBoard delivers a GPA maximization dashboard in 4 coarse phases across 2 weeks
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment
+- [x] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment (completed 2026-03-16)
 - [ ] **Phase 2: Core Services & API** - GPA engine, deadline aggregation, course materials, sync engine, REST API
 - [ ] **Phase 3: Frontend Dashboard** - All 7 UI pages with Anthropic-inspired design, onboarding flow
 - [ ] **Phase 4: Intelligence, Skills & MCP** - AI extraction, digests, notifications, skill system, MCP server
@@ -29,12 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Canvas adapter can fetch courses, grades, assignments, and modules for a real Canvas token (with rate limiting and pagination)
   4. Ed Discussion and Ed Lessons adapters can fetch threads, posts, and lesson content for a real Ed token (with defensive Pydantic parsing)
   5. Unit Outline parser can extract assessment weights from a USYD Unit Outline HTML page with weight-sum validation
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
-- [ ] 01-02: JWT auth (PyJWT + bcrypt) and user registration endpoint
-- [ ] 01-03: All 4 platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline parser)
+- [x] 01-01-PLAN.md — Database schema, ORM models, Alembic migrations, Docker Compose, token encryption
+- [x] 01-02-PLAN.md — JWT auth (PyJWT + bcrypt) and user registration endpoint
+- [x] 01-03-PLAN.md — Platform adapters (Canvas, Ed Discussion, Ed Lessons, Unit Outline), resilience utilities, course linking, integration tests
 
 ### Phase 2: Core Services & API
 **Goal**: Users can retrieve real-time GPA data, unified deadlines, and course materials through REST API endpoints
@@ -93,7 +93,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Acquisition | 0/3 | Not started | - |
+| 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
 | 2. Core Services & API | 0/2 | Not started | - |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Intelligence, Skills & MCP | 0/3 | Not started | - |

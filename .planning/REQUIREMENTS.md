@@ -62,15 +62,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
+- [x] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
 - [ ] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
-- [ ] **INFRA-03**: Canvas adapter with rate limiting (sliding window from X-Rate-Limit-Remaining header), pagination, and circuit breaker
-- [ ] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
-- [ ] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
-- [ ] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
-- [ ] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
-- [ ] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
-- [ ] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
+- [x] **INFRA-03**: Canvas adapter with rate limiting (sliding window from X-Rate-Limit-Remaining header), pagination, and circuit breaker
+- [x] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
+- [x] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
+- [x] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
+- [x] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
+- [x] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
+- [x] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
 
 ## v2 Requirements
 
@@ -149,15 +149,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-05 | Phase 3 | Pending |
 | UI-06 | Phase 3 | Pending |
 | UI-07 | Phase 3 | Pending |
-| INFRA-01 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 2 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
-| INFRA-05 | Phase 1 | Pending |
-| INFRA-06 | Phase 1 | Pending |
-| INFRA-07 | Phase 1 | Pending |
-| INFRA-08 | Phase 1 | Pending |
-| INFRA-09 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
+| INFRA-05 | Phase 1 | Complete |
+| INFRA-06 | Phase 1 | Complete |
+| INFRA-07 | Phase 1 | Complete |
+| INFRA-08 | Phase 1 | Complete |
+| INFRA-09 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 41 total
