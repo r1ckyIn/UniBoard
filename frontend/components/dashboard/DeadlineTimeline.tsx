@@ -3,26 +3,12 @@
 import RoughCard from "@/components/design-system/RoughCard";
 import RoughTimeline from "@/components/design-system/RoughTimeline";
 import { formatRelative, formatDeadline } from "@/lib/utils/dates";
+import { urgencyColor } from "@/lib/utils/gpa";
 import type { DeadlineResponse } from "@/lib/api/types";
 
 interface DeadlineTimelineProps {
   deadlines: DeadlineResponse[];
   isLoading: boolean;
-}
-
-/** Map urgency level to display color */
-function urgencyColor(urgency: DeadlineResponse["urgency"]): string {
-  switch (urgency) {
-    case "urgent":
-      return "#c0392b";
-    case "warning":
-      return "var(--color-amber)";
-    case "past_due":
-      return "var(--color-text-3)";
-    case "normal":
-    default:
-      return "var(--color-text-2)";
-  }
 }
 
 /**

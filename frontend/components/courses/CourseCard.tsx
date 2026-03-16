@@ -4,27 +4,10 @@ import Link from "next/link";
 import RoughCard from "@/components/design-system/RoughCard";
 import RoughProgressBar from "@/components/design-system/RoughProgressBar";
 import type { CourseSummary } from "@/lib/api/types";
+import { gradeBandColor } from "@/lib/utils/gpa";
 
 interface CourseCardProps {
   course: CourseSummary;
-}
-
-/** Map grade band to theme color */
-function gradeBandColor(band: string): string {
-  switch (band) {
-    case "HD":
-      return "var(--color-green)";
-    case "D":
-      return "var(--color-blue)";
-    case "CR":
-      return "var(--color-amber)";
-    case "P":
-      return "var(--color-orange)";
-    case "F":
-      return "#c0392b";
-    default:
-      return "var(--color-text-2)";
-  }
 }
 
 /**

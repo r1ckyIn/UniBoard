@@ -65,3 +65,36 @@ export function gradeBand(wam: number): string {
   if (wam >= 50) return "P";
   return "F";
 }
+
+/** Map grade band to its theme color for display */
+export function gradeBandColor(band: string): string {
+  switch (band) {
+    case "HD":
+      return "var(--color-green)";
+    case "D":
+      return "var(--color-blue)";
+    case "CR":
+      return "var(--color-amber)";
+    case "P":
+      return "var(--color-orange)";
+    case "F":
+      return "#c0392b";
+    default:
+      return "var(--color-text-2)";
+  }
+}
+
+/** Map urgency level to display color */
+export function urgencyColor(urgency: string): string {
+  switch (urgency) {
+    case "urgent":
+      return "#c0392b";
+    case "warning":
+      return "var(--color-amber)";
+    case "past_due":
+      return "var(--color-text-3)";
+    case "normal":
+    default:
+      return "var(--color-text-2)";
+  }
+}

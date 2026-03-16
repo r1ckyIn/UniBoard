@@ -4,27 +4,13 @@ import { isSameDay, parseISO } from "date-fns";
 import { X } from "lucide-react";
 import RoughCard from "@/components/design-system/RoughCard";
 import { formatDeadline, formatRelative } from "@/lib/utils/dates";
+import { urgencyColor } from "@/lib/utils/gpa";
 import type { DeadlineResponse } from "@/lib/api/types";
 
 interface DeadlineListProps {
   deadlines: DeadlineResponse[];
   selectedDate: Date | null;
   onClearDate?: () => void;
-}
-
-/** Map urgency to left border color */
-function urgencyBorderColor(urgency: DeadlineResponse["urgency"]): string {
-  switch (urgency) {
-    case "urgent":
-      return "#c0392b";
-    case "warning":
-      return "var(--color-amber)";
-    case "past_due":
-      return "var(--color-text-3)";
-    case "normal":
-    default:
-      return "var(--color-divider)";
-  }
 }
 
 /**
@@ -84,7 +70,7 @@ export default function DeadlineList({
             key={d.id}
             className="p-4 bg-[var(--color-card-bg)]"
             style={{
-              borderLeft: `3px solid ${urgencyBorderColor(d.urgency)}`,
+              borderLeft: `3px solid ${urgencyColor(d.urgency)}`,
             }}
           >
             <div className="flex items-start justify-between gap-3">
@@ -114,7 +100,7 @@ export default function DeadlineList({
                   style={{ color: "var(--color-text-2)" }}
                 >
                   {formatDeadline(d.due_date)} &middot;{" "}
-                  <span style={{ color: urgencyBorderColor(d.urgency) }}>
+                  <span style={{ color: urgencyColor(d.urgency) }}>
                     {formatRelative(d.due_date)}
                   </span>
                 </p>
