@@ -6,18 +6,24 @@ import DigestCard, { type DigestDay } from "./DigestCard";
 import { useGPASummary } from "@/lib/hooks/useGPA";
 import { useDeadlines } from "@/lib/hooks/useDeadlines";
 import { useCourseDiscussions } from "@/lib/hooks/useCourses";
-import type { DeadlineResponse, HighValuePostResponse } from "@/lib/api/types";
+import { useLatestDigest } from "@/lib/hooks/useDigest";
+import type {
+  DeadlineResponse,
+  HighValuePostResponse,
+  DigestItemResponse,
+} from "@/lib/api/types";
 
 /**
  * Client-side aggregation of grades, deadlines, and Ed posts into daily digest cards.
- * Groups all data by date, sorts by most recent first.
- *
- * Phase 3 version: Rule-based chronological aggregation (no AI scoring).
+ * Phase 4: Uses API digest when available, falls back to client-side aggregation.
  */
 export default function DigestFeed() {
+  // API digest (Phase 4)
+  const { data: apiDigest, isLoading: digestLoading, isError: digestError } = useLatestDigest();
+
+  // Fallback: client-side aggregation (Phase 3 behavior)
   const { data: summary, isLoading: gpLoading } = useGPASummary();
 
-  // Memoize date range to avoid re-creating on every render
   const { fromDate, toDate, today } = useMemo(() => {
     const now = new Date();
     return {
@@ -33,15 +39,48 @@ export default function DigestFeed() {
     include_past: true,
   });
 
-  // Fetch discussions for all courses
-  // We pick the first course with data as a representative feed
   const firstCourseId = summary?.courses?.[0]?.course_id ?? "";
   const { data: posts, isLoading: postsLoading } = useCourseDiscussions(firstCourseId);
 
-  const isLoading = gpLoading || dlLoading || postsLoading;
+  // Use API digest if available, otherwise fall back to client-side
+  const useApiDigest = !digestError && apiDigest != null;
+  const isLoading = digestLoading || (!useApiDigest && (gpLoading || dlLoading || postsLoading));
 
-  // Aggregate data into daily cards
-  const days: DigestDay[] = useMemo(() => {
+  // Convert API digest items into DigestDay format
+  const apiDays: DigestDay[] = useMemo(() => {
+    if (!apiDigest) return [];
+
+    const dayMap = new Map<string, DigestDay>();
+    const ensureDay = (dateStr: string): DigestDay => {
+      if (!dayMap.has(dateStr)) {
+        dayMap.set(dateStr, { date: dateStr, grades: [], deadlines: [], posts: [] });
+      }
+      return dayMap.get(dateStr)!;
+    };
+
+    for (const item of apiDigest.items as DigestItemResponse[]) {
+      const dateKey = apiDigest.digest_date.split("T")[0];
+      const day = ensureDay(dateKey);
+
+      if (item.type === "grade") {
+        day.grades.push({
+          assessment_name: item.title,
+          score: 0,
+          max_score: 100,
+          course_code: item.course_code,
+          urgency_score: item.urgency_score,
+        });
+      }
+      // Deadlines and posts from API digest are summarized; show as grades for simplicity
+    }
+
+    return Array.from(dayMap.values()).filter(
+      (d) => d.grades.length > 0 || d.deadlines.length > 0 || d.posts.length > 0
+    );
+  }, [apiDigest]);
+
+  // Fallback: client-side aggregation
+  const fallbackDays: DigestDay[] = useMemo(() => {
     const dayMap = new Map<string, DigestDay>();
 
     const ensureDay = (dateStr: string): DigestDay => {
@@ -51,7 +90,6 @@ export default function DigestFeed() {
       return dayMap.get(dateStr)!;
     };
 
-    // Group deadlines by due date
     if (deadlines) {
       for (const d of deadlines as DeadlineResponse[]) {
         const dateKey = d.due_date.split("T")[0];
@@ -59,7 +97,6 @@ export default function DigestFeed() {
       }
     }
 
-    // Group posts by created_at date
     if (posts) {
       for (const p of posts as HighValuePostResponse[]) {
         const dateKey = p.created_at.split("T")[0];
@@ -67,11 +104,8 @@ export default function DigestFeed() {
       }
     }
 
-    // Grades: since we don't have graded_at timestamps, show recent
-    // graded assessments under today's date
     if (summary?.courses) {
       for (const c of summary.courses) {
-        // Indicate that this course has graded assessments
         if (c.graded_count > 0) {
           ensureDay(today).grades.push({
             assessment_name: `${c.course_name} progress`,
@@ -83,11 +117,13 @@ export default function DigestFeed() {
       }
     }
 
-    // Sort by date descending (newest first)
     return Array.from(dayMap.values())
       .filter((d) => d.grades.length > 0 || d.deadlines.length > 0 || d.posts.length > 0)
       .sort((a, b) => b.date.localeCompare(a.date));
   }, [summary, deadlines, posts, today]);
+
+  const days = useApiDigest ? apiDays : fallbackDays;
+  const aiSummary = useApiDigest ? apiDigest?.ai_summary : null;
 
   if (isLoading) {
     return (
@@ -118,11 +154,17 @@ export default function DigestFeed() {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs" style={{ color: "var(--color-text-3)" }}>
-        This is your rule-based digest. AI-enhanced digest with urgency scoring coming in Phase 4.
-      </p>
-      {days.map((day) => (
-        <DigestCard key={day.date} day={day} />
+      {!useApiDigest && (
+        <p className="text-xs" style={{ color: "var(--color-text-3)" }}>
+          Showing rule-based digest. AI-enhanced version will appear after daily generation.
+        </p>
+      )}
+      {days.map((day, idx) => (
+        <DigestCard
+          key={day.date}
+          day={day}
+          ai_summary={idx === 0 ? aiSummary : undefined}
+        />
       ))}
     </div>
   );

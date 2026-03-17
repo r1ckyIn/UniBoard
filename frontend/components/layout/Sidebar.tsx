@@ -14,6 +14,8 @@ import {
   Settings,
 } from "lucide-react";
 import clsx from "clsx";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import NotificationDropdown from "@/components/notifications/NotificationDropdown";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, key: "dashboard", path: "" },
@@ -136,6 +138,31 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Notification bell */}
+      <div className="relative" style={{ padding: "0 10px", marginBottom: 4 }}>
+        <div
+          className={clsx(
+            "flex items-center gap-[14px] whitespace-nowrap overflow-hidden",
+            "rounded-[10px]"
+          )}
+          style={{ padding: "4px 8px" }}
+        >
+          <NotificationBell />
+          <span
+            className="text-sm font-medium"
+            style={{
+              opacity: hovered ? 1 : 0,
+              transition: "opacity var(--ease)",
+              fontSize: ".84rem",
+              color: "rgba(60,50,40,.65)",
+            }}
+          >
+            {t("notifications")}
+          </span>
+        </div>
+        <NotificationDropdown />
+      </div>
 
       {/* Bottom: Settings */}
       <div style={{ padding: "0 10px" }}>

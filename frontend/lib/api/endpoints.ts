@@ -37,4 +37,16 @@ export const ENDPOINTS = {
     trigger: "sync/trigger",
     status: "sync/status",
   },
+  notifications: {
+    list: "notifications",
+    unreadCount: "notifications/unread-count",
+    markRead: (id: string) => `notifications/${id}/read`,
+  },
+  digest: {
+    latest: "digest/latest",
+    history: "digest/history",
+  },
+  alerts: {
+    list: "alerts",
+  },
 } as const;

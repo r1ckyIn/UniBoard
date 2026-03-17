@@ -276,6 +276,59 @@ export interface HighValuePostResponse {
 }
 
 // ============================================================
+// Notifications
+// ============================================================
+
+export interface NotificationResponse {
+  id: string;
+  type: "deadline_reminder" | "gpa_risk" | "digest" | "system";
+  severity: "critical" | "warning" | "info";
+  title: string;
+  body: string;
+  is_read: boolean;
+  action_url: string | null;
+  created_at: string;
+  metadata_json: Record<string, string> | null;
+}
+
+export interface UnreadCountResponse {
+  count: number;
+}
+
+// ============================================================
+// Digest (AI-enhanced)
+// ============================================================
+
+export interface DigestItemResponse {
+  type: "grade" | "deadline" | "post";
+  title: string;
+  detail: string;
+  course_code: string;
+  urgency_score: number | null; // 1-5, null if AI not applied
+  timestamp: string;
+}
+
+export interface DigestResponse {
+  id: string;
+  digest_date: string;
+  items: DigestItemResponse[];
+  ai_summary: string | null;
+  created_at: string;
+}
+
+export interface RiskAlertResponse {
+  id: string;
+  course_code: string;
+  course_name: string;
+  current_wam: number;
+  target_wam: number;
+  gap: number;
+  severity: string;
+  recommendation: string;
+  created_at: string;
+}
+
+// ============================================================
 // Sync
 // ============================================================
 

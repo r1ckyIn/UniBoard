@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, Clock, MessageCircle, Star, Shield } from "lucide-react";
+import { Trophy, Clock, MessageCircle, Star, Shield, Sparkles } from "lucide-react";
 import RoughCard from "@/components/design-system/RoughCard";
 import { RoughNotationItem } from "@/components/design-system/RoughNotationWrapper";
 import { formatRelative } from "@/lib/utils/dates";
@@ -15,6 +15,15 @@ const urgencyColors: Record<string, { bg: string; text: string }> = {
   past_due: { bg: "var(--color-orange-soft)", text: "var(--color-text-3)" },
 };
 
+/** Color map for AI urgency scores (1-5) */
+const urgencyBadgeColors: Record<number, string> = {
+  5: "var(--color-orange)",
+  4: "var(--color-amber)",
+  3: "var(--color-blue)",
+  2: "#95a5a6",
+  1: "#bdc3c7",
+};
+
 export interface DigestDay {
   date: string; // ISO date (YYYY-MM-DD)
   grades: Array<{
@@ -22,6 +31,7 @@ export interface DigestDay {
     score: number;
     max_score: number;
     course_code: string;
+    urgency_score?: number | null;
   }>;
   deadlines: DeadlineResponse[];
   posts: HighValuePostResponse[];
@@ -29,13 +39,15 @@ export interface DigestDay {
 
 interface DigestCardProps {
   day: DigestDay;
+  /** AI-generated summary for this digest (from Phase 4). */
+  ai_summary?: string | null;
 }
 
 /**
  * One day's digest card. Shows grades, deadlines, and Ed posts for that date.
  * Empty sections are omitted. Cards with no data at all should not be rendered.
  */
-export default function DigestCard({ day }: DigestCardProps) {
+export default function DigestCard({ day, ai_summary }: DigestCardProps) {
   const hasGrades = day.grades.length > 0;
   const hasDeadlines = day.deadlines.length > 0;
   const hasPosts = day.posts.length > 0;
@@ -57,6 +69,22 @@ export default function DigestCard({ day }: DigestCardProps) {
         </h3>
       </RoughNotationItem>
 
+      {/* AI Summary (Phase 4) */}
+      {ai_summary && (
+        <div
+          className="flex items-start gap-2 mb-4 px-3 py-2.5 rounded-[var(--radius-sm)]"
+          style={{
+            background: "rgba(99,102,241,.06)",
+            border: "1px solid rgba(99,102,241,.12)",
+          }}
+        >
+          <Sparkles size={14} className="shrink-0 mt-0.5" style={{ color: "#6366f1" }} />
+          <p className="text-sm" style={{ color: "var(--color-text-2)", lineHeight: 1.5 }}>
+            {ai_summary}
+          </p>
+        </div>
+      )}
+
       <div className="space-y-4">
         {/* Grades section */}
         {hasGrades && (
@@ -74,7 +102,23 @@ export default function DigestCard({ day }: DigestCardProps) {
                   className="flex items-center justify-between text-sm px-3 py-1.5 rounded-[var(--radius-sm)]"
                   style={{ background: "var(--color-green-soft)" }}
                 >
-                  <span>
+                  <span className="flex items-center gap-1.5">
+                    {g.urgency_score != null && (
+                      <span
+                        className="inline-flex items-center justify-center shrink-0"
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          background: urgencyBadgeColors[g.urgency_score] ?? "#bdc3c7",
+                          color: "#fff",
+                          fontSize: 10,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {g.urgency_score}
+                      </span>
+                    )}
                     New grade: <span className="font-medium">{g.assessment_name}</span>
                     <span className="ml-1" style={{ color: "var(--color-text-3)" }}>
                       ({g.course_code})
