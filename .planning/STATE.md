@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Phase 3 verified, awaiting PR cycle
-last_updated: "2026-03-17T10:00:00Z"
-last_activity: 2026-03-17 -- Phase 3 verified (all 9 requirements PASS, 41 tests, 50+ files)
+stopped_at: Plan 04-01 complete, continuing Phase 4
+last_updated: "2026-03-17T03:33:00Z"
+last_activity: 2026-03-17 -- Plan 04-01 executed (2 tasks, 17 backend tests + 3 frontend tests, 40 files)
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
-  percent: 80
+  completed_phases: 3
+  total_plans: 11
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 3 — Frontend Dashboard (IN PROGRESS)
+**Current focus:** Phase 4 — Intelligence & Skills (IN PROGRESS)
 
 ## Current Position
 
-Phase: 3 of 4 (Frontend Dashboard)
-Plan: 3 of 3 executed in current phase
-Status: Plan 03-03 complete -- Predict page (What-if simulator), Digest page, Settings page, 11 tests
-Last activity: 2026-03-17 -- Plan 03-03 executed (2 tasks, 11 tests, 16 files)
+Phase: 4 of 4 (Intelligence & Skills)
+Plan: 1 of 3 executed in current phase
+Status: Plan 04-01 complete -- Notification/digest/risk-alert system (17 backend + 3 frontend tests, 40 files)
+Last activity: 2026-03-17 -- Plan 04-01 executed (2 tasks, 20 new tests, 40 files)
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 15.4 min
-- Total execution time: 2.1 hours
+- Total plans completed: 9
+- Average duration: 16.3 min
+- Total execution time: 2.5 hours
 
 **By Phase:**
 
@@ -46,10 +46,11 @@ Progress: [████████░░] 80%
 | 1 | 3/3 | 34 min | 11.3 min |
 | 2 | 2/2 | 34 min | 17.0 min |
 | 3 | 3/3 | 63 min | 21.0 min |
+| 4 | 1/3 | 24 min | 24.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (12 min), 02-02 (22 min), 03-01 (14 min), 03-02 (26 min), 03-03 (23 min)
-- Trend: Frontend plans take ~20 min avg (more components per plan)
+- Last 5 plans: 02-02 (22 min), 03-01 (14 min), 03-02 (26 min), 03-03 (23 min), 04-01 (24 min)
+- Trend: Full-stack plans (backend + frontend) take ~24 min
 
 *Updated after each plan completion*
 
@@ -98,6 +99,11 @@ Recent decisions affecting current work:
 - [03-03]: CourseLinking simplified -- manual linking deferred (backend API not available)
 - [03-03]: Digest is Phase 3 rule-engine version (AI-enhanced urgency scoring deferred to Phase 4)
 - [03-03]: Password change UI disabled with 'coming soon' (backend endpoint not yet available)
+- [04-01]: Naive datetimes for PushRecord pushed_at -- consistent with asyncpg TIMESTAMP WITHOUT TIME ZONE convention
+- [04-01]: pgvector extension creation wrapped in DO block for graceful fallback when container not rebuilt
+- [04-01]: Digest CronTrigger uses timezone='Australia/Sydney' for DST-correct 07:00 AEST scheduling
+- [04-01]: Service factories in route files (not deps.py) for clean mypy typing
+- [04-01]: DigestFeed dual-mode: API digest when available, falls back to Phase 3 client-side aggregation
 
 ### Pending Todos
 
@@ -112,7 +118,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T10:00:00Z
-Stopped at: Phase 3 verified, awaiting PR cycle
-Resume file: .planning/phases/03-frontend-dashboard/03-VERIFICATION.md
-Next action: Run /pr-cycle to merge feature/gsd-03-frontend-dashboard into main, then Phase 4.
+Last session: 2026-03-17T03:33:00Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-intelligence-skills/04-01-SUMMARY.md
+Next action: Execute Plan 04-02 (content embedding + semantic search)

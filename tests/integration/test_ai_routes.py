@@ -1,0 +1,125 @@
+"""Integration tests for AI API routes."""
+
+from __future__ import annotations
+
+import uuid
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import pytest
+
+from src.schemas.ai import QAResponse, UnitReviewResponse
+from src.web.deps import get_current_user
+
+
+def _mock_user() -> MagicMock:
+    """Build a mock User for dependency override."""
+    user = MagicMock()
+    user.id = uuid.uuid4()
+    user.email = "test@test.com"
+    user.display_name = "Tester"
+    return user
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_post_course_qa_returns_200(
+    test_client: httpx.AsyncClient,
+) -> None:
+    """POST /courses/{id}/qa returns 200 with QAResponse."""
+    course_id = uuid.uuid4()
+    mock_user = _mock_user()
+
+    qa_response = QAResponse(
+        answer="The answer is 42 [Canvas: Week 1 Notes].",
+        citations=["[Canvas: Week 1 Notes]"],
+        method="direct_context",
+        tokens_used=100,
+    )
+
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with patch("src.web.routes.ai._build_qa_service") as mock_build:
+        mock_svc = AsyncMock()
+        mock_svc.answer_question = AsyncMock(return_value=qa_response)
+        mock_build.return_value = mock_svc
+
+        resp = await test_client.post(
+            f"/api/v1/courses/{course_id}/qa",
+            json={"question": "What is the answer?"},
+            headers={"Authorization": "Bearer fake-token"},
+        )
+
+    app.dependency_overrides.pop(get_current_user, None)
+
+    assert resp.status_code == 200
+    body = resp.json()["data"]
+    assert "answer" in body
+    assert "citations" in body
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_get_course_review_returns_200(
+    test_client: httpx.AsyncClient,
+) -> None:
+    """GET /courses/{id}/review returns 200 with UnitReviewResponse."""
+    course_id = uuid.uuid4()
+    mock_user = _mock_user()
+
+    review_response = UnitReviewResponse(
+        course_id=str(course_id),
+        course_name="Algorithms",
+        key_concepts=["Binary search", "Sorting"],
+        common_mistakes=["Off-by-one errors"],
+        exam_scope="Chapters 1-5",
+        study_tips=["Practice past exams"],
+        generated_at=datetime.now(UTC).isoformat(),
+    )
+
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with patch("src.web.routes.ai._build_qa_service") as mock_build:
+        mock_svc = AsyncMock()
+        mock_svc.generate_review = AsyncMock(return_value=review_response)
+        mock_build.return_value = mock_svc
+
+        resp = await test_client.get(
+            f"/api/v1/courses/{course_id}/review",
+            headers={"Authorization": "Bearer fake-token"},
+        )
+
+    app.dependency_overrides.pop(get_current_user, None)
+
+    assert resp.status_code == 200
+    body = resp.json()["data"]
+    assert "key_concepts" in body
+    assert "common_mistakes" in body
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_get_intelligence_ai_returns_200(
+    test_client: httpx.AsyncClient,
+) -> None:
+    """GET /courses/{id}/intelligence/ai returns 200 with AI-scored posts."""
+    course_id = uuid.uuid4()
+    mock_user = _mock_user()
+
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
+    with patch(
+        "src.web.routes.intelligence._build_ai_engine"
+    ) as mock_build_ai:
+        mock_build_ai.return_value = None  # No AI key -> fallback to rule-based
+        resp = await test_client.get(
+            f"/api/v1/courses/{course_id}/intelligence/ai",
+            headers={"Authorization": "Bearer fake-token"},
+        )
+
+    app.dependency_overrides.pop(get_current_user, None)
+
+    assert resp.status_code == 200
+    body = resp.json()["data"]
+    assert isinstance(body, list)

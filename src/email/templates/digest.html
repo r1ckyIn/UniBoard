@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard Daily Digest</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }
+    .header { background-color: #1a1a2e; color: #ffffff; padding: 24px 32px; text-align: center; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    .header .date { color: #a0a0b0; font-size: 14px; margin-top: 4px; }
+    .content { padding: 24px 32px; }
+    .section { margin-bottom: 24px; }
+    .section-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; border-bottom: 2px solid #ff6b35; padding-bottom: 4px; display: inline-block; }
+    .item { padding: 12px 16px; margin-bottom: 8px; background-color: #fafafa; border-radius: 6px; border-left: 3px solid #ddd; }
+    .item.urgent { border-left-color: #ff6b35; }
+    .item.warning { border-left-color: #f5a623; }
+    .item .title { font-weight: 600; color: #333; font-size: 14px; }
+    .item .detail { color: #666; font-size: 13px; margin-top: 4px; }
+    .item .course { color: #888; font-size: 12px; margin-top: 2px; }
+    .urgency-badge { display: inline-block; width: 20px; height: 20px; border-radius: 50%; color: #fff; font-size: 11px; text-align: center; line-height: 20px; margin-right: 6px; }
+    .urgency-5 { background-color: #e74c3c; }
+    .urgency-4 { background-color: #f5a623; }
+    .urgency-3 { background-color: #3498db; }
+    .urgency-2 { background-color: #95a5a6; }
+    .urgency-1 { background-color: #bdc3c7; }
+    .ai-summary { background-color: #f0f4ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 1px solid #d0d8f0; }
+    .ai-summary .label { font-size: 12px; color: #6366f1; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+    .ai-summary .text { font-size: 14px; color: #333; line-height: 1.5; }
+    .footer { background-color: #f5f5f5; padding: 16px 32px; text-align: center; color: #888; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>UniBoard Daily Digest</h1>
+      <div class="date">{{ date }}</div>
+    </div>
+    <div class="content">
+      {% if ai_summary %}
+      <div class="ai-summary">
+        <div class="label">AI Summary</div>
+        <div class="text">{{ ai_summary }}</div>
+      </div>
+      {% endif %}
+
+      {% if grades %}
+      <div class="section">
+        <div class="section-title">Grades</div>
+        {% for item in grades %}
+        <div class="item">
+          {% if item.urgency_score %}<span class="urgency-badge urgency-{{ item.urgency_score }}">{{ item.urgency_score }}</span>{% endif %}
+          <span class="title">{{ item.title }}</span>
+          <div class="detail">{{ item.detail }}</div>
+          <div class="course">{{ item.course_code }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if deadlines %}
+      <div class="section">
+        <div class="section-title">Upcoming Deadlines</div>
+        {% for item in deadlines %}
+        <div class="item {% if item.urgency_score and item.urgency_score >= 4 %}urgent{% elif item.urgency_score and item.urgency_score >= 3 %}warning{% endif %}">
+          {% if item.urgency_score %}<span class="urgency-badge urgency-{{ item.urgency_score }}">{{ item.urgency_score }}</span>{% endif %}
+          <span class="title">{{ item.title }}</span>
+          <div class="detail">{{ item.detail }}</div>
+          <div class="course">{{ item.course_code }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if posts %}
+      <div class="section">
+        <div class="section-title">Ed Discussion Highlights</div>
+        {% for item in posts %}
+        <div class="item">
+          {% if item.urgency_score %}<span class="urgency-badge urgency-{{ item.urgency_score }}">{{ item.urgency_score }}</span>{% endif %}
+          <span class="title">{{ item.title }}</span>
+          <div class="detail">{{ item.detail }}</div>
+          <div class="course">{{ item.course_code }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    <div class="footer">
+      UniBoard &mdash; Your GPA Maximizer
+    </div>
+  </div>
+</body>
+</html>

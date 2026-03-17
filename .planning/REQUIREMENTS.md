@@ -18,15 +18,15 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Deadlines
 
 - [x] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas Assignments + Ed Lessons + Ed Discussion (deduplicated)
-- [ ] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
-- [ ] **DL-03**: User receives risk alert when their grade trajectory in a course deviates from their target GPA threshold
+- [x] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
+- [x] **DL-03**: User receives risk alert when their grade trajectory in a course deviates from their target GPA threshold
 
 ### Intelligence
 
 - [x] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
 - [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes
-- [ ] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
-- [ ] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking
+- [x] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
+- [x] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking
 - [x] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
 
 ### Files & Materials
@@ -123,12 +123,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GPA-04 | Phase 2 | Complete |
 | GPA-05 | Phase 2 | Complete |
 | DL-01 | Phase 2 | Complete |
-| DL-02 | Phase 4 | Pending |
-| DL-03 | Phase 4 | Pending |
+| DL-02 | Phase 4 | Complete |
+| DL-03 | Phase 4 | Complete |
 | INTEL-01 | Phase 2 | Complete |
 | INTEL-02 | Phase 4 | Pending |
-| INTEL-03 | Phase 4 | Pending |
-| INTEL-04 | Phase 4 | Pending |
+| INTEL-03 | Phase 4 | Complete |
+| INTEL-04 | Phase 4 | Complete |
 | INTEL-05 | Phase 2 | Complete |
 | FILE-01 | Phase 2 | Complete |
 | FILE-02 | Phase 2 | Complete |

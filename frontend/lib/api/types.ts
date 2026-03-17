@@ -276,6 +276,100 @@ export interface HighValuePostResponse {
 }
 
 // ============================================================
+// Notifications
+// ============================================================
+
+export interface NotificationResponse {
+  id: string;
+  type: "deadline_reminder" | "gpa_risk" | "digest" | "system";
+  severity: "critical" | "warning" | "info";
+  title: string;
+  body: string;
+  is_read: boolean;
+  action_url: string | null;
+  created_at: string;
+  metadata_json: Record<string, string> | null;
+}
+
+export interface UnreadCountResponse {
+  count: number;
+}
+
+// ============================================================
+// Digest (AI-enhanced)
+// ============================================================
+
+export interface DigestItemResponse {
+  type: "grade" | "deadline" | "post";
+  title: string;
+  detail: string;
+  course_code: string;
+  urgency_score: number | null; // 1-5, null if AI not applied
+  timestamp: string;
+}
+
+export interface DigestResponse {
+  id: string;
+  digest_date: string;
+  items: DigestItemResponse[];
+  ai_summary: string | null;
+  created_at: string;
+}
+
+export interface RiskAlertResponse {
+  id: string;
+  course_code: string;
+  course_name: string;
+  current_wam: number;
+  target_wam: number;
+  gap: number;
+  severity: string;
+  recommendation: string;
+  created_at: string;
+}
+
+// ============================================================
+// AI Intelligence
+// ============================================================
+
+export interface QARequest {
+  question: string;
+}
+
+export interface QAResponse {
+  answer: string;
+  citations: string[];
+  method: "direct_context" | "rag";
+  tokens_used: number;
+}
+
+export interface UnitReviewResponse {
+  course_id: string;
+  course_name: string;
+  key_concepts: string[];
+  common_mistakes: string[];
+  exam_scope: string;
+  study_tips: string[];
+  generated_at: string;
+}
+
+export interface AIHighValuePostResponse {
+  id: string;
+  ed_thread_id: string;
+  title: string;
+  category: string;
+  content_summary: string;
+  is_endorsed: boolean;
+  is_staff_post: boolean;
+  created_at: string;
+  gpa_relevance: number;
+  ai_category: string;
+  ai_summary: string;
+  urgency: string;
+  key_facts: string[];
+}
+
+// ============================================================
 // Sync
 // ============================================================
 

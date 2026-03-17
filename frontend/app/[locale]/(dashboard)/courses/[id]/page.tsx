@@ -7,7 +7,9 @@ import { useGPACourseDetail } from "@/lib/hooks/useGPA";
 import { useCourseMaterials, useCourseDiscussions } from "@/lib/hooks/useCourses";
 import AssessmentBreakdown from "@/components/courses/AssessmentBreakdown";
 import MaterialsFolders from "@/components/courses/MaterialsFolders";
-import HighValuePosts from "@/components/courses/HighValuePosts";
+import CourseQA from "@/components/ai/CourseQA";
+import UnitReview from "@/components/ai/UnitReview";
+import AIHighValuePosts from "@/components/ai/AIHighValuePosts";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -24,7 +26,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
 
   const { data: detail, isLoading: detailLoading } = useGPACourseDetail(id);
   const { data: materials, isLoading: materialsLoading } = useCourseMaterials(id);
-  const { data: posts, isLoading: postsLoading } = useCourseDiscussions(id);
+  const { data: posts } = useCourseDiscussions(id);
 
   return (
     <div className="space-y-6">
@@ -78,11 +80,17 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
         isLoading={materialsLoading}
       />
 
-      {/* High-Value Posts */}
-      <HighValuePosts
-        posts={posts ?? []}
-        isLoading={postsLoading}
+      {/* AI-Scored High-Value Posts (replaces basic posts) */}
+      <AIHighValuePosts
+        courseId={id}
+        fallbackPosts={posts ?? []}
       />
+
+      {/* AI Q&A */}
+      <CourseQA courseId={id} />
+
+      {/* AI Unit Review */}
+      <UnitReview courseId={id} />
     </div>
   );
 }

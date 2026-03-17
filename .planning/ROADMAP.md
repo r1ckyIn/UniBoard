@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Data Acquisition** - Database schema, auth, all 4 platform adapters, Docker environment (completed 2026-03-16)
 - [x] **Phase 2: Core Services & API** - GPA engine, deadline aggregation, course materials, sync engine, REST API (completed 2026-03-16)
 - [x] **Phase 3: Frontend Dashboard** - All 7 UI pages with Anthropic-inspired design, onboarding flow (completed 2026-03-17)
-- [ ] **Phase 4: Intelligence, Skills & MCP** - AI extraction, digests, notifications, skill system, MCP server
+- [ ] **Phase 4: Intelligence, Skills & MCP** - AI extraction, digests, notifications, skill system, MCP server (PLAT-03 deferred to v1.1+)
 
 ## Phase Details
 
@@ -70,7 +70,7 @@ Plans:
 - [x] 03-03-PLAN.md — Predict page (slider-based What-if simulator, target path, scenario management), Digest page (rule-based daily card feed), Settings page (token management, GPA target, profile)
 
 ### Phase 4: Intelligence, Skills & MCP
-**Goal**: UniBoard delivers proactive intelligence (AI-enhanced digests, risk alerts, notifications), AI-powered course material Q&A, and operates as an MCP server with a self-improving skill system
+**Goal**: UniBoard delivers proactive intelligence (AI-enhanced digests, risk alerts, notifications), AI-powered course material Q&A, and a self-improving skill system for development (MCP server deferred to v1.1+)
 **Depends on**: Phase 2 (services), Phase 3 (frontend pages to display intelligence)
 **Requirements**: DL-02, DL-03, INTEL-02, INTEL-03, INTEL-04, FILE-03, FILE-04, PLAT-03, SKILL-01, SKILL-02, SKILL-03, SKILL-04
 **Success Criteria** (what must be TRUE):
@@ -79,12 +79,12 @@ Plans:
   3. User can ask AI questions about synced course materials and receive cited answers; user can view AI-generated unit review summaries
   4. MCP server exposes UniBoard data to Claude Desktop; after first successful API exploration, system auto-generates a reusable skill template per operation
   5. Skills are per-course differentiated and subsequent executions load generated skills instead of re-exploring
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Notifications (deadline reminders, GPA risk alerts), daily/weekly digest (rule-based + AI-enhanced)
-- [ ] 04-02: AI course material Q&A (cited answers), AI unit review summaries, AI high-value Ed post extraction
-- [ ] 04-03: MCP server entry point, skill auto-generation engine, per-course skill differentiation
+- [ ] 04-01-PLAN.md — Notifications (deadline reminders at 72h/24h/3h, GPA risk alerts), daily digest (rule-based + AI-enhanced urgency scoring), dual-channel delivery (in-app + SES email), notification API + frontend bell/dropdown UI
+- [ ] 04-02-PLAN.md — AIEngine (Anthropic structured outputs), course material Q&A (hybrid direct-context/RAG with pgvector), AI unit review summaries, AI high-value Ed post extraction, ContentEmbedding model, frontend AI components
+- [ ] 04-03-PLAN.md — Developer skill system (.claude/skills/ with 18+ markdown files across 5 categories: data-collection, data-processing, ai-analysis, user-actions, courses), PLAT-03 (MCP server) documented as DEFERRED to v1.1+
 
 ## Progress
 
@@ -96,4 +96,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
 | 2. Core Services & API | 2/2 | Complete | 2026-03-16 |
 | 3. Frontend Dashboard | 3/3 | Complete | 2026-03-17 |
-| 4. Intelligence, Skills & MCP | 0/3 | Not started | - |
+| 4. Intelligence, Skills & MCP | 0/3 | Planned | - |

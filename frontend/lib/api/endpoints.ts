@@ -32,9 +32,26 @@ export const ENDPOINTS = {
   },
   intelligence: {
     discussions: (id: string) => `courses/${id}/discussions`,
+    aiPosts: (id: string) => `courses/${id}/intelligence/ai`,
+  },
+  ai: {
+    qa: (courseId: string) => `courses/${courseId}/qa`,
+    review: (courseId: string) => `courses/${courseId}/review`,
   },
   sync: {
     trigger: "sync/trigger",
     status: "sync/status",
+  },
+  notifications: {
+    list: "notifications",
+    unreadCount: "notifications/unread-count",
+    markRead: (id: string) => `notifications/${id}/read`,
+  },
+  digest: {
+    latest: "digest/latest",
+    history: "digest/history",
+  },
+  alerts: {
+    list: "alerts",
   },
 } as const;
