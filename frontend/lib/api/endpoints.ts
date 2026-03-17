@@ -32,6 +32,11 @@ export const ENDPOINTS = {
   },
   intelligence: {
     discussions: (id: string) => `courses/${id}/discussions`,
+    aiPosts: (id: string) => `courses/${id}/intelligence/ai`,
+  },
+  ai: {
+    qa: (courseId: string) => `courses/${courseId}/qa`,
+    review: (courseId: string) => `courses/${courseId}/review`,
   },
   sync: {
     trigger: "sync/trigger",

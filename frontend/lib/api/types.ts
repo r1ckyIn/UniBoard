@@ -329,6 +329,47 @@ export interface RiskAlertResponse {
 }
 
 // ============================================================
+// AI Intelligence
+// ============================================================
+
+export interface QARequest {
+  question: string;
+}
+
+export interface QAResponse {
+  answer: string;
+  citations: string[];
+  method: "direct_context" | "rag";
+  tokens_used: number;
+}
+
+export interface UnitReviewResponse {
+  course_id: string;
+  course_name: string;
+  key_concepts: string[];
+  common_mistakes: string[];
+  exam_scope: string;
+  study_tips: string[];
+  generated_at: string;
+}
+
+export interface AIHighValuePostResponse {
+  id: string;
+  ed_thread_id: string;
+  title: string;
+  category: string;
+  content_summary: string;
+  is_endorsed: boolean;
+  is_staff_post: boolean;
+  created_at: string;
+  gpa_relevance: number;
+  ai_category: string;
+  ai_summary: string;
+  urgency: string;
+  key_facts: string[];
+}
+
+// ============================================================
 // Sync
 // ============================================================
 
