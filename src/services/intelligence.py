@@ -8,8 +8,10 @@ import structlog
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import get_settings
 from src.models.course import Course
 from src.models.discussion import DiscussionThread
+from src.models.user import User
 from src.schemas.intelligence import AIHighValuePostResponse, HighValuePostResponse
 
 logger = structlog.get_logger()
@@ -87,7 +89,14 @@ class EdIntelligenceService:
 
         scored_posts: list[AIHighValuePostResponse] = []
 
-        for thread in unscored:
+        # Enforce AI daily limit (consistent with QAService pattern)
+        settings = get_settings()
+        user = await self._session.get(User, user_id)
+        calls_used = user.ai_calls_today if user else 0
+        calls_remaining = max(0, settings.ai_daily_limit_per_user - calls_used)
+        threads_to_eval = unscored[:calls_remaining] if calls_remaining > 0 else []
+
+        for thread in threads_to_eval:
             try:
                 evaluation = await ai_engine.evaluate_thread(
                     title=thread.title,
@@ -97,6 +106,8 @@ class EdIntelligenceService:
                     is_staff_post=thread.is_staff_post,
                 )
                 thread.gpa_relevance_score = evaluation.gpa_relevance
+                if user:
+                    user.ai_calls_today += 1
                 await self._session.flush()
 
                 if evaluation.gpa_relevance > 0.3:

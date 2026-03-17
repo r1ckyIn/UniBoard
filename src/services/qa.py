@@ -39,9 +39,14 @@ class QAService:
         self._voyage_api_key = voyage_api_key
 
     async def _check_and_increment_limit(self, user_id: uuid.UUID) -> User:
-        """Check AI daily limit and increment counter. Raises RateLimitedError."""
+        """Check AI daily limit and atomically increment counter. Raises RateLimitedError.
+
+        Uses SELECT ... FOR UPDATE to prevent TOCTOU race conditions.
+        """
         settings = get_settings()
-        user = await self._session.get(User, user_id)
+        stmt = select(User).where(User.id == user_id).with_for_update()
+        result = await self._session.execute(stmt)
+        user = result.scalar_one_or_none()
         if user is None:
             raise RateLimitedError("User not found")
 
@@ -58,6 +63,10 @@ class QAService:
             raise RateLimitedError(
                 f"AI daily limit reached ({settings.ai_daily_limit_per_user} calls/day)"
             )
+
+        # Increment atomically while row is locked
+        user.ai_calls_today += 1
+        await self._session.flush()
 
         return user
 
@@ -107,7 +116,7 @@ class QAService:
         Uses direct context for small courses (< rag_token_threshold tokens),
         auto-switches to RAG for large courses.
         """
-        user = await self._check_and_increment_limit(user_id)
+        await self._check_and_increment_limit(user_id)
         settings = get_settings()
 
         course, materials_text = await self._load_course_materials(course_id)
@@ -119,10 +128,6 @@ class QAService:
             result = await self._answer_direct(question, materials_text)
         else:
             result = await self._answer_rag(question, course_id)
-
-        # Increment usage
-        user.ai_calls_today += 1
-        await self._session.flush()
 
         return result
 
@@ -197,7 +202,7 @@ class QAService:
         course_id: uuid.UUID,
     ) -> UnitReviewResponse:
         """Generate an AI unit review summary for a course."""
-        user = await self._check_and_increment_limit(user_id)
+        await self._check_and_increment_limit(user_id)
 
         course, materials_text = await self._load_course_materials(course_id)
         result = await self._ai_engine.generate_review(
@@ -209,10 +214,6 @@ class QAService:
         result.course_id = str(course.id)
         result.course_name = course.name
         result.generated_at = datetime.utcnow().isoformat()
-
-        # Increment usage
-        user.ai_calls_today += 1
-        await self._session.flush()
 
         return result
 

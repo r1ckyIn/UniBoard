@@ -5,14 +5,13 @@ from __future__ import annotations
 import uuid
 
 import structlog
-from anthropic import AsyncAnthropic
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import Notification
 from src.models.user import User
-from src.prompts.risk_analysis import GPA_RISK_ANALYSIS_SYSTEM_PROMPT
 from src.schemas.digest import RiskAlertResponse
+from src.services.ai_engine import AIEngine
 from src.services.gpa import GPAService
 from src.services.notification import NotificationService
 
@@ -69,21 +68,12 @@ class RiskAlertService:
 
         if self._anthropic_api_key:
             try:
-                client = AsyncAnthropic(api_key=self._anthropic_api_key)
-                user_message = (
-                    f"Student data:\n"
-                    f"Current WAM: {current_wam:.1f}\n"
-                    f"Target WAM: {target_wam:.1f}\n"
-                    f"Gap: {gap:.1f} points\n\n"
-                    f"Per-course breakdown:\n{course_breakdown}"
+                ai_engine = AIEngine(api_key=self._anthropic_api_key)
+                recommendation = await ai_engine.analyze_gpa_risk(
+                    current_wam=current_wam,
+                    target_wam=target_wam,
+                    course_grades_json=course_breakdown,
                 )
-                response = await client.messages.create(
-                    model="claude-opus-4-6",
-                    max_tokens=300,
-                    system=GPA_RISK_ANALYSIS_SYSTEM_PROMPT,
-                    messages=[{"role": "user", "content": user_message}],
-                )
-                recommendation = response.content[0].text  # type: ignore[union-attr]
                 ai_was_called = True
             except Exception:
                 logger.warning(

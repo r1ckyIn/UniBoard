@@ -1,7 +1,7 @@
 """Unit tests for RiskAlertService -- risk detection, AI invocation, fallback."""
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -100,20 +100,19 @@ async def test_risk_alert_invokes_ai_for_deep_analysis(session: AsyncSession) ->
 
     user = await _create_user_with_grades(session, gpa_target=85.0, course_wam=70.0)
 
-    # Mock Anthropic client
-    mock_response = MagicMock()
-    mock_response.content = [MagicMock(text="Focus on COMP2017 final exam preparation.")]
+    # Mock AIEngine.analyze_gpa_risk
+    mock_ai_engine = AsyncMock()
+    mock_ai_engine.analyze_gpa_risk = AsyncMock(
+        return_value="Focus on COMP2017 final exam preparation."
+    )
 
-    mock_client = AsyncMock()
-    mock_client.messages.create = AsyncMock(return_value=mock_response)
-
-    with patch("src.services.risk_alert.AsyncAnthropic", return_value=mock_client):
+    with patch("src.services.risk_alert.AIEngine", return_value=mock_ai_engine):
         svc = RiskAlertService(session, anthropic_api_key="test-key")
         result = await svc.check_risk_for_user(user.id)
 
     assert result is not None
     assert "COMP2017" in result.recommendation or "Focus" in result.recommendation
-    mock_client.messages.create.assert_called_once()
+    mock_ai_engine.analyze_gpa_risk.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -123,11 +122,11 @@ async def test_risk_alert_falls_back_on_ai_failure(session: AsyncSession) -> Non
 
     user = await _create_user_with_grades(session, gpa_target=85.0, course_wam=70.0)
 
-    # Mock Anthropic client that raises
-    mock_client = AsyncMock()
-    mock_client.messages.create = AsyncMock(side_effect=Exception("API error"))
+    # Mock AIEngine that raises
+    mock_ai_engine = AsyncMock()
+    mock_ai_engine.analyze_gpa_risk = AsyncMock(side_effect=Exception("API error"))
 
-    with patch("src.services.risk_alert.AsyncAnthropic", return_value=mock_client):
+    with patch("src.services.risk_alert.AIEngine", return_value=mock_ai_engine):
         svc = RiskAlertService(session, anthropic_api_key="test-key")
         result = await svc.check_risk_for_user(user.id)
 

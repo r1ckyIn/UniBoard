@@ -82,14 +82,18 @@ class NotificationService:
         # Email delivery (fire-and-forget, never raise)
         if "email" in channels:
             try:
-                from src.email.ses import SESEmailSender
+                from src.models.user import User
 
-                sender = SESEmailSender()
-                await sender.send_html_email(
-                    to_email="",  # Would need user's email
-                    subject=title,
-                    html_body=body,
-                )
+                user = await self._session.get(User, user_id)
+                if user and user.email:
+                    from src.email.ses import SESEmailSender
+
+                    sender = SESEmailSender()
+                    await sender.send_html_email(
+                        to_email=user.email,
+                        subject=title,
+                        html_body=body,
+                    )
             except Exception:
                 logger.warning(
                     "notification_email_failed",

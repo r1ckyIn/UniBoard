@@ -48,14 +48,13 @@ async def get_ai_high_value_posts(
     course_id: uuid.UUID,
     request: Request,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    svc: EdIntelligenceService = Depends(get_intelligence_service),
 ) -> SuccessResponse[list[AIHighValuePostResponse]]:
     """Return AI-scored high-value Ed Discussion posts for a course.
 
     Evaluates unscored threads via AI, then returns all posts above threshold.
     Falls back to rule-based filtering if no API key configured.
     """
-    svc = EdIntelligenceService(session)
     ai_engine = _build_ai_engine()
 
     if ai_engine is not None:

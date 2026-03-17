@@ -70,12 +70,13 @@ async def test_answer_question_direct_context_for_small_course() -> None:
     mock_course = _make_mock_course(text_tokens=5000)
 
     mock_session = AsyncMock()
-    mock_session.get = AsyncMock(return_value=mock_user)
 
-    # Mock the query that loads course with materials
-    mock_result = MagicMock()
-    mock_result.scalar_one_or_none = MagicMock(return_value=mock_course)
-    mock_session.execute = AsyncMock(return_value=mock_result)
+    # execute() is called twice: first for SELECT FOR UPDATE (user), then for course query
+    user_result = MagicMock()
+    user_result.scalar_one_or_none = MagicMock(return_value=mock_user)
+    course_result = MagicMock()
+    course_result.scalar_one_or_none = MagicMock(return_value=mock_course)
+    mock_session.execute = AsyncMock(side_effect=[user_result, course_result])
     mock_session.flush = AsyncMock()
 
     svc = QAService(session=mock_session, ai_engine=mock_ai)
@@ -100,7 +101,10 @@ async def test_answer_question_respects_daily_limit() -> None:
     mock_user = _make_mock_user(ai_calls_today=100)
 
     mock_session = AsyncMock()
-    mock_session.get = AsyncMock(return_value=mock_user)
+    user_result = MagicMock()
+    user_result.scalar_one_or_none = MagicMock(return_value=mock_user)
+    mock_session.execute = AsyncMock(return_value=user_result)
+    mock_session.flush = AsyncMock()
 
     svc = QAService(session=mock_session, ai_engine=mock_ai)
 
