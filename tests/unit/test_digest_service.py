@@ -99,27 +99,25 @@ async def test_enhance_with_ai(session: AsyncSession) -> None:
 
     user = await _create_user_with_data(session)
 
-    # Mock Anthropic responses
-    mock_urgency_response = MagicMock()
-    mock_urgency_response.content = [
-        MagicMock(
-            text='[{"index": 0, "urgency_score": 4, "reason": "Due soon"}, '
-            '{"index": 1, "urgency_score": 3, "reason": "Upcoming"}]'
-        )
-    ]
+    # Mock AIEngine for urgency scoring
+    mock_ai_engine = AsyncMock()
+    mock_ai_engine.score_urgency = AsyncMock(
+        return_value=[
+            {"index": 0, "urgency_score": 4, "reason": "Due soon"},
+            {"index": 1, "urgency_score": 3, "reason": "Upcoming"},
+        ]
+    )
 
+    # Mock AsyncAnthropic for summary generation (used inside _generate_summary)
     mock_summary_response = MagicMock()
     mock_summary_response.content = [
         MagicMock(text="Focus on Assignment 2 due in 3 days. Good score on Assignment 1.")
     ]
-
     mock_client = AsyncMock()
-    mock_client.messages.create = AsyncMock(
-        side_effect=[mock_urgency_response, mock_summary_response]
-    )
+    mock_client.messages.create = AsyncMock(return_value=mock_summary_response)
 
-    with patch("src.services.digest.AsyncAnthropic", return_value=mock_client):
-        svc = DigestService(session, anthropic_api_key="test-key")
+    with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        svc = DigestService(session, anthropic_api_key="test-key", ai_engine=mock_ai_engine)
         result = await svc.generate_digest(user.id)
 
     assert result is not None

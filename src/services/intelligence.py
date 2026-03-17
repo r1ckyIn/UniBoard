@@ -108,7 +108,6 @@ class EdIntelligenceService:
                 thread.gpa_relevance_score = evaluation.gpa_relevance
                 if user:
                     user.ai_calls_today += 1
-                await self._session.flush()
 
                 if evaluation.gpa_relevance > 0.3:
                     scored_posts.append(
@@ -135,6 +134,9 @@ class EdIntelligenceService:
                     exc_info=True,
                 )
                 # Rule-engine fallback: thread stays at 0.0
+
+        # Batch flush all score updates + AI call counter
+        await self._session.flush()
 
         # Sort by gpa_relevance descending
         scored_posts.sort(key=lambda p: p.gpa_relevance, reverse=True)

@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import json
+import asyncio
 import uuid
 from datetime import datetime, timedelta
 
 import structlog
-from anthropic import AsyncAnthropic
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +16,7 @@ from src.models.digest import Digest
 from src.models.discussion import DiscussionThread
 from src.models.grade import Grade
 from src.models.user import User
-from src.prompts.digest import DIGEST_SUMMARY_SYSTEM_PROMPT, DIGEST_URGENCY_SYSTEM_PROMPT
+from src.prompts.digest import DIGEST_SUMMARY_SYSTEM_PROMPT
 from src.schemas.digest import DigestItemResponse, DigestResponse
 
 logger = structlog.get_logger()
@@ -30,9 +29,11 @@ class DigestService:
         self,
         session: AsyncSession,
         anthropic_api_key: str = "",
+        ai_engine: object | None = None,
     ) -> None:
         self._session = session
         self._anthropic_api_key = anthropic_api_key
+        self._ai_engine = ai_engine
 
     async def generate_digest(
         self,
@@ -194,13 +195,11 @@ class DigestService:
         self,
         items: list[DigestItemResponse],
     ) -> tuple[list[DigestItemResponse], str]:
-        """Use AsyncAnthropic to score urgency and generate summary.
+        """Use AIEngine to score urgency and generate summary in parallel.
 
         Returns (enhanced_items, ai_summary).
-        Falls back to original items on parse failure (F1 quality gate).
+        Falls back to original items on failure.
         """
-        client = AsyncAnthropic(api_key=self._anthropic_api_key)
-
         # Build item descriptions for AI
         item_descs = "\n".join(
             f"[{i}] type={item.type}, title={item.title}, "
@@ -208,39 +207,55 @@ class DigestService:
             for i, item in enumerate(items)
         )
 
-        # 1. Urgency scoring
-        try:
-            urgency_response = await client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=500,
-                system=DIGEST_URGENCY_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": f"Items:\n{item_descs}"}],
-            )
-            urgency_text = urgency_response.content[0].text  # type: ignore[union-attr]
-            urgency_data = json.loads(urgency_text)
+        # Use AIEngine if available, else create from API key
+        engine = self._ai_engine
+        if engine is None and self._anthropic_api_key:
+            from src.services.ai_engine import AIEngine
 
-            # Apply urgency scores to items
-            for entry in urgency_data:
-                idx = int(entry["index"])
+            engine = AIEngine(api_key=self._anthropic_api_key)
+
+        if engine is None:
+            return items, ""
+
+        # Run urgency scoring and summary generation in parallel
+        async def _score_urgency() -> list[dict[str, object]]:
+            try:
+                result: list[dict[str, object]] = await engine.score_urgency(item_descs)  # type: ignore[attr-defined]
+                return result
+            except Exception:
+                logger.warning("digest_urgency_scoring_failed", exc_info=True)
+                return []
+
+        async def _generate_summary() -> str:
+            try:
+                from anthropic import AsyncAnthropic
+
+                client = AsyncAnthropic(api_key=self._anthropic_api_key)
+                summary_response = await client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=200,
+                    system=DIGEST_SUMMARY_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": f"Items:\n{item_descs}"}],
+                )
+                return summary_response.content[0].text  # type: ignore[union-attr]
+            except Exception:
+                logger.warning("digest_summary_generation_failed", exc_info=True)
+                return ""
+
+        urgency_data, ai_summary = await asyncio.gather(
+            _score_urgency(), _generate_summary()
+        )
+
+        # Apply urgency scores to items
+        for entry in urgency_data:
+            try:
+                idx = int(str(entry["index"]))
                 if 0 <= idx < len(items):
                     items[idx] = items[idx].model_copy(
-                        update={"urgency_score": int(entry["urgency_score"])}
+                        update={"urgency_score": int(str(entry["urgency_score"]))}
                     )
-        except Exception:
-            logger.warning("digest_urgency_scoring_failed", exc_info=True)
-
-        # 2. Summary generation
-        ai_summary = ""
-        try:
-            summary_response = await client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=200,
-                system=DIGEST_SUMMARY_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": f"Items:\n{item_descs}"}],
-            )
-            ai_summary = summary_response.content[0].text  # type: ignore[union-attr]
-        except Exception:
-            logger.warning("digest_summary_generation_failed", exc_info=True)
+            except (KeyError, ValueError, TypeError):
+                continue
 
         return items, ai_summary
 

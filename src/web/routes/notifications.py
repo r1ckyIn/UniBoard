@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.models.notification import Notification
 from src.models.user import User
 from src.schemas.common import SuccessResponse
 from src.schemas.notification import NotificationResponse, UnreadCountResponse
@@ -12,6 +13,21 @@ from src.services.notification import NotificationService
 from src.web.deps import get_current_user, get_request_meta, get_session
 
 router = APIRouter()
+
+
+def _serialize(n: Notification) -> NotificationResponse:
+    """Convert Notification ORM instance to response schema."""
+    return NotificationResponse(
+        id=str(n.id),
+        type=n.type,
+        severity=n.severity,
+        title=n.title,
+        body=n.body,
+        is_read=n.is_read,
+        action_url=n.action_url,
+        created_at=n.created_at.isoformat(),
+        metadata_json=n.metadata_json,
+    )
 
 
 def get_notification_service(
@@ -31,20 +47,7 @@ async def get_notifications(
 ) -> SuccessResponse[list[NotificationResponse]]:
     """Return list of notifications for the current user."""
     notifications = await svc.get_notifications(current_user.id, limit=limit, offset=offset)
-    data = [
-        NotificationResponse(
-            id=str(n.id),
-            type=n.type,
-            severity=n.severity,
-            title=n.title,
-            body=n.body,
-            is_read=n.is_read,
-            action_url=n.action_url,
-            created_at=n.created_at.isoformat(),
-            metadata_json=n.metadata_json,
-        )
-        for n in notifications
-    ]
+    data = [_serialize(n) for n in notifications]
     return SuccessResponse(data=data, meta=get_request_meta(request))
 
 
@@ -61,18 +64,7 @@ async def mark_notification_read(
     notification = await svc.mark_read(current_user.id, notification_id)
     if notification is None:
         raise NotFoundError("Notification")
-    data = NotificationResponse(
-        id=str(notification.id),
-        type=notification.type,
-        severity=notification.severity,
-        title=notification.title,
-        body=notification.body,
-        is_read=notification.is_read,
-        action_url=notification.action_url,
-        created_at=notification.created_at.isoformat(),
-        metadata_json=notification.metadata_json,
-    )
-    return SuccessResponse(data=data, meta=get_request_meta(request))
+    return SuccessResponse(data=_serialize(notification), meta=get_request_meta(request))
 
 
 @router.get("/unread-count")

@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import Notification
 from src.models.push_record import PushRecord
+from src.models.user import User
 
 logger = structlog.get_logger()
 
@@ -82,8 +83,6 @@ class NotificationService:
         # Email delivery (fire-and-forget, never raise)
         if "email" in channels:
             try:
-                from src.models.user import User
-
                 user = await self._session.get(User, user_id)
                 if user and user.email:
                     from src.email.ses import SESEmailSender
