@@ -22,7 +22,14 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Create notifications and digests tables; enable vector extension."""
     # Enable pgvector extension for Plan 04-02 ContentEmbedding table
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    # Wrapped in DO block so it doesn't fail if pgvector is not yet installed
+    op.execute(
+        "DO $$ BEGIN "
+        "CREATE EXTENSION IF NOT EXISTS vector; "
+        "EXCEPTION WHEN OTHERS THEN "
+        "RAISE NOTICE 'pgvector not available, will be added when container is rebuilt'; "
+        "END $$"
+    )
 
     # Notifications table
     op.create_table(
