@@ -24,6 +24,8 @@ dependencies = [
     "boto3>=1.35,<2.0",
     "jinja2>=3.1,<4.0",
     "tiktoken>=0.8,<1.0",
+    "pgvector>=0.3,<1.0",
+    "voyageai>=0.3,<1.0",
 ]
 
 [project.optional-dependencies]
@@ -74,6 +76,8 @@ module = [
     "botocore.*",
     "tiktoken.*",
     "jinja2.*",
+    "voyageai.*",
+    "pgvector.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = false

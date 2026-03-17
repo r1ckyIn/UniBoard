@@ -4,64 +4,31 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.course import Course
-from src.models.user import User
 from src.schemas.ai import QAResponse, UnitReviewResponse
-from src.security.password import hash_password
+from src.web.deps import get_current_user
 
 
-@pytest_asyncio.fixture(loop_scope="session")
-async def _seed_ai_data(session: AsyncSession) -> dict[str, Any]:
-    """Seed user and course for AI route tests."""
-    user = User(
-        email=f"ai-test-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
-        display_name="AI Tester",
-    )
-    session.add(user)
-    await session.flush()
-
-    course = Course(
-        user_id=user.id,
-        name="Algorithms",
-        code="COMP2017",
-        semester="2026S1",
-    )
-    session.add(course)
-    await session.flush()
-
-    return {
-        "user_id": user.id,
-        "course_id": course.id,
-        "email": user.email,
-    }
-
-
-async def _get_token(client: httpx.AsyncClient, email: str) -> str:
-    """Authenticate and return access token."""
-    resp = await client.post(
-        "/api/v1/auth/login",
-        data={"username": email, "password": "testpass123"},
-    )
-    return str(resp.json()["data"]["access_token"])
+def _mock_user() -> MagicMock:
+    """Build a mock User for dependency override."""
+    user = MagicMock()
+    user.id = uuid.uuid4()
+    user.email = "test@test.com"
+    user.display_name = "Tester"
+    return user
 
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_post_course_qa_returns_200(
     test_client: httpx.AsyncClient,
-    _seed_ai_data: dict[str, Any],
 ) -> None:
     """POST /courses/{id}/qa returns 200 with QAResponse."""
-    data = _seed_ai_data
-    token = await _get_token(test_client, str(data["email"]))
+    course_id = uuid.uuid4()
+    mock_user = _mock_user()
 
     qa_response = QAResponse(
         answer="The answer is 42 [Canvas: Week 1 Notes].",
@@ -70,16 +37,21 @@ async def test_post_course_qa_returns_200(
         tokens_used=100,
     )
 
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
     with patch("src.web.routes.ai._build_qa_service") as mock_build:
         mock_svc = AsyncMock()
         mock_svc.answer_question = AsyncMock(return_value=qa_response)
         mock_build.return_value = mock_svc
 
         resp = await test_client.post(
-            f"/api/v1/courses/{data['course_id']}/qa",
+            f"/api/v1/courses/{course_id}/qa",
             json={"question": "What is the answer?"},
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": "Bearer fake-token"},
         )
+
+    app.dependency_overrides.pop(get_current_user, None)
 
     assert resp.status_code == 200
     body = resp.json()["data"]
@@ -90,14 +62,13 @@ async def test_post_course_qa_returns_200(
 @pytest.mark.asyncio(loop_scope="session")
 async def test_get_course_review_returns_200(
     test_client: httpx.AsyncClient,
-    _seed_ai_data: dict[str, Any],
 ) -> None:
     """GET /courses/{id}/review returns 200 with UnitReviewResponse."""
-    data = _seed_ai_data
-    token = await _get_token(test_client, str(data["email"]))
+    course_id = uuid.uuid4()
+    mock_user = _mock_user()
 
     review_response = UnitReviewResponse(
-        course_id=str(data["course_id"]),
+        course_id=str(course_id),
         course_name="Algorithms",
         key_concepts=["Binary search", "Sorting"],
         common_mistakes=["Off-by-one errors"],
@@ -106,15 +77,20 @@ async def test_get_course_review_returns_200(
         generated_at=datetime.now(UTC).isoformat(),
     )
 
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+
     with patch("src.web.routes.ai._build_qa_service") as mock_build:
         mock_svc = AsyncMock()
         mock_svc.generate_review = AsyncMock(return_value=review_response)
         mock_build.return_value = mock_svc
 
         resp = await test_client.get(
-            f"/api/v1/courses/{data['course_id']}/review",
-            headers={"Authorization": f"Bearer {token}"},
+            f"/api/v1/courses/{course_id}/review",
+            headers={"Authorization": "Bearer fake-token"},
         )
+
+    app.dependency_overrides.pop(get_current_user, None)
 
     assert resp.status_code == 200
     body = resp.json()["data"]
@@ -125,20 +101,24 @@ async def test_get_course_review_returns_200(
 @pytest.mark.asyncio(loop_scope="session")
 async def test_get_intelligence_ai_returns_200(
     test_client: httpx.AsyncClient,
-    _seed_ai_data: dict[str, Any],
 ) -> None:
     """GET /courses/{id}/intelligence/ai returns 200 with AI-scored posts."""
-    data = _seed_ai_data
-    token = await _get_token(test_client, str(data["email"]))
+    course_id = uuid.uuid4()
+    mock_user = _mock_user()
+
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user] = lambda: mock_user
 
     with patch(
         "src.web.routes.intelligence._build_ai_engine"
     ) as mock_build_ai:
         mock_build_ai.return_value = None  # No AI key -> fallback to rule-based
         resp = await test_client.get(
-            f"/api/v1/courses/{data['course_id']}/intelligence/ai",
-            headers={"Authorization": f"Bearer {token}"},
+            f"/api/v1/courses/{course_id}/intelligence/ai",
+            headers={"Authorization": "Bearer fake-token"},
         )
+
+    app.dependency_overrides.pop(get_current_user, None)
 
     assert resp.status_code == 200
     body = resp.json()["data"]

@@ -5,6 +5,7 @@ from src.models.course import Course
 from src.models.deadline import UnifiedDeadline
 from src.models.digest import Digest
 from src.models.discussion import DiscussionThread
+from src.models.embedding import ContentEmbedding
 from src.models.grade import Grade
 from src.models.lesson import Lesson, Slide
 from src.models.module import Module, ModuleItem
@@ -16,6 +17,7 @@ from src.models.whatif import WhatIfScenario
 
 __all__ = [
     "Base",
+    "ContentEmbedding",
     "Course",
     "Digest",
     "DiscussionThread",

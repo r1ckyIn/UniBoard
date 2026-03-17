@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from src.web.routes.ai import router as ai_router
 from src.web.routes.alerts import router as alerts_router
 from src.web.routes.auth import router as auth_router
 from src.web.routes.deadlines import router as deadlines_router
@@ -25,5 +26,6 @@ api_router.include_router(intelligence_router, prefix="", tags=["intelligence"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(digest_router, prefix="/digest", tags=["digest"])
 api_router.include_router(alerts_router, prefix="/alerts", tags=["alerts"])
+api_router.include_router(ai_router, prefix="", tags=["ai"])
 
-__all__ = ["api_router", "health_router"]
+__all__ = ["ai_router", "api_router", "health_router"]

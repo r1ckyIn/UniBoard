@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     ai_daily_limit_per_user: int = 100
 
+    # RAG / Embeddings (Voyage AI)
+    voyage_api_key: str = ""
+    rag_token_threshold: int = 100_000  # switch to RAG above this
+    rag_chunk_size: int = 512
+    rag_chunk_overlap: int = 50
+    rag_top_k: int = 15
+
     # AWS SES
     ses_sender_email: str = "digest@uniboard.app"
     ses_region: str = "ap-southeast-2"

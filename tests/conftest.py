@@ -41,6 +41,12 @@ async def test_engine() -> AsyncGenerator[AsyncEngine, None]:
     )
 
     async with engine.begin() as conn:
+        # Enable pgvector extension before creating tables (ContentEmbedding needs it)
+        await conn.execute(
+            __import__("sqlalchemy").text(
+                "CREATE EXTENSION IF NOT EXISTS vector"
+            )
+        )
         await conn.run_sync(Base.metadata.create_all)
 
     yield engine
