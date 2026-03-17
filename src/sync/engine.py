@@ -37,6 +37,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Import tasks here to avoid circular imports when sync is disabled
     from src.sync.tasks import (
+        check_deadline_reminders,
+        generate_daily_digests,
         sync_all_deadlines,
         sync_all_grades,
         sync_all_modules,
@@ -68,12 +70,35 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         max_instances=1,
     )
 
+    # Deadline reminder checks (every N minutes)
+    scheduler.add_job(
+        check_deadline_reminders,
+        IntervalTrigger(minutes=settings.reminder_check_interval_min),
+        id="check_deadline_reminders",
+        replace_existing=True,
+        max_instances=1,
+    )
+    # Daily digest generation (AEST timezone for DST correctness)
+    scheduler.add_job(
+        generate_daily_digests,
+        CronTrigger(
+            hour=settings.digest_cron_hour_aest,
+            minute=0,
+            timezone="Australia/Sydney",
+        ),
+        id="generate_daily_digests",
+        replace_existing=True,
+        max_instances=1,
+    )
+
     scheduler.start()
     logger.info(
         "sync_engine_started",
         grades_interval_min=settings.sync_grades_interval_min,
         deadlines_interval_min=settings.sync_deadlines_interval_min,
         modules_cron_hour=settings.sync_modules_cron_hour,
+        reminder_check_interval_min=settings.reminder_check_interval_min,
+        digest_cron_hour_aest=settings.digest_cron_hour_aest,
     )
 
     # Trigger initial full sync for all users

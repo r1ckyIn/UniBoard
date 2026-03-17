@@ -12,6 +12,8 @@ from src.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from src.models.course import Course
+    from src.models.digest import Digest
+    from src.models.notification import Notification
     from src.models.push_record import PushRecord
     from src.models.whatif import WhatIfScenario
 
@@ -60,6 +62,14 @@ class User(UUIDMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
     whatif_scenarios: Mapped[list[WhatIfScenario]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    notifications: Mapped[list[Notification]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    digests: Mapped[list[Digest]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )

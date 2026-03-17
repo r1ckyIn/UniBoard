@@ -45,6 +45,17 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     ai_daily_limit_per_user: int = 100
 
+    # AWS SES
+    ses_sender_email: str = "digest@uniboard.app"
+    ses_region: str = "ap-southeast-2"
+    email_notifications_enabled: bool = True
+
+    # Digest -- uses Australia/Sydney timezone, NOT static UTC offset
+    digest_cron_hour_aest: int = 7  # 07:00 AEST (APScheduler handles DST)
+
+    # Reminder check interval
+    reminder_check_interval_min: int = 30
+
     # Debug (default True for local dev; production sets DEBUG=false explicitly)
     debug: bool = True
     log_level: str = "INFO"

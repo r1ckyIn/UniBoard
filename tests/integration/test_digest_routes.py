@@ -1,7 +1,5 @@
 """Integration tests for digest and alerts API routes."""
 
-import uuid
-
 import httpx
 import pytest
 

@@ -1,7 +1,7 @@
 """Unit tests for DigestService -- rule-based collection and AI enhancement."""
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -45,7 +45,7 @@ async def _create_user_with_data(
         max_score=100.0,
         weight=0.3,
         group_name="Assignments",
-        graded_at=datetime.now(UTC) - timedelta(hours=2),
+        graded_at=datetime.utcnow() - timedelta(hours=2),  # noqa: DTZ003
     )
     session.add(grade)
 
@@ -53,7 +53,7 @@ async def _create_user_with_data(
     deadline = UnifiedDeadline(
         course_id=course.id,
         title="Assignment 2",
-        due_date=datetime.now(UTC) + timedelta(days=3),
+        due_date=datetime.utcnow() + timedelta(days=3),  # noqa: DTZ003
         source="canvas_assignment",
         source_id="12345",
         weight=0.3,
