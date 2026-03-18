@@ -47,9 +47,9 @@ export default function NotificationDropdown() {
       ref={dropdownRef}
       className="absolute z-50"
       style={{
-        bottom: "100%",
-        left: 0,
-        marginBottom: 8,
+        top: "100%",
+        right: 0,
+        marginTop: 8,
         width: 360,
         maxHeight: 400,
         overflowY: "auto",
