@@ -183,12 +183,14 @@ export default function AIHighValuePosts({ courseId, fallbackPosts }: AIHighValu
     }
 
     return (
-      <RoughCard className="p-5 bg-[var(--color-card-bg)]">
+      <RoughCard className="p-5 bg-[var(--color-card-bg)]" style={{ minHeight: 120 }}>
         <h3 className="text-lg mb-4" style={{ fontFamily: "var(--font-serif)" }}>
           AI-Scored Posts
         </h3>
-        <p style={{ color: "var(--color-text-3)" }}>
-          No AI-scored posts available for this course.
+        <p className="text-sm" style={{ color: "var(--color-text-3)" }}>
+          {isError
+            ? "AI post analysis is being configured. Check back after discussions are synced."
+            : "No AI-scored posts available for this course."}
         </p>
       </RoughCard>
     );

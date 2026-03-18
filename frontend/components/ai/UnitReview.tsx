@@ -42,9 +42,59 @@ export default function UnitReview({ courseId }: UnitReviewProps) {
         <h3 className="text-lg mb-4" style={{ fontFamily: "var(--font-serif)" }}>
           Unit Review
         </h3>
-        <p style={{ color: "var(--color-text-3)" }}>
-          Unable to generate review. Please try again later.
-        </p>
+        <div className="space-y-5">
+          {/* Key Concepts placeholder */}
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen size={16} style={{ color: "var(--color-blue)" }} />
+              <h4 className="text-sm font-semibold" style={{ fontFamily: "var(--font-serif)" }}>
+                Key Concepts
+              </h4>
+            </div>
+            <p className="text-sm" style={{ color: "var(--color-text-3)" }}>
+              Connect AI services to generate concept analysis
+            </p>
+          </section>
+
+          {/* Common Mistakes placeholder */}
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle size={16} style={{ color: "var(--color-orange)" }} />
+              <h4 className="text-sm font-semibold" style={{ fontFamily: "var(--font-serif)" }}>
+                Common Mistakes
+              </h4>
+            </div>
+            <p className="text-sm" style={{ color: "var(--color-text-3)" }}>
+              AI analysis will highlight frequent errors
+            </p>
+          </section>
+
+          {/* Exam Scope placeholder */}
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <Target size={16} style={{ color: "var(--color-green)" }} />
+              <h4 className="text-sm font-semibold" style={{ fontFamily: "var(--font-serif)" }}>
+                Exam Scope
+              </h4>
+            </div>
+            <p className="text-sm" style={{ color: "var(--color-text-3)" }}>
+              Assessment coverage analysis will appear here
+            </p>
+          </section>
+
+          {/* Study Tips placeholder */}
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <Lightbulb size={16} style={{ color: "var(--color-amber)" }} />
+              <h4 className="text-sm font-semibold" style={{ fontFamily: "var(--font-serif)" }}>
+                Study Tips
+              </h4>
+            </div>
+            <p className="text-sm" style={{ color: "var(--color-text-3)" }}>
+              Personalized study recommendations will be generated
+            </p>
+          </section>
+        </div>
       </RoughCard>
     );
   }

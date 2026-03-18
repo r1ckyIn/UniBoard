@@ -10,6 +10,7 @@ import MaterialsFolders from "@/components/courses/MaterialsFolders";
 import CourseQA from "@/components/ai/CourseQA";
 import UnitReview from "@/components/ai/UnitReview";
 import AIHighValuePosts from "@/components/ai/AIHighValuePosts";
+import AIErrorBoundary from "@/components/ai/AIErrorBoundary";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -81,16 +82,22 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
       />
 
       {/* AI-Scored High-Value Posts (replaces basic posts) */}
-      <AIHighValuePosts
-        courseId={id}
-        fallbackPosts={posts ?? []}
-      />
+      <AIErrorBoundary featureName="AI-Scored Posts">
+        <AIHighValuePosts
+          courseId={id}
+          fallbackPosts={posts ?? []}
+        />
+      </AIErrorBoundary>
 
       {/* AI Q&A */}
-      <CourseQA courseId={id} />
+      <AIErrorBoundary featureName="Course Q&A">
+        <CourseQA courseId={id} />
+      </AIErrorBoundary>
 
       {/* AI Unit Review */}
-      <UnitReview courseId={id} />
+      <AIErrorBoundary featureName="Unit Review">
+        <UnitReview courseId={id} />
+      </AIErrorBoundary>
     </div>
   );
 }
