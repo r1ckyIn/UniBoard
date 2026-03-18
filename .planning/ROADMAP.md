@@ -79,12 +79,14 @@ Plans:
   3. User can ask AI questions about synced course materials and receive cited answers; user can view AI-generated unit review summaries
   4. MCP server exposes UniBoard data to Claude Desktop; after first successful API exploration, system auto-generates a reusable skill template per operation
   5. Skills are per-course differentiated and subsequent executions load generated skills instead of re-exploring
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Notifications (deadline reminders at 72h/24h/3h, GPA risk alerts), daily digest (rule-based + AI-enhanced urgency scoring), dual-channel delivery (in-app + SES email), notification API + frontend bell/dropdown UI
-- [ ] 04-02-PLAN.md — AIEngine (Anthropic structured outputs), course material Q&A (hybrid direct-context/RAG with pgvector), AI unit review summaries, AI high-value Ed post extraction, ContentEmbedding model, frontend AI components
-- [ ] 04-03-PLAN.md — Developer skill system (.claude/skills/ with 18+ markdown files across 5 categories: data-collection, data-processing, ai-analysis, user-actions, courses), PLAT-03 (MCP server) documented as DEFERRED to v1.1+
+- [x] 04-01-PLAN.md — Notifications (deadline reminders at 72h/24h/3h, GPA risk alerts), daily digest (rule-based + AI-enhanced urgency scoring), dual-channel delivery (in-app + SES email), notification API + frontend bell/dropdown UI
+- [x] 04-02-PLAN.md — AIEngine (Anthropic structured outputs), course material Q&A (hybrid direct-context/RAG with pgvector), AI unit review summaries, AI high-value Ed post extraction, ContentEmbedding model, frontend AI components
+- [x] 04-03-PLAN.md — Developer skill system (.claude/skills/ with 18+ markdown files across 5 categories: data-collection, data-processing, ai-analysis, user-actions, courses), PLAT-03 (MCP server) documented as DEFERRED to v1.1+
+- [ ] 04-04-PLAN.md — [GAP CLOSURE] Token whitespace fix, sync_courses creation, datetime naive/aware fixes (3 blockers)
+- [ ] 04-05-PLAN.md — [GAP CLOSURE] Header component + notification bell relocation, UnitReview/AIHighValuePosts error boundaries and fallbacks (3 majors)
 
 ## Progress
 
@@ -96,4 +98,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & Data Acquisition | 3/3 | Complete   | 2026-03-16 |
 | 2. Core Services & API | 2/2 | Complete | 2026-03-16 |
 | 3. Frontend Dashboard | 3/3 | Complete | 2026-03-17 |
-| 4. Intelligence, Skills & MCP | 0/3 | Planned | - |
+| 4. Intelligence, Skills & MCP | 3/5 | In Progress | - |
