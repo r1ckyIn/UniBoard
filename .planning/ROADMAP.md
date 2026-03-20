@@ -61,7 +61,11 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   3. All Rough.js design system components (RoughCard, RoughDonut, RoughProgressBar, RoughTimeline, RoughNotationWrapper, HeroDoodles) render without SSR hydration errors
   4. i18n routing works — switching between English and Chinese updates all UI text
   5. Source Serif 4 (headings) + Inter (body) fonts load correctly
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffolding, Tailwind @theme, fonts, paper texture, i18n routing
+- [ ] 01-02-PLAN.md — Design system components (RoughCard, RoughNotationWrapper, HeroDoodles) and app shell layout (Sidebar, Header, RightPanel)
 
 ### Phase 2: API Contracts & Mock Layer
 **Goal**: Define the complete API contract and mock implementation so all pages can be built with realistic data
@@ -328,7 +332,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Design System & Foundation | M1 | 0/TBD | Not started | - |
+| 1. Design System & Foundation | M1 | 0/2 | Planning | - |
 | 2. API Contracts & Mock Layer | M1 | 0/TBD | Not started | - |
 | 3. Auth Page | M1 | 0/TBD | Not started | - |
 | 4. Setup Page | M1 | 0/TBD | Not started | - |
