@@ -1,47 +1,48 @@
-# Requirements: UniBoard
+# Requirements: UniBoard v2.0
 
-**Defined:** 2026-03-16
+**Defined:** 2026-03-20
 **Core Value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
 
 ## v1 Requirements
 
-Requirements for initial release. Each maps to roadmap phases.
+Requirements for full release across 4 milestones.
 
 ### GPA Core
 
-- [x] **GPA-01**: User can view real-time GPA/WAM for current semester, calculated from Canvas grades (data delay < 15 min)
-- [x] **GPA-02**: User can perform What-if simulation by inputting hypothetical future assessment scores and seeing updated GPA in real-time
-- [x] **GPA-03**: User can set a target GPA and see the minimum scores needed per remaining assessment to reach it
-- [x] **GPA-04**: User can view assessment weight breakdown per course, parsed from Unit Outline HTML with visual donut chart
-- [x] **GPA-05**: User can see per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage of course assessed
+- [ ] **GPA-01**: User can view real-time GPA/WAM for current semester, calculated from Canvas grades (data delay < 15 min)
+- [ ] **GPA-02**: User can perform What-if simulation by inputting hypothetical future assessment scores and seeing updated GPA in real-time
+- [ ] **GPA-03**: User can set a target GPA and see the minimum scores needed per remaining assessment to reach it
+- [ ] **GPA-04**: User can view assessment weight breakdown per course, parsed from Unit Outline HTML with visual donut chart
+- [ ] **GPA-05**: User can see per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage of course assessed
 
 ### Deadlines
 
-- [x] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas Assignments + Ed Lessons + Ed Discussion (deduplicated)
-- [x] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
-- [x] **DL-03**: User receives risk alert when their grade trajectory in a course deviates from their target GPA threshold
+- [ ] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas + Ed Lessons + Ed Discussion (SHA-256 deduplicated)
+- [ ] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
+- [ ] **DL-03**: User receives risk alert when grade trajectory deviates from target GPA threshold
+- [ ] **DL-04**: User can ask AI about assignment details in Deadline page chat — MCP Agent researches across Canvas announcements, modules, Ed threads, and Ed Lessons to provide contextual answers with cited sources (AiStudyMate integration placeholder)
 
 ### Intelligence
 
-- [x] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
-- [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes
-- [x] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
-- [x] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking
-- [x] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
+- [ ] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
+- [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes (MCP Agent)
+- [ ] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
+- [ ] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking (pre-collected data + Claude API)
+- [ ] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
 
 ### Files & Materials
 
-- [x] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions explaining folder contents (Canvas Modules + Ed Lessons unified)
-- [x] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
-- [ ] **FILE-03**: User can ask AI questions about synced course materials and receive answers with cited sources (no hallucination)
-- [ ] **FILE-04**: User can select a course unit and view AI-generated structured review summary (key concepts, common mistakes, exam scope) plus downloadable community cheatsheets
+- [ ] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions (Canvas Modules + Ed Lessons unified)
+- [ ] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
+- [ ] **FILE-03**: User can ask AI questions about synced course materials and receive answers with cited sources — MCP Agent cross-platform research
+- [ ] **FILE-04**: User can select a course unit and view AI-generated structured review summary (key concepts, common mistakes, exam scope) — MCP Agent
 
 ### Platform & Onboarding
 
-- [x] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
-- [x] **PLAT-02**: User can access the full dashboard via web browser without installing anything
+- [ ] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
+- [ ] **PLAT-02**: User can access the full dashboard via web browser without installing anything
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
-- [x] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
+- [ ] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
 
 ### Skill System (MCP Agent)
 
@@ -50,27 +51,48 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SKILL-03**: Skills are per-course differentiated (different courses may have different material organization patterns)
 - [ ] **SKILL-04**: ~50 skills covering data collection, data processing, AI analysis, and user action dimensions
 
+### AI Tutoring (promoted from v2)
+
+- [ ] **TUTOR-03**: Assignment ROI analysis — MCP Agent identifies high-weight/low-difficulty assignments for effort optimization
+
 ### Frontend Pages
 
-- [x] **UI-01**: Dashboard page with hero welcome, stats row (WAM/Target/Alerts), course grades table, deadline timeline, assessment weight chart (prototype exists)
-- [x] **UI-02**: Courses page showing all enrolled courses with grade overview, assessment breakdown, and file navigation
-- [x] **UI-03**: Deadlines page with full calendar view and filterable timeline of all deadlines across courses
-- [x] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
-- [x] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
-- [x] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
-- [x] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
+- [ ] **UI-01**: Dashboard page with hero welcome, stats row (WAM/Target/Alerts), course grades table, deadline timeline, assessment weight chart
+- [ ] **UI-02**: Courses page showing all enrolled courses with grade overview, assessment breakdown, and file navigation
+- [ ] **UI-03**: Deadlines page with full calendar view, filterable timeline, and AI chat panel
+- [ ] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
+- [ ] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
+- [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
+- [ ] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
+- [ ] **UI-08**: Timetable page with weekly schedule view
+- [ ] **UI-09**: Auth page with login and register flows
+- [ ] **UI-10**: Setup page with 3-step API token onboarding flow
+- [ ] **UI-11**: Course Detail page with assessment breakdown, materials browser, and Ed posts
 
 ### Infrastructure
 
-- [x] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
-- [x] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
-- [x] **INFRA-03**: Canvas adapter with rate limiting (sliding window from X-Rate-Limit-Remaining header), pagination, and circuit breaker
-- [x] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
-- [x] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
-- [x] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
-- [x] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
-- [x] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
-- [x] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
+- [ ] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
+- [ ] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
+- [ ] **INFRA-03**: Canvas adapter with rate limiting (sliding window), pagination, and circuit breaker
+- [ ] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
+- [ ] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
+- [ ] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
+- [ ] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
+- [ ] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
+- [ ] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
+- [ ] **INFRA-10**: i18n support (English + Chinese) with next-intl
+- [ ] **INFRA-11**: OpenAPI contract spec shared between frontend mock (Route Handlers) and backend (FastAPI)
+
+### Engineering (M4)
+
+- [ ] **ENG-01**: Unit test suite with 80%+ coverage (pytest backend, Vitest frontend)
+- [ ] **ENG-02**: Integration tests for all API endpoints against real database
+- [ ] **ENG-03**: E2E smoke tests for critical user flows
+- [ ] **ENG-04**: AWS CDK infrastructure (Lambda + API Gateway + RDS)
+- [ ] **ENG-05**: Docker production images with multi-stage builds
+- [ ] **ENG-06**: CI/CD pipeline (GitHub Actions) with lint, test, type-check, deploy
+- [ ] **ENG-07**: Monitoring and alerting (structured logging, error tracking, performance metrics)
+- [ ] **ENG-08**: Security hardening (input validation, rate limiting, CORS, CSP headers, OWASP Top 10)
 
 ## v2 Requirements
 
@@ -78,9 +100,8 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ### AI Tutoring
 
-- **TUTOR-01**: Interactive AI review Q&A — AI asks questions based on course materials, evaluates student answers, explains weak points
+- **TUTOR-01**: Interactive AI review Q&A — AI asks questions based on course materials, evaluates student answers
 - **TUTOR-02**: AI homework coaching — guidance based on assignment outline, rubric, and Ed Discussion context
-- **TUTOR-03**: Assignment ROI analysis — identify high-weight/low-difficulty assignments for effort optimization
 
 ### Personalization
 
@@ -89,12 +110,16 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ### External Integration
 
-- **EXT-01**: AiStudyMate platform integration (https://aistudymate.it.com/zh) — connect to classmate's multimodal learning platform for assignment guidance. AiStudyMate provides: classroom transcription, review assistant (flashcards/mind maps/quizzes), problem-solving, interactive learning, paper/defense prep, whiteboard parsing, knowledge recycling. UniBoard provides data context (course materials, Ed discussions, assessment weights), AiStudyMate provides AI tutoring capabilities.
+- **EXT-01**: AiStudyMate platform integration — connect to classmate's multimodal learning platform for assignment guidance (DL-04 serves as placeholder)
 
-### Deployment
+### Deployment Enhancement
 
-- **DEPLOY-01**: AWS deployment (Lambda + API Gateway + RDS + CDK)
 - **DEPLOY-02**: AWS Cognito authentication migration
+
+### Mobile
+
+- **MOBILE-01**: Responsive mobile layout
+- **MOBILE-02**: Native mobile app (React Native / PWA)
 
 ## Out of Scope
 
@@ -105,65 +130,79 @@ Deferred to future release. Tracked but not in current roadmap.
 | Canvas quiz answering | Academic integrity risk |
 | Homework ghostwriting / direct answers | Academic integrity violation |
 | Social/chat features | Irrelevant to GPA |
-| Course recommendations | Out of GPA tracking scope for v1 |
-| Timetable page | Sidebar placeholder — not a GPA feature, defer |
-| Mobile app | Web-first, mobile later |
+| Course recommendations | Out of GPA tracking scope |
+| Multi-university support | USYD-only for current release |
 | Real-time chat/messaging | High complexity, not core value |
-| Multi-university support | USYD-only for v1 |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Which milestones/phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| GPA-01 | Phase 2 | Complete |
-| GPA-02 | Phase 2 | Complete |
-| GPA-03 | Phase 2 | Complete |
-| GPA-04 | Phase 2 | Complete |
-| GPA-05 | Phase 2 | Complete |
-| DL-01 | Phase 2 | Complete |
-| DL-02 | Phase 4 | Complete |
-| DL-03 | Phase 4 | Complete |
-| INTEL-01 | Phase 2 | Complete |
-| INTEL-02 | Phase 4 | Pending |
-| INTEL-03 | Phase 4 | Complete |
-| INTEL-04 | Phase 4 | Complete |
-| INTEL-05 | Phase 2 | Complete |
-| FILE-01 | Phase 2 | Complete |
-| FILE-02 | Phase 2 | Complete |
-| FILE-03 | Phase 4 | Pending |
-| FILE-04 | Phase 4 | Pending |
-| PLAT-01 | Phase 3 | Complete |
-| PLAT-02 | Phase 3 | Complete |
-| PLAT-03 | Phase 4 | Pending |
-| PLAT-04 | Phase 2 | Complete |
-| SKILL-01 | Phase 4 | Pending |
-| SKILL-02 | Phase 4 | Pending |
-| SKILL-03 | Phase 4 | Pending |
-| SKILL-04 | Phase 4 | Pending |
-| UI-01 | Phase 3 | Complete |
-| UI-02 | Phase 3 | Complete |
-| UI-03 | Phase 3 | Complete |
-| UI-04 | Phase 3 | Complete |
-| UI-05 | Phase 3 | Complete |
-| UI-06 | Phase 3 | Complete |
-| UI-07 | Phase 3 | Complete |
-| INFRA-01 | Phase 1 | Complete |
-| INFRA-02 | Phase 2 | Complete |
-| INFRA-03 | Phase 1 | Complete |
-| INFRA-04 | Phase 1 | Complete |
-| INFRA-05 | Phase 1 | Complete |
-| INFRA-06 | Phase 1 | Complete |
-| INFRA-07 | Phase 1 | Complete |
-| INFRA-08 | Phase 1 | Complete |
-| INFRA-09 | Phase 1 | Complete |
+| Requirement | Milestone | Phase | Status |
+|-------------|-----------|-------|--------|
+| GPA-01 | M2 | TBD | Pending |
+| GPA-02 | M2 | TBD | Pending |
+| GPA-03 | M2 | TBD | Pending |
+| GPA-04 | M2 | TBD | Pending |
+| GPA-05 | M2 | TBD | Pending |
+| DL-01 | M2 | TBD | Pending |
+| DL-02 | M2 | TBD | Pending |
+| DL-03 | M2 | TBD | Pending |
+| DL-04 | M3 | TBD | Pending |
+| INTEL-01 | M2 | TBD | Pending |
+| INTEL-02 | M3 | TBD | Pending |
+| INTEL-03 | M2 | TBD | Pending |
+| INTEL-04 | M3 | TBD | Pending |
+| INTEL-05 | M2 | TBD | Pending |
+| FILE-01 | M2 | TBD | Pending |
+| FILE-02 | M2 | TBD | Pending |
+| FILE-03 | M3 | TBD | Pending |
+| FILE-04 | M3 | TBD | Pending |
+| PLAT-01 | M1 | TBD | Pending |
+| PLAT-02 | M1 | TBD | Pending |
+| PLAT-03 | M3 | TBD | Pending |
+| PLAT-04 | M2 | TBD | Pending |
+| SKILL-01 | M3 | TBD | Pending |
+| SKILL-02 | M3 | TBD | Pending |
+| SKILL-03 | M3 | TBD | Pending |
+| SKILL-04 | M3 | TBD | Pending |
+| TUTOR-03 | M3 | TBD | Pending |
+| UI-01 | M1 | TBD | Pending |
+| UI-02 | M1 | TBD | Pending |
+| UI-03 | M1 | TBD | Pending |
+| UI-04 | M1 | TBD | Pending |
+| UI-05 | M1 | TBD | Pending |
+| UI-06 | M1 | TBD | Pending |
+| UI-07 | M1 | TBD | Pending |
+| UI-08 | M1 | TBD | Pending |
+| UI-09 | M1 | TBD | Pending |
+| UI-10 | M1 | TBD | Pending |
+| UI-11 | M1 | TBD | Pending |
+| INFRA-01 | M2 | TBD | Pending |
+| INFRA-02 | M2 | TBD | Pending |
+| INFRA-03 | M2 | TBD | Pending |
+| INFRA-04 | M2 | TBD | Pending |
+| INFRA-05 | M2 | TBD | Pending |
+| INFRA-06 | M2 | TBD | Pending |
+| INFRA-07 | M2 | TBD | Pending |
+| INFRA-08 | M2 | TBD | Pending |
+| INFRA-09 | M2 | TBD | Pending |
+| INFRA-10 | M1 | TBD | Pending |
+| INFRA-11 | M1 | TBD | Pending |
+| ENG-01 | M4 | TBD | Pending |
+| ENG-02 | M4 | TBD | Pending |
+| ENG-03 | M4 | TBD | Pending |
+| ENG-04 | M4 | TBD | Pending |
+| ENG-05 | M4 | TBD | Pending |
+| ENG-06 | M4 | TBD | Pending |
+| ENG-07 | M4 | TBD | Pending |
+| ENG-08 | M4 | TBD | Pending |
 
 **Coverage:**
-- v1 requirements: 41 total
-- Mapped to phases: 41/41
-- Unmapped: 0
+- v1 requirements: 52 total
+- Mapped to milestones: 52
+- Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after roadmap creation (all 41 requirements mapped)*
+*Requirements defined: 2026-03-20*
+*Last updated: 2026-03-20 after v2.0 rebuild initialization*
