@@ -55,13 +55,16 @@ export default function RoughCard({
     const el = containerRef.current;
     if (!el) return;
 
+    let rafId: number | null = null;
     const observer = new ResizeObserver(() => {
-      drawBorder();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(drawBorder);
     });
     observer.observe(el);
 
     return () => {
       observer.disconnect();
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [drawBorder]);
 

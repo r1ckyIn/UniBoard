@@ -151,13 +151,16 @@ export default function HeroDoodles() {
   useEffect(() => {
     drawDoodles();
 
+    let rafId: number | null = null;
     const handleResize = () => {
-      drawDoodles();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(drawDoodles);
     };
 
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [drawDoodles]);
 

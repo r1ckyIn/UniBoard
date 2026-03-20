@@ -13,19 +13,21 @@ export default function Header() {
   const notifRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside click (only listen when a dropdown is open)
   useEffect(() => {
+    if (!notifOpen && !avatarOpen) return;
+
     function handleClick(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+      if (notifOpen && notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifOpen(false);
       }
-      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+      if (avatarOpen && avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
         setAvatarOpen(false);
       }
     }
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
-  }, []);
+  }, [notifOpen, avatarOpen]);
 
   return (
     <header
