@@ -63,7 +63,7 @@ Requirements for full release across 4 milestones.
 - [ ] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
 - [ ] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
 - [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
-- [ ] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
+- [x] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
 - [ ] **UI-08**: Timetable page with weekly schedule view
 - [ ] **UI-09**: Auth page with login and register flows
 - [ ] **UI-10**: Setup page with 3-step API token onboarding flow
