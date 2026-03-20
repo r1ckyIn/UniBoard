@@ -1,139 +1,182 @@
 # Feature Landscape
 
-**Domain:** University Academic Dashboard (GPA Maximization, LMS Integration)
-**Researched:** 2026-03-16
+**Domain:** Academic GPA maximization dashboard (Canvas + Ed Discussion aggregator)
+**Researched:** 2026-03-20
+**Overall confidence:** HIGH
+
+---
 
 ## Table Stakes
 
-Features users expect from a GPA tracking + LMS aggregation dashboard. Missing any of these and the product feels incomplete.
+Features users expect from an academic dashboard. Missing any = product feels incomplete compared to Better Canvas (1.5M users), Atlas (800K users), or even Canvas Student App.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Real-time GPA/WAM display | Core value proposition -- "how am I doing?" | Medium | Canvas grades API + USYD WAM formula + level weights. 15min sync. |
-| Assessment weight visualization | Students need to know what matters most | Medium | Primary source: Unit Outline HTML parsing. Fallback: Canvas assignment_groups. |
-| What-if GPA simulator | #1 differentiator from plain Canvas -- "what if I score X?" | Medium | Slider UI + weighted average recalculation. Pure frontend compute on cached data. |
-| Unified deadline view | Students use 2-3 platforms; missing deadlines = grade impact | High | Three-source aggregation (Canvas + Ed Lessons + Ed Discussion) with SHA-256 dedup. Most complex table-stakes feature. |
-| Course file/folder navigation | Students waste time finding materials across platforms | Medium | Canvas Modules + Ed Lessons unified view. AI-generated folder descriptions (P2). |
-| High-value Ed Discussion posts | Staff/endorsed posts contain exam hints, rubric clarifications | Low-Medium | Rule-based: filter on is_endorsed + is_staff_answered. No AI needed for MVP. |
-| 3-step onboarding | Non-technical students must connect Canvas/Ed tokens easily | Medium | Visual guide for token acquisition + validation + encrypted storage. |
-| Zero-install web access | "Just open a browser" -- no extensions, no desktop apps | Low | Next.js static export, standard web stack. |
-| User authentication | Multi-user support, token security | Medium | JWT + bcrypt for MVP. Each user's API tokens encrypted independently. |
+| Real-time GPA/WAM display | Better Canvas and Canvas GPA Extension both do this. Students' #1 question is "what's my current grade?" | Low | Canvas API provides grades directly; compute WAM from weighted scores. Prototype: `dashboard.html` stats row |
+| Per-course grade breakdown | Every competitor shows per-course scores. Atlas and Better Canvas both surface this | Low | Canvas assignment_groups API. Prototype: `courses.html` card grid |
+| Assessment weight visualization | Students need to know what's worth how much. Canvas GPA Extension does this at basic level | Med | Unit Outline HTML parsing is the differentiator — more accurate than Canvas-only data. Prototype: `course-detail.html` donut chart |
+| Unified deadline view | MyStudyLife (4.7/5 rating), Better Canvas todo list, Canvas Student App all provide this. Core pain point | Med | Three-source aggregation (Canvas + Ed Lessons + Ed Discussion) is unique; rendering is standard. Prototype: `deadline.html` |
+| Deadline reminders/notifications | Every student planner app has tiered reminders (72h/24h/3h). Expected by all user personas | Low | Notification bell in header + notification panel. Prototype: `dashboard.html` header dropdown |
+| 3-step onboarding flow | Atlas achieves zero-config Canvas sync. UniBoard needs token paste but must be equally frictionless | Med | Token acquisition requires screenshots/guides for non-technical users (Persona C: Sarah). Prototype: `setup.html` |
+| Search across course materials | Atlas and Better Canvas provide course search. Students expect to find files without navigating folder trees | Med | Keyword search across synced Canvas Modules + Ed Lessons content |
+| User authentication (JWT + register/login) | Any multi-user web app requires auth. Zero-install web access is a stated requirement | Low | Simple JWT + bcrypt; no OAuth complexity. Prototype: `auth.html` |
+| Settings & token management | Token expiration is a real operational issue. Users must be able to update tokens, set preferences | Low | Prototype: `settings.html` with token fields, notification toggles, GPA target |
+| Responsive three-column layout | Desktop-first is decided, but the layout must work well at various desktop widths | Med | Sidebar (68px→224px hover) + main + right panel (300px sticky). All prototypes implement this |
+| Staggered entrance animations | Prototype has 10 delay classes (.d1-.d10) with slideUp. Removing these would feel "broken" vs prototypes | Low | CSS keyframe animations with cubic-bezier easing. Already fully specced in DESIGN_SYSTEM.md |
+| Paper texture + ruled lines | Core to the "notebook on your desk" aesthetic. Removing it makes the app look like any other SaaS | Low | SVG fractalNoise overlay + repeating-linear-gradient. Two CSS pseudo-elements |
 
 ## Differentiators
 
-Features that set UniBoard apart from competitors. Not expected by default, but create the "aha" moment.
+Features that set UniBoard apart. No competitor combines all of these.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Target GPA path planner | Reverse-calculate: "you need 88+ on final exam to get HD" | Medium | Unique among competitors. Mathematical optimization across remaining assessments. |
-| Daily/weekly academic digest | "One email with everything that matters for your grades today" | Medium | Rule-based aggregation for MVP. AI-enhanced prioritization later. |
-| GPA risk alerts | Proactive warning when trajectory deviates from target | Medium | Threshold-based: (target - projected) > configurable delta. |
-| Deadline tiered reminders | 72h / 24h / 3h escalating notifications | Medium | Requires notification infrastructure (web notifications for MVP, email later). |
-| AI thread relevance scoring | Machine-extract exam tips from 100s of Ed posts | High | F1 quality gate with rule-based fallback. Deferred to post-MVP is acceptable. |
-| AI Q&A on course materials | "Ask questions about your lecture slides" | High | RAG pattern over synced materials. Phase 3+ feature. |
-| MCP server for Claude Desktop | Power users interact with university data via Claude | Medium | Shares service layer with web API. Differentiator for CS students. |
-| Anthropic-inspired design aesthetic | "Warm, academic, trustworthy" vs typical EdTech neon | Low | Design system already defined in frontend_brief.md. Implementation is CSS/component work. |
+| **What-if GPA simulator** (slider-based) | Better Canvas has a basic GPA calculator, but UniBoard's slider-based per-assessment prediction with real-time WAM update is uniquely interactive | High | Core differentiator. Prototype: `predict.html` with expandable per-course cards, sliders per assessment, instant recalculation. Requires assessment weights from Unit Outline |
+| **Canvas + Ed dual-platform integration** | Zero competitors integrate Ed Discussion or Ed Lessons. This is UniBoard's unique moat — USYD heavily uses Ed | High | Three adapters: CanvasAdapter, EdDiscussionAdapter, EdLessonsAdapter. Undocumented Ed API adds complexity |
+| **Rough.js hand-drawn aesthetic** | No competitor uses hand-drawn UI. This creates instant visual recognition and reduces academic stress. Validated through 103 prototype iterations | Med | Rough.js 4.6.6 for card borders, donut charts, timeline dots, progress bars. React wrapper (`rough-react-wrapper`) exists with Next.js support |
+| **AI-powered daily digest** | No competitor aggregates cross-platform academic intelligence into a single daily briefing. Atlas has AI Q&A but no daily synthesis | High | Rule-based aggregation (P0) + Claude API urgency scoring (P1). Prototype: `digest.html` with urgency badges, grade alerts, deadline warnings, Ed highlights |
+| **Ed Discussion high-value post filtering** | No competitor mines Ed Discussion for exam scope, rubric details, assignment clarifications. This is invisible gold for GPA | Med | Rule-based first (is_endorsed + is_staff_answered), then AI extraction. Critical for Persona B (Kevin — can't read all Ed posts) |
+| **AI-generated folder descriptions** | Atlas does AI Q&A on materials but doesn't help students understand file organization. UniBoard explains "what's in each folder" | Med | MCP Agent reads folder contents, generates one-line descriptions. Especially valuable for Persona C (Sarah — lost freshman) |
+| **Target GPA path planner** | Reverse-calculate required scores per remaining assessment. Better Canvas only shows current GPA, not what you need | Med | Requires assessment weights + current scores + remaining assessments. Pure math once data is available |
+| **MCP Agent cross-platform research** | AI that autonomously searches across Canvas + Ed to answer student questions with full context and cited sources | High | Claude Opus 4.6 + MCP tools architecture. Streaming chat interface in deadline page. Prototype: `deadline.html` AI chat panel |
+| **Rough Notation text annotations** | Interactive highlights, underlines, and circles that animate on hover/load. Unique micro-interaction pattern | Low | rough-notation library. Used on hero text, grade cells (hover circle), WAM value (persistent circle) |
+| **Hero section (data below fold)** | Counter-intuitive: push data below fold, greet student with encouragement first. Reduces anxiety before showing grades | Low | Prototype: `dashboard.html` hero with greeting, breathing scroll hint, Rough.js doodle decorations |
+| **Timetable weekly view** | Competitors focus on deadlines; UniBoard also shows class schedule in a visual weekly grid | Med | Prototype: `timetable.html`. Requires class schedule data (manual input or Canvas calendar sync) |
+| **i18n (English + Chinese)** | Targets Chinese international student community at USYD — significant demographic that competitors ignore | Med | next-intl with App Router `[locale]` segment. ~2KB bundle. Server Component translations add zero client JS |
+| **Skill system (MCP Agent)** | Auto-generate reusable prompt templates per operation/course. No competitor has self-improving AI skills | High | ~50 skills across data collection, processing, AI analysis, user actions. Per-course customization. M3 feature |
 
 ## Anti-Features
 
-Features to explicitly NOT build. These would harm the product or violate principles.
+Features to explicitly NOT build. Each has a clear reason tied to product principles or risk.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Ed Discussion posting/replying | Read-only policy prevents UniBoard from polluting Ed with auto-generated content | Display posts in read-only view with link to original on Ed |
-| Canvas assignment submission | Academic integrity risk -- system should never submit work on student's behalf | Show submission status and deadline, link to Canvas for actual submission |
-| Quiz answering / homework ghostwriting | Direct academic integrity violation | AI can explain concepts and reference course materials, never generate answers |
-| Social/chat features | Irrelevant to GPA, distracts from core mission | Focus entirely on academic data aggregation |
-| Course recommendations | Out of scope for GPA tracking, requires enrollment data UniBoard doesn't have | Stick to tracking enrolled courses |
-| Real-time collaborative editing | Not a document tool | Link to original resources on Canvas/Ed |
-| Push notifications to mobile | Requires native app or PWA service worker -- too complex for MVP | Web notifications + email digests are sufficient |
-| Multi-university support in MVP | Different universities have different LMS configs, grading systems, Unit Outline formats | Hard-code USYD-specific logic. Abstract interfaces allow future expansion without over-engineering now. |
+| Ed Discussion posting/replying | Read-only policy: avoid polluting Ed ecosystem. Writing to Ed creates spam risk and potential university policy violations | Display high-value posts read-only with source links back to Ed |
+| Canvas assignment submission | Academic integrity risk. Handling submissions creates liability and regulatory exposure | Link to Canvas for submission; show deadline countdown only |
+| Canvas quiz/exam answering | Direct academic integrity violation. University could ban the platform | Never access quiz content. Only show quiz deadlines |
+| Homework ghostwriting / direct answers | Violates academic integrity. Contradicts GPA *maximization* through *learning* | AI guides learning: "here's how to approach this" not "here's the answer" |
+| Social/chat features | Irrelevant to GPA. Adds moderation burden. Ed Discussion already serves this need | Focus all UI real estate on grade-relevant information |
+| Course recommendations / enrollment advice | Out of scope for GPA tracking. Requires different data (course reviews, workload estimates) | Only show enrolled courses. Let students use RateMyProfessors etc. separately |
+| Mobile-first / native mobile app | Desktop-first decision for MVP. Mobile adds 2x surface area with different interaction patterns | Responsive desktop-first. PWA consideration in Phase 5 |
+| Multi-university support (Phase 1-4) | USYD-only simplifies Unit Outline parsing, Ed API patterns, and user acquisition | Abstract Platform Adapter layer for future expansion, but don't build adapters yet |
+| OAuth / AWS Cognito (Phase 1-3) | Simple JWT is faster to implement. Cognito adds AWS dependency for auth flow | JWT + bcrypt for MVP. Migrate to Cognito only if scaling demands it |
+| Interactive AI tutoring (real-time Q&A mode) | High complexity, high API cost, unclear value vs simpler AI features. Deferred to v2 | Focus on AI digest, folder descriptions, and material Q&A first |
+| Personalized dashboard questionnaire | Requires statistically significant user data to be useful. Premature before product-market fit | Ship one good default layout. Personalization after 500+ users |
+| Real-time collaboration / shared notes | Feature creep. Competes with Google Docs, Notion. Not grade-relevant | Focus on individual GPA tracking. Students can share screenshots |
+| Grade history / semester comparison | Adds data complexity (multi-semester sync) without immediate GPA improvement value | Show current semester only. Historical tracking in Phase 5+ |
 
 ## Feature Dependencies
 
 ```
-Authentication (JWT + bcrypt)
-  |
-  +-> Token Configuration (Canvas/Ed token storage)
-  |     |
-  |     +-> Canvas Adapter (requires Canvas token)
-  |     |     |
-  |     |     +-> Grade Sync -> GPA Calculation -> GPA Display
-  |     |     +-> Module Sync -> Course Materials View
-  |     |     +-> Assignment Sync -> Deadline Aggregation (source 1)
-  |     |     +-> Tab URL -> Unit Outline URL -> Unit Outline Parsing -> Assessment Weights
-  |     |
-  |     +-> Ed Adapter (requires Ed token)
-  |           |
-  |           +-> Discussion Sync -> High-Value Posts (rule-based)
-  |           +-> Lesson Sync -> Course Materials View
-  |           +-> Lesson due_at -> Deadline Aggregation (source 2)
-  |           +-> Discussion teacher mentions -> Deadline Aggregation (source 3, AI-assisted)
-  |
-  +-> GPA Calculation + Assessment Weights
-  |     |
-  |     +-> What-if Predictor (requires weights + current grades)
-  |     +-> Target GPA Path Planner (requires weights + current grades)
-  |     +-> GPA Risk Alerts (requires target GPA setting)
-  |
-  +-> Deadline Aggregation (all 3 sources)
-  |     |
-  |     +-> Unified Deadline View
-  |     +-> Tiered Reminders (72h / 24h / 3h)
-  |
-  +-> High-Value Posts + New Grades + New Deadlines
-  |     |
-  |     +-> Daily Digest (rule-based aggregation)
-  |
-  +-> AI Engine (Anthropic API)
-        |
-        +-> AI Thread Scoring (enhances rule-based filtering)
-        +-> AI Digest Generation (enhances rule-based digest)
-        +-> AI Material Summarization
-        +-> AI Q&A (Phase 3+)
+Unit Outline HTML parsing
+  → Assessment weight visualization
+  → What-if GPA simulator (needs weights)
+  → Target GPA path planner (needs weights + remaining assessments)
+
+Canvas grades API
+  → Real-time GPA/WAM display
+  → Per-course grade breakdown
+  → GPA risk alerts
+
+Three-source deadline aggregation
+  → Canvas adapter (assignments)
+  → Ed Lessons adapter (lesson assignments)
+  → Ed Discussion adapter (teacher-mentioned deadlines)
+  → SHA-256 deduplication across sources
+
+Auth + Token management
+  → All data sync features (Canvas, Ed)
+  → Onboarding flow
+
+Design system (Tailwind + Rough.js)
+  → All page components
+  → All visual features
+
+Mock API (MSW + OpenAPI contracts)
+  → All frontend pages (M1)
+  → Zero-change backend integration (M2)
+
+i18n (next-intl)
+  → All user-facing text across 10 pages
+  → Should be set up in M1 Phase 1 to avoid retrofitting
 ```
+
+## Feature-to-Page Mapping
+
+| Page | Primary Features | Milestone |
+|------|-----------------|-----------|
+| Auth | Login, register, JWT | M1 |
+| Setup | 3-step token onboarding, token validation | M1 |
+| Dashboard | Hero greeting, WAM stats, course grades, deadline timeline, assessment weights, Rough.js doodles | M1 |
+| Courses | Course card grid, grade overview per course, search | M1 |
+| Course Detail | Assessment breakdown (donut chart), materials list, Ed Discussion posts, AI folder descriptions | M1 (mock), M2 (real), M3 (AI) |
+| Deadlines | Calendar view, filterable timeline, urgency badges, AI chat panel (placeholder M1, MCP Agent M3) | M1 |
+| Predict | Slider-based What-if simulator, per-course cards, real-time WAM recalculation | M1 |
+| Digest | Daily intelligence digest, urgency scoring, grade alerts, Ed highlights, refresh button | M1 (mock), M2 (rule-based), M3 (AI) |
+| Timetable | Weekly class schedule grid, color-coded courses | M1 |
+| Settings | Token management, notification preferences, GPA target, profile, language switch | M1 |
 
 ## MVP Recommendation
 
-Prioritize for the 2-week timeline:
+### Must ship in M1 (frontend with Mock API):
 
-### Must Ship (P0)
+1. **All 10 pages converted from HTML prototypes** — the prototypes are the product spec; every interaction must be preserved pixel-perfect
+2. **Design system fully ported** — Rough.js hand-drawn borders, paper texture, Rough Notation, all animations
+3. **Mock API via MSW** — contract-first OpenAPI specs that M2 backend will implement; frontend zero-change on integration
+4. **i18n scaffolding** — next-intl with `[locale]` routing, EN + CN translations for all pages
+5. **Auth flow (mock)** — login/register/setup pages functional with mock JWT
 
-1. **Authentication + Token Setup** -- gate to everything else
-2. **Canvas Adapter + Grade Sync** -- enables GPA tracking (core value)
-3. **Unit Outline Parser** -- enables accurate assessment weights
-4. **GPA/WAM Calculation + Display** -- the dashboard's headline number
-5. **What-if GPA Simulator** -- #1 differentiator, high impact, medium complexity
-6. **Canvas Assignments -> Deadline Aggregation** -- at minimum single-source deadlines
-7. **Dashboard UI (GPA overview + deadline list)** -- users need to see the data
-8. **3-step Onboarding Flow** -- without this, non-technical users cannot start
+### Must ship in M2 (backend):
 
-### Should Ship (P1)
+1. **Canvas adapter** — grades, assignments, modules with rate limiting + circuit breaker
+2. **Ed Discussion adapter** — threads, posts, with defensive Pydantic parsing
+3. **Ed Lessons adapter** — lesson content and assignments
+4. **Unit Outline parser** — USYD HTML scraping with weight-sum validation
+5. **Sync engine** — grades 15min, deadlines 1h, modules daily, Unit Outline per semester
+6. **All API contracts from M1** — implement the same OpenAPI specs the mock used
 
-9. **Ed Discussion Adapter + High-Value Post Filtering (rule-based)** -- adds Ed integration
-10. **Ed Lessons Adapter + Lesson Sync** -- completes course materials view
-11. **Three-source Deadline Aggregation** -- the full dedup pipeline
-12. **Target GPA Path Planner** -- reverse-calculate required scores
-13. **Course Detail Pages (grades/materials/discussions/outline tabs)**
-14. **Daily Digest (rule-based)** -- aggregated email/web notification
-15. **GPA Risk Alerts** -- threshold-based warnings
+### Defer to M3 (AI/MCP):
 
-### Defer (P2 / Post-MVP)
+- AI digest scoring (use rule-based in M2)
+- AI folder descriptions (show raw folder names in M1-M2)
+- MCP Agent Q&A (show placeholder chat in M1)
+- Skill system
+- AI-extracted Ed Discussion insights
 
-- **AI thread relevance scoring** -- rule-based is sufficient initially
-- **AI-enhanced digest** -- rule-based aggregation works for MVP
-- **AI material summarization** -- nice-to-have, not critical
-- **AI Q&A** -- Phase 3+ feature
-- **MCP Server** -- the adapters exist but MCP tool wiring can wait
-- **File content search (tsvector)** -- requires indexing pipeline
-- **Unit review with community cheatsheets** -- Phase 3+ feature
-- **Tiered reminder notifications (72h/24h/3h)** -- requires scheduling infrastructure
+### Defer to M4+ or never:
 
-**Rationale:** Ship GPA tracking + deadlines + basic Ed integration first. These deliver the core "see everything in one place" value. AI features and MCP are enhancements that make the product better but aren't required for the first usable version.
+- Mobile responsiveness
+- Multi-university
+- Interactive AI tutoring
+- Personalized dashboard questionnaire
+- Grade history / semester comparison
+
+## Competitive Position Summary
+
+| Capability | UniBoard | Better Canvas (1.5M users) | Atlas (800K users) | Canvas Student App |
+|------------|----------|---------------------------|--------------------|--------------------|
+| GPA tracking | Real-time WAM + What-if simulator | Basic GPA calculator | None | Grade view only |
+| Ed Discussion integration | Full (endorsed, staff, AI extraction) | None | None | None |
+| Ed Lessons integration | Full (assignments, materials) | None | None | None |
+| Deadline aggregation | 3-source (Canvas + Ed Lessons + Ed Discussion) | Enhanced todo list | Canvas only | Canvas only |
+| AI features | MCP Agent, digest scoring, folder descriptions | None | AI Q&A, study guides, flashcards | None |
+| Assessment weights | Unit Outline HTML parsing (accurate) | None | None | Partial |
+| Visual design | Hand-drawn Rough.js aesthetic | Dark mode themes | Standard EdTech | Standard mobile |
+| Platform | Web (desktop-first) | Chrome extension | Web + Chrome extension | Mobile app |
+| Price | Free | Free | Free | Free (with Canvas) |
+| USYD-specific | Yes (Ed + Unit Outline + USYD HTML) | No | No | No |
+
+**UniBoard's moat: No competitor does Canvas + Ed integration. The Ed ecosystem (Discussion + Lessons) contains ~40% of grade-relevant information at USYD, and UniBoard is the only product that touches it.**
 
 ## Sources
 
-- UniBoard BRD v2.6 SS2 (user stories and priorities)
-- UniBoard BRD v2.6 SS3 (competitive analysis)
-- UniBoard PROJECT.md (active requirements)
-- UniBoard TRD v2.5 SS3.3 (service layer design)
+- [Better Canvas Features](https://www.better-canvas.com/features) — 1.5M+ users, GPA calculator, custom dashboard, enhanced todo list
+- [Atlas AI Student Platform](https://www.atlas.org/) — 800K+ users, Canvas LTI integration, AI Q&A, study guides
+- [Canvas GPA Calculator Extension](https://chromewebstore.google.com/detail/canvas-gpa-calculator/einableffeiagahfigklikcgfnphihib) — Browser extension for Canvas grade calculation
+- [MSW + OpenAPI Contract-First Mocking](https://dev.to/michaliskout/supercharge-frontend-development-with-msw-openapi-and-ai-generated-mocks-1bfo) — MSW + OpenAPI for contract-first frontend development
+- [rough-react-wrapper](https://github.com/fsefidabi/rough-react-wrapper) — React 18 + Next.js App Router support for Rough.js
+- [next-intl App Router Guide](https://next-intl.dev/docs/getting-started/app-router) — ~2KB bundle, native Server Component support
+- [AI Agent UX Patterns (Smashing Magazine)](https://www.smashingmagazine.com/2026/02/designing-agentic-ai-practical-ux-patterns/) — Progressive disclosure, streaming responses, consent patterns
+- [UX for Agents (LangChain)](https://www.blog.langchain.com/ux-for-agents-part-1-chat-2/) — Streaming chat moving beyond traditional chat UX
+- [MyStudyLife Student Planner](https://mystudylife.com/) — 4.7/5 rating, benchmark for deadline management UX
+- [U Michigan MyLA Dashboard](https://www.insidehighered.com/news/student-success/academic-life/2024/03/27/u-michigan-grade-dashboard-promotes-student-learning) — Student-facing analytics embedded in Canvas

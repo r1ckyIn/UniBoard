@@ -1,244 +1,351 @@
 # Technology Stack
 
-**Project:** UniBoard - University GPA Maximization Dashboard
-**Researched:** 2026-03-16
-**Overall confidence:** HIGH
-
-## Recommended Stack
-
-The stack is already decided in PROJECT.md constraints. This document validates those choices, corrects outdated version numbers, identifies critical library substitutions, and fills in supporting libraries with specific versions verified against current releases.
-
-### Core Framework (Backend)
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Python | 3.12+ | Backend language | Async support, type hints, match statements, MCP SDK compatibility. 3.13 also viable but 3.12 has broader library compat. | HIGH |
-| FastAPI | 0.135+ | REST API framework | Async-native, automatic OpenAPI docs, Pydantic v2 validation, dependency injection. Latest stable as of March 2026. Starlette 1.0+ foundation. | HIGH |
-| Pydantic | 2.12+ | Data validation | Ships with FastAPI. v2 Rust core is 5-50x faster than v1. Use for all request/response schemas and settings. | HIGH |
-| uvicorn | 0.34+ | ASGI server | Standard FastAPI deployment. `--reload` for dev. | HIGH |
-| SQLAlchemy | 2.0+ (async) | ORM | Async engine with asyncpg, 2.0-style Mapped[] annotations (not legacy 1.x patterns). | HIGH |
-| asyncpg | 0.30+ | PostgreSQL driver | Fastest async PG driver for Python, C-level performance, asyncio-native. | HIGH |
-| Alembic | 1.18+ | Database migrations | SQLAlchemy-native. Use `alembic init -t async alembic` for async setup. | HIGH |
-| mcp (Python SDK) | 1.25+ | MCP server | Official Anthropic SDK. Frequent releases (v1.0 to v1.25+ in 6 months). Pin version explicitly. | HIGH |
-
-### Core Framework (Frontend)
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Next.js | **16.1+** | React framework | **CORRECTION: Next.js 16 shipped Oct 2025.** Turbopack stable (50%+ faster builds), React 19 support, cache components. Use `output: 'export'` for static export. TRD says "14+" which is outdated. | HIGH |
-| React | **19+** | UI library | Ships with Next.js 16. React Compiler for automatic memoization. | HIGH |
-| TypeScript | 5.7+ | Type safety | Catch bugs at compile time, better DX. Strict mode. | HIGH |
-| Tailwind CSS | **4.0+** | Styling | **CORRECTION: v4 released Jan 2025.** CSS-first config via `@theme` (no tailwind.config.js), 5x faster, OKLCH colors. TRD says "3+" which is outdated. | HIGH |
-| shadcn/ui | CLI v4+ | Component library | Copy-paste components, Radix UI + Tailwind, fully customizable. Supports React 19 + Tailwind v4. | HIGH |
-| TanStack Query | v5.90+ | Server state | ~20% smaller than v4. `useSuspenseQuery` for data loading. `staleTime: 5min` for GPA, `refetchInterval: 15min` for deadlines. | HIGH |
-| Zustand | 5.0+ | Client state | v5 uses native `useSyncExternalStore` (React 18+). For UI state (sidebar, active tab, What-if slider values). | HIGH |
-
-### Database
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| PostgreSQL | 16 | Primary database | Relational data, full-text search (tsvector/tsquery), JSON columns, Docker-friendly. | HIGH |
-| Docker Compose | latest | Local DB hosting | Zero-install PostgreSQL, reproducible environment. | HIGH |
-
-### Infrastructure (MVP - Local Only)
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Docker Compose | latest | Local services orchestration | PostgreSQL + backend + frontend. Single `docker compose up`. | HIGH |
-| uvicorn | 0.34+ | ASGI server | FastAPI's recommended production server, hot reload for dev. | HIGH |
-
-### Authentication (MVP)
-
-| Library | Version | Purpose | Why | Confidence |
-|---------|---------|---------|-----|------------|
-| **PyJWT** | 2.10+ | JWT tokens | **CRITICAL FIX: python-jose is abandoned** (3+ years no release, 8 security warnings, Python 3.12 deprecation warnings). FastAPI docs officially switched to PyJWT. | HIGH |
-| passlib[bcrypt] | 1.7+ | Password hashing | Standard FastAPI auth pattern. CryptContext handles bcrypt with auto-deprecation. | HIGH |
-| bcrypt | 4.2+ | Bcrypt backend | Required by passlib. Actively maintained. | HIGH |
-
-### Supporting Libraries (Backend)
-
-| Library | Version | Purpose | When to Use | Confidence |
-|---------|---------|---------|-------------|------------|
-| httpx | 0.28+ | Async HTTP client | All external API calls (Canvas, Ed, USYD HTML). **RECOMMENDATION: Use httpx instead of aiohttp** -- see rationale below. Also needed for FastAPI TestClient. | MEDIUM |
-| beautifulsoup4 | 4.13+ | HTML parsing | Unit Outline HTML parsing only. Performance irrelevant (once-per-semester). | HIGH |
-| lxml | 5.3+ | BS4 backend parser | Use `BeautifulSoup(html, 'lxml')` for 10x faster parsing vs html.parser. | HIGH |
-| pydantic-settings | 2.0+ | Configuration | Environment variable loading, .env file support. | HIGH |
-| cryptography | 44+ | AES-256-GCM encryption | API token encryption in database. Already a transitive dep via PyJWT. | HIGH |
-| structlog | 25.5+ | Structured logging | JSON-formatted logs for CloudWatch compat. Production-proven since 2013. | HIGH |
-| anthropic | latest | Claude API client | AIEngine implementation (thread evaluation, digest generation). Phase 3+. | HIGH |
-| ruff | 0.15+ | Linting + formatting | Replaces flake8, isort, black. 10-100x faster. Written in Rust (same team as uv). | HIGH |
-| mypy | 1.15+ | Type checking | `--strict` mode enforced. | HIGH |
-| pytest | 8.3+ | Testing framework | Unit and integration tests. | HIGH |
-| pytest-asyncio | 0.25+ | Async test support | Testing async service/adapter methods. | HIGH |
-| pytest-cov | 6.0+ | Coverage reporting | Target >80% core modules, >60% overall. | HIGH |
-
-### Supporting Libraries (Frontend)
-
-| Library | Version | Purpose | When to Use | Confidence |
-|---------|---------|---------|-------------|------------|
-| ky | 1.14+ | HTTP client | API calls from frontend (fetch-based, auto-retry, hooks for JWT injection). | HIGH |
-| Recharts | **3.8+** | Data visualization | GPA charts, assessment weight pie charts. **CORRECTION: v3 is current** (March 2026). TRD says "2+". | HIGH |
-| date-fns | **4.1+** | Date manipulation | Deadline countdowns, "X days remaining". **CORRECTION: v4 adds native timezone support.** TRD says "3+". | HIGH |
-| @date-fns/tz | 1.0+ | Timezone support | Display deadlines in correct timezone. | HIGH |
-| lucide-react | latest | Icons | Consistent icon set across the UI. | HIGH |
-| clsx / tailwind-merge | latest | Class utilities | Conditional Tailwind classes in components. | HIGH |
-
-### Package Management
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| uv | 0.10+ | Python package/project manager | 10-100x faster than pip. From Astral (same team as ruff). Universal lockfile. | HIGH |
-| pnpm | 9+ | Frontend package manager | Strict dependency hoisting, fast installs, disk space savings. | HIGH |
+**Project:** UniBoard v2.0 — GPA Maximization Dashboard
+**Researched:** 2026-03-20
+**Overall Confidence:** HIGH (majority verified via official docs + multiple sources)
 
 ---
 
-## Critical Library Corrections
+## Recommended Stack
 
-These are changes from what the TRD v2.5 specifies, based on verified 2026 research:
+### Core Frontend Framework
 
-| TRD v2.5 Spec | Corrected Version | Reason |
-|---------------|-------------------|--------|
-| python-jose 3.3+ | **PyJWT 2.10+** | python-jose abandoned 3+ years. 8 security warnings. FastAPI officially deprecated it in favor of PyJWT. |
-| Next.js 14+ | **Next.js 16.1+** | 16 shipped Oct 2025. Turbopack stable, React 19, cache components, proxy.ts. |
-| Tailwind CSS 3+ | **Tailwind CSS 4.0+** | v4 released Jan 2025. CSS-first config, 5x faster builds, OKLCH colors. |
-| React 18+ | **React 19+** | Ships with Next.js 16. React Compiler for automatic memoization. |
-| Recharts 2+ | **Recharts 3.8+** | v3 is current (March 2026). Major improvements. |
-| date-fns 3+ | **date-fns 4.1+** | v4 adds native timezone support via @date-fns/tz. |
-| Alembic 1.14+ | **Alembic 1.18+** | 1.18 is current, has async improvements. |
-| ruff 0.8+ | **ruff 0.15+** | 0.15 is current, includes 2026 style guide. |
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Next.js | 15.5.x (already installed) | Full-stack React framework | App Router with RSC, Turbopack bundler, streaming, `next/dynamic` for code splitting. Already configured in project. No reason to change. | HIGH |
+| React | 19.1.x (already installed) | UI library | React 19 brings Server Components, `use()` hook, Actions. Already installed. | HIGH |
+| TypeScript | 5.x (already installed) | Type safety | Strict mode for contract-first development. Already configured. | HIGH |
+| Turbopack | Built into Next.js 15.5 | Dev/build bundler | Already configured via `next dev --turbopack` and `next build --turbopack`. ~10x faster HMR than Webpack. | HIGH |
 
-## httpx vs aiohttp Decision
+### Styling & Design System
 
-The TRD specifies aiohttp. This recommendation suggests **httpx** instead, for these reasons:
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Tailwind CSS | 4.x (already installed) | Utility-first CSS | Already installed. Tailwind v4 has CSS-first config, faster builds. Perfect for converting prototype inline styles to reusable utility classes. | HIGH |
+| CSS Variables (custom) | N/A | Design tokens | The prototype's 30+ CSS variables (--orange, --cream, --card-bg, etc.) should be defined as Tailwind theme extensions AND raw CSS custom properties for Rough.js components that need direct access. | HIGH |
+| Google Fonts (Inter + Source Serif 4) | N/A | Typography | Already specified in prototypes. Use `next/font/google` instead of CDN `<link>` tags for self-hosting, zero layout shift, and privacy. | HIGH |
 
-1. **UniBoard's API volume is low**: Canvas rate limit is 70 req/10s per token, Ed has even wider limits. aiohttp's raw throughput advantage is irrelevant.
-2. **httpx has HTTP/2 support**: Useful if Canvas/Ed ever upgrade.
-3. **httpx has both sync and async APIs**: Easier testing with sync mode, cleaner test fixtures.
-4. **Fewer dependencies**: aiohttp pulls in multidict, yarl, frozenlist, aiosignal. httpx is lighter.
-5. **httpx is the FastAPI TestClient**: Already needed as a dev dependency. Using it for production calls avoids having two HTTP libraries.
-6. **Better type hints**: httpx has more complete type annotations for mypy --strict.
+### Rough.js / Hand-Drawn Aesthetic
 
-**If the user prefers aiohttp**: It's a valid choice too -- it's faster for high-concurrency scenarios and more battle-tested for WebSocket use cases. The difference is marginal for UniBoard's needs. Either works.
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| roughjs | 4.6.6 (already installed) | Hand-drawn SVG/Canvas borders, charts, timelines | Core design differentiator. Must be client-only (`"use client"` components). Use `useRef` + `useEffect` pattern for DOM manipulation. | HIGH |
+| react-rough-notation | 1.0.8 (already installed) | React wrapper for text annotations | Declarative `<RoughNotation>` component with `show` prop. Already installed. Works well in client components. | HIGH |
+| rough-notation | 0.5.1 (already installed) | Underlying annotation engine | Peer dependency of react-rough-notation. Already installed. | HIGH |
+
+**Rough.js Integration Strategy (Critical):**
+
+Rough.js is inherently imperative (DOM manipulation via `rough.svg()` / `rough.canvas()`). In React/Next.js:
+
+1. **All Rough.js components must be client components** (`"use client"`) — no SSR support, canvas/SVG APIs require browser DOM
+2. **Use `useRef` + `useEffect` pattern** — get DOM reference, instantiate `rough.svg(svgRef.current)`, draw shapes in effect
+3. **Wrap in `next/dynamic` with `ssr: false`** for any Rough.js component imported from a Server Component page
+4. **ResizeObserver for responsive borders** — hand-drawn card borders need redrawing on resize. Debounce to 100ms.
+5. **Performance**: Rough.js generates complex SVG paths. For lists with 20+ cards, consider virtualizing or lazy-drawing (IntersectionObserver). Each `rough.rectangle()` call generates ~4-8 SVG path elements.
+
+**Already implemented components** (from Phase 04):
+- `RoughCard.tsx` — hand-drawn border card wrapper
+- `RoughDonut.tsx` — assessment weight donut chart
+- `RoughProgressBar.tsx` — hand-drawn progress bars
+- `RoughTimeline.tsx` — deadline timeline with dots
+- `RoughNotationWrapper.tsx` — declarative annotation wrapper
+- `HeroDoodles.tsx` — decorative background shapes
+
+**NOT recommended:**
+- `react-rough-fiber` — A React renderer that converts ALL SVG to hand-drawn. Overkill for UniBoard (only specific elements need hand-drawn style). Adds reconciler complexity. Last maintained for React 18 reconciler; React 19 compatibility unverified.
+
+### State Management
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| TanStack Query | v5.90.x (already installed) | Server state (API data caching, sync) | Industry standard for async state. Already installed. Use `prefetchQuery` + `dehydrate` + `HydrationBoundary` for SSR hydration. | HIGH |
+| Zustand | 5.x (already installed) | Client state (UI state, predictor sliders, notification panel) | Lightweight, no boilerplate. Already installed with stores for `predictor.ts`, `ui.ts`, `notifications.ts`. For SSR: client-only stores, `persist` middleware with `skipHydration: true` to avoid mismatches. | HIGH |
+
+**NOT recommended:**
+- Redux Toolkit — overkill for this app's client state needs. Zustand covers it with 1/10th the boilerplate.
+- Jotai — fine alternative but Zustand already chosen and installed.
+
+### HTTP Client
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| ky | 1.14.x (already installed) | HTTP requests to backend API | Already installed. Lightweight fetch wrapper (~3KB). Retry, timeout, hooks, JSON parsing built-in. Works well with TanStack Query (returns Promises). | MEDIUM |
+
+**Note on ky vs Axios:** ky is already chosen and installed. It's a modern, fetch-based client that's smaller than Axios (~3KB vs ~13KB). Works perfectly with TanStack Query since TQ is HTTP-client-agnostic. No reason to switch.
+
+### Icons
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| lucide-react | 0.577.x (already installed) | SVG icon system | React components for all Lucide icons. Already used in prototypes (via CDN lucide.js) and installed as React package. Tree-shakable — only bundles used icons. | HIGH |
+
+### Internationalization (i18n)
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| next-intl | 4.8.x (already installed) | i18n for Next.js App Router | Already configured with `[locale]` routing, `request.ts`, `routing.ts`. Best-in-class for App Router + RSC. Supports static rendering with `setRequestLocale()`. 2 locales: `en` + `zh`. | HIGH |
+
+### Date/Time
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| date-fns | 4.1.x (already installed) | Date formatting, relative time, calendar math | Tree-shakable, immutable, TypeScript-first. Already installed. Use for deadline countdowns, calendar grid, semester week calculations. | HIGH |
+
+### Contract-First Mock API (M1)
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Next.js Route Handlers | Built-in | Mock API endpoints during M1 | **Recommended over MSW and JSON Server.** Route Handlers (`app/api/[...]/route.ts`) provide the simplest contract-first approach: define the exact URL paths and response shapes that M2's FastAPI will implement. Zero extra dependencies. Same URL structure the frontend already calls. Type-safe with TypeScript. | HIGH |
+| OpenAPI spec (YAML) | N/A | API contract documentation | Write `openapi.yaml` defining all endpoints, request/response schemas. Frontend Route Handlers implement this spec for M1. Backend FastAPI implements same spec for M2. Ensures zero-change frontend integration. | HIGH |
+
+**Why NOT MSW:**
+- MSW intercepts at the network level — useful for testing but adds complexity for development mocking
+- Requires separate browser + Node.js setup for App Router (SSR + CSR)
+- MSW doesn't work in Edge Runtime (middleware)
+- Route Handlers are simpler: same file system, same Next.js dev server, no extra process
+
+**Why NOT JSON Server:**
+- Separate process to manage
+- Can't match complex response shapes or business logic
+- No TypeScript type safety
+- Less representative of the actual API contract
+
+**M1 to M2 Transition Strategy:**
+1. Define `openapi.yaml` with all API contracts
+2. M1: Next.js Route Handlers return static/mock JSON matching the spec
+3. M2: FastAPI implements the same endpoints
+4. Frontend: Change `API_BASE_URL` environment variable from `/api` (local Route Handlers) to `http://backend:8000` (FastAPI)
+5. Zero frontend code changes needed
+
+### Testing (Frontend)
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Vitest | 4.1.x (already installed) | Test runner | Already configured. Fast, Vite-native, ESM-first. | HIGH |
+| Testing Library (React) | 16.3.x (already installed) | Component testing | Already installed. `@testing-library/react` + `@testing-library/user-event` + `@testing-library/jest-dom`. | HIGH |
+| jsdom | 29.x (already installed) | DOM environment for tests | Already installed. Note: jsdom lacks `scrollTo`, `scrollIntoView`, `ResizeObserver` — mock or guard these in Rough.js components. | HIGH |
+
+### Linting & Formatting
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| ESLint | 9.x (already installed) | Linting | Already configured with `eslint-config-next`. `--max-warnings 0` in lint script. | HIGH |
+| eslint-config-next | 15.5.x (already installed) | Next.js-specific ESLint rules | Already installed. | HIGH |
+
+---
+
+## Backend Stack (M2)
+
+### Core Backend
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Python | 3.12+ | Runtime | Already specified in constraints. Type hints, `match` statement, performance improvements. | HIGH |
+| FastAPI | 0.115.x+ | Web framework | Async-first, auto-generated OpenAPI docs, Pydantic v2 integration, dependency injection. Production-proven. | HIGH |
+| SQLAlchemy | 2.0.x | ORM | Async engine via `create_async_engine()`, 2.0-style queries, type-annotated models. Use `AsyncSession` with FastAPI dependency injection. | HIGH |
+| asyncpg | 0.30.x+ | PostgreSQL async driver | Highest-performance async PG driver. 3-5x throughput vs sync for concurrent requests. | HIGH |
+| Pydantic | 2.x | Data validation / schemas | V2 is Rust-backed, 5-17x faster than V1. Shared validation between API schemas and adapter response parsing. | HIGH |
+| Alembic | 1.14.x+ | Database migrations | Async migration support with `run_async()`. Use `op.execute()` for custom types (e.g., pgvector). | HIGH |
+| PostgreSQL | 16 | Database | Docker for local, RDS for production. JSONB for flexible Ed API responses, full-text search for materials. | HIGH |
+| uv | Latest | Package management | 10-100x faster than pip. Already specified in constraints. | HIGH |
+
+### Backend Libraries
+
+| Library | Version | Purpose | Why | Confidence |
+|---------|---------|---------|-----|------------|
+| httpx | 0.28.x+ | HTTP client for external APIs | Async, connection pooling, timeout/retry. For Canvas API, Ed API calls. | HIGH |
+| APScheduler | 3.11.x+ | Background sync scheduler | Cron triggers for grades (15min), deadlines (1h), modules (daily). Use `timezone="Australia/Sydney"` (not UTC offset). | HIGH |
+| bcrypt | 4.x | Password hashing | JWT auth. Already specified in constraints. | HIGH |
+| python-jose | 3.3.x | JWT token handling | Encode/decode JWT with HS256. | MEDIUM |
+| cryptography | 44.x+ | AES-256-GCM token encryption | Encrypt Canvas/Ed API tokens at rest in PostgreSQL. | HIGH |
+| beautifulsoup4 | 4.12.x | HTML parsing | Unit Outline HTML scraping from USYD website. | HIGH |
+| ruff | Latest | Linting + formatting | Already specified. Single tool replaces flake8 + black + isort. | HIGH |
+| mypy | Latest | Type checking | `--strict` mode. Already specified. | HIGH |
+| pytest + pytest-asyncio | Latest | Testing | Already specified. Use `asyncio_mode = "auto"` for cleaner async test syntax. | HIGH |
+
+### AI / MCP Stack (M3)
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| anthropic | Latest PyPI | Claude API client | Official Python SDK. For Sonnet digest/scoring (Messages API with structured output). | HIGH |
+| claude-agent-sdk | 0.1.48+ | MCP Agent runtime | Official Anthropic Agent SDK. Provides the agent loop, tool management, and MCP integration. For spawning Claude Opus 4.6 agents with MCP tools server-side. | MEDIUM |
+| mcp | 1.7.x+ | MCP Python SDK | Official MCP protocol implementation. Build MCP server exposing Canvas/Ed tools. Use Streamable HTTP transport for production (replaces deprecated SSE transport). | HIGH |
+
+**MCP Agent Architecture:**
+
+```
+User Request (e.g., "What's important for my COMP2017 exam?")
+    |
+    v
+FastAPI Endpoint → claude-agent-sdk
+    |                    |
+    |                    v
+    |              Claude Opus 4.6 (agent loop)
+    |                    |
+    |                    v  (MCP tool calls)
+    |              MCP Server (Python, same process or separate)
+    |                    |
+    |          +---------+---------+
+    |          |         |         |
+    |          v         v         v
+    |     Canvas     Ed Discussion  Ed Lessons
+    |     Adapter     Adapter       Adapter
+    |          |         |         |
+    |          +---------+---------+
+    |                    |
+    |                    v
+    |              Aggregated Context
+    |                    |
+    |                    v
+    |              Claude Response (with citations)
+    v
+API Response → Frontend
+```
+
+**Key decisions:**
+- Use `claude-agent-sdk` (not raw Messages API) for agent features — it handles the tool-use loop, retries, and context management
+- Use raw `anthropic` SDK for simpler tasks (digest scoring, GPA predictions) where a single API call suffices
+- MCP server can run in-process (same FastAPI app) or as a separate service. Start in-process for simplicity, split if performance requires it.
+
+---
+
+## Infrastructure
+
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Docker Compose | Latest | Local development | PostgreSQL 16 container. Already specified. | HIGH |
+| pnpm | 9+ | Frontend package manager | Already specified and configured. Faster, deduplicates. | HIGH |
+| Node.js | 20 LTS or 22 LTS | Frontend runtime | Next.js 15.5 requires Node 18.18+. Use LTS for stability. | HIGH |
+
+---
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Backend framework | FastAPI | Django REST | Django is sync-first; FastAPI's async is critical for concurrent API calls to Canvas/Ed |
-| ORM | SQLAlchemy 2.0 async | Tortoise ORM | SQLAlchemy has far larger ecosystem, better migration tooling (Alembic) |
-| HTTP client (backend) | httpx | aiohttp | aiohttp is faster at scale but httpx has better DX, fewer deps, HTTP/2. See section above. |
-| JWT | PyJWT | python-jose | python-jose abandoned, 8 security warnings, deprecated by FastAPI. |
-| HTML Parser | beautifulsoup4 + lxml | selectolax | selectolax is fastest but BS4 is sufficient (once-per-semester parsing). |
-| Frontend framework | Next.js 16 | Vite + React | Next.js provides file-system routing, static export, built-in optimizations. |
-| Component library | shadcn/ui | Ant Design, MUI | shadcn/ui gives full source code control, fits Anthropic aesthetic. MUI/Ant impose their own design. |
-| State management | Zustand + TanStack Query | Redux Toolkit | Redux is overkill; Zustand for UI + TQ for server state is the modern standard. |
-| Charts | Recharts 3 | Nivo | Nivo is heavier. Recharts covers needed chart types (bar, pie, line) with simpler API. |
-| Task queue | asyncio tasks (MVP) | Celery + Redis | Celery adds operational complexity; asyncio tasks sufficient for single-user local MVP. |
-| Search | PostgreSQL tsvector | Elasticsearch | tsvector is zero-cost, sufficient for text search at MVP scale. |
-| Package mgmt | uv | poetry | uv is 10-100x faster, from same team as ruff. Poetry is slower. |
-| Logging | structlog | loguru | structlog outputs structured JSON natively (CloudWatch compatible). loguru is prettier but less structured. |
-| Encryption | cryptography | PyCryptodome | cryptography is already a transitive dep via PyJWT. Avoids duplicate crypto libraries. |
+| Mock API (M1) | Next.js Route Handlers | MSW 2.x | MSW adds complexity (dual browser/Node setup), doesn't work in Edge Runtime, extra dependency. Route Handlers are zero-config and represent the actual URL structure. |
+| Mock API (M1) | Next.js Route Handlers | JSON Server | Separate process, no TypeScript safety, can't model complex response shapes, no middleware support. |
+| Rough.js wrapper | Direct `useRef`+`useEffect` | react-rough-fiber | react-rough-fiber converts ALL SVGs to hand-drawn style (too aggressive). UniBoard needs selective hand-drawn elements. React 19 reconciler compatibility unverified. |
+| State management | Zustand | Redux Toolkit | Overkill. UniBoard has ~3 small stores (UI, predictor, notifications). Zustand requires no providers, no actions, no reducers. |
+| State management | Zustand | Jotai | Both are fine. Zustand already chosen and installed. Switching provides no benefit. |
+| HTTP client | ky | Axios | ky already installed. Smaller (~3KB vs ~13KB), fetch-based (native), works everywhere. Axios would be redundant. |
+| i18n | next-intl | i18next + react-i18next | next-intl is purpose-built for Next.js App Router + RSC. i18next requires more setup for server components. |
+| CSS | Tailwind CSS | CSS Modules | Tailwind already chosen. Faster to convert prototypes (utility classes map 1:1 to inline styles). CSS Modules require naming conventions. |
+| Agent SDK | claude-agent-sdk | Raw Messages API + manual tool loop | claude-agent-sdk handles retries, tool-use loop, context management. Manual implementation is error-prone for complex multi-tool agent flows. |
+| MCP transport | Streamable HTTP | Deprecated SSE | SSE transport was deprecated March 2025. Streamable HTTP is the current standard — single endpoint, bidirectional, supports stateless deployments. |
 
-## Version Pinning Strategy
+---
 
-Pin major.minor in `pyproject.toml` and `package.json`, allow patch updates:
+## Fonts Configuration
 
-```toml
-# pyproject.toml (backend)
-[project]
-requires-python = ">=3.12"
-dependencies = [
-    "fastapi[standard]>=0.135,<1.0",
-    "sqlalchemy[asyncio]>=2.0,<3.0",
-    "asyncpg>=0.30,<1.0",
-    "alembic>=1.18,<2.0",
-    "mcp>=1.25,<2.0",
-    "pyjwt[crypto]>=2.10,<3.0",
-    "passlib[bcrypt]>=1.7,<2.0",
-    "bcrypt>=4.2,<5.0",
-    "httpx>=0.28,<1.0",
-    "beautifulsoup4>=4.13,<5.0",
-    "lxml>=5.3,<6.0",
-    "structlog>=25.0,<26.0",
-    "pydantic>=2.12,<3.0",
-    "pydantic-settings>=2.0,<3.0",
-]
+**Replace CDN `<link>` tags with `next/font/google`:**
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.3,<9.0",
-    "pytest-asyncio>=0.25,<1.0",
-    "pytest-cov>=6.0,<7.0",
-    "mypy>=1.15,<2.0",
-    "ruff>=0.15,<1.0",
-]
+```typescript
+// app/[locale]/layout.tsx
+import { Inter, Source_Serif_4 } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-source-serif',
+  display: 'swap',
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
+});
+
+// Apply to <body>
+<body className={`${inter.variable} ${sourceSerif.variable}`}>
 ```
 
-```json
-{
-  "dependencies": {
-    "next": "^16.1",
-    "react": "^19.0",
-    "react-dom": "^19.0",
-    "@tanstack/react-query": "^5.90",
-    "zustand": "^5.0",
-    "recharts": "^3.8",
-    "ky": "^1.14",
-    "date-fns": "^4.1",
-    "@date-fns/tz": "^1.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.7",
-    "@types/react": "^19.0",
-    "tailwindcss": "^4.0",
-    "eslint": "^9.0",
-    "eslint-config-next": "^16.1"
-  }
-}
+```css
+/* In Tailwind/CSS */
+body { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif; }
+h1, h2, h3, h4, h5 { font-family: var(--font-source-serif), Georgia, serif; }
 ```
+
+---
 
 ## Installation
 
+### Frontend (already configured)
+
 ```bash
-# Backend setup (with uv)
-uv sync
-uv sync --group dev
-
-# Frontend setup
-cd frontend && pnpm install
-
-# Database
-docker compose up -d  # starts PostgreSQL 16
-
-# Initialize database
-alembic upgrade head
-
-# Verify environment
-mypy src/ && pytest && ruff check .
+cd frontend
+pnpm install
+# All packages already in package.json
 ```
+
+### Backend (M2 — new setup)
+
+```bash
+# Initialize with uv
+uv init
+uv add fastapi uvicorn[standard] sqlalchemy[asyncio] asyncpg alembic
+uv add pydantic pydantic-settings
+uv add httpx apscheduler bcrypt python-jose cryptography
+uv add beautifulsoup4 lxml
+uv add anthropic mcp claude-agent-sdk
+
+# Dev dependencies
+uv add --dev pytest pytest-asyncio httpx mypy ruff
+uv add --dev types-beautifulsoup4
+```
+
+### Mock API OpenAPI Contract (M1)
+
+```bash
+# No extra packages needed — use Next.js Route Handlers
+# Define contract in:
+frontend/openapi.yaml
+# Implement mock handlers in:
+frontend/app/api/[...endpoint]/route.ts
+```
+
+---
+
+## Version Pinning Strategy
+
+| Layer | Strategy | Rationale |
+|-------|----------|-----------|
+| Frontend | `^` (caret) in package.json, pnpm lockfile | Caret allows patch/minor updates. Lockfile ensures reproducibility. |
+| Backend | `>=X.Y,<X+1` in pyproject.toml, uv.lock | Pin major, allow minor/patch. Lock for reproducibility. |
+| Docker | Exact tags (e.g., `postgres:16.4-alpine`) | Prevent surprise changes in infrastructure. |
+| Node.js | LTS version in `.nvmrc` or `.node-version` | Consistency across dev machines and CI. |
+
+---
 
 ## Sources
 
-- [FastAPI Releases](https://github.com/fastapi/fastapi/releases) -- latest 0.135+
-- [FastAPI JWT docs -- PyJWT](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) -- python-jose deprecated
-- [python-jose abandonment discussion](https://github.com/fastapi/fastapi/discussions/9587)
-- [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) -- v1.25+
-- [MCP Python SDK PyPI](https://pypi.org/project/mcp/)
-- [SQLAlchemy Async Docs](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)
-- [Alembic Docs](https://alembic.sqlalchemy.org/en/latest/) -- v1.18
-- [Next.js 16 Blog](https://nextjs.org/blog/next-16) -- Oct 2025 release
-- [Next.js 16.1 Blog](https://nextjs.org/blog/next-16-1) -- Dec 2025, Turbopack FS cache
-- [Tailwind CSS v4](https://tailwindcss.com/blog/tailwindcss-v4) -- Jan 2025 release
-- [shadcn/ui CLI v4](https://ui.shadcn.com/docs/changelog/2026-03-cli-v4)
-- [Recharts npm](https://www.npmjs.com/package/recharts) -- v3.8.0
-- [Zustand v5 Announcement](https://pmnd.rs/blog/announcing-zustand-v5)
-- [TanStack Query v5](https://tanstack.com/query/latest) -- v5.90+
-- [Ruff Releases](https://github.com/astral-sh/ruff/releases) -- v0.15+
-- [uv Releases](https://github.com/astral-sh/uv/releases) -- v0.10+
-- [structlog Docs](https://www.structlog.org/) -- v25.5.0
-- [cryptography AESGCM Docs](https://cryptography.io/en/latest/hazmat/primitives/aead/)
-- [Pydantic Docs](https://docs.pydantic.dev/latest/) -- v2.12+
-- [ky npm](https://www.npmjs.com/package/ky) -- v1.14+
-- [date-fns v4 Blog](https://blog.date-fns.org/v40-with-time-zone-support/)
-- UniBoard TRD v2.5 SS1.2 (technology stack decisions)
-- UniBoard PROJECT.md (constraints)
+### Official Documentation (HIGH confidence)
+- [Next.js App Router Guides](https://nextjs.org/docs/app/guides) — Rendering, data fetching, streaming
+- [TanStack Query SSR Guide](https://tanstack.com/query/latest/docs/framework/react/guides/ssr) — Hydration patterns for App Router
+- [TanStack Query Advanced SSR](https://tanstack.com/query/v5/docs/react/guides/advanced-ssr) — prefetchQuery + dehydrate pattern
+- [next-intl App Router Setup](https://next-intl.dev/docs/getting-started/app-router) — i18n configuration
+- [Rough.js Documentation](https://roughjs.com/) — API reference for SVG/Canvas rendering
+- [MSW Source OpenAPI](https://source.mswjs.io/docs/integrations/open-api/) — MSW OpenAPI integration (evaluated, not recommended)
+- [Anthropic MCP SDK (PyPI)](https://pypi.org/project/mcp/) — Python MCP protocol SDK
+- [Claude Agent SDK (GitHub)](https://github.com/anthropics/claude-agent-sdk-python) — Official agent runtime
+- [Claude Agent SDK Overview](https://platform.claude.com/docs/en/agent-sdk/overview) — Production agent building guide
+- [Anthropic Tool Use Docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) — Tool use patterns
+
+### Verified Articles (MEDIUM confidence)
+- [FastAPI + Async SQLAlchemy 2.0 + asyncpg](https://leapcell.io/blog/building-high-performance-async-apis-with-fastapi-sqlalchemy-2-0-and-asyncpg) — Async patterns, 3-5x throughput
+- [Setting up FastAPI with Async SQLAlchemy 2.0 & Pydantic V2](https://medium.com/@tclaitken/setting-up-a-fastapi-app-with-async-sqlalchemy-2-0-pydantic-v2-e6c540be4308)
+- [Rough.js + React Hooks Pattern](https://christoshrousis.com/writing/04-how-to-combine-roughjs-and-react-hooks-to-draw-to-a-html-canvas-within-gatsby/) — useRef + useEffect pattern
+- [react-rough-fiber (evaluated)](https://bowencodes.com/post/react-rough-fiber) — React renderer for SVG (decided against)
+- [MSW + Next.js App Router Setup](https://gimbap.dev/blog/setting-msw-in-next) — MSW dual setup complexity (decided against)
+- [MSW + Next.js 16 Integration Demo](https://github.com/laststance/next-msw-integration) — Comprehensive MSW setup reference
+- [MCP Production Architecture](https://dev.to/lizechengnet/how-to-structure-claude-code-for-production-mcp-servers-subagents-and-claudemd-2026-guide-4gjn) — Layered MCP architecture
+- [FastMCP + Anthropic API Integration](https://gofastmcp.com/integrations/anthropic) — FastAPI MCP server patterns
+- [Zustand + Next.js App Router](https://www.dimasroger.com/blog/how-to-use-zustand-with-next-js-15) — SSR hydration patterns
+- [Orval OpenAPI Codegen](https://orval.dev/) — Type-safe client + MSW mock generation from OpenAPI (evaluated for M2 integration)
+
+### Package Documentation
+- [react-rough-notation (npm)](https://www.npmjs.com/package/react-rough-notation) — React wrapper API
+- [react-rough-notation (GitHub)](https://github.com/linkstrifer/react-rough-notation) — Source + examples
+- [ky (npm)](https://www.npmjs.com/package/ky) — HTTP client API

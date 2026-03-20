@@ -1,391 +1,510 @@
 # Architecture Patterns
 
-**Domain:** University Academic Dashboard with LMS Integration (GPA Maximization)
-**Researched:** 2026-03-16
+**Domain:** GPA Maximization Dashboard (University EdTech SaaS)
+**Researched:** 2026-03-20
+**Confidence:** HIGH (existing v1 codebase validated patterns, TRD v2.5 provides detailed specs)
+
+---
 
 ## Recommended Architecture
 
-UniBoard's architecture is a **sync-and-serve data aggregation system** -- a pattern common in dashboard products that pull from multiple upstream APIs with varying rate limits and data freshness requirements. The system collects data from Canvas LMS, Ed Discussion, Ed Lessons, and USYD Unit Outline HTML pages, normalizes it into a local PostgreSQL store, and serves it to both a web dashboard (Next.js) and an MCP server (Claude Desktop).
-
-The TRD v2.5 already defines a solid dual-layer architecture. This document validates, refines, and annotates it with build-order implications for roadmap phasing.
+UniBoard v2.0 uses a **dual-layer architecture** with four milestone-aligned component groups:
 
 ```
-                    +--------------------------+
-                    |     User Entry Points    |
-                    |  Browser / Claude / Email |
-                    +-----------+--------------+
-                                |
-               +----------------+----------------+
-               |                                 |
-      +--------v--------+            +----------v----------+
-      |   Web API Layer  |            |   MCP Server Layer   |
-      |   (FastAPI REST) |            |   (stdio/SSE)        |
-      +--------+---------+            +----------+-----------+
-               |                                 |
-               +----------------+----------------+
-                                |
-                    +-----------v-----------+
-                    |    Service Layer       |
-                    |  (Shared Business Logic)|
-                    |                        |
-                    | GPAService             |
-                    | UnitOutlineService     |
-                    | DeadlineService        |
-                    | CourseMaterialService  |
-                    | IntelligenceService    |
-                    | RiskAlertService       |
-                    | NotificationService    |
-                    | AIEngine               |
-                    +-----------+-----------+
-                                |
-                    +-----------v-----------+
-                    | Platform Adapter Layer |
-                    |  (Abstract interfaces) |
-                    |                        |
-                    | LMSAdapter (Canvas)    |
-                    | DiscussionAdapter (Ed) |
-                    | LessonAdapter (Ed)     |
-                    | UnitOutlineParser      |
-                    +-----------+-----------+
-                                |
-               +----------------+----------------+
-               |                |                |
-      +--------v------+ +------v------+ +-------v--------+
-      | Canvas LMS API| | Ed API      | | USYD HTML      |
-      | (sydney.edu)  | | (edstem.org)| | (sydney.edu.au)|
-      +---------------+ +-------------+ +----------------+
-
-                    +-----------+-----------+
-                    |     Data Layer         |
-                    |  PostgreSQL (Docker)   |
-                    |  + File Cache (local)  |
-                    +-----------------------+
-
-                    +-----------+-----------+
-                    |   Sync Engine          |
-                    |  (Background Tasks)    |
-                    |  Grades: 15min         |
-                    |  Deadlines: 1h         |
-                    |  Modules/Lessons: 24h  |
-                    |  UnitOutline: semester  |
-                    +-----------------------+
+                   ┌─────────────────────────────────┐
+                   │         User Interface           │
+                   │  Next.js App Router + Tailwind   │
+                   │  Rough.js canvas + i18n (EN/CN)  │
+                   │  TanStack Query + Zustand        │
+                   └───────────┬─────────────────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │   API Contract Layer │
+                    │ OpenAPI spec (shared)│
+                    │ MSW mocks (M1)      │
+                    │ FastAPI real (M2+)   │
+                    └──────────┬──────────┘
+                               │
+         ┌─────────────────────▼─────────────────────┐
+         │              Application Layer             │
+         │  FastAPI + SQLAlchemy 2.0 async            │
+         │  ┌───────┐ ┌──────────┐ ┌──────────────┐  │
+         │  │Service│ │  Sync    │ │ AI Engine    │  │
+         │  │ Layer │ │  Engine  │ │ (Anthropic)  │  │
+         │  └───┬───┘ └────┬─────┘ └──────┬───────┘  │
+         │      └──────────┼──────────────┘           │
+         │                 │                          │
+         │  ┌──────────────▼──────────────────────┐   │
+         │  │     Platform Adapter Layer           │   │
+         │  │  Canvas │ Ed Discussion │ Ed Lessons │   │
+         │  │  Unit Outline Parser                 │   │
+         │  └──────────────┬──────────────────────┘   │
+         └─────────────────┼──────────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │       Data Layer        │
+              │  PostgreSQL 16 (Docker) │
+              │  AES-256-GCM tokens     │
+              │  APScheduler sync jobs  │
+              └─────────────────────────┘
 ```
 
-### Component Boundaries
+### Four Milestone Component Map
 
-| Component | Responsibility | Communicates With | I/O Boundary |
-|-----------|---------------|-------------------|--------------|
-| **Web API Layer** (FastAPI) | REST endpoints, JWT auth, request validation, response formatting | Service Layer, Auth middleware | HTTP in, JSON out |
-| **MCP Server Layer** | MCP tool definitions, stdio/SSE transport for Claude Desktop | Service Layer (same instances) | MCP protocol in/out |
-| **Service Layer** | All business logic: GPA calculation, deadline aggregation, AI evaluation, digest generation | Adapter Layer (data fetch), Data Layer (read/write), AIEngine (LLM calls) | Internal function calls |
-| **Platform Adapter Layer** | Abstract interfaces to external APIs; handle pagination, rate limiting, auth headers | External APIs (Canvas, Ed, USYD HTML) | HTTPS out, structured data in |
-| **Data Layer** (PostgreSQL) | Persistent storage: users, courses, grades, threads, outlines, deadlines, push records | Accessed by Service Layer via SQLAlchemy async ORM | SQL queries |
-| **Sync Engine** | Periodic background jobs that pull fresh data from adapters into DB | Adapter Layer (fetch), Data Layer (upsert) | Timer-triggered |
-| **AIEngine** | LLM-powered evaluation (thread relevance, digest generation, material summarization) | Anthropic API (Claude) | HTTPS out |
-| **Frontend** (Next.js) | SPA dashboard UI, client-side routing, data visualization | Web API Layer via HTTP | Fetch API |
+| Milestone | Components | Dependencies |
+|-----------|-----------|--------------|
+| **M1: Frontend** | Next.js app, design system, MSW mock API, i18n, OpenAPI spec | None (standalone) |
+| **M2: Backend** | FastAPI, adapters, services, sync engine, DB models, migrations | M1's OpenAPI spec (implements contracts) |
+| **M3: AI/MCP** | MCP Agent (Opus 4.6), Skill system, streaming SSE, Claude API integration | M2 backend (data access) |
+| **M4: Engineering** | Testing suite, AWS CDK, CI/CD, monitoring, security hardening | M1 + M2 + M3 stable |
 
-### Data Flow
+---
 
-**Primary data flow (sync cycle):**
+## Component Boundaries
+
+### Frontend Layer (M1)
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| **AppShell** | Three-column layout: Sidebar (68px→224px) + Header + Main + RightPanel (300px) | All page components |
+| **Design System** (`components/design-system/`) | RoughCard, RoughDonut, RoughProgressBar, RoughTimeline, RoughNotationWrapper, HeroDoodles — all Rough.js canvas rendering | Page components via composition |
+| **Page Components** (10 pages) | Dashboard, Courses, CourseDetail, Deadlines, Predict, Digest, Timetable, Settings, Auth (login/register), Setup (onboarding) | API layer via TanStack Query hooks |
+| **API Client** (`lib/api/`) | ky-based HTTP client with JWT auth, response unwrapping, typed endpoints | Backend API (real or MSW mock) |
+| **Hooks** (`lib/hooks/`) | TanStack Query wrappers: useGPA, useCourses, useDeadlines, usePredict, useDigest, useAI, useNotifications, useSync, useAuth, useUser | API client |
+| **Stores** (`lib/stores/`) | Zustand: UIStore (sidebar state), PredictorStore (what-if scores), NotificationStore | Page components |
+| **i18n** (`lib/i18n/` + `messages/`) | next-intl with `[locale]` dynamic routing, EN + CN JSON message files | All components via `useTranslations()` |
+| **Mock API** (MSW handlers) | Request interceptors implementing OpenAPI contracts with realistic fixture data | ky client (network level interception) |
+
+**Key boundary rule:** Rough.js components are always `"use client"` — they use `useRef`, `useEffect`, and browser canvas APIs. Keep them in `components/design-system/` and compose into page-level Server Components where needed.
+
+### Backend Layer (M2)
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| **FastAPI App** (`src/web/main.py`) | Application factory, CORS, error handlers, request ID middleware | Routes, middleware |
+| **Routes** (`src/web/routes/`) | HTTP endpoints: auth, users, gpa, deadlines, materials, intelligence, digest, ai, sync, notifications, alerts, health | Services via dependency injection |
+| **Services** (`src/services/`) | Business logic: GPAService, DeadlineService, IntelligenceService, DigestService, MaterialsService, AIEngine, NotificationService, RiskAlertService, CourseLinkingService, QAService | Adapters, Models |
+| **Adapters** (`src/adapters/`) | Platform abstraction: CanvasAdapter (LMSAdapter), EdDiscussionAdapter (DiscussionAdapter), EdLessonsAdapter (LessonAdapter) | External APIs (Canvas, Ed) |
+| **Parsers** (`src/parsers/`) | Unit Outline HTML parser (BeautifulSoup4, deterministic) | USYD website HTML |
+| **Models** (`src/models/`) | SQLAlchemy 2.0 ORM: User, Course, Grade, Module, ModuleItem, Lesson, Slide, DiscussionThread, UnifiedDeadline, UnitOutline, PushRecord, Notification, Digest, Embedding | Database |
+| **Schemas** (`src/schemas/`) | Pydantic v2 request/response schemas mirroring frontend TypeScript types | Routes, Services |
+| **Sync Engine** (`src/sync/`) | APScheduler 3.11 with configurable intervals: grades 15min, deadlines 1h, modules daily, Unit Outline per semester | Adapters, Models |
+| **Security** (`src/security/`) | JWT auth, bcrypt password hashing, AES-256-GCM token encryption | Routes, Models |
+
+**Key boundary rule:** Services never call external APIs directly — always through Adapters. This enables testing with mock adapters and future platform extensibility (Moodle, Blackboard).
+
+### AI/MCP Layer (M3)
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| **AIEngine** (`src/services/ai_engine.py`) | Anthropic API wrapper: thread evaluation, digest generation, Q&A, unit review. Uses Sonnet for routine tasks, Opus for deep analysis | Anthropic API |
+| **MCP Agent** (new in M3) | Opus 4.6 with MCP tools for cross-platform research. Spawns agent sessions to autonomously research across Canvas + Ed | MCP tools, Anthropic API |
+| **MCP Tools** (canvas-ed-mcp) | Already configured in dev environment. Tools for Canvas/Ed data access | Canvas API, Ed API |
+| **Skill System** (new in M3) | Auto-generated prompt templates (~50 skills). Per-course differentiation. Categories: data-collection, data-processing, ai-analysis, user-actions | MCP Agent, prompt storage |
+| **Streaming SSE** (new in M3) | FastAPI `StreamingResponse` with SSE for real-time AI output. Frontend `EventSource` or `fetch` with `ReadableStream` | FastAPI → Frontend |
+
+**Key boundary rule:** MCP Agent is invoked via backend API routes (not directly from frontend). The backend spawns Claude sessions with MCP tools, streams results via SSE. The frontend never holds Anthropic API keys.
+
+---
+
+## Data Flow
+
+### 1. Contract-First Flow (M1 → M2 Integration)
 
 ```
-External APIs ──[Adapter fetches]──> Raw Data
-  ──[Service Layer normalizes/deduplicates]──> PostgreSQL
-  ──[Service Layer reads + computes]──> API Response
-  ──[Frontend renders]──> User sees dashboard
+[M1] Define OpenAPI spec (YAML/JSON)
+  ↓
+[M1] Generate TypeScript types from spec → lib/api/types.ts
+  ↓
+[M1] Write MSW handlers matching spec → mocks/handlers.ts
+  ↓
+[M1] Frontend dev against MSW mocks (full functionality)
+  ↓
+[M2] Implement FastAPI routes matching SAME spec
+  ↓
+[M2] Generate Pydantic schemas from spec (or manually match)
+  ↓
+[Integration] Swap MSW → real backend (NEXT_PUBLIC_API_URL change)
+  ↓
+[Verification] Frontend works with zero changes
 ```
 
-**Detailed flow for key operations:**
+**Implementation strategy:** Use a shared `openapi.yaml` at project root. M1 uses `openapi-typescript` to generate types. MSW handlers are written to match the spec exactly. M2 FastAPI routes are validated against the same spec via `openapi-spec-validator` or manual matching.
 
-1. **Grade Sync (every 15 min):**
-   ```
-   SyncEngine timer fires
-     -> GPAService.sync_grades()
-       -> CanvasAdapter.get_grades(course_id) for each course
-       -> Compare with existing Grade rows (graded_at timestamp)
-       -> Upsert new/changed grades to PostgreSQL
-       -> GPAService.recalculate_wam() if grades changed
-       -> RiskAlertService.check_gpa_risk() if deviation detected
-   ```
+Existing `frontend/lib/api/endpoints.ts` already defines all endpoint paths. Existing `frontend/lib/api/types.ts` already mirrors backend Pydantic schemas. This contract surface is already well-defined.
 
-2. **Deadline Aggregation (every 1h):**
-   ```
-   SyncEngine timer fires
-     -> DeadlineService.sync_all_deadlines()
-       -> CanvasAdapter.get_assignments_with_dates() -> deadlines from Canvas
-       -> EdLessonsAdapter.get_lessons() -> deadlines from Ed Lessons (due_at field)
-       -> EdDiscussionAdapter.get_threads() + AIEngine -> deadline mentions from Ed posts
-       -> DeadlineService._merge_and_deduplicate() (SHA-256 dedup_key)
-       -> Upsert to UnifiedDeadline table
-       -> NotificationService.schedule_reminders() for new deadlines
-   ```
+### 2. Sync Data Flow (Background)
 
-3. **GPA What-if Prediction (on-demand):**
-   ```
-   User adjusts sliders in frontend
-     -> POST /gpa/predict with what_if_scores[]
-       -> GPAService.predict_gpa()
-         -> Read current Grade rows from DB
-         -> Merge with hypothetical scores
-         -> Apply UnitOutline weights (primary) or Canvas weights (fallback)
-         -> Calculate projected WAM using USYD formula
-       -> Return prediction to frontend immediately (no sync needed)
-   ```
+```
+APScheduler cron/interval triggers
+  ↓
+sync_all_grades() / sync_all_deadlines() / sync_all_modules() / ...
+  ↓
+For each user with valid tokens:
+  ↓
+  Adapter.get_*(decrypt_token(user.canvas_token))
+    ↓
+  Canvas/Ed API → raw data
+    ↓
+  Transform → ORM model instances
+    ↓
+  Upsert to PostgreSQL (ON CONFLICT UPDATE)
+    ↓
+  Detect changes → create Notifications
+```
 
-4. **Unit Outline Fetch (once per semester):**
-   ```
-   First sync or manual trigger
-     -> UnitOutlineService.get_assessment_structure(course_id)
-       -> CanvasAdapter.get_tab_url(course_id, "Unit Outline")
-       -> HTTP GET USYD HTML page (no auth needed)
-       -> BeautifulSoup4 parse #assessment-table
-       -> Store parsed assessments + raw HTML in UnitOutline table
-       -> Cache entire semester (won't refetch unless manually triggered)
-   ```
+### 3. AI Agent Flow (M3)
 
-5. **MCP Tool Call (on-demand from Claude Desktop):**
-   ```
-   Claude Desktop sends MCP tool call (e.g., "canvas_list_courses")
-     -> MCP Server receives via stdio
-       -> Routes to same Service Layer used by Web API
-         -> Service reads from DB (cached data) or Adapter (fresh fetch)
-       -> Returns structured JSON via MCP protocol
-   ```
+```
+User asks question in Deadline AI Chat or Course Q&A
+  ↓
+Frontend POST /courses/{id}/qa (or /deadlines/{id}/chat)
+  ↓
+Backend creates Anthropic Messages request with MCP tools:
+  - claude-opus-4-6 model
+  - tools: [canvas_list_assignments, ed_list_threads, ed_get_lesson, ...]
+  - system: Skill template (auto-generated or manual)
+  ↓
+Claude Opus autonomously calls MCP tools:
+  Tool call: canvas_list_assignments(course_id=69855)
+  Tool call: ed_search_threads(course_id=31567, query="assignment 2")
+  → Agent gathers cross-platform context
+  ↓
+Claude synthesizes answer with citations
+  ↓
+Backend streams response via SSE:
+  event: text_delta
+  data: {"content": "Based on..."}
+  ↓
+Frontend renders streaming text in chat UI
+```
+
+### 4. Page-Level Data Flow (Example: Dashboard)
+
+```
+User navigates to /en/dashboard
+  ↓
+Layout: AppShell wraps with Sidebar + Header + RightPanel
+  ↓
+Page component mounts, TanStack Query hooks fire:
+  useGPA() → GET /gpa/summary (staleTime: 5min)
+  useCourses() → GET /courses
+  useDeadlines({ range: '7d' }) → GET /deadlines?to=...
+  useNotifications({ unread: true }) → GET /notifications/unread-count
+  ↓
+Parallel API calls → MSW handlers respond with fixtures (M1)
+                   → FastAPI routes respond with DB data (M2+)
+  ↓
+Components render: HeroSection → StatsRow → CourseGradesTable → DeadlineTimeline → WeightDonut
+  ↓
+RoughCard wraps each card section (useEffect draws SVG borders)
+```
+
+---
 
 ## Patterns to Follow
 
-### Pattern 1: Adapter Abstraction (Strategy Pattern)
+### Pattern 1: Design System Components as Client Islands
 
-**What:** Abstract interfaces (LMSAdapter, DiscussionAdapter, LessonAdapter) with concrete implementations per platform. Each adapter handles its own auth, pagination, rate limiting, and data mapping.
+**What:** All Rough.js canvas components are `"use client"` islands wrapped in server-rendered page layouts.
 
-**When:** Always -- this is the core extensibility mechanism. If UniBoard expands to Moodle, Blackboard, or other Ed-like platforms, only new adapter implementations are needed.
+**When:** Any component that uses `rough.svg()`, `useRef`, `ResizeObserver`, or canvas APIs.
 
-**Why it matters for build order:** Adapters are the foundation. Without them, no service can function. Build adapters first, services second.
+**Why:** Next.js App Router defaults to Server Components. Rough.js requires browser DOM access. The "client island" pattern keeps the server-rendering benefits for data-heavy pages while isolating client-side interactivity.
 
-```python
-# Abstract interface -- defined once
-class LMSAdapter(ABC):
-    @abstractmethod
-    async def get_courses(self) -> list[Course]: ...
-    @abstractmethod
-    async def get_grades(self, course_id: str) -> list[Grade]: ...
+**Example (already implemented):**
+```typescript
+// components/design-system/RoughCard.tsx
+"use client";
+import rough from "roughjs";
+// ... uses useRef, useEffect, ResizeObserver
 
-# Concrete implementation -- Canvas-specific
-class CanvasAdapter(LMSAdapter):
-    async def get_grades(self, course_id: str) -> list[Grade]:
-        # Handle Canvas pagination (Link header)
-        # Handle rate limiting (700 req/10s)
-        # Map Canvas enrollment.grades -> internal Grade model
-        ...
+// app/[locale]/(dashboard)/page.tsx — Server Component
+import RoughCard from "@/components/design-system/RoughCard";
+export default function Dashboard() {
+  return <RoughCard>...</RoughCard>; // Client island in server page
+}
 ```
 
-### Pattern 2: Shared Service Layer (Facade Pattern)
+### Pattern 2: Contract-First API with MSW
 
-**What:** Both the Web API (FastAPI routes) and MCP Server call into the same Service Layer instances. No duplicate business logic.
+**What:** Define OpenAPI spec first, generate types, write MSW handlers, build frontend, then implement backend against same spec.
 
-**When:** Always. This is a key architectural decision already made in the TRD.
+**When:** M1 frontend development before M2 backend exists.
 
-**Why it matters:** Ensures consistency between MCP and Web responses. A grade calculation or deadline aggregation works identically regardless of entry point.
+**Why:** Frontend never changes when backend arrives. Types are shared truth. MSW intercepts at network level, so `ky` client works identically with mocks and real API.
 
-```python
-# Service is created once, injected into both layers
-gpa_service = GPAService(lms=canvas_adapter, outline_service=outline_service)
-
-# FastAPI route uses it
-@router.get("/gpa")
-async def get_gpa(user: User = Depends(get_current_user)):
-    return await gpa_service.get_current_gpa(user.id)
-
-# MCP tool uses the same instance
-@mcp_server.tool()
-async def canvas_get_grades(course_id: str):
-    return await gpa_service.get_course_grades(course_id)
+**Implementation:**
+```
+openapi.yaml (source of truth)
+  → npx openapi-typescript openapi.yaml -o lib/api/generated-types.ts
+  → MSW handlers in mocks/handlers/ per domain
+  → setupWorker(handlers) for browser dev
+  → setupServer(handlers) for vitest
 ```
 
-### Pattern 3: Sync-and-Serve with Stale Cache Fallback
+### Pattern 3: Adapter Abstraction for External APIs
 
-**What:** Background sync jobs populate the database on fixed intervals. API requests serve from the database, never directly from upstream APIs (except on-demand triggers). When upstream APIs fail, serve stale cached data with an `is_stale` flag.
+**What:** All external API access goes through abstract adapter interfaces. Services depend on abstractions, not concrete implementations.
 
-**When:** For all data that has defined sync frequencies (grades, deadlines, discussions, modules).
+**When:** Any code that calls Canvas, Ed Discussion, or Ed Lessons APIs.
 
-**Why it matters:** Decouples API response time from upstream latency. Users get instant responses. Upstream outages become graceful degradation, not hard failures.
+**Why:** Testability (mock adapters in tests), extensibility (add Moodle/Blackboard later), and single responsibility (adapter handles auth, pagination, rate limiting; service handles business logic).
 
+**Already implemented:** `LMSAdapter`, `DiscussionAdapter`, `LessonAdapter` abstract base classes in `src/adapters/`.
+
+### Pattern 4: SSE Streaming for AI Responses
+
+**What:** Backend uses FastAPI `StreamingResponse` with SSE format. Frontend consumes via `EventSource` or fetch + ReadableStream.
+
+**When:** Any AI-generated response that takes >2 seconds (Q&A, unit review, digest generation, MCP Agent research).
+
+**Why:** Users see progressive output immediately instead of waiting for full response. Matches Claude API's native streaming capability.
+
+**Implementation:**
 ```python
-class DegradedResponse(Generic[T]):
-    data: T
-    is_stale: bool
-    stale_since: datetime | None
-    source: Literal["live", "cache"]
+# Backend: FastAPI SSE endpoint
+@router.post("/courses/{course_id}/qa", response_class=StreamingResponse)
+async def course_qa(course_id: str, body: QARequest):
+    async def generate():
+        async with anthropic.messages.stream(...) as stream:
+            async for text in stream.text_stream:
+                yield f"data: {json.dumps({'type': 'text', 'content': text})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+    return StreamingResponse(generate(), media_type="text/event-stream")
 ```
 
-### Pattern 4: Circuit Breaker per Upstream
+```typescript
+// Frontend: consume SSE
+const response = await fetch(`/api/v1/courses/${id}/qa`, { method: 'POST', body });
+const reader = response.body!.getReader();
+// ... read chunks, parse SSE events, update state
+```
 
-**What:** Each external API (Canvas, Ed) has an independent circuit breaker. After 5 consecutive failures, the breaker opens for 60 seconds, routing all requests directly to cache. One failing API does not cascade to the other.
+### Pattern 5: Sync Engine with Idempotent Upserts
 
-**When:** All adapter-level external calls.
+**What:** Background sync jobs use SHA-256 fingerprints for deduplication and ON CONFLICT UPDATE for idempotent upserts.
 
-**Why it matters:** Canvas can go down without affecting Ed data, and vice versa. Prevents thundering herd on a recovering upstream.
+**When:** All scheduled data sync (grades, deadlines, modules, discussions).
 
-### Pattern 5: Deduplication via Content Fingerprint
+**Why:** Network failures, duplicate runs, and overlapping schedules are common. Idempotent operations make the system resilient without complex state tracking.
 
-**What:** SHA-256 hash of `(source_type, source_id, content)` stored in PushRecord table. Before pushing any notification/digest item, check if fingerprint exists. For deadlines, use normalized `(course + assignment_name)` as dedup_key.
+**Already implemented:** `src/sync/engine.py` with APScheduler, `src/sync/tasks.py` with sync functions.
 
-**When:** All notification/push operations and deadline merging across sources.
-
-**Why it matters:** Three sources (Canvas, Ed Lessons, Ed Discussion) may report the same deadline. Without dedup, users get triple notifications.
-
-### Pattern 6: Weight Source Priority Chain
-
-**What:** Assessment weights are fetched with a clear priority: Unit Outline (authoritative USYD source) > Canvas assignment_groups (teacher-configured fallback). The `weight_source` field in API responses tells the UI which source was used.
-
-**When:** Any GPA calculation or assessment weight display.
-
-**Why it matters:** Unit Outline is the official grading contract. Canvas assignment_groups may be incomplete or inconsistent with the official outline.
-
-### Pattern 7: Dependency Injection via Constructor
-
-**What:** Services receive their dependencies (adapters, other services) via constructor injection. No global singletons. FastAPI's `Depends()` system handles DI at the route level.
-
-**When:** All service and adapter instantiation.
-
-**Why it matters:** Testability -- swap CanvasAdapter with MockCanvasAdapter in tests. Configurability -- different adapter instances per user (each user has their own API tokens).
+---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Direct API Calls from Routes
+### Anti-Pattern 1: Rough.js in Server Components
 
-**What:** FastAPI routes calling Canvas/Ed APIs directly, bypassing the service and adapter layers.
+**What:** Importing `roughjs` in a file without `"use client"` directive.
 
-**Why bad:** Duplicates logic between Web API and MCP. Makes testing impossible without live API access. Loses caching/circuit-breaker benefits.
+**Why bad:** Rough.js depends on browser DOM (`document.createElementNS`). Server-side rendering will crash with `ReferenceError: document is not defined`.
 
-**Instead:** All external API access goes through Adapter -> Service -> Route/MCP Tool.
+**Instead:** Always mark Rough.js components as `"use client"`. Wrap them in `dynamic(() => import(...), { ssr: false })` if needed for lazy loading.
 
-### Anti-Pattern 2: User-Scoped Sync in Request Path
+### Anti-Pattern 2: Frontend Holding API Keys
 
-**What:** Triggering a full data sync when a user loads the dashboard (request-time sync).
+**What:** Putting Anthropic API key, Canvas token, or Ed token in frontend environment variables or client-side code.
 
-**Why bad:** Canvas API has rate limits (70 req/10s per token). A full sync can take 10-30 seconds. Users would see loading spinners on every page load. Multiple concurrent users would overwhelm rate limits.
+**Why bad:** Exposes credentials to users via browser DevTools. Violates security model.
 
-**Instead:** Background sync engine runs on fixed schedules. API requests serve cached data. Manual sync triggers return 202 Accepted and process asynchronously.
+**Instead:** All external API calls (Anthropic, Canvas, Ed) go through backend. Frontend only holds JWT for UniBoard's own API. User platform tokens are encrypted in PostgreSQL, decrypted only server-side.
 
-### Anti-Pattern 3: Monolithic Adapter
+### Anti-Pattern 3: Services Calling External APIs Directly
 
-**What:** A single adapter class that handles Canvas, Ed Discussion, and Ed Lessons all together.
+**What:** A service class making HTTP requests to Canvas/Ed without going through the adapter layer.
 
-**Why bad:** Violates SRP. Makes it impossible to add new platforms. Different APIs have different auth, rate limits, and data shapes.
+**Why bad:** Breaks testability (can't mock in tests), breaks extensibility (can't swap implementations), mixes concerns (rate limiting, auth, pagination mixed with business logic).
 
-**Instead:** One adapter per API surface: CanvasAdapter, EdDiscussionAdapter, EdLessonsAdapter, plus UnitOutlineParser as a separate parser (not an adapter -- it's HTTP GET + HTML parsing, not an authenticated API).
+**Instead:** Service depends on adapter interface. Tests inject mock adapter. Real adapter handles all HTTP concerns.
 
-### Anti-Pattern 4: AI for Everything
+### Anti-Pattern 4: Shared Mutable State in Sync Jobs
 
-**What:** Using LLM calls for data that can be deterministically extracted (assessment weights, lesson due dates, thread endorsement status).
+**What:** Using module-level variables or global state across sync job executions.
 
-**Why bad:** Slow (100ms+ per call), expensive (API costs), unreliable (hallucination risk), non-reproducible. The TRD correctly separates deterministic parsing from AI tasks.
+**Why bad:** APScheduler runs jobs concurrently. Shared mutable state causes race conditions and data corruption.
 
-**Instead:** Use AI only for: Ed Discussion thread relevance scoring, digest narrative generation, material summarization, and question answering. Use deterministic parsing for: Unit Outline weights, Canvas grades, Ed Lessons due dates, thread metadata (is_endorsed, is_staff_answered).
+**Instead:** Each sync job creates its own database session, adapter instances, and local state. The scheduler instance itself is the only module-level object (read-only after initialization).
 
-### Anti-Pattern 5: Storing Raw API Responses as Primary Data
+### Anti-Pattern 5: Blocking AI Calls in Request Handlers
 
-**What:** Saving entire Canvas/Ed API JSON blobs and querying them at read time.
+**What:** Waiting for Claude to complete a full response before sending any data to the frontend.
 
-**Why bad:** Couples your schema to upstream API changes. Makes indexing and querying slow. PostgreSQL JSON queries are slower than columnar queries for structured data.
+**Why bad:** Claude responses can take 5-30 seconds for complex analysis. Users see a spinner with no feedback. Feels broken.
 
-**Instead:** Map upstream data to normalized internal models (Grade, DiscussionThread, UnifiedDeadline, etc.) at sync time. Store raw HTML only for UnitOutline (debugging fallback).
+**Instead:** Stream all AI responses via SSE. Show partial output as it arrives. Use `StreamingResponse` on backend, `ReadableStream` on frontend.
+
+---
 
 ## Scalability Considerations
 
-| Concern | At 1 user (MVP) | At 100 users | At 1000+ users |
-|---------|-----------------|--------------|----------------|
-| **Sync load** | Sequential per-course sync, trivial | Per-user sync jobs, stagger scheduling to spread API load | Need job queue (PGQueuer or similar) to manage concurrency; may hit Canvas rate limits across users |
-| **Database** | Single Docker PostgreSQL, no optimization needed | Add indexes on (user_id, course_id), connection pool sufficient | Consider read replicas, RDS Proxy for connection management |
-| **API rate limits** | Canvas 70 req/10s per token, no concern | Each user has own token, so limits are per-user, still fine | Aggregate USYD HTML scraping may need centralized throttling (1 req/s shared) |
-| **Background jobs** | Simple asyncio.create_task() or APScheduler | APScheduler with PostgreSQL job store | Dedicated task queue (Celery, PGQueuer, or EventBridge + Lambda for serverless) |
-| **Frontend** | Static Next.js, no scaling concern | Same -- static export served from disk | Move to S3 + CloudFront for CDN |
-| **AI costs** | Negligible for single user | ~100 thread evaluations/day * 100 users = 10K calls/day, budget-relevant | Batch processing, caching AI results, consider smaller models |
+| Concern | At 1-10 users (MVP) | At 100 users | At 1,000+ users |
+|---------|---------------------|--------------|-----------------|
+| **Database** | Docker PostgreSQL on dev machine | Single RDS t3.micro (Free Tier) | RDS t3.small + read replica |
+| **Sync load** | Sequential per-user sync | APScheduler with concurrency limits, stagger user sync start times | Celery workers + Redis broker, distributed job queue |
+| **API rate limits** | Canvas 70 req/10s per token — plenty for 1 user | Per-user tokens mean independent rate limits — scales linearly | Same — each user's token has its own rate limit budget |
+| **AI costs** | Direct Anthropic API calls per request | Response caching (identical questions within staleTime), Sonnet for routine tasks | Prompt caching, batch API for non-urgent tasks, cost alerting |
+| **Frontend** | Next.js dev server | Static export to S3 + CloudFront | Same — static assets scale infinitely on CDN |
+| **Authentication** | Simple JWT + bcrypt | Same | Migrate to AWS Cognito (50K MAU free) |
 
-For MVP (local Docker, single user): asyncio tasks for background sync are sufficient. No need for Celery, Redis, or external job queues. Keep it simple.
+**MVP priority note:** At 1-10 users, avoid over-engineering. Docker PostgreSQL, single-process FastAPI with APScheduler, direct Anthropic API calls. The adapter abstraction and OpenAPI contracts are the only "architecture tax" worth paying upfront — they pay back immediately in testability and M1→M2 integration smoothness.
 
-## Build Order (Dependencies Between Components)
+---
 
-The architecture has clear dependency chains that dictate build order:
+## Suggested Build Order
+
+### M1: Frontend App (No backend dependency)
 
 ```
 Phase 1: Foundation
-  Data Models (SQLAlchemy) ──> Alembic migrations ──> Database ready
-  Adapter Interfaces (ABC) ──> No external deps, pure Python
-  Auth (JWT + bcrypt) ──> User registration/login works
+  ├── Next.js project setup (App Router, Tailwind, pnpm)
+  ├── Design system: CSS variables, paper texture, fonts
+  ├── Layout: AppShell, Sidebar, Header, RightPanel
+  └── i18n: next-intl setup, [locale] routing, EN+CN messages
 
-Phase 2: Data Acquisition
-  CanvasAdapter (concrete) ──> Requires: Adapter interfaces + Canvas API token
-  EdDiscussionAdapter ──> Requires: Adapter interfaces + Ed API token
-  EdLessonsAdapter ──> Requires: Adapter interfaces + Ed API token
-  UnitOutlineParser ──> Requires: aiohttp + BeautifulSoup4 (no auth)
-  Note: All 4 adapters are independent of each other, can be built in parallel
+Phase 2: OpenAPI + Mock Layer
+  ├── OpenAPI spec (all endpoints from TRD §12)
+  ├── Generate TypeScript types
+  ├── MSW handlers with realistic fixtures
+  └── ky client + TanStack Query hooks
 
-Phase 3: Core Services
-  UnitOutlineService ──> Requires: CanvasAdapter (for tab URL) + UnitOutlineParser
-  GPAService ──> Requires: CanvasAdapter (grades) + UnitOutlineService (weights)
-  DeadlineService ──> Requires: CanvasAdapter + EdLessonsAdapter + EdDiscussionAdapter + UnitOutlineService
-  CourseMaterialService ──> Requires: CanvasAdapter (modules) + EdLessonsAdapter (lessons)
-  Note: GPAService and CourseMaterialService are independent of each other
+Phase 3: Core Pages (depends on Phase 1+2)
+  ├── Dashboard (hero, stats, course table, deadline timeline, weight donut)
+  ├── Courses (card grid) + Course Detail (tabs: grades, materials, discussions)
+  ├── Deadlines (calendar + filterable list + AI chat placeholder)
+  └── Predict (slider-based what-if + target path)
 
-Phase 4: Sync Engine
-  Background sync jobs ──> Requires: All adapters + all services + database
-  Circuit breaker ──> Requires: Adapter layer functional
-  Dedup engine ──> Requires: PushRecord table + sync jobs
-
-Phase 5: API Layer
-  FastAPI routes ──> Requires: Service layer + Auth
-  MCP Server tools ──> Requires: Service layer
-  Note: Web API and MCP can be built in parallel since they share the service layer
-
-Phase 6: Intelligence Layer
-  AIEngine (Claude integration) ──> Requires: Anthropic API key
-  IntelligenceService (thread scoring) ──> Requires: AIEngine + EdDiscussionAdapter
-  RiskAlertService ──> Requires: GPAService + DeadlineService
-  NotificationService ──> Requires: DeadlineService + RiskAlertService
-  Digest generation ──> Requires: IntelligenceService + all services
-
-Phase 7: Frontend
-  Layout + auth pages ──> Requires: Auth API endpoints
-  Dashboard (GPA overview) ──> Requires: GPA + courses endpoints
-  Deadline timeline ──> Requires: Deadline endpoints
-  Course detail pages ──> Requires: Course + materials + discussions endpoints
-  What-if predictor ──> Requires: GPA predict endpoint
-  Digest/intelligence pages ──> Requires: Intelligence endpoints
+Phase 4: Secondary Pages (depends on Phase 1+2)
+  ├── Digest (daily intelligence feed)
+  ├── Timetable (weekly schedule)
+  ├── Settings (tokens, notifications, GPA target, profile)
+  └── Auth (login, register) + Setup (3-step onboarding)
 ```
 
-**Critical path:** Models -> Adapters -> Services -> Sync -> API -> Frontend. The intelligence layer (AI) is optional for MVP -- the system works with rule-based filtering alone (is_endorsed + is_staff_answered).
+### M2: Backend Core (Implements M1's contracts)
 
-**Parallelization opportunities:**
-- All 4 adapters can be built simultaneously (no interdependencies)
-- FastAPI routes and MCP tools can be built simultaneously
-- Frontend pages can be built in parallel once the API is up
-- AI features can be deferred entirely without blocking the core flow
+```
+Phase 1: Infrastructure
+  ├── FastAPI app factory, middleware, error handlers
+  ├── PostgreSQL + Alembic migrations
+  ├── SQLAlchemy models (all 15+ tables from TRD §4)
+  └── Auth routes (register, login, refresh, JWT)
 
-## Key Architectural Decisions (Validated)
+Phase 2: Platform Adapters
+  ├── CanvasAdapter (courses, grades, modules, assignments, tabs)
+  ├── EdDiscussionAdapter (threads, search)
+  ├── EdLessonsAdapter (lessons, slides)
+  └── Unit Outline parser (BeautifulSoup4)
 
-| Decision | Status | Assessment |
-|----------|--------|------------|
-| Shared service layer between Web API and MCP | Validated | Correct -- avoids logic duplication, most important architectural decision |
-| Sync-based (not real-time) data model | Validated | Correct for this domain -- LMS data changes infrequently, rate limits preclude real-time polling |
-| PostgreSQL for everything (cache, jobs, search) | Validated for MVP | Simplifies ops. tsvector handles search adequately. For 100+ users, evaluate adding Redis for session cache |
-| Abstract adapter interfaces | Validated | Good investment even for single-university MVP -- makes testing much easier |
-| Local Docker deployment for MVP | Validated | Right call -- cloud deployment (Lambda + RDS + CDK) adds weeks of complexity |
-| Simple JWT + bcrypt over Cognito for MVP | Validated | Correct -- Cognito integration can wait until cloud deployment phase |
-| Unit Outline as primary weight source | Validated | USYD-specific but correct -- Unit Outline is the official grading contract, Canvas may lag behind |
-| AI quality gate (F1 < 75% fallback to rules) | Validated | Good safety net -- ensures the system is useful even if AI evaluation quality drifts |
+Phase 3: Core Services
+  ├── GPAService (WAM calculation, what-if, target path)
+  ├── DeadlineService (3-source aggregation, deduplication)
+  ├── MaterialsService (Canvas Modules + Ed Lessons unified)
+  └── IntelligenceService (high-value filtering, rule-based)
+
+Phase 4: Sync + Notifications
+  ├── APScheduler engine (grades 15min, deadlines 1h, modules daily)
+  ├── NotificationService (tiered reminders)
+  ├── DigestService (daily aggregation)
+  └── Sync status tracking
+```
+
+### M3: AI/MCP/Skills (Extends M2)
+
+```
+Phase 1: AI Enhancement
+  ├── AI thread evaluation (Sonnet, structured output)
+  ├── AI digest scoring (replace rule-based urgency)
+  └── AI quality gate (F1 monitoring, fallback)
+
+Phase 2: MCP Agent
+  ├── MCP tool integration (canvas-ed-mcp tools)
+  ├── Agent session management (spawn Opus with tools)
+  ├── Streaming SSE endpoints
+  └── Deadline AI chat + Course Q&A
+
+Phase 3: Skill System
+  ├── Skill template schema and storage
+  ├── Auto-generation after first successful exploration
+  ├── Per-course skill differentiation
+  └── ~50 skills across categories
+```
+
+### M4: Engineering (Hardens everything)
+
+```
+Phase 1: Testing
+  ├── Unit tests (pytest, 80% coverage on services)
+  ├── Integration tests (real DB, adapter mocks)
+  ├── Frontend tests (vitest + RTL)
+  └── E2E smoke tests
+
+Phase 2: Deployment
+  ├── AWS CDK infrastructure
+  ├── Docker production images
+  ├── CI/CD pipeline
+  └── Environment configuration
+
+Phase 3: Operations
+  ├── Monitoring + alerting
+  ├── Security audit
+  └── Performance optimization
+```
+
+---
+
+## Key Architecture Decisions
+
+### Decision 1: MSW over Next.js API Routes for Mocking
+
+**Chose:** MSW (Mock Service Worker) for M1 contract-first development.
+
+**Over:** Next.js API routes (`app/api/`) as mock backend.
+
+**Why:** MSW intercepts at network level — the ky client, TanStack Query hooks, and error handling all work identically with mocks and real API. Next.js API routes would create a second backend that doesn't match FastAPI's behavior (different error formats, no middleware). When M2 launches, switching from MSW to real backend is a single environment variable change (`NEXT_PUBLIC_API_URL`).
+
+### Decision 2: next-intl over next-translate or react-intl
+
+**Chose:** next-intl for i18n.
+
+**Already implemented:** `middleware.ts` with `createMiddleware(routing)`, `[locale]` dynamic routes, `lib/i18n/routing.ts`.
+
+**Why:** Native App Router support, type-safe message keys, static rendering compatible via `setRequestLocale()`, built-in locale negotiation middleware.
+
+### Decision 3: ky over Axios or native fetch
+
+**Chose:** ky as HTTP client.
+
+**Already implemented:** `lib/api/client.ts` with JWT auth hooks, retry logic, response unwrapping.
+
+**Why:** Tiny bundle size (~3KB), built on native fetch (no polyfills needed), hooks API for auth injection, automatic JSON parsing, cleaner API than raw fetch.
+
+### Decision 4: APScheduler over Celery for Sync
+
+**Chose:** APScheduler (in-process) for background sync.
+
+**Already implemented:** `src/sync/engine.py` with AsyncIOScheduler.
+
+**Why:** At MVP scale (1-10 users), a separate Celery + Redis setup is over-engineering. APScheduler runs in the same FastAPI process, shares the event loop, and handles 10 users' sync jobs comfortably. Migrate to Celery at 100+ users if needed.
+
+### Decision 5: Anthropic Messages API with MCP tools (not MCP Server for Agent)
+
+**Chose:** Backend spawns Claude agent sessions using Anthropic Messages API with `tools` parameter pointing to local MCP tool implementations.
+
+**Over:** Running a separate MCP Server that Claude Desktop connects to.
+
+**Why:** For the web dashboard, users interact via browser — they don't have Claude Desktop. The backend acts as both the "host" and "client" in MCP terminology, creating Anthropic API calls with tool definitions that mirror the MCP tool specs. For Claude Desktop users (PLAT-03), a separate stdio MCP server is provided — but the web agent path goes through the backend API.
+
+---
 
 ## Sources
 
-- UniBoard TRD v2.5 (primary architecture reference) -- `/docs/UniBoard_TRD_v2.md`
-- UniBoard BRD v2.6 (business requirements) -- `/docs/UniBoard_BRD_v2.md`
-- UniBoard Frontend Design Brief -- `/docs/frontend_brief.md`
-- [Canvas LMS REST API Documentation](https://www.canvas.instructure.com/doc/api/)
-- [canvasapi Python wrapper](https://ucfopen.github.io/canvasapi/)
-- [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
-- [MCP Architecture](https://modelcontextprotocol.io/docs/develop/build-client)
-- [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices)
-- [FastAPI Production Patterns 2025](https://orchestrator.dev/blog/2025-1-30-fastapi-production-patterns/)
-- [PGQueuer - PostgreSQL job queue](https://pypi.org/project/pgqueuer/)
-- [asyncpg documentation](https://www.tigerdata.com/blog/how-to-build-applications-with-asyncpg-and-postgresql)
+- TRD v2.5: System architecture (§3), data models (§4), REST API spec (§12), frontend architecture (§13)
+- BRD v2.6: User stories and feature requirements
+- Existing codebase: `src/` (Python backend), `frontend/` (Next.js app), `prototype/` (10 HTML prototypes)
+- [MSW with Next.js App Router](https://dev.to/mehakb7/mock-service-worker-msw-in-nextjs-a-guide-for-api-mocking-and-testing-e9m) — MSW integration patterns
+- [next-intl App Router setup](https://next-intl.dev/docs/getting-started/app-router) — i18n configuration
+- [Anthropic MCP Specification](https://modelcontextprotocol.io/specification/2025-11-25) — MCP protocol and transport mechanisms
+- [Streaming AI with SSE](https://platform.claude.com/docs/en/build-with-claude/streaming) — Anthropic streaming API patterns
+- [MSW keeping mocks in sync](https://mswjs.io/docs/recipes/keeping-mocks-in-sync/) — Contract-first mock maintenance
