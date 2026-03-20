@@ -77,12 +77,14 @@ Plans:
   3. Route Handler mocks return realistic fixture data for all endpoints
   4. TanStack Query hooks exist for every data domain with proper loading/error states
   5. ky HTTP client is configured with base URL, error handling, and auth token injection
-**Plans:** 3 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — OpenAPI 3.1 spec, type codegen, ky client, auth store, QueryProvider
-- [ ] 02-02-PLAN.md — Fixture data files and Route Handler mock endpoints
-- [ ] 02-03-PLAN.md — TanStack Query hooks for all data domains
+- [ ] 02-01-PLAN.md — OpenAPI 3.1 spec, type codegen, ky client, auth store, QueryProvider, Wave 0 tests
+- [ ] 02-02-PLAN.md — Fixture data files and auth/user Route Handler mocks
+- [ ] 02-03-PLAN.md — Courses, GPA, and deadlines Route Handler mocks
+- [ ] 02-04-PLAN.md — Intelligence, sync, search, health Route Handler mocks + mock-routes test
+- [ ] 02-05-PLAN.md — TanStack Query hooks for all data domains + hooks test
 
 ### Phase 3: Auth Page
 **Goal**: Users can register and log in through a polished auth interface
@@ -338,7 +340,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Design System & Foundation | M1 | 2/2 | Complete | 2026-03-20 |
-| 2. API Contracts & Mock Layer | M1 | 0/3 | Planned | - |
+| 2. API Contracts & Mock Layer | M1 | 0/5 | Planned | - |
 | 3. Auth Page | M1 | 0/TBD | Not started | - |
 | 4. Setup Page | M1 | 0/TBD | Not started | - |
 | 5. Dashboard Page | M1 | 0/TBD | Not started | - |
