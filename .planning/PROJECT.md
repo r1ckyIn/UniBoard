@@ -1,8 +1,8 @@
-# UniBoard
+# UniBoard v2.0
 
 ## What This Is
 
-UniBoard is a GPA maximization dashboard for University of Sydney students. It aggregates data from Canvas LMS, Ed Discussion, Ed Lessons, and Unit Outline pages into a single interface that shows students exactly what matters for their grades — real-time GPA tracking, unified deadlines, high-value discussion highlights, and AI-powered course material navigation. It runs as both an MCP server (for Claude Desktop power users) and a web dashboard (for everyone).
+UniBoard is a GPA maximization dashboard for University of Sydney students. It aggregates data from Canvas LMS, Ed Discussion, Ed Lessons, and Unit Outline pages into a single interface that shows students exactly what matters for their grades — real-time GPA tracking, unified deadlines, high-value discussion highlights, and AI-powered course material research. The system features an MCP Agent architecture where Claude (Opus 4.6) autonomously researches across platforms using MCP tools to answer student questions with full context.
 
 ## Core Value
 
@@ -16,29 +16,72 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ### Active
 
-- [ ] Real-time GPA/WAM tracking from Canvas grades
+**GPA Core:**
+- [ ] Real-time GPA/WAM tracking from Canvas grades (data delay < 15 min)
 - [ ] What-if GPA simulator (adjust future scores, see GPA impact)
 - [ ] Target GPA path planner (reverse-calculate required scores)
 - [ ] Assessment weight visualization from Unit Outline HTML parsing
-- [ ] Unified deadline view (Canvas + Ed Lessons + Ed Discussion, deduplicated)
-- [ ] Course file/folder AI classification and navigation (Canvas Modules + Ed Lessons)
-- [ ] Ed Discussion high-value post extraction (endorsed + staff-answered, rule-based)
-- [ ] AI-powered high-value post extraction (exam tips, rubric info, deadline changes)
-- [ ] Daily/weekly academic digest (rule-based aggregation of new deadlines, grades, posts)
-- [ ] AI-enhanced digest with urgency scoring and GPA relevance
-- [ ] Deadline reminder notifications (72h / 24h / 3h tiered)
-- [ ] Deduplication across all data sources (SHA-256 based)
-- [ ] GPA risk alert when trajectory deviates from target
-- [ ] AI Q&A based on synced course materials (cite sources, no hallucination)
-- [ ] Unit review: AI-generated structured review summary + community cheatsheet integration
-- [ ] File search across all course materials
+- [ ] Per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage assessed
+
+**Deadlines:**
+- [ ] Unified deadline view (Canvas + Ed Lessons + Ed Discussion, SHA-256 deduplicated)
+- [ ] Tiered deadline reminders at 72h, 24h, and 3h before due date
+- [ ] GPA risk alert when grade trajectory deviates from target
+- [ ] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context (placeholder for future AiStudyMate integration)
+
+**Intelligence:**
+- [ ] Ed Discussion high-value post filtering (endorsed + staff-answered, rule-based)
+- [ ] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details, deadline changes) — MCP Agent
+- [ ] Daily academic digest (rule-based aggregation + Claude API urgency scoring)
+- [ ] Deduplication across all data sources (SHA-256)
+
+**Files & Materials:**
+- [ ] Course folders with AI-generated descriptions (Canvas Modules + Ed Lessons unified)
+- [ ] Keyword search across all course materials
+- [ ] AI Q&A on course materials with cited sources — MCP Agent cross-platform research
+- [ ] AI unit review summaries (key concepts, common mistakes, exam scope) — MCP Agent
+
+**Platform & Onboarding:**
 - [ ] 3-step onboarding (register → get tokens → paste tokens)
-- [ ] Zero-install web access (browser-only, no extensions)
-- [ ] MCP server entry point for Claude Desktop users
-- [ ] Skill-based agent system: auto-generate prompt template "skills" after first successful API exploration
-- [ ] Per-course skill differentiation (different courses organize materials differently)
-- [ ] Skill auto-generation: AI explores → succeeds → summarizes optimal steps into reusable skill file
-- [ ] ~50 skills covering data collection, data processing, AI analysis, and user actions
+- [ ] Zero-install web access (browser-only)
+- [ ] MCP server for Claude Desktop users (PLAT-03)
+- [ ] Token expiration warnings and re-authentication guidance
+
+**Skill System (MCP Agent):**
+- [ ] Auto-generate prompt template skill after first successful API exploration
+- [ ] Subsequent executions load generated skill instead of re-exploring
+- [ ] Per-course skill differentiation (different material organization patterns)
+- [ ] ~50 skills across data collection, data processing, AI analysis, user actions
+
+**Frontend Pages (10 pages from HTML prototypes):**
+- [ ] Auth page (login + register)
+- [ ] Setup page (3-step API token onboarding)
+- [ ] Dashboard (hero welcome, stats row, course grades, deadline timeline, assessment weights)
+- [ ] Courses (card grid + grade overview)
+- [ ] Course Detail (assessment breakdown, materials, Ed posts)
+- [ ] Deadlines (calendar + filterable timeline + AI chat)
+- [ ] Predict (slider-based What-if GPA simulator)
+- [ ] Digest (daily intelligence digest)
+- [ ] Timetable (weekly schedule view)
+- [ ] Settings (token management, notifications, GPA target, profile)
+
+**Design System:**
+- [ ] Anthropic-inspired aesthetic: warm colors, paper texture, Rough.js hand-drawn borders
+- [ ] Fonts: Source Serif 4 (headings) + Inter (body)
+- [ ] Rough Notation animated text annotations
+- [ ] All animations, transitions, and interactions from HTML prototypes preserved pixel-perfect
+
+**Infrastructure:**
+- [ ] PostgreSQL with full schema (users, courses, grades, deadlines, Ed threads, materials, skills, encrypted tokens)
+- [ ] Background sync engine (grades 15min, deadlines 1h, modules daily, Unit Outline per semester)
+- [ ] Canvas adapter with rate limiting, pagination, circuit breaker
+- [ ] Ed Discussion adapter with defensive Pydantic parsing
+- [ ] Ed Lessons adapter for lesson content and assignments
+- [ ] Unit Outline HTML parser with weight-sum validation
+- [ ] Token encryption (AES-256-GCM)
+- [ ] JWT + bcrypt authentication
+- [ ] Docker Compose local development environment
+- [ ] i18n support (English + Chinese)
 
 ### Out of Scope
 
@@ -47,75 +90,83 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - Canvas quiz answering — academic integrity risk
 - Homework ghostwriting / direct answers — academic integrity violation
 - Social/chat features — irrelevant to GPA
-- Course recommendations — out of GPA tracking scope for v1
-- Interactive AI tutoring (Phase 4+) — deferred to post-v1
-- AI homework coaching (Phase 4+) — deferred to post-v1
-- Assignment ROI analysis (Phase 4+) — deferred to post-v1
-- Personalized dashboard onboarding questionnaire (Phase 4+) — deferred to post-v1
-- Cloud deployment — MVP runs locally only
-- OAuth / AWS Cognito — using simple JWT + bcrypt for MVP
+- Course recommendations — out of GPA tracking scope
+- Mobile-first design — desktop-first, mobile later
+- Multi-university support — USYD-only
+- OAuth / AWS Cognito — using simple JWT for now, migrate post-MVP
+- Interactive AI tutoring (TUTOR-01/02) — deferred to v2
+- Personalized dashboard questionnaire — deferred to v2
 
 ## Context
 
 - **University**: University of Sydney (USYD)
-- **Target users**: USYD students across all faculties — from anxious high-achievers to confused freshmen
-- **3 user personas defined**: Emily (high-GPA business student), Kevin (efficient CS student), Sarah (lost freshman)
-- **Data sources**: Canvas LMS API, Ed Discussion API (undocumented, reference hschafer/edstem OSS), Ed Lessons API, USYD Unit Outline HTML pages
-- **Existing docs**: BRD v2.6 (32KB), TRD v2.5 (113KB), frontend design brief, roadmap backlog
-- **API tokens**: Both Canvas and Ed tokens available for development/testing
-- **Design aesthetic**: Anthropic/Claude-inspired — warm, paper-textured, restrained. Colors: dark near-black (#141413), cream (#faf9f5), warm orange (#d97757), soft blue (#6a9bcc), olive green (#788c5d)
-- **Layout**: Three-column — narrow icon sidebar (68px→224px on hover) | main content | right panel (300px, sticky)
-- **Prototype**: `prototype/dashboard.html` — fully implemented dashboard page with Rough.js hand-drawn borders, paper grain texture, ruled lines background
-- **Design libraries**: Lucide Icons, Rough.js 4.6.6 (hand-drawn card borders), Rough Notation (hand-drawn text annotations like circle/underline)
-- **Fonts**: Inter (body/UI), Source Serif 4 (headings/display — serif, academic feel)
-- **CSS Variables**: --dark (#e8ddd0 sidebar bg), --cream (#faf9f5 page bg), --orange (#d97757), --blue (#6a9bcc), --green (#788c5d), --amber (#b08968), --card-bg (#f6f5f0), --radius (14px), --radius-sm (8px)
+- **Target users**: USYD students across all faculties
+- **3 user personas**: Emily (high-GPA business), Kevin (efficient CS), Sarah (lost freshman)
+- **Data sources**: Canvas LMS API, Ed Discussion API (undocumented, ref: hschafer/edstem OSS), Ed Lessons API, USYD Unit Outline HTML
+- **Existing docs**: BRD v2.6, TRD v2.5, frontend design brief, roadmap backlog
+- **10 HTML prototypes**: Complete interactive prototypes in `prototype/` directory (~7000 lines, DESIGN_SYSTEM.md included)
+- **Design aesthetic**: "学生书桌上最顺手的那本笔记" — stress-relief first, data second. 103 iterations refined.
+- **Design libraries**: Lucide Icons, Rough.js 4.6.6, Rough Notation
+- **Colors**: --dark (#141413), --cream (#faf9f5), --orange (#d97757), --blue (#6a9bcc), --green (#788c5d), --amber (#b08968), --card-bg (#f6f5f0)
+- **Layout**: Three-column — icon sidebar (68px→224px on hover) | main content | right panel (300px, sticky)
 - **Paper texture**: SVG fractalNoise grain overlay (opacity 0.12) + repeating ruled lines (opacity 0.02)
-- **7 pages defined by sidebar nav**: Dashboard (done), Timetable, Courses, Deadlines, Predict, Digest, Settings
-- **Dashboard components**: Hero welcome (greeting + date + encouragement), Stats row (WAM/Target/Alerts), Course Grades table, Deadline timeline (with urgency colors), Assessment weights donut chart, Right panel (Profile card, Calendar with deadline dots, Recent Activity feed)
-- **Design philosophy (103 iterations)**: "学生书桌上最顺手的那本笔记" — stress-relief first, data second. Hero welcome occupies 100vh first screen (students shouldn't face a wall of data). Encouragement tone: casual friend, not slogan ("The COMP2017 lab and the stats quiz are done and behind you now.")
-- **Rough.js usage**: Hand-drawn card borders, progress bars (roughCanvas.rectangle), donut chart (pure arc), timeline line, background doodles (stars, waves, dots — fixed layer, low opacity, notebook-margin-doodle feel)
-- **Rough Notation usage**: Animated text annotations — underline weekday, circle "Week 3", highlight encouragement text, circle WAM number on hover. Staggered playback sequence.
-- **Hero design decision**: Data pushed below fold. First screen = greeting + date + warm encouragement + "your dashboard ↓" scroll prompt with breathing text animation + bracket wrap + arrow bounce
-- **Course Grades table**: 4 columns (Course | Assessed progress bar + % | Earned weighted % | Target grade badge). Hover: Rough Notation circles the grade + fade-in "see predicted grade →" link
-- **Sidebar behavior**: Logo stays fixed position even when sidebar expands. Active item: orange-tinted background. Labels: opacity 0→1 on hover
-- **Right panel**: Sticky, doesn't scroll with main content. Current WAM with hand-drawn circle annotation. Mini calendar with deadline dot indicators (orange-soft background on deadline days)
-- **Competitive gap**: No existing product combines Canvas + Ed integration with GPA-focused information filtering
-- **Ed API note**: No public documentation; reference hschafer/edstem OSS library + curl testing. zsh export may escape special characters in tokens.
-- **Canvas Modules API**: Use `include[]=items` parameter to avoid N+1 requests
-- **Unit Outline source**: Scrape from USYD official website HTML (not Canvas API — Canvas may be incomplete)
-- **Three-source deadline aggregation**: Canvas + Ed Lessons + Ed Discussion, SHA-256 deduplication
-- **AI quality gate**: F1 < 75% auto-fallback to rule engine (is_endorsed + is_staff_answered)
-- **Sync frequencies**: Grades 15min, deadlines 1h, modules daily, Unit Outline once per semester
-- **Read-only policy**: System never writes to external platforms
-- **Skill system**: MCP server uses a skill-based agent pattern. Each "skill" is a prompt template that captures the optimal API call sequence for a specific operation (e.g., "collect deadlines for COMP2123"). Skills are auto-generated after the AI's first successful exploration of an operation, then reused deterministically. Different courses may need different skills because professors organize materials differently (Canvas Modules vs Ed Lessons, naming conventions, folder structures). ~50 skills expected across 4 dimensions: data collection, data processing, AI analysis, user actions.
+- **Hero design**: Data pushed below fold. First screen = greeting + encouragement + scroll prompt
+- **MCP tools**: canvas-ed-mcp already configured in development environment
+- **AI architecture**: MCP Agent (Opus 4.6 + MCP tools) for cross-platform research features; pre-collected data + Claude API for digest scoring
+- **AiStudyMate integration**: Future partner platform (EXT-01) — Deadline AI chat serves as integration placeholder
+- **v1.0 learnings**: Full rebuild preserving all requirements and key decisions from previous implementation
+- **Ed API note**: No public docs; reference hschafer/edstem OSS + curl testing
+- **Canvas Modules API**: Use `include[]=items` to avoid N+1 requests
+- **Unit Outline source**: Scrape from USYD official HTML (not Canvas — may be incomplete)
 
 ## Constraints
 
-- **Timeline**: 2 weeks — aggressive, accept rough edges to ship all P0+P1+P2 features
+- **Approach**: MVP speed priority — ship working product first, optimize in M4
 - **Tech stack (backend)**: Python 3.12+, FastAPI, SQLAlchemy 2.0 async + asyncpg, PostgreSQL 16 (Docker)
-- **Tech stack (frontend)**: Next.js, TanStack Query v5, Tailwind CSS
-- **Tech stack (MCP)**: Python asyncio MCP server
-- **Type checking**: mypy --strict
-- **Linting**: ruff
-- **Testing**: pytest + pytest-asyncio
+- **Tech stack (frontend)**: Next.js, Tailwind CSS, TanStack Query v5
+- **Tech stack (AI)**: Anthropic Claude API (Opus 4.6 for MCP Agent features, Sonnet for digest/scoring)
+- **Tech stack (MCP)**: Python asyncio MCP server + canvas-ed-mcp tools
+- **Type checking**: mypy --strict (backend)
+- **Linting**: ruff (backend)
+- **Testing**: pytest + pytest-asyncio (backend), key interaction tests (frontend, M1 only)
 - **Package management**: uv (backend), pnpm 9+ (frontend)
-- **Auth**: Simple JWT + bcrypt (not Cognito) — migrate to Cognito post-MVP
-- **Deployment**: Local only (Docker Compose) — no cloud deployment for MVP
-- **Token storage**: AES-256-GCM encrypted in PostgreSQL (not Secrets Manager, cost reasons)
-- **Architecture**: Dual-layer — MCP Engine (data acquisition) + Web Dashboard (user interface), sharing same service layer
+- **Auth**: Simple JWT + bcrypt
+- **Token storage**: AES-256-GCM encrypted in PostgreSQL
+- **Architecture**: Dual-layer — MCP Engine (data acquisition + AI research) + Web Dashboard (user interface)
+- **API strategy**: Contract-first — M1 defines OpenAPI contracts, Mock implements them, M2 backend implements same contracts → frontend zero-change on integration
+- **Read-only policy**: System never writes to external platforms
+- **Sync frequencies**: Grades 15min, deadlines 1h, modules daily, Unit Outline per semester
+- **AI quality gate**: F1 < 75% auto-fallback to rule engine
+- **Desktop-first**: Mobile responsiveness deferred
+
+## Milestone Structure
+
+| Milestone | Scope | Description |
+|-----------|-------|-------------|
+| **M1: Frontend App** | 10 HTML → Next.js | Convert all prototypes to interactive app with Mock API (contract-first), i18n (EN+CN), Rough.js preserved |
+| **M2: Backend Core** | From-scratch backend | FastAPI + SQLAlchemy, all adapters/services/sync, implement M1's API contracts |
+| **M3: AI/MCP/Skills** | Intelligence layer | MCP Agent features (INTEL-02, FILE-03/04, Deadline AI chat), Skill system, PLAT-03 MCP Server |
+| **M4: Engineering** | Production readiness | Testing (unit/integration/E2E), AWS deployment (CDK/Docker), monitoring, security, CI/CD |
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| P0+P1+P2 all in v1 | User wants complete feature set even with rough edges | — Pending |
-| MCP + Web together | MCP serves as data layer, Web calls same services — avoids duplicate logic | — Pending |
-| Local-only deployment | MVP validation before investing in cloud infrastructure | — Pending |
-| Simple JWT auth over Cognito | Faster to implement, migrate to Cognito post-MVP | — Pending |
-| Unit Outline from USYD HTML | Canvas may not have complete Unit Outline data | — Pending |
-| Rule-based + AI fallback for Ed posts | AI quality gate (F1 < 75% → fallback to rule engine) ensures reliability | — Pending |
-| Anthropic-inspired design | Warm, restrained, academic aesthetic — differentiates from typical EdTech | — Pending |
-| Skill-based MCP agent | Each MCP operation codified as a reusable prompt template after first exploration — avoids repeated trial-and-error, per-course customization | — Pending |
+| Full rebuild (delete src/ + frontend/) | v1.0 had structural issues; fresh start with prototype-first approach | — Pending |
+| 4-milestone structure | Frontend-first validates UX, backend implements proven contracts, AI/MCP is complex enough for own milestone, engineering last | — Pending |
+| Contract-first Mock API | M1 defines OpenAPI contracts that M2 implements — frontend zero-change on backend integration | — Pending |
+| MCP Agent for AI features | Cross-platform research requires intelligent agent, not simple API+prompt — scattered data across Canvas/Ed/Lessons needs autonomous research | — Pending |
+| Digest via pre-collect + Claude API | Digest doesn't need real-time MCP research; scheduled sync + Claude scoring is sufficient and cheaper | — Pending |
+| Rough.js fully preserved | Design aesthetics are a core differentiator — optimize performance later if needed | — Pending |
+| Timetable page added | Prototype exists (timetable.html), moved from out-of-scope to active | — Pending |
+| Deadline AI chat (new) | Placeholder for AiStudyMate integration (EXT-01); currently serves as MCP Agent Q&A | — Pending |
+| Desktop-first | Personal project / startup validation stage; mobile later | — Pending |
+| MVP speed priority | Ship working product first, engineering polish in M4 | — Pending |
+| Anthropic-inspired design | Warm, restrained, academic aesthetic — differentiates from typical EdTech | ✓ Good (validated through 103 prototype iterations) |
+| Simple JWT over Cognito | Faster to implement; migrate post-MVP | — Pending |
+| Unit Outline from USYD HTML | Canvas may not have complete data | — Pending |
+| Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending |
+| i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-16 after initialization + skill system architecture decision*
+*Last updated: 2026-03-20 after v2.0 full rebuild initialization*
