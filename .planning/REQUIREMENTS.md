@@ -140,69 +140,69 @@ Which milestones/phases cover which requirements. Updated during roadmap creatio
 
 | Requirement | Milestone | Phase | Status |
 |-------------|-----------|-------|--------|
-| GPA-01 | M2 | TBD | Pending |
-| GPA-02 | M2 | TBD | Pending |
-| GPA-03 | M2 | TBD | Pending |
-| GPA-04 | M2 | TBD | Pending |
-| GPA-05 | M2 | TBD | Pending |
-| DL-01 | M2 | TBD | Pending |
-| DL-02 | M2 | TBD | Pending |
-| DL-03 | M2 | TBD | Pending |
-| DL-04 | M3 | TBD | Pending |
-| INTEL-01 | M2 | TBD | Pending |
-| INTEL-02 | M3 | TBD | Pending |
-| INTEL-03 | M2 | TBD | Pending |
-| INTEL-04 | M3 | TBD | Pending |
-| INTEL-05 | M2 | TBD | Pending |
-| FILE-01 | M2 | TBD | Pending |
-| FILE-02 | M2 | TBD | Pending |
-| FILE-03 | M3 | TBD | Pending |
-| FILE-04 | M3 | TBD | Pending |
-| PLAT-01 | M1 | TBD | Pending |
-| PLAT-02 | M1 | TBD | Pending |
-| PLAT-03 | M3 | TBD | Pending |
-| PLAT-04 | M2 | TBD | Pending |
-| SKILL-01 | M3 | TBD | Pending |
-| SKILL-02 | M3 | TBD | Pending |
-| SKILL-03 | M3 | TBD | Pending |
-| SKILL-04 | M3 | TBD | Pending |
-| TUTOR-03 | M3 | TBD | Pending |
-| UI-01 | M1 | TBD | Pending |
-| UI-02 | M1 | TBD | Pending |
-| UI-03 | M1 | TBD | Pending |
-| UI-04 | M1 | TBD | Pending |
-| UI-05 | M1 | TBD | Pending |
-| UI-06 | M1 | TBD | Pending |
-| UI-07 | M1 | TBD | Pending |
-| UI-08 | M1 | TBD | Pending |
-| UI-09 | M1 | TBD | Pending |
-| UI-10 | M1 | TBD | Pending |
-| UI-11 | M1 | TBD | Pending |
-| INFRA-01 | M2 | TBD | Pending |
-| INFRA-02 | M2 | TBD | Pending |
-| INFRA-03 | M2 | TBD | Pending |
-| INFRA-04 | M2 | TBD | Pending |
-| INFRA-05 | M2 | TBD | Pending |
-| INFRA-06 | M2 | TBD | Pending |
-| INFRA-07 | M2 | TBD | Pending |
-| INFRA-08 | M2 | TBD | Pending |
-| INFRA-09 | M2 | TBD | Pending |
-| INFRA-10 | M1 | TBD | Pending |
-| INFRA-11 | M1 | TBD | Pending |
-| ENG-01 | M4 | TBD | Pending |
-| ENG-02 | M4 | TBD | Pending |
-| ENG-03 | M4 | TBD | Pending |
-| ENG-04 | M4 | TBD | Pending |
-| ENG-05 | M4 | TBD | Pending |
-| ENG-06 | M4 | TBD | Pending |
-| ENG-07 | M4 | TBD | Pending |
-| ENG-08 | M4 | TBD | Pending |
+| GPA-01 | M2 | Phase 15 | Pending |
+| GPA-02 | M2 | Phase 15 | Pending |
+| GPA-03 | M2 | Phase 15 | Pending |
+| GPA-04 | M2 | Phase 15 | Pending |
+| GPA-05 | M2 | Phase 15 | Pending |
+| DL-01 | M2 | Phase 15 | Pending |
+| DL-02 | M2 | Phase 17 | Pending |
+| DL-03 | M2 | Phase 17 | Pending |
+| DL-04 | M3 | Phase 19 | Pending |
+| INTEL-01 | M2 | Phase 15 | Pending |
+| INTEL-02 | M3 | Phase 18 | Pending |
+| INTEL-03 | M2 | Phase 17 | Pending |
+| INTEL-04 | M3 | Phase 18 | Pending |
+| INTEL-05 | M2 | Phase 15 | Pending |
+| FILE-01 | M2 | Phase 15 | Pending |
+| FILE-02 | M2 | Phase 15 | Pending |
+| FILE-03 | M3 | Phase 19 | Pending |
+| FILE-04 | M3 | Phase 19 | Pending |
+| PLAT-01 | M1 | Phase 4 | Pending |
+| PLAT-02 | M1 | Phase 3 | Pending |
+| PLAT-03 | M3 | Phase 21 | Pending |
+| PLAT-04 | M2 | Phase 17 | Pending |
+| SKILL-01 | M3 | Phase 20 | Pending |
+| SKILL-02 | M3 | Phase 20 | Pending |
+| SKILL-03 | M3 | Phase 20 | Pending |
+| SKILL-04 | M3 | Phase 20 | Pending |
+| TUTOR-03 | M3 | Phase 21 | Pending |
+| UI-01 | M1 | Phase 5 | Pending |
+| UI-02 | M1 | Phase 6 | Pending |
+| UI-03 | M1 | Phase 8 | Pending |
+| UI-04 | M1 | Phase 9 | Pending |
+| UI-05 | M1 | Phase 10 | Pending |
+| UI-06 | M1 | Phase 12 | Pending |
+| UI-07 | M1 | Phase 1 | Pending |
+| UI-08 | M1 | Phase 11 | Pending |
+| UI-09 | M1 | Phase 3 | Pending |
+| UI-10 | M1 | Phase 4 | Pending |
+| UI-11 | M1 | Phase 7 | Pending |
+| INFRA-01 | M2 | Phase 13 | Pending |
+| INFRA-02 | M2 | Phase 16 | Pending |
+| INFRA-03 | M2 | Phase 14 | Pending |
+| INFRA-04 | M2 | Phase 14 | Pending |
+| INFRA-05 | M2 | Phase 14 | Pending |
+| INFRA-06 | M2 | Phase 14 | Pending |
+| INFRA-07 | M2 | Phase 13 | Pending |
+| INFRA-08 | M2 | Phase 13 | Pending |
+| INFRA-09 | M2 | Phase 13 | Pending |
+| INFRA-10 | M1 | Phase 1 | Pending |
+| INFRA-11 | M1 | Phase 2 | Pending |
+| ENG-01 | M4 | Phase 22 | Pending |
+| ENG-02 | M4 | Phase 22 | Pending |
+| ENG-03 | M4 | Phase 22 | Pending |
+| ENG-04 | M4 | Phase 23 | Pending |
+| ENG-05 | M4 | Phase 23 | Pending |
+| ENG-06 | M4 | Phase 23 | Pending |
+| ENG-07 | M4 | Phase 24 | Pending |
+| ENG-08 | M4 | Phase 24 | Pending |
 
 **Coverage:**
 - v1 requirements: 52 total
-- Mapped to milestones: 52
+- Mapped to phases: 52
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after v2.0 rebuild initialization*
+*Last updated: 2026-03-20 — phase mappings added during roadmap creation*
