@@ -4,72 +4,32 @@
     "timetable": "课程表",
     "courses": "课程",
     "deadlines": "截止日期",
-    "predict": "预测",
+    "predict": "成绩预测",
     "digest": "每日摘要",
-    "notifications": "通知",
     "settings": "设置"
   },
-  "auth": {
-    "loginTitle": "欢迎回来",
-    "registerTitle": "创建你的账户",
-    "email": "邮箱",
-    "password": "密码",
-    "confirmPassword": "确认密码",
-    "displayName": "显示名称",
-    "login": "登录",
-    "register": "注册",
-    "noAccount": "还没有账户？",
-    "hasAccount": "已经有账户了？",
-    "registerLink": "注册",
-    "loginLink": "登录",
-    "passwordMinLength": "密码至少需要8个字符",
-    "passwordMismatch": "两次密码输入不一致"
+  "header": {
+    "brand": "UniBoard",
+    "search": "搜索课程、文件...",
+    "notifications": "通知",
+    "viewAll": "查看全部",
+    "profile": "个人资料",
+    "logout": "退出登录"
   },
-  "onboarding": {
-    "step1Title": "欢迎使用 UniBoard",
-    "step1Desc": "你的 GPA，最大化。我们聚合 Canvas 和 Ed 的数据，让你专注于最重要的事。",
-    "step2Title": "获取你的 API Token",
-    "step2Desc": "UniBoard 通过 API Token 安全连接你的大学平台。",
-    "step3Title": "连接你的账户",
-    "step3Desc": "在下方粘贴你的 Token 以开始同步课程数据。",
-    "canvasToken": "Canvas API Token",
-    "edToken": "Ed API Token",
-    "validate": "验证并连接",
-    "next": "下一步",
-    "back": "上一步",
-    "skip": "跳过",
-    "validating": "验证中...",
-    "tokenValid": "Token 验证成功",
-    "tokenInvalid": "Token 无效，请检查是否完整复制",
-    "canvasGuideTitle": "如何获取 Canvas Token",
-    "canvasStep1": "前往 Canvas LMS",
-    "canvasStep2": "点击 Account > Settings",
-    "canvasStep3": "滚动到 Approved Integrations",
-    "canvasStep4": "点击 + New Access Token",
-    "canvasStep5": "复制生成的 Token",
-    "edGuideTitle": "如何获取 Ed Token",
-    "edStep1": "前往 Ed Discussion",
-    "edStep2": "点击你的头像",
-    "edStep3": "前往 Settings > API Tokens",
-    "edStep4": "点击 Generate",
-    "edStep5": "复制生成的 Token"
+  "rightPanel": {
+    "recentActivity": "最近活动",
+    "courses": "课程",
+    "creditPts": "学分"
+  },
+  "dashboard": {
+    "welcome": "欢迎使用 UniBoard",
+    "subtitle": "您的学术仪表盘已准备就绪"
   },
   "common": {
     "loading": "加载中...",
-    "error": "出了点问题",
+    "error": "出错了",
     "retry": "重试",
     "save": "保存",
-    "cancel": "取消",
-    "comingSoon": "即将推出..."
-  },
-  "dashboard": {
-    "greeting": "{timeOfDay}好，{name}",
-    "encouragement": "来看看今天的进展吧。",
-    "scrollPrompt": "你的仪表盘",
-    "stats": "统计",
-    "courses": "课程",
-    "deadlines": "截止日期",
-    "weights": "权重",
-    "placeholder": "Plan 03-02 正在开发中..."
+    "cancel": "取消"
   }
 }

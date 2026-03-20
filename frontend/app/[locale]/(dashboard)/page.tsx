@@ -1,55 +1,28 @@
-"use client";
+import { useTranslations } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
+import AnimatedEntry from "@/components/shared/AnimatedEntry";
 
-import { useGPASummary, useGPATrend } from "@/lib/hooks/useGPA";
-import { useDeadlines } from "@/lib/hooks/useDeadlines";
-import { useCurrentUser } from "@/lib/hooks/useUser";
-import HeroSection from "@/components/dashboard/HeroSection";
-import StatsRow from "@/components/dashboard/StatsRow";
-import CourseGradesTable from "@/components/dashboard/CourseGradesTable";
-import DeadlineTimeline from "@/components/dashboard/DeadlineTimeline";
-import WeightDonut from "@/components/dashboard/WeightDonut";
+type Props = { params: Promise<{ locale: string }> };
 
-/**
- * Dashboard page: 100vh hero section followed by below-fold data sections.
- * Fetches GPA summary, deadlines, user profile, and trend data via TanStack Query.
- */
-export default function DashboardPage() {
-  const { data: gpa, isLoading: gpaLoading } = useGPASummary();
-  const { data: deadlines, isLoading: dlLoading } = useDeadlines();
-  const { data: user } = useCurrentUser();
-  useGPATrend(); // pre-fetch trend data
+export default async function DashboardPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  return <DashboardContent />;
+}
 
-  const urgentCount =
-    deadlines?.filter((d) => d.urgency === "urgent").length ?? 0;
+function DashboardContent() {
+  const t = useTranslations("dashboard");
 
   return (
-    <>
-      <HeroSection
-        displayName={user?.display_name ?? "Student"}
-        wam={gpa?.cumulative_wam}
-      />
-
-      <div id="dashboard-data" className="space-y-8 pb-16">
-        <StatsRow
-          wam={gpa?.cumulative_wam}
-          target={user?.gpa_target}
-          urgentCount={urgentCount}
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <CourseGradesTable
-            courses={gpa?.courses ?? []}
-            isLoading={gpaLoading}
-          />
-          <div className="space-y-6">
-            <DeadlineTimeline
-              deadlines={deadlines ?? []}
-              isLoading={dlLoading}
-            />
-            <WeightDonut courses={gpa?.courses ?? []} />
-          </div>
-        </div>
-      </div>
-    </>
+    <div>
+      <AnimatedEntry delay={1}>
+        <h1 className="font-serif text-[1.5rem] font-bold tracking-[-0.02em] mb-2">
+          {t("welcome")}
+        </h1>
+      </AnimatedEntry>
+      <AnimatedEntry delay={2}>
+        <p className="text-text-2 text-[0.88rem]">{t("subtitle")}</p>
+      </AnimatedEntry>
+    </div>
   );
 }

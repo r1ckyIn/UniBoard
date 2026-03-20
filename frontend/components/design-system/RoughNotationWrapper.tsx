@@ -1,58 +1,74 @@
 "use client";
 
-import { type ReactNode } from "react";
-import {
-  RoughNotation,
-  RoughNotationGroup,
-} from "react-rough-notation";
-
-type AnnotationType =
-  | "underline"
-  | "circle"
-  | "highlight"
-  | "box"
-  | "bracket"
-  | "strike-through"
-  | "crossed-off";
+import { useRef, useEffect, useCallback } from "react";
+import { annotate } from "rough-notation";
+import type { RoughAnnotation, RoughAnnotationType } from "rough-notation/lib/model.js";
 
 interface RoughNotationWrapperProps {
-  children: ReactNode;
-  type: AnnotationType;
+  children: React.ReactNode;
+  type: "underline" | "circle" | "highlight" | "box" | "strike-through";
   color: string;
-  /** Animation order within a group (lower = earlier). */
-  order?: number;
+  strokeWidth?: number;
+  padding?: number;
+  animationDuration?: number;
   show?: boolean;
+  delay?: number;
 }
 
-/**
- * Wraps react-rough-notation to provide a declarative JSX API
- * with staggered auto-play via RoughNotationGroup.
- */
-export function RoughNotationItem({
+export default function RoughNotationWrapper({
   children,
   type,
   color,
-  order = 1,
+  strokeWidth = 2,
+  padding = 2,
+  animationDuration = 600,
   show = true,
+  delay = 0,
 }: RoughNotationWrapperProps) {
-  return (
-    <RoughNotation type={type} color={color} order={order} show={show}>
-      {children}
-    </RoughNotation>
-  );
-}
+  const spanRef = useRef<HTMLSpanElement>(null);
+  const annotationRef = useRef<RoughAnnotation | null>(null);
 
-/**
- * Group wrapper that plays annotations in sequence on mount.
- */
-export function RoughNotationSequence({
-  children,
-  show = true,
-}: {
-  children: ReactNode;
-  show?: boolean;
-}) {
-  return (
-    <RoughNotationGroup show={show}>{children}</RoughNotationGroup>
-  );
+  const updateAnnotation = useCallback(() => {
+    if (!spanRef.current) return;
+
+    // Remove existing annotation if present
+    if (annotationRef.current) {
+      annotationRef.current.remove();
+      annotationRef.current = null;
+    }
+
+    const annotation = annotate(spanRef.current, {
+      type: type as RoughAnnotationType,
+      color,
+      strokeWidth,
+      padding,
+      animationDuration,
+    });
+    annotationRef.current = annotation;
+
+    if (show) {
+      if (delay > 0) {
+        const timer = setTimeout(() => {
+          annotation.show();
+        }, delay);
+        return () => clearTimeout(timer);
+      } else {
+        annotation.show();
+      }
+    }
+  }, [type, color, strokeWidth, padding, animationDuration, show, delay]);
+
+  useEffect(() => {
+    const cleanup = updateAnnotation();
+
+    return () => {
+      if (cleanup) cleanup();
+      if (annotationRef.current) {
+        annotationRef.current.remove();
+        annotationRef.current = null;
+      }
+    };
+  }, [updateAnnotation]);
+
+  return <span ref={spanRef}>{children}</span>;
 }

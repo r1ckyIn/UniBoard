@@ -1,34 +1,20 @@
-import type { ReactNode } from "react";
-import Sidebar from "./Sidebar";
-import RightPanel from "./RightPanel";
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
+import RightPanel from "@/components/layout/RightPanel";
 
-interface AppShellProps {
-  children: ReactNode;
-  rightPanel?: ReactNode;
-}
-
-/**
- * Three-column flex layout:
- * - Left: Sidebar (fixed, 68px collapsed)
- * - Center: main content area (margins for sidebar and right panel)
- * - Right: RightPanel (fixed, 300px)
- */
-export default function AppShell({ children, rightPanel }: AppShellProps) {
+export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main
-        style={{
-          marginLeft: "var(--sidebar-w)",
-          marginRight: "var(--right-panel-w)",
-          flex: 1,
-          padding: "24px 40px",
-          minHeight: "100vh",
-        }}
-      >
-        {children}
-      </main>
-      <RightPanel>{rightPanel}</RightPanel>
+      <div className="ml-[var(--spacing-sidebar-w)] flex-1 flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 py-7 px-8">
+          <div className="flex gap-7">
+            <div className="flex-1 flex flex-col gap-7">{children}</div>
+            <RightPanel />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

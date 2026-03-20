@@ -6,70 +6,30 @@
     "deadlines": "Deadlines",
     "predict": "Predict",
     "digest": "Digest",
-    "notifications": "Notifications",
     "settings": "Settings"
   },
-  "auth": {
-    "loginTitle": "Welcome back",
-    "registerTitle": "Create your account",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "displayName": "Display Name",
-    "login": "Log in",
-    "register": "Register",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
-    "registerLink": "Register",
-    "loginLink": "Log in",
-    "passwordMinLength": "Password must be at least 8 characters",
-    "passwordMismatch": "Passwords do not match"
+  "header": {
+    "brand": "UniBoard",
+    "search": "Search courses, files...",
+    "notifications": "Notifications",
+    "viewAll": "View all",
+    "profile": "Profile",
+    "logout": "Logout"
   },
-  "onboarding": {
-    "step1Title": "Welcome to UniBoard",
-    "step1Desc": "Your GPA, Maximized. We aggregate Canvas and Ed data so you can focus on what matters.",
-    "step2Title": "Get Your API Tokens",
-    "step2Desc": "UniBoard connects to your university platforms securely using API tokens.",
-    "step3Title": "Connect Your Accounts",
-    "step3Desc": "Paste your tokens below to start syncing your course data.",
-    "canvasToken": "Canvas API Token",
-    "edToken": "Ed API Token",
-    "validate": "Validate & Connect",
-    "next": "Next",
-    "back": "Back",
-    "skip": "Skip",
-    "validating": "Validating...",
-    "tokenValid": "Token validated successfully",
-    "tokenInvalid": "Invalid token, please check if copied completely",
-    "canvasGuideTitle": "How to get your Canvas token",
-    "canvasStep1": "Go to Canvas LMS",
-    "canvasStep2": "Click Account > Settings",
-    "canvasStep3": "Scroll to Approved Integrations",
-    "canvasStep4": "Click + New Access Token",
-    "canvasStep5": "Copy the generated token",
-    "edGuideTitle": "How to get your Ed token",
-    "edStep1": "Go to Ed Discussion",
-    "edStep2": "Click your profile icon",
-    "edStep3": "Go to Settings > API Tokens",
-    "edStep4": "Click Generate",
-    "edStep5": "Copy the generated token"
+  "rightPanel": {
+    "recentActivity": "Recent Activity",
+    "courses": "Courses",
+    "creditPts": "Credit Pts"
+  },
+  "dashboard": {
+    "welcome": "Welcome to UniBoard",
+    "subtitle": "Your academic dashboard is ready"
   },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
     "retry": "Retry",
     "save": "Save",
-    "cancel": "Cancel",
-    "comingSoon": "Coming soon..."
-  },
-  "dashboard": {
-    "greeting": "Good {timeOfDay}, {name}",
-    "encouragement": "Let's check on your progress today.",
-    "scrollPrompt": "Your dashboard",
-    "stats": "Stats",
-    "courses": "Courses",
-    "deadlines": "Deadlines",
-    "weights": "Weights",
-    "placeholder": "Building in Plan 03-02..."
+    "cancel": "Cancel"
   }
 }
