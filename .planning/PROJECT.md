@@ -66,9 +66,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [ ] Settings (token management, notifications, GPA target, profile)
 
 **Design System:**
-- [ ] Anthropic-inspired aesthetic: warm colors, paper texture, Rough.js hand-drawn borders
-- [ ] Fonts: Source Serif 4 (headings) + Inter (body)
-- [ ] Rough Notation animated text annotations
+- [x] Anthropic-inspired aesthetic: warm colors, paper texture, Rough.js hand-drawn borders — Validated in Phase 01: Design System Foundation
+- [x] Fonts: Source Serif 4 (headings) + Inter (body) — Validated in Phase 01: Design System Foundation
+- [x] Rough Notation animated text annotations — Validated in Phase 01: Design System Foundation
 - [ ] All animations, transitions, and interactions from HTML prototypes preserved pixel-perfect
 
 **Infrastructure:**
@@ -81,7 +81,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [ ] Token encryption (AES-256-GCM)
 - [ ] JWT + bcrypt authentication
 - [ ] Docker Compose local development environment
-- [ ] i18n support (English + Chinese)
+- [x] i18n support (English + Chinese) — Validated in Phase 01: Design System Foundation
 
 ### Out of Scope
 
@@ -169,4 +169,4 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-20 after v2.0 full rebuild initialization*
+*Last updated: 2026-03-20 — Phase 01 (Design System Foundation) complete*
