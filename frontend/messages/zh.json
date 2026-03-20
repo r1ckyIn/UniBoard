@@ -12,7 +12,18 @@
     "brand": "UniBoard",
     "search": "搜索课程、文件...",
     "notifications": "通知",
-    "viewAll": "查看全部"
+    "viewAll": "查看全部",
+    "profile": "个人资料",
+    "logout": "退出登录"
+  },
+  "rightPanel": {
+    "recentActivity": "最近活动",
+    "courses": "课程",
+    "creditPts": "学分"
+  },
+  "dashboard": {
+    "welcome": "欢迎使用 UniBoard",
+    "subtitle": "您的学术仪表盘已准备就绪"
   },
   "common": {
     "loading": "加载中...",

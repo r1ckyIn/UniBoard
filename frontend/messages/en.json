@@ -12,7 +12,18 @@
     "brand": "UniBoard",
     "search": "Search courses, files...",
     "notifications": "Notifications",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "rightPanel": {
+    "recentActivity": "Recent Activity",
+    "courses": "Courses",
+    "creditPts": "Credit Pts"
+  },
+  "dashboard": {
+    "welcome": "Welcome to UniBoard",
+    "subtitle": "Your academic dashboard is ready"
   },
   "common": {
     "loading": "Loading...",
