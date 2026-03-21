@@ -81,7 +81,7 @@ Requirements for full release across 4 milestones.
 - [ ] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
 - [ ] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
 - [x] **INFRA-10**: i18n support (English + Chinese) with next-intl
-- [ ] **INFRA-11**: OpenAPI contract spec shared between frontend mock (Route Handlers) and backend (FastAPI)
+- [x] **INFRA-11**: OpenAPI contract spec shared between frontend mock (Route Handlers) and backend (FastAPI)
 
 ### Engineering (M4)
 

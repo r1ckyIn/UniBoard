@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-20T10:40:11.021Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-21T01:42:21.138Z"
 progress:
   total_phases: 24
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 7
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 01 — design-system-foundation (COMPLETE)
+**Current focus:** Phase 02 — api-contracts-mock-layer
 
 ## Current Position
 
-Phase: 01 (design-system-foundation) — COMPLETE
-Plan: 2 of 2 (all plans complete)
+Phase: 02 (api-contracts-mock-layer) — EXECUTING
+Plan: 2 of 5
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Plan: 2 of 2 (all plans complete)
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 02 P01 | 7min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,8 @@ Recent decisions affecting current work:
 - [01-02]: Removed old app/[locale]/page.tsx in favor of (dashboard)/page.tsx route group
 - [01-02]: RightPanel hidden on screens below xl (1280px) via hidden xl:flex
 - [01-02]: Imported rough-notation types from rough-notation/lib/model.js (not directly exported)
+- [Phase 02]: Single YAML spec over split-by-domain: ~32 endpoints fits comfortably in one file
+- [Phase 02]: vi.hoisted() pattern for ky mock: resolves let-before-init issues with vi.mock factory hoisting
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T10:40:11.016Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-api-contracts-mock-layer/02-CONTEXT.md
+Last session: 2026-03-21T01:42:21.133Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None
