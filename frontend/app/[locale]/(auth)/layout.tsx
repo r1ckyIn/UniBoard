@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
@@ -17,7 +18,9 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen relative bg-cream">
       <AuthDoodles />
-      <LanguageSwitcher />
+      <Suspense>
+        <LanguageSwitcher />
+      </Suspense>
       <Toaster
         position="top-center"
         toastOptions={{

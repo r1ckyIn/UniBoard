@@ -1,21 +1,26 @@
 "use client";
 
 import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Globe } from "lucide-react";
 import { useRouter, usePathname } from "@/lib/i18n/navigation";
 
 /**
  * Small language toggle button for the auth page top-right corner.
  * Switches between EN and ZH using next-intl routing.
+ * Preserves URL search params (e.g., ?mode=register) across locale switches.
  */
 export default function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const toggleLocale = () => {
     const nextLocale = locale === "en" ? "zh" : "en";
-    router.replace(pathname, { locale: nextLocale });
+    const params = searchParams.toString();
+    const fullPath = params ? `${pathname}?${params}` : pathname;
+    router.replace(fullPath, { locale: nextLocale });
   };
 
   return (

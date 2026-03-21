@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import BrandPanel from "./BrandPanel";
 import AuthFormCard from "./AuthFormCard";
@@ -31,9 +31,27 @@ const itemVariants = {
 };
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [showSuccess, setShowSuccess] = useState(false);
   const router = useRouter();
+
+  const handleSwitchMode = useCallback(
+    (newMode: "login" | "register") => {
+      setMode(newMode);
+      const params = new URLSearchParams(searchParams.toString());
+      if (newMode === "register") {
+        params.set("mode", "register");
+      } else {
+        params.delete("mode");
+      }
+      const query = params.toString();
+      window.history.replaceState(null, "", query ? `${pathname}?${query}` : pathname);
+    },
+    [searchParams, pathname],
+  );
 
   return (
     <motion.div
@@ -58,7 +76,7 @@ export default function AuthPage() {
         <div className="relative w-full max-w-[420px]">
           <AuthFormCard
             mode={mode}
-            onSwitchMode={setMode}
+            onSwitchMode={handleSwitchMode}
             onRegisterSuccess={() => setShowSuccess(true)}
           />
           <SuccessOverlay
