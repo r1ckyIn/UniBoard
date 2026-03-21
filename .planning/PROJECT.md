@@ -12,7 +12,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] API contracts (OpenAPI 3.1 spec with 32 endpoints) — Validated in Phase 02: API Contracts & Mock Layer
+- [x] Mock API layer (30 Route Handlers with realistic fixture data) — Validated in Phase 02: API Contracts & Mock Layer
+- [x] TanStack Query hooks for all 12 data domains — Validated in Phase 02: API Contracts & Mock Layer
 
 ### Active
 
@@ -154,7 +156,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 |----------|-----------|---------|
 | Full rebuild (delete src/ + frontend/) | v1.0 had structural issues; fresh start with prototype-first approach | — Pending |
 | 4-milestone structure | Frontend-first validates UX, backend implements proven contracts, AI/MCP is complex enough for own milestone, engineering last | — Pending |
-| Contract-first Mock API | M1 defines OpenAPI contracts that M2 implements — frontend zero-change on backend integration | — Pending |
+| Contract-first Mock API | M1 defines OpenAPI contracts that M2 implements — frontend zero-change on backend integration | ✓ Good (OpenAPI spec + 30 route handlers + 12 hooks) |
 | MCP Agent for AI features | Cross-platform research requires intelligent agent, not simple API+prompt — scattered data across Canvas/Ed/Lessons needs autonomous research | — Pending |
 | Digest via pre-collect + Claude API | Digest doesn't need real-time MCP research; scheduled sync + Claude scoring is sufficient and cheaper | — Pending |
 | Rough.js fully preserved | Design aesthetics are a core differentiator — optimize performance later if needed | — Pending |
@@ -169,4 +171,4 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-20 — Phase 01 (Design System Foundation) complete*
+*Last updated: 2026-03-21 — Phase 02 (API Contracts & Mock Layer) complete*
