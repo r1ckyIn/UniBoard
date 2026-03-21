@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-01-PLAN.md
+stopped_at: Completed 02-03-PLAN.md
 last_updated: "2026-03-21T01:42:21.138Z"
 progress:
   total_phases: 24
   completed_phases: 1
   total_plans: 7
-  completed_plans: 3
+  completed_plans: 5
 ---
 
 # Project State
@@ -24,15 +24,15 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 02 (api-contracts-mock-layer) — EXECUTING
-Plan: 2 of 5
+Plan: 4 of 5
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 2
-- Average duration: 7.5min
-- Total execution time: 0.25 hours
+- Total plans completed: 4
+- Average duration: 6.8min
+- Total execution time: 0.45 hours
 
 **By Phase:**
 
@@ -42,11 +42,12 @@ Plan: 2 of 5
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (8min), 01-02 (7min)
+- Last 5 plans: 01-01 (8min), 01-02 (7min), 02-01 (7min), 02-03 (6min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 02 P01 | 7min | 3 tasks | 9 files |
+| Phase 02 P03 | 6min | 1 task | 12 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [01-02]: Imported rough-notation types from rough-notation/lib/model.js (not directly exported)
 - [Phase 02]: Single YAML spec over split-by-domain: ~32 endpoints fits comfortably in one file
 - [Phase 02]: vi.hoisted() pattern for ky mock: resolves let-before-init issues with vi.mock factory hoisting
+- [02-03]: Explicit field projection over destructuring to avoid unused-variable lint warnings
+- [02-03]: CourseOutline generated from courseDetails at request time instead of separate fixture file
+- [02-03]: Discussion filtering uses switch/case for 4 filter modes (high_value, endorsed, staff, all)
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T01:42:21.133Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-21T01:50:47Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
