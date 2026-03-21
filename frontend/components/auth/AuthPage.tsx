@@ -20,45 +20,24 @@ const bookVariants = {
   },
 };
 
-const leftPageVariants = {
-  hidden: {
-    rotateY: -90,
-    opacity: 0,
-  },
+const pageVariants = (initialRotateY: number) => ({
+  hidden: { rotateY: initialRotateY, opacity: 0 },
   visible: {
     rotateY: 0,
     opacity: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 60,
-      damping: 15,
-      mass: 1,
-    },
+    transition: { type: "spring" as const, stiffness: 60, damping: 15, mass: 1 },
   },
-};
+});
 
-const rightPageVariants = {
-  hidden: {
-    rotateY: 90,
-    opacity: 0,
-  },
-  visible: {
-    rotateY: 0,
-    opacity: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 60,
-      damping: 15,
-      mass: 1,
-    },
-  },
-};
+const leftPageVariants = pageVariants(-90);
+const rightPageVariants = pageVariants(90);
 
 export default function AuthPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
-  const [mode, setMode] = useState<"login" | "register">(initialMode);
+  const [mode, setMode] = useState<"login" | "register">(
+    () => (searchParams.get("mode") === "register" ? "register" : "login"),
+  );
   const [showSuccess, setShowSuccess] = useState(false);
   const router = useRouter();
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { Globe } from "lucide-react";
 import { useRouter, usePathname } from "@/lib/i18n/navigation";
 
@@ -14,12 +13,12 @@ export default function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const toggleLocale = () => {
     const nextLocale = locale === "en" ? "zh" : "en";
-    const params = searchParams.toString();
-    const fullPath = params ? `${pathname}?${params}` : pathname;
+    // Read search params at click time to avoid subscribing to URL changes
+    const search = typeof window !== "undefined" ? window.location.search : "";
+    const fullPath = search ? `${pathname}${search}` : pathname;
     router.replace(fullPath, { locale: nextLocale });
   };
 

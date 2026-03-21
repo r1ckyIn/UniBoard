@@ -33,9 +33,7 @@ export default function RoughCard({
     svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
 
     // Clear previous SVG children before drawing
-    while (svg.firstChild) {
-      svg.removeChild(svg.firstChild);
-    }
+    svg.replaceChildren();
 
     const rc = rough.svg(svg);
     const rect = rc.rectangle(0, 0, w, h, {
@@ -51,11 +49,12 @@ export default function RoughCard({
 
   useEffect(() => {
     // Double rAF to ensure layout is stable before reading dimensions
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+    const outerRafId = requestAnimationFrame(() => {
+      innerRafId = requestAnimationFrame(() => {
         drawBorder();
       });
     });
+    let innerRafId: number;
 
     // Redraw on resize to keep borders aligned
     const el = containerRef.current;
@@ -84,6 +83,8 @@ export default function RoughCard({
     observer.observe(el);
 
     return () => {
+      cancelAnimationFrame(outerRafId);
+      cancelAnimationFrame(innerRafId);
       observer.disconnect();
       if (burstRafId !== null) cancelAnimationFrame(burstRafId);
     };
