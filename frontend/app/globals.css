@@ -107,6 +107,7 @@
 /* Base styles */
 html {
   font-size: 15px;
+  overflow-y: scroll;
 }
 
 body {

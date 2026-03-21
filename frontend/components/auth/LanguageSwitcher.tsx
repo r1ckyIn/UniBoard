@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "@/lib/i18n/navigation";
 /**
  * Small language toggle button for the auth page top-right corner.
  * Switches between EN and ZH using next-intl routing.
+ * Preserves URL search params (e.g., ?mode=register) across locale switches.
  */
 export default function LanguageSwitcher() {
   const locale = useLocale();
@@ -15,7 +16,10 @@ export default function LanguageSwitcher() {
 
   const toggleLocale = () => {
     const nextLocale = locale === "en" ? "zh" : "en";
-    router.replace(pathname, { locale: nextLocale });
+    // Read search params at click time to avoid subscribing to URL changes
+    const search = typeof window !== "undefined" ? window.location.search : "";
+    const fullPath = search ? `${pathname}${search}` : pathname;
+    router.replace(fullPath, { locale: nextLocale });
   };
 
   return (

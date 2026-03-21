@@ -22,7 +22,7 @@ export default function AuthFormCard({
       transition={{ layout: { type: "spring", stiffness: 300, damping: 30 } }}
       className="w-full max-w-[420px]"
     >
-      <RoughCard padding="px-8 py-9" className="overflow-hidden">
+      <RoughCard padding="px-8 py-9" className="overflow-hidden" disableHover>
         <AnimatePresence mode="wait" initial={false}>
           {mode === "login" ? (
             <motion.div
