@@ -77,7 +77,7 @@ Plans:
   3. Route Handler mocks return realistic fixture data for all endpoints
   4. TanStack Query hooks exist for every data domain with proper loading/error states
   5. ky HTTP client is configured with base URL, error handling, and auth token injection
-**Plans:** 2/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [ ] 02-01-PLAN.md — OpenAPI 3.1 spec, type codegen, ky client, auth store, QueryProvider, Wave 0 tests
@@ -340,7 +340,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Design System & Foundation | M1 | 2/2 | Complete | 2026-03-20 |
-| 2. API Contracts & Mock Layer | 2/5 | In Progress|  | - |
+| 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
 | 3. Auth Page | M1 | 0/TBD | Not started | - |
 | 4. Setup Page | M1 | 0/TBD | Not started | - |
 | 5. Dashboard Page | M1 | 0/TBD | Not started | - |
