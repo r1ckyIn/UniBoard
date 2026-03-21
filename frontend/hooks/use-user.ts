@@ -103,7 +103,7 @@ export function useDeleteToken() {
 
   return useMutation({
     mutationFn: ({ platform }: { platform: "canvas" | "ed" }) =>
-      api.delete(`users/me/tokens/${platform}`).json<void>(),
+      api.delete(`users/me/tokens/${platform}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
     },
@@ -112,7 +112,9 @@ export function useDeleteToken() {
 
 export function useDeleteAccount() {
   return useMutation({
-    mutationFn: () => api.delete("users/me").json<void>(),
+    mutationFn: async () => {
+      await api.delete("users/me");
+    },
     onSuccess: () => {
       useAuthStore.getState().clearAuth();
     },
