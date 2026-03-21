@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 // Mock next/navigation
@@ -22,7 +22,6 @@ let mockAuthState = {
 };
 
 // Hydration control
-let hydrationCallback: (() => void) | null = null;
 let isHydrated = true;
 
 vi.mock("@/lib/auth/store", () => ({
@@ -31,12 +30,9 @@ vi.mock("@/lib/auth/store", () => ({
     () => mockAuthState,
     {
       persist: {
-        onFinishHydration: (cb: () => void) => {
-          hydrationCallback = cb;
-          // Return unsubscribe function
-          return () => {
-            hydrationCallback = null;
-          };
+        onFinishHydration: () => {
+          // Return unsubscribe function (noop for tests)
+          return () => {};
         },
         hasHydrated: () => isHydrated,
       },
@@ -48,7 +44,6 @@ describe("AuthGuard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuthState = { isAuthenticated: false, tokenConfigured: false };
-    hydrationCallback = null;
     isHydrated = true;
   });
 
