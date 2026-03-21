@@ -35,7 +35,7 @@ export default function RegisterForm({
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
   });
 
   const passwordValue = watch("password");

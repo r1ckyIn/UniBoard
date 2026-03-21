@@ -114,13 +114,15 @@ describe("LoginForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows inline error on blur when email is invalid", async () => {
+  it("shows inline error on submit when email is invalid", async () => {
     const user = userEvent.setup();
     render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
 
     const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
     await user.type(emailInput, "test@gmail.com");
-    await user.tab();
+
+    const submitBtn = screen.getByRole("button", { name: "Sign In" });
+    await user.click(submitBtn);
 
     await waitFor(() => {
       expect(
