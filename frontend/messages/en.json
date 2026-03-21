@@ -31,5 +31,71 @@
     "retry": "Retry",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue to your dashboard",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@uni.sydney.edu.au",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "submitButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Start maximizing your GPA today",
+      "displayNameLabel": "Display Name",
+      "displayNamePlaceholder": "Ricky",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@uni.sydney.edu.au",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "submitButton": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "emailDomain": "Please use your USYD student email (@uni.sydney.edu.au)",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "confirmRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match",
+      "displayNameRequired": "Display name is required"
+    },
+    "passwordStrength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "success": {
+      "title": "Account Created!",
+      "description": "Welcome to UniBoard. Let's connect your Canvas and Ed accounts to get started.",
+      "continueButton": "Continue to Setup"
+    },
+    "errors": {
+      "loginFailed": "Invalid email or password. Please try again.",
+      "registerFailed": "Registration failed. Please try again.",
+      "networkError": "Network error. Please check your connection.",
+      "forgotPasswordDemo": "Password reset is not available in demo mode",
+      "forgotPasswordDemoDesc": "This feature will be available in a future update."
+    },
+    "brand": {
+      "tagline": "Your GPA, Maximized.",
+      "gpaTracking": "GPA Tracking & Prediction",
+      "gpaTrackingDesc": "Real-time grades across all courses with what-if scenarios",
+      "smartDigest": "Smart Digest",
+      "smartDigestDesc": "AI-curated updates from Canvas & Ed Discussion",
+      "deadlineIntel": "Deadline Intelligence",
+      "deadlineIntelDesc": "Three-source aggregation with AI prep summaries"
+    }
   }
 }

@@ -95,7 +95,11 @@ Plans:
   2. Form validation shows inline errors for invalid email, weak password, password mismatch
   3. Successful login stores mock JWT and redirects to dashboard
   4. Auth page design matches prototype aesthetic (Rough.js borders, warm colors)
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Install deps (motion, react-hook-form, zod, sonner), validation schemas, auth guard, auth doodles, language switcher, i18n messages, auth layout
+- [ ] 03-02-PLAN.md — BrandPanel, LoginForm, RegisterForm, PasswordStrengthMeter, AuthFormCard (switching animation), SuccessOverlay, AuthPage orchestrator, page.tsx
 
 ### Phase 4: Setup Page
 **Goal**: New users can complete API token onboarding in 3 guided steps
@@ -341,7 +345,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 |-------|-----------|----------------|--------|-----------|
 | 1. Design System & Foundation | M1 | 2/2 | Complete | 2026-03-20 |
 | 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
-| 3. Auth Page | M1 | 0/TBD | Not started | - |
+| 3. Auth Page | M1 | 0/2 | Not started | - |
 | 4. Setup Page | M1 | 0/TBD | Not started | - |
 | 5. Dashboard Page | M1 | 0/TBD | Not started | - |
 | 6. Courses Page | M1 | 0/TBD | Not started | - |

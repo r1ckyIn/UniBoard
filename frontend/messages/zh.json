@@ -31,5 +31,71 @@
     "retry": "重试",
     "save": "保存",
     "cancel": "取消"
+  },
+  "auth": {
+    "login": {
+      "title": "欢迎回来",
+      "subtitle": "登录以继续使用你的仪表盘",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@uni.sydney.edu.au",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "输入你的密码",
+      "forgotPassword": "忘记密码？",
+      "submitButton": "登录",
+      "noAccount": "还没有账号？",
+      "createOne": "创建一个"
+    },
+    "register": {
+      "title": "创建你的账号",
+      "subtitle": "立即开始最大化你的 GPA",
+      "displayNameLabel": "显示名称",
+      "displayNamePlaceholder": "Ricky",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@uni.sydney.edu.au",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "至少 8 个字符",
+      "confirmPasswordLabel": "确认密码",
+      "confirmPasswordPlaceholder": "再次输入你的密码",
+      "submitButton": "创建账号",
+      "hasAccount": "已有账号？",
+      "signIn": "登录"
+    },
+    "validation": {
+      "emailRequired": "请输入邮箱",
+      "emailInvalid": "邮箱格式无效",
+      "emailDomain": "请使用你的 USYD 学生邮箱（@uni.sydney.edu.au）",
+      "passwordRequired": "请输入密码",
+      "passwordMinLength": "密码至少需要 8 个字符",
+      "confirmRequired": "请确认你的密码",
+      "passwordMismatch": "两次输入的密码不一致",
+      "displayNameRequired": "请输入显示名称"
+    },
+    "passwordStrength": {
+      "weak": "弱",
+      "fair": "一般",
+      "good": "良好",
+      "strong": "强"
+    },
+    "success": {
+      "title": "账号创建成功！",
+      "description": "欢迎来到 UniBoard。让我们连接你的 Canvas 和 Ed 账号来开始使用。",
+      "continueButton": "继续设置"
+    },
+    "errors": {
+      "loginFailed": "邮箱或密码无效，请重试。",
+      "registerFailed": "注册失败，请重试。",
+      "networkError": "网络错误，请检查你的连接。",
+      "forgotPasswordDemo": "密码重置在演示模式下不可用",
+      "forgotPasswordDemoDesc": "此功能将在未来更新中提供。"
+    },
+    "brand": {
+      "tagline": "你的 GPA，最大化。",
+      "gpaTracking": "GPA 追踪与预测",
+      "gpaTrackingDesc": "实时查看所有课程成绩，支持假设情景分析",
+      "smartDigest": "智能摘要",
+      "smartDigestDesc": "AI 精选来自 Canvas 和 Ed Discussion 的更新",
+      "deadlineIntel": "截止日期智能",
+      "deadlineIntelDesc": "三源聚合，配合 AI 准备摘要"
+    }
   }
 }
