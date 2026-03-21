@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "generate:types": "openapi-typescript openapi/openapi.yaml -o lib/api/types.gen.d.ts",
+    "check:types-api": "openapi-typescript openapi/openapi.yaml --check"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.91.2",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -39,6 +42,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
     "jsdom": "^29.0.1",
+    "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.0"

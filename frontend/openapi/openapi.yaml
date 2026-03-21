@@ -1,0 +1,1887 @@
+openapi: "3.1.0"
+info:
+  title: UniBoard API
+  version: "1.0.0"
+  description: University GPA Dashboard API — aggregates Canvas LMS + Ed Discussion data for GPA maximization.
+servers:
+  - url: /api/v1
+    description: Mock (Next.js Route Handlers)
+  - url: https://api.uniboard.app/v1
+    description: Production
+
+tags:
+  - name: auth
+    description: Authentication (proxied via AWS Cognito)
+  - name: users
+    description: User profile and token management
+  - name: courses
+    description: Course information and sub-resources
+  - name: gpa
+    description: GPA/WAM calculation, prediction, and path planning
+  - name: deadlines
+    description: Unified deadline timeline
+  - name: digest
+    description: Daily academic digest
+  - name: alerts
+    description: Risk alerts
+  - name: notifications
+    description: User notifications
+  - name: sync
+    description: Data synchronization
+  - name: search
+    description: Full-text search
+  - name: health
+    description: Health check
+
+paths:
+  # ── Auth ──────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: registerUser
+      summary: Register a new user
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, display_name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                display_name:
+                  type: string
+      responses:
+        "201":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [user_id, pending_verification]
+                    properties:
+                      user_id:
+                        type: string
+                      pending_verification:
+                        type: boolean
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      summary: Login with email and password
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [access_token, refresh_token, expires_in, user]
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      expires_in:
+                        type: integer
+                        description: Token TTL in seconds
+                      user:
+                        $ref: "#/components/schemas/User"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      summary: Refresh JWT access token
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [access_token, refresh_token, expires_in]
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      expires_in:
+                        type: integer
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      summary: Logout and invalidate refresh token
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "204":
+          description: Logged out successfully
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      summary: Request password reset code
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Reset code sent
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [message]
+                    properties:
+                      message:
+                        type: string
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+
+  /auth/confirm-password:
+    post:
+      operationId: confirmPassword
+      summary: Confirm password reset with code
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code, new_password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                code:
+                  type: string
+                new_password:
+                  type: string
+                  minLength: 8
+      responses:
+        "200":
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [message]
+                    properties:
+                      message:
+                        type: string
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  # ── Users ─────────────────────────────────────────────────────────
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get current user profile
+      tags: [users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+    patch:
+      operationId: updateCurrentUser
+      summary: Update user profile
+      tags: [users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+                gpa_target:
+                  type: number
+                gpa_scale:
+                  type: string
+                  enum: [wam, gpa_4, gpa_7]
+      responses:
+        "200":
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+    delete:
+      operationId: deleteCurrentUser
+      summary: Delete user account and all data
+      tags: [users]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Account deleted
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /users/me/tokens/{platform}:
+    put:
+      operationId: configurePlatformToken
+      summary: Configure platform API token
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [canvas, ed]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Token configured and verified
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [status, courses_found]
+                    properties:
+                      status:
+                        type: string
+                        enum: [active, invalid]
+                      courses_found:
+                        type: integer
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+    delete:
+      operationId: removePlatformToken
+      summary: Remove platform API token
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [canvas, ed]
+      responses:
+        "204":
+          description: Token removed
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /users/me/tokens/{platform}/verify:
+    post:
+      operationId: verifyPlatformToken
+      summary: Re-verify platform token validity
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [canvas, ed]
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [status, valid]
+                    properties:
+                      status:
+                        type: string
+                        enum: [active, invalid]
+                      valid:
+                        type: boolean
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /users/me/export:
+    get:
+      operationId: exportUserData
+      summary: Export all user data (GDPR)
+      tags: [users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Download URL for exported data
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [download_url, expires_at]
+                    properties:
+                      download_url:
+                        type: string
+                        format: uri
+                      expires_at:
+                        type: string
+                        format: date-time
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Courses ───────────────────────────────────────────────────────
+  /courses:
+    get:
+      operationId: listCourses
+      summary: List enrolled courses
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: semester
+          in: query
+          schema:
+            type: string
+          example: "2026-S1"
+      responses:
+        "200":
+          description: Course list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Course"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /courses/{id}:
+    get:
+      operationId: getCourseDetail
+      summary: Get course detail with assessment weights
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course detail
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/CourseDetail"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /courses/{id}/grades:
+    get:
+      operationId: getCourseGrades
+      summary: Get grade list for a course
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Grade list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Grade"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /courses/{id}/materials:
+    get:
+      operationId: getCourseMaterials
+      summary: Get course materials (Canvas modules + Ed lessons)
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [canvas, ed]
+          description: Filter by source platform
+      responses:
+        "200":
+          description: Material list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Material"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /courses/{id}/discussions:
+    get:
+      operationId: getCourseDiscussions
+      summary: Get high-value discussion threads for a course
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [high_value, endorsed, staff, all]
+            default: high_value
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: Discussion list with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Discussion"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+                  pagination:
+                    $ref: "#/components/schemas/CursorPagination"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /courses/{id}/deadlines:
+    get:
+      operationId: getCourseDeadlines
+      summary: Get deadlines for a single course
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course deadline list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CourseDeadline"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /courses/{id}/outline:
+    get:
+      operationId: getCourseOutline
+      summary: Get parsed unit outline for a course
+      tags: [courses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course outline
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/CourseOutline"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  # ── GPA ───────────────────────────────────────────────────────────
+  /gpa:
+    get:
+      operationId: getGpaReport
+      summary: Get current GPA/WAM report
+      tags: [gpa]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: GPA report
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/GpaReport"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /gpa/predict:
+    post:
+      operationId: predictGpa
+      summary: What-if GPA prediction
+      tags: [gpa]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [what_if_scores, scale]
+              properties:
+                what_if_scores:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/WhatIfScore"
+                scale:
+                  type: string
+                  enum: [wam, gpa_4, gpa_7]
+      responses:
+        "200":
+          description: GPA prediction result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/GpaPrediction"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /gpa/path:
+    post:
+      operationId: calculateGpaPath
+      summary: Calculate path to target GPA
+      tags: [gpa]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_wam]
+              properties:
+                target_wam:
+                  type: number
+      responses:
+        "200":
+          description: GPA path result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/GpaPath"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Deadlines ─────────────────────────────────────────────────────
+  /deadlines:
+    get:
+      operationId: listDeadlines
+      summary: Get unified deadline timeline across all courses
+      tags: [deadlines]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start date (default today)
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End date (default semester end)
+        - name: course_id
+          in: query
+          schema:
+            type: string
+          description: Filter by course
+      responses:
+        "200":
+          description: Deadline list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Deadline"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /deadlines/upcoming:
+    get:
+      operationId: getUpcomingDeadlines
+      summary: Get deadlines within the next 7 days
+      tags: [deadlines]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Upcoming deadline list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Deadline"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Digest ────────────────────────────────────────────────────────
+  /digest/latest:
+    get:
+      operationId: getLatestDigest
+      summary: Get latest daily academic digest
+      tags: [digest]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Latest digest
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DigestLatest"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /digest/history:
+    get:
+      operationId: getDigestHistory
+      summary: Get digest history with pagination
+      tags: [digest]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: Digest history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DigestSummary"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+                  pagination:
+                    $ref: "#/components/schemas/CursorPagination"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Alerts ────────────────────────────────────────────────────────
+  /alerts:
+    get:
+      operationId: getAlerts
+      summary: Get risk alerts
+      tags: [alerts]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Alert list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Alert"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Notifications ─────────────────────────────────────────────────
+  /notifications:
+    get:
+      operationId: getNotifications
+      summary: Get user notifications
+      tags: [notifications]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Notification"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+                  pagination:
+                    $ref: "#/components/schemas/CursorPagination"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Sync ──────────────────────────────────────────────────────────
+  /sync/trigger:
+    post:
+      operationId: triggerSync
+      summary: Manually trigger data synchronization
+      tags: [sync]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scope]
+              properties:
+                scope:
+                  type: string
+                  enum: [all, grades, deadlines, materials, discussions, outline]
+      responses:
+        "202":
+          description: Sync started
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SyncTriggerResponse"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /sync/status:
+    get:
+      operationId: getSyncStatus
+      summary: Get current sync status
+      tags: [sync]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Sync status
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SyncStatusResponse"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Search ────────────────────────────────────────────────────────
+  /search:
+    get:
+      operationId: search
+      summary: Full-text search across materials and discussions
+      tags: [search]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query string
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [materials, discussions, all]
+            default: all
+        - name: course_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SearchResult"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  # ── Health ────────────────────────────────────────────────────────
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check (no auth required)
+      tags: [health]
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/HealthCheck"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+
+# ════════════════════════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════════════════════════
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    AuthError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    # ── Shared ────────────────────────────────────────────────────
+    ResponseMeta:
+      type: object
+      required: [request_id, timestamp]
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              $ref: "#/components/schemas/ErrorCode"
+            message:
+              type: string
+
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION_ERROR
+        - AUTH_REQUIRED
+        - FORBIDDEN
+        - NOT_FOUND
+        - TOKEN_INVALID
+        - RATE_LIMITED
+        - UPSTREAM_ERROR
+        - INTERNAL_ERROR
+
+    CursorPagination:
+      type: object
+      required: [next_cursor, has_more]
+      properties:
+        next_cursor:
+          type: ["string", "null"]
+        has_more:
+          type: boolean
+
+    # ── User ──────────────────────────────────────────────────────
+    User:
+      type: object
+      required: [id, email, display_name, gpa_target, gpa_scale, tokens, created_at]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+        gpa_target:
+          type: ["number", "null"]
+        gpa_scale:
+          type: string
+          enum: [wam, gpa_4, gpa_7]
+        tokens:
+          type: object
+          required: [canvas, ed]
+          properties:
+            canvas:
+              $ref: "#/components/schemas/TokenStatus"
+            ed:
+              $ref: "#/components/schemas/TokenStatus"
+        created_at:
+          type: string
+          format: date-time
+
+    TokenStatus:
+      type: object
+      required: [status, last_verified_at]
+      properties:
+        status:
+          type: string
+          enum: [active, invalid, not_configured]
+        last_verified_at:
+          type: ["string", "null"]
+          format: date-time
+
+    # ── Course ────────────────────────────────────────────────────
+    Course:
+      type: object
+      required: [id, name, code, semester, credit_points]
+      properties:
+        id:
+          type: string
+          example: "crs_abc123"
+        name:
+          type: string
+          example: "Systems Programming"
+        code:
+          type: string
+          example: "COMP2017"
+        semester:
+          type: string
+          example: "2026-S1"
+        credit_points:
+          type: integer
+          example: 6
+        canvas_course_id:
+          type: string
+        ed_course_id:
+          type: string
+        current_mark:
+          type: ["number", "null"]
+          example: 82.5
+        grade_letter:
+          type: ["string", "null"]
+          example: "D"
+        completed_weight:
+          type: number
+          example: 0.40
+        has_unit_outline:
+          type: boolean
+        last_sync_at:
+          type: string
+          format: date-time
+
+    CourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/Course"
+        - type: object
+          required: [assessment_weights, weight_source]
+          properties:
+            assessment_weights:
+              type: array
+              items:
+                $ref: "#/components/schemas/AssessmentWeight"
+            weight_source:
+              type: string
+              enum: [unit_outline, canvas_assignment_groups]
+
+    AssessmentWeight:
+      type: object
+      required: [name, weight, score, max_score, status]
+      properties:
+        name:
+          type: string
+        weight:
+          type: number
+        score:
+          type: ["number", "null"]
+        max_score:
+          type: number
+        status:
+          type: string
+          enum: [graded, upcoming, submitted]
+        due_date:
+          type: string
+          format: date-time
+
+    # ── Grade ─────────────────────────────────────────────────────
+    Grade:
+      type: object
+      required: [id, assessment_name, score, max_score, weight, group_name, graded_at, submitted_at]
+      properties:
+        id:
+          type: string
+        assessment_name:
+          type: string
+        score:
+          type: number
+        max_score:
+          type: number
+        weight:
+          type: number
+        group_name:
+          type: string
+        graded_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+
+    # ── Material ──────────────────────────────────────────────────
+    Material:
+      type: object
+      required: [id, title, source, source_type]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        source:
+          type: string
+          enum: [canvas, ed]
+        source_type:
+          type: string
+          enum: [module, lesson]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaterialItem"
+        slide_count:
+          type: integer
+        url:
+          type: string
+
+    MaterialItem:
+      type: object
+      required: [title, type, url]
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+        url:
+          type: string
+
+    # ── Discussion ────────────────────────────────────────────────
+    Discussion:
+      type: object
+      required: [id, ed_thread_id, title, author, category, is_endorsed, is_staff_post, gpa_relevance_score, relevance_category, summary, created_at]
+      properties:
+        id:
+          type: string
+        ed_thread_id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        category:
+          type: string
+        is_endorsed:
+          type: boolean
+        is_staff_post:
+          type: boolean
+        gpa_relevance_score:
+          type: number
+        relevance_category:
+          type: string
+        summary:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    # ── Deadline ──────────────────────────────────────────────────
+    CourseDeadline:
+      type: object
+      required: [id, title, due_date, source, status, days_remaining]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+        source:
+          type: string
+        weight:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [upcoming, submitted, overdue, completed]
+        days_remaining:
+          type: integer
+
+    Deadline:
+      allOf:
+        - $ref: "#/components/schemas/CourseDeadline"
+        - type: object
+          required: [course_code, course_name, is_confirmed]
+          properties:
+            course_code:
+              type: string
+            course_name:
+              type: string
+            is_confirmed:
+              type: boolean
+
+    # ── GPA ───────────────────────────────────────────────────────
+    GpaReport:
+      type: object
+      required: [scale, current_wam, current_gpa_4, target_wam, gap, courses, last_sync_at]
+      properties:
+        scale:
+          type: string
+          enum: [wam, gpa_4, gpa_7]
+        current_wam:
+          type: number
+        current_gpa_4:
+          type: number
+        target_wam:
+          type: ["number", "null"]
+        gap:
+          type: ["number", "null"]
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/GpaCourseSummary"
+        last_sync_at:
+          type: string
+          format: date-time
+
+    GpaCourseSummary:
+      type: object
+      required: [course_id, code, name, credit_points, level_weight, current_mark, grade_letter, completed_weight]
+      properties:
+        course_id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        credit_points:
+          type: integer
+        level_weight:
+          type: integer
+        current_mark:
+          type: ["number", "null"]
+        grade_letter:
+          type: ["string", "null"]
+        completed_weight:
+          type: number
+
+    GpaPrediction:
+      type: object
+      required: [current_wam, predicted_wam, delta, per_course]
+      properties:
+        current_wam:
+          type: number
+        predicted_wam:
+          type: number
+        delta:
+          type: number
+        per_course:
+          type: array
+          items:
+            $ref: "#/components/schemas/GpaPredictionCourse"
+
+    GpaPredictionCourse:
+      type: object
+      required: [course_id, code, current_mark, predicted_mark, applied_assumptions]
+      properties:
+        course_id:
+          type: string
+        code:
+          type: string
+        current_mark:
+          type: number
+        predicted_mark:
+          type: number
+        applied_assumptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WhatIfScore"
+
+    WhatIfScore:
+      type: object
+      required: [course_id, assessment_name, assumed_score]
+      properties:
+        course_id:
+          type: string
+        assessment_name:
+          type: string
+        assumed_score:
+          type: number
+
+    GpaPath:
+      type: object
+      required: [target_wam, current_wam, is_achievable, per_course]
+      properties:
+        target_wam:
+          type: number
+        current_wam:
+          type: number
+        is_achievable:
+          type: boolean
+        per_course:
+          type: array
+          items:
+            $ref: "#/components/schemas/GpaPathCourse"
+
+    GpaPathCourse:
+      type: object
+      required: [course_id, code, current_mark, minimum_remaining_avg, remaining_assessments, difficulty]
+      properties:
+        course_id:
+          type: string
+        code:
+          type: string
+        current_mark:
+          type: number
+        minimum_remaining_avg:
+          type: number
+        remaining_assessments:
+          type: array
+          items:
+            $ref: "#/components/schemas/GpaPathAssessment"
+        difficulty:
+          type: string
+          enum: [easy, moderate, hard, impossible]
+
+    GpaPathAssessment:
+      type: object
+      required: [name, weight, minimum_score]
+      properties:
+        name:
+          type: string
+        weight:
+          type: number
+        minimum_score:
+          type: number
+
+    # ── Digest ────────────────────────────────────────────────────
+    DigestLatest:
+      type: object
+      required: [digest_id, generated_at, period, courses, urgent_deadlines]
+      properties:
+        digest_id:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        period:
+          type: string
+          enum: [daily, weekly]
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/DigestCourseEntry"
+        urgent_deadlines:
+          type: array
+          items:
+            $ref: "#/components/schemas/UrgentDeadline"
+
+    DigestCourseEntry:
+      type: object
+      required: [code, highlights]
+      properties:
+        code:
+          type: string
+        highlights:
+          type: array
+          items:
+            $ref: "#/components/schemas/DigestHighlight"
+
+    DigestHighlight:
+      type: object
+      required: [type, summary, urgency]
+      properties:
+        type:
+          type: string
+        summary:
+          type: string
+        urgency:
+          type: string
+          enum: [informational, important, critical]
+        source_thread_id:
+          type: string
+
+    UrgentDeadline:
+      type: object
+      required: [course_code, title, due_date, hours_remaining]
+      properties:
+        course_code:
+          type: string
+        title:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+        hours_remaining:
+          type: number
+
+    DigestSummary:
+      type: object
+      required: [digest_id, generated_at, period, highlight_count]
+      properties:
+        digest_id:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        period:
+          type: string
+          enum: [daily, weekly]
+        highlight_count:
+          type: integer
+
+    # ── Alert ─────────────────────────────────────────────────────
+    Alert:
+      type: object
+      required: [id, type, severity, course_code, message, created_at, is_read]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [gpa_risk, deadline_risk, token_expired, grade_drop]
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        course_code:
+          type: string
+        message:
+          type: string
+        current_mark:
+          type: number
+        target_mark:
+          type: number
+        deadline:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        is_read:
+          type: boolean
+
+    # ── Notification ──────────────────────────────────────────────
+    Notification:
+      type: object
+      required: [id, type, severity, title, body, is_read, created_at]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        title:
+          type: string
+        body:
+          type: string
+        is_read:
+          type: boolean
+        action_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    # ── Sync ──────────────────────────────────────────────────────
+    SyncTriggerResponse:
+      type: object
+      required: [sync_id, status, started_at]
+      properties:
+        sync_id:
+          type: string
+        status:
+          type: string
+          enum: [in_progress, completed, failed]
+        started_at:
+          type: string
+          format: date-time
+
+    SyncStatusResponse:
+      type: object
+      required: [last_sync, platforms]
+      properties:
+        last_sync:
+          $ref: "#/components/schemas/SyncDetail"
+        platforms:
+          $ref: "#/components/schemas/PlatformStatus"
+
+    SyncDetail:
+      type: object
+      required: [sync_id, status, started_at, results]
+      properties:
+        sync_id:
+          type: string
+        status:
+          type: string
+          enum: [in_progress, completed, failed]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: ["string", "null"]
+          format: date-time
+        results:
+          $ref: "#/components/schemas/SyncResults"
+
+    SyncResults:
+      type: object
+      properties:
+        grades:
+          $ref: "#/components/schemas/SyncCount"
+        deadlines:
+          $ref: "#/components/schemas/SyncCount"
+        discussions:
+          $ref: "#/components/schemas/SyncCount"
+
+    SyncCount:
+      type: object
+      required: [synced, new, updated]
+      properties:
+        synced:
+          type: integer
+        new:
+          type: integer
+        updated:
+          type: integer
+
+    PlatformStatus:
+      type: object
+      required: [canvas, ed]
+      properties:
+        canvas:
+          $ref: "#/components/schemas/PlatformHealth"
+        ed:
+          $ref: "#/components/schemas/PlatformHealth"
+
+    PlatformHealth:
+      type: object
+      required: [status, last_success]
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, error]
+        last_success:
+          type: string
+          format: date-time
+
+    # ── Search ────────────────────────────────────────────────────
+    SearchResult:
+      type: object
+      required: [type, title, source, course_code, snippet, url, relevance]
+      properties:
+        type:
+          type: string
+          enum: [material, discussion]
+        title:
+          type: string
+        source:
+          type: string
+        course_code:
+          type: string
+        snippet:
+          type: string
+        url:
+          type: string
+        relevance:
+          type: number
+
+    # ── Health ────────────────────────────────────────────────────
+    HealthCheck:
+      type: object
+      required: [status, version, checks, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded]
+        version:
+          type: string
+        checks:
+          type: object
+          required: [database, canvas_api, ed_api, cognito]
+          properties:
+            database:
+              type: string
+              enum: [ok, error]
+            canvas_api:
+              type: string
+              enum: [ok, error]
+            ed_api:
+              type: string
+              enum: [ok, error]
+            cognito:
+              type: string
+              enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+
+    # ── Course Outline ────────────────────────────────────────────
+    CourseOutline:
+      type: object
+      required: [course_id, assessments, learning_outcomes, fetched_at, source]
+      properties:
+        course_id:
+          type: string
+        outline_url:
+          type: ["string", "null"]
+          format: uri
+        assessments:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutlineAssessment"
+        learning_outcomes:
+          type: array
+          items:
+            type: string
+        fetched_at:
+          type: string
+          format: date-time
+        source:
+          type: string
+          enum: [unit_outline, canvas_fallback]
+
+    OutlineAssessment:
+      type: object
+      required: [name, weight, description]
+      properties:
+        name:
+          type: string
+        weight:
+          type: number
+        description:
+          type: string
+        due_date:
+          type: string
+        length:
+          type: string
+        ai_policy:
+          type: string

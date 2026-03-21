@@ -1,0 +1,65 @@
+import type { components } from "@/lib/api/types.gen";
+
+type Notification = components["schemas"]["Notification"];
+
+export const notifications: Notification[] = [
+  {
+    id: "ntf_001",
+    type: "deadline_reminder",
+    severity: "critical",
+    title: "Due in 3 hours: COMP3221 Project Milestone 2",
+    body: "Project Milestone 2 (25% weight) closes at 23:59 tonight. Ensure your submission is uploaded.",
+    is_read: false,
+    action_url: "/courses/crs_comp3221",
+    created_at: "2026-03-22T20:59:00Z",
+  },
+  {
+    id: "ntf_002",
+    type: "deadline_reminder",
+    severity: "warning",
+    title: "Due in 24 hours: INFO2222 User Testing Report",
+    body: "User Testing Report (15% weight) is due tomorrow at 23:59.",
+    is_read: false,
+    action_url: "/courses/crs_info2222",
+    created_at: "2026-03-24T23:59:00Z",
+  },
+  {
+    id: "ntf_003",
+    type: "deadline_reminder",
+    severity: "info",
+    title: "Due in 72 hours: MATH1005 Online Quiz 1",
+    body: "Online Quiz 1 (5% weight) is due on March 28. 20 MCQ questions, one attempt.",
+    is_read: true,
+    action_url: "/courses/crs_math1005",
+    created_at: "2026-03-25T23:59:00Z",
+  },
+  {
+    id: "ntf_004",
+    type: "grade_published",
+    severity: "info",
+    title: "Grade Released: COMP2017 Assignment 2",
+    body: "Your Assignment 2 has been graded. You scored 78/100.",
+    is_read: false,
+    action_url: "/courses/crs_comp2017",
+    created_at: "2026-03-25T14:00:00Z",
+  },
+  {
+    id: "ntf_005",
+    type: "token_expired",
+    severity: "warning",
+    title: "Ed Discussion Token Expired",
+    body: "Your Ed Discussion API token has expired. Re-configure in Settings to continue syncing.",
+    is_read: false,
+    action_url: "/settings",
+    created_at: "2026-03-20T12:00:00Z",
+  },
+  {
+    id: "ntf_006",
+    type: "sync_complete",
+    severity: "info",
+    title: "Data Sync Complete",
+    body: "Successfully synced 14 grades, 8 deadlines, and 45 discussions from Canvas and Ed.",
+    is_read: true,
+    created_at: "2026-03-20T08:15:00Z",
+  },
+];
