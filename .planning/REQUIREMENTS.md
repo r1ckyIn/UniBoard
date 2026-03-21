@@ -40,7 +40,7 @@ Requirements for full release across 4 milestones.
 ### Platform & Onboarding
 
 - [ ] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
-- [ ] **PLAT-02**: User can access the full dashboard via web browser without installing anything
+- [x] **PLAT-02**: User can access the full dashboard via web browser without installing anything
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
 - [ ] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
 
@@ -65,7 +65,7 @@ Requirements for full release across 4 milestones.
 - [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
 - [x] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
 - [ ] **UI-08**: Timetable page with weekly schedule view
-- [ ] **UI-09**: Auth page with login and register flows
+- [x] **UI-09**: Auth page with login and register flows
 - [ ] **UI-10**: Setup page with 3-step API token onboarding flow
 - [ ] **UI-11**: Course Detail page with assessment breakdown, materials browser, and Ed posts
 
