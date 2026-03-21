@@ -8,12 +8,17 @@ interface RoughCardProps {
   children: React.ReactNode;
   className?: string;
   padding?: string;
+  disableHover?: boolean;
 }
+
+// Duration (ms) for the rAF burst that tracks layout animation resizes
+const RESIZE_BURST_DURATION = 400;
 
 export default function RoughCard({
   children,
   className,
   padding = "py-[22px] px-[30px]",
+  disableHover = false,
 }: RoughCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -39,6 +44,7 @@ export default function RoughCard({
       roughness: 1.0,
       bowing: 1,
       fill: "none",
+      seed: 42, // Fixed seed for deterministic hand-drawn paths (no jitter on redraw)
     });
     svg.appendChild(rect);
   }, []);
@@ -55,16 +61,31 @@ export default function RoughCard({
     const el = containerRef.current;
     if (!el) return;
 
-    let rafId: number | null = null;
+    let burstRafId: number | null = null;
+
     const observer = new ResizeObserver(() => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(drawBorder);
+      // Cancel any ongoing burst to avoid stacking loops
+      if (burstRafId !== null) cancelAnimationFrame(burstRafId);
+
+      // Start a rAF burst that redraws the border every frame for RESIZE_BURST_DURATION ms.
+      // This ensures the rough.js border follows height changes frame-by-frame
+      // during spring/layout animations rather than snapping at discrete intervals.
+      const start = performance.now();
+      const loop = () => {
+        drawBorder();
+        if (performance.now() - start < RESIZE_BURST_DURATION) {
+          burstRafId = requestAnimationFrame(loop);
+        } else {
+          burstRafId = null;
+        }
+      };
+      loop();
     });
     observer.observe(el);
 
     return () => {
       observer.disconnect();
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (burstRafId !== null) cancelAnimationFrame(burstRafId);
     };
   }, [drawBorder]);
 
@@ -74,7 +95,7 @@ export default function RoughCard({
       className={cn(
         "relative overflow-visible bg-card-bg rounded-card shadow-card",
         "transition-shadow duration-[0.28s] ease-[cubic-bezier(.4,0,.2,1)]",
-        "hover:shadow-card-hover hover:-translate-y-px",
+        !disableHover && "hover:shadow-card-hover hover:-translate-y-px",
         padding,
         className
       )}
