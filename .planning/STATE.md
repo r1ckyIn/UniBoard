@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: unknown
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-03-21T01:54:17.697Z"
+status: phase_complete
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-03-21T01:59:46Z"
 progress:
   total_phases: 24
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 02 (api-contracts-mock-layer) — EXECUTING
-Plan: 5 of 5
+Phase: 02 (api-contracts-mock-layer) — COMPLETE
+Plan: 5 of 5 (all done)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5
-- Average duration: 6.8min
-- Total execution time: 0.58 hours
+- Total plans completed: 6
+- Average duration: 6.3min
+- Total execution time: 0.63 hours
 
 **By Phase:**
 
@@ -42,7 +42,7 @@ Plan: 5 of 5
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (8min), 01-02 (7min), 02-01 (7min), 02-03 (6min), 02-04 (8min)
+- Last 5 plans: 01-02 (7min), 02-01 (7min), 02-03 (6min), 02-04 (8min), 02-05 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -50,6 +50,7 @@ Plan: 5 of 5
 | Phase 02 P03 | 6min | 1 task | 12 files |
 | Phase 02 P04 | 8min | 2 tasks | 9 files |
 | Phase 02 P02 | 9min | 2 tasks | 23 files |
+| Phase 02 P05 | 4min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,10 @@ Recent decisions affecting current work:
 - [02-04]: Notifications apply unread_only filter before pagination for accurate page counts
 - [Phase 02]: Base64 index-based cursors for mockPaginatedResponse for generic compatibility
 - [Phase 02]: Next.js 15 Promise-based params for dynamic [platform] route segments
+- [02-05]: All hooks follow keys-factory -> queryOptions-factory -> thin-wrapper pattern
+- [02-05]: Auth mutations use useAuthStore.getState() (not hook) since callbacks run outside render
+- [02-05]: useSearch enabled guard at q.length >= 2 to prevent empty API calls
+- [02-05]: useExportData uses enabled: false for on-demand GDPR export fetching
 
 ### Pending Todos
 
@@ -89,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T01:54:13.814Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-03-21T01:59:46Z
+Stopped at: Completed 02-05-PLAN.md (Phase 02 complete)
 Resume file: None
