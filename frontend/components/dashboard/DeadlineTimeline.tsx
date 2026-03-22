@@ -133,7 +133,7 @@ export default function DeadlineTimeline({
   }, [drawTimeline, deadlines]);
 
   return (
-    <RoughCard>
+    <RoughCard className="h-full">
       {/* Card header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

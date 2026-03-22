@@ -54,7 +54,9 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   const t = useTranslations("dashboard");
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [showAnnotations, setShowAnnotations] = useState(false);
+  const [showUnderline, setShowUnderline] = useState(false);
+  const [showCircle, setShowCircle] = useState(false);
+  const [showHighlight, setShowHighlight] = useState(false);
 
   // Extract first name from userName
   const firstName = userName.split(" ")[0];
@@ -69,12 +71,13 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   // Encouragement text
   const encouragement = defaultEncouragementProvider(mockActivity, t);
 
-  // Show Rough Notation annotations after 0.9s delay
+  // Show Rough Notation annotations one-by-one with staggered delays
+  // Underline at 900ms (duration 600ms), circle at 1500ms (duration 800ms), highlight at 2300ms (duration 1000ms)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAnnotations(true);
-    }, 900);
-    return () => clearTimeout(timer);
+    const t1 = setTimeout(() => setShowUnderline(true), 900);
+    const t2 = setTimeout(() => setShowCircle(true), 1500);
+    const t3 = setTimeout(() => setShowHighlight(true), 2300);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   // Parallax fade-out on scroll
@@ -123,8 +126,8 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
         <RoughNotationWrapper
           type="highlight"
           color="rgba(217,119,87,0.10)"
-          show={showAnnotations}
-          animationDuration={800}
+          show={showHighlight}
+          animationDuration={1000}
           padding={4}
         >
           {highlightPhrase}
@@ -151,8 +154,8 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
             key={i}
             type="underline"
             color="#d97757"
-            show={showAnnotations}
-            animationDuration={800}
+            show={showUnderline}
+            animationDuration={600}
             strokeWidth={2}
             padding={2}
           >
@@ -166,8 +169,8 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
             key={i}
             type="circle"
             color="#6a9bcc"
-            show={showAnnotations}
-            animationDuration={1200}
+            show={showCircle}
+            animationDuration={800}
             strokeWidth={2}
             padding={4}
           >

@@ -300,7 +300,7 @@ export default function DashboardPage() {
 
         {/* Bottom row: Deadlines + Donut */}
         <div className="grid grid-cols-1 min-[900px]:grid-cols-2 gap-6">
-          <AnimatedEntry delay={5}>
+          <AnimatedEntry delay={5} className="h-full">
             {deadlines.isLoading ? (
               <SkeletonCard variant="timeline" />
             ) : (
@@ -313,7 +313,7 @@ export default function DashboardPage() {
             )}
           </AnimatedEntry>
 
-          <AnimatedEntry delay={6}>
+          <AnimatedEntry delay={6} className="h-full">
             {deadlines.isLoading || courseDetail.isLoading ? (
               <SkeletonCard variant="donut" />
             ) : (
