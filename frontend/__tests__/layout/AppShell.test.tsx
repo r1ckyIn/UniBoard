@@ -5,6 +5,27 @@ import React from "react";
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+}));
+
+// Mock next/navigation (Header now uses useRouter for dropdown navigation)
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/",
+}));
+
+// Mock auth store (Header now reads user from store)
+vi.mock("@/lib/auth/store", () => ({
+  useAuthStore: (selector: (s: Record<string, unknown>) => unknown) =>
+    selector({
+      user: { id: "u1", email: "test@test.com", displayName: "Test User" },
+      clearAuth: vi.fn(),
+    }),
+}));
+
+// Mock notifications hook (Header now calls useNotifications)
+vi.mock("@/hooks/use-notifications", () => ({
+  useNotifications: () => ({ data: { data: [] } }),
 }));
 
 // Mock next-intl navigation

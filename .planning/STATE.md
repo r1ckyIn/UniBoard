@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-05-PLAN.md
-last_updated: "2026-03-22T04:38:02.853Z"
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-03-22T10:06:59.003Z"
 progress:
   total_phases: 24
-  completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
+  completed_phases: 5
+  total_plans: 22
+  completed_plans: 22
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 04 — setup-page
+**Current focus:** Phase 05 — dashboard-page
 
 ## Current Position
 
-Phase: 04 (setup-page) — COMPLETE
-Plan: 5 of 5 (all complete)
+Phase: 05 (dashboard-page) — EXECUTING
+Plan: 5 of 6
 
 ## Performance Metrics
 
@@ -59,6 +59,12 @@ Plan: 5 of 5 (all complete)
 | Phase 04 P03 | 7min | 2 tasks | 7 files |
 | Phase 04 P04 | 3min | 2 tasks | 9 files |
 | Phase 04 P05 | 5min | 2 tasks | 4 files |
+| Phase 05 P00 | 3min | 2 tasks | 13 files |
+| Phase 05 P01 | 5min | 2 tasks | 6 files |
+| Phase 05 P02 | 6min | 2 tasks | 4 files |
+| Phase 05 P04 | 3min | 2 tasks | 4 files |
+| Phase 05 P03 | 3min | 3 tasks | 4 files |
+| Phase 05 P05 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -110,6 +116,18 @@ Recent decisions affecting current work:
 - [Phase 04]: not-found.tsx uses div wrapper (no html/body) since Next.js root layout already provides them
 - [Phase 04]: Two-layer RoughCard: outer div with 10px padding gap (no bg) + inner div with bg/shadow, so rough.js border wobble is visible against page background
 - [Phase 04]: URL search params (?step=N) for setup step persistence across language switches, leveraging existing LanguageSwitcher search param preservation
+- [Phase 05-00]: Used it.todo() over it.skip() for cleaner vitest reporting and intent clarity
+- [Phase 05]: SkeletonCard uses variant map pattern (Record<SkeletonVariant, React.FC>) instead of conditional rendering
+- [Phase 05]: skeleton-shimmer animation added to globals.css @theme block (Tailwind v4 CSS config)
+- [05-02]: NotificationPanel receives data as props (not calling hooks directly) for testability
+- [05-02]: AvatarMenu uses button elements (not anchor tags) with onClick handlers for SPA navigation
+- [05-02]: Header computes initials from displayName with first+last letter logic
+- [Phase 05-04]: Native HTML dialog over custom modal for built-in focus trap and Escape handling
+- [Phase 05-04]: 3-tier deadline dot opacity thresholds based on cumulative weight (0.08/0.15/0.22)
+- [Phase 05]: Motion spring variants with custom delay for hero stagger (damping: 25, stiffness: 200)
+- [Phase 05]: Portal-slot pattern (createPortal + #right-panel-slot) for injecting dashboard-specific content into RightPanel without modifying AppShell
+- [Phase 05]: useCourseDetail fetched on-demand based on donutCourseCode derived from selected/nearest deadline
+- [Phase 05]: rAF-based converge animation for AssessmentDonut to precisely control Rough.js SVG redraw timing
 
 ### Pending Todos
 
@@ -121,6 +139,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T04:32:09.042Z
-Stopped at: Completed 04-05-PLAN.md
+Last session: 2026-03-22T10:00:50.755Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None

@@ -50,6 +50,16 @@
   --animate-gentle-bob: gentle-bob 3s ease-in-out infinite;
   --animate-drop-in: drop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-spin: spin 0.8s linear infinite;
+  --animate-skeleton-shimmer: skeleton-shimmer 1.5s ease-in-out infinite;
+
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
 
   @keyframes slide-up {
     from {

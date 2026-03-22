@@ -10,11 +10,7 @@
   },
   "header": {
     "brand": "UniBoard",
-    "search": "搜索课程、文件...",
-    "notifications": "通知",
-    "viewAll": "查看全部",
-    "profile": "个人资料",
-    "logout": "退出登录"
+    "search": "搜索课程、文件..."
   },
   "rightPanel": {
     "recentActivity": "最近活动",
@@ -22,8 +18,73 @@
     "creditPts": "学分"
   },
   "dashboard": {
-    "welcome": "欢迎使用 UniBoard",
-    "subtitle": "您的学术仪表盘已准备就绪"
+    "hero": {
+      "greeting": {
+        "morning": "早上好，{firstName}",
+        "afternoon": "下午好，{firstName}",
+        "evening": "晚上好，{firstName}"
+      },
+      "date": "今天是{weekday}，第{semester}学期 第{weekNumber}周。",
+      "scrollPrompt": "你的仪表盘"
+    },
+    "stats": {
+      "wam": { "label": "当前 WAM", "sub": "加权平均分" },
+      "target": { "label": "GPA 目标", "sub": "{gradeBand}", "badge": "还差 {gap} 分" },
+      "alerts": { "label": "提醒", "sub": "{course}低于目标 · {count} 个截止日期将至" }
+    },
+    "grades": {
+      "title": "课程成绩概览",
+      "badge": "{year} S{semester}",
+      "th": { "course": "课程", "assessed": "已评估", "earned": "已得分", "target": "目标" },
+      "predictLink": "预测 →"
+    },
+    "deadlines": {
+      "title": "即将到来的截止日期",
+      "badge": "7 天",
+      "days": "{count} 天",
+      "seeDetails": "详情"
+    },
+    "donut": {
+      "title": "评估权重",
+      "empty": {
+        "heading": "暂无即将到来的截止日期",
+        "body": "当你有即将到来的截止日期时，评估权重将在此显示。"
+      }
+    },
+    "profile": {
+      "statLabels": { "courses": "课程数", "credits": "学分" }
+    },
+    "calendar": {
+      "monthFormat": "{year}年{month}月",
+      "days": { "mon": "一", "tue": "二", "wed": "三", "thu": "四", "fri": "五", "sat": "六", "sun": "日" }
+    },
+    "time": {
+      "justNow": "刚刚",
+      "hoursAgo": "{count}小时前",
+      "daysAgo": "{count}天前"
+    },
+    "activity": {
+      "title": "最近动态",
+      "grade": "成绩已发布 — {course} {assignment}: {score}",
+      "discussion": "教职人员回复了 {course} {topic}",
+      "deadline": "提醒 — {course} {assignment}还有{days}天",
+      "endorsed": "{course}「{topic}」有新的官方回答"
+    },
+    "externalLink": {
+      "title": "打开外部链接？",
+      "body": "你即将离开 UniBoard 并打开一个外部页面。",
+      "confirm": "打开链接",
+      "cancel": "留在 UniBoard"
+    },
+    "notifications": { "title": "通知", "footer": "查看所有通知" },
+    "avatarMenu": {
+      "profile": "个人资料",
+      "settings": "设置",
+      "apiTokens": "API 令牌",
+      "logout": "退出登录"
+    },
+    "error": { "message": "加载此部分时出错。", "retry": "重试" },
+    "loading": { "aria": "加载中..." }
   },
   "common": {
     "loading": "加载中...",
