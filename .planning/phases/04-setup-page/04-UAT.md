@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 04-setup-page
 source: 04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md
 started: 2026-03-22T03:10:00Z
-updated: 2026-03-22T03:08:00Z
+updated: 2026-03-22T03:20:00Z
 ---
 
 ## Current Test
@@ -71,37 +71,62 @@ skipped: 0
   reason: "User reported: 这个自定义边框看起来不像手绘的"
   severity: cosmetic
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "RoughCard 使用单层结构，bg-card-bg/rounded-card 与 rough.js SVG 在同一元素边缘，手绘线条被背景和圆角遮盖。原型使用双层结构（外层 padding:10px 无背景 + 内层有背景），rough.js 边框画在页面背景上，手绘效果清晰可见。"
+  artifacts:
+    - path: "frontend/components/design-system/RoughCard.tsx"
+      issue: "Single-layer structure hides rough.js border wobble"
+  missing:
+    - "Restructure to two-layer approach: outer wrapper (padding, no bg) + inner wrapper (bg, content)"
+  debug_session: ".planning/debug/roughcard-border-not-sketchy.md"
 
 - truth: "Token 输入框清除按钮可点击，Canvas Token 验证应接受实际 Canvas API Token 格式（字母数字+波浪号，如3156~PR7xC...）"
   status: failed
   reason: "User reported: 右侧x删除按钮无法点击，Canvas token 实际格式是字母数字+波浪号，不是纯数字"
   severity: major
   test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "XCircle 是被动状态图标（无 onClick/role/cursor），不是按钮。Canvas token 正则 /^\\d{50,100}$/ 只接受纯数字，实际格式是 {id}~{secret}（如 3156~PR7xC...）。Canvas token 最大有效期 120 天需在教程中说明。"
+  artifacts:
+    - path: "frontend/components/setup/TokenInput.tsx"
+      issue: "XCircle div has no onClick handler (lines 63-69)"
+    - path: "frontend/lib/validations/token.ts"
+      issue: "Canvas regex /^\\d{50,100}$/ rejects real tokens (line 7)"
+    - path: "frontend/__tests__/setup/token-validation.test.ts"
+      issue: "Test tokens are pure-digit strings matching wrong regex"
+  missing:
+    - "Add onClear callback prop to TokenInput, wire XCircle as button"
+    - "Change Canvas regex to /^\\d+~[A-Za-z0-9_]{40,}$/"
+    - "Update i18n tutorial to mention Canvas token 120-day expiration"
+    - "Update tests with realistic token formats"
+  debug_session: ".planning/debug/setup-token-input-bugs.md"
 
 - truth: "Success Step 显示 5 个模拟课程名称，Go to Dashboard 跳转到正确路由"
   status: failed
   reason: "User reported: 没有显示模拟课程名称，Go to Dashboard 跳转到 /en/dashboard 是 404，hydration error"
   severity: major
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "setTokenConfigured(true) 在 setTimeout 回调中与 setCourseNames 同时调用，SetupGuard 检测到 tokenConfigured=true 立即卸载组件，用户无法看到课程名。router.push('/dashboard') 路由错误（dashboard 是路由组，实际路径是 /）。not-found.tsx 重复 <html> 标签导致 hydration mismatch。"
+  artifacts:
+    - path: "frontend/components/setup/SuccessStep.tsx"
+      issue: "setTokenConfigured(true) in setTimeout kills component before courses shown (line 35); router.push('/dashboard') wrong route (line 44)"
+    - path: "frontend/app/not-found.tsx"
+      issue: "Duplicate <html><body> tags nested inside root layout"
+  missing:
+    - "Move setTokenConfigured(true) into handleGoToDashboard click handler"
+    - "Change router.push('/dashboard') to router.push('/')"
+    - "Strip <html><body> from not-found.tsx, keep only content div"
+  debug_session: ".planning/debug/setup-success-step-bugs.md"
 
 - truth: "切换语言时保持当前步骤状态"
   status: failed
   reason: "User reported: 切换中英文的时候会重定向到setup的第一个步骤，步骤状态丢失"
   severity: minor
   test: 9
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "SetupPage 步骤状态用 useState(1) 管理，无持久化。LanguageSwitcher 调用 router.replace 切换 locale 导致 [locale] 动态段变化，Next.js 卸载重挂载整个组件树，useState 重置为初始值 1。"
+  artifacts:
+    - path: "frontend/components/setup/SetupPage.tsx"
+      issue: "useState<1|2|3|'success'>(1) — no persistence (line 21)"
+    - path: "frontend/components/auth/LanguageSwitcher.tsx"
+      issue: "router.replace with new locale causes component remount (line 22)"
+  missing:
+    - "Persist step as URL query param ?step=N (LanguageSwitcher already preserves search params)"
+  debug_session: ".planning/debug/setup-lang-switch-reset.md"
