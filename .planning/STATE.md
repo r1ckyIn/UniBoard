@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-03-22T09:51:41.447Z"
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-03-22T10:00:50.760Z"
 progress:
   total_phases: 24
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 05 (dashboard-page) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Plan: 4 of 6
 | Phase 05 P02 | 6min | 2 tasks | 4 files |
 | Phase 05 P04 | 3min | 2 tasks | 4 files |
 | Phase 05 P03 | 3min | 3 tasks | 4 files |
+| Phase 05 P05 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,9 @@ Recent decisions affecting current work:
 - [Phase 05-04]: Native HTML dialog over custom modal for built-in focus trap and Escape handling
 - [Phase 05-04]: 3-tier deadline dot opacity thresholds based on cumulative weight (0.08/0.15/0.22)
 - [Phase 05]: Motion spring variants with custom delay for hero stagger (damping: 25, stiffness: 200)
+- [Phase 05]: Portal-slot pattern (createPortal + #right-panel-slot) for injecting dashboard-specific content into RightPanel without modifying AppShell
+- [Phase 05]: useCourseDetail fetched on-demand based on donutCourseCode derived from selected/nearest deadline
+- [Phase 05]: rAF-based converge animation for AssessmentDonut to precisely control Rough.js SVG redraw timing
 
 ### Pending Todos
 
@@ -135,6 +139,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T09:51:41.442Z
-Stopped at: Completed 05-03-PLAN.md
+Last session: 2026-03-22T10:00:50.755Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None
