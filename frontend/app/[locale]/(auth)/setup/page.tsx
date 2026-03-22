@@ -1,16 +1,12 @@
 import { Suspense } from "react";
 import { SetupGuard } from "@/components/setup/SetupGuard";
+import SetupPage from "@/components/setup/SetupPage";
 
 export default function SetupPageRoute() {
   return (
     <SetupGuard>
       <Suspense>
-        <div
-          data-testid="setup-page"
-          className="flex items-center justify-center min-h-screen"
-        >
-          <p>Setup Page</p>
-        </div>
+        <SetupPage />
       </Suspense>
     </SetupGuard>
   );
