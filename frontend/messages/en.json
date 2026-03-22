@@ -25,7 +25,19 @@
         "evening": "Good evening, {firstName}"
       },
       "date": "It's {weekday}, {weekNumber} of Semester {semester}.",
-      "scrollPrompt": "your dashboard"
+      "scrollPrompt": "your dashboard",
+      "encourage": {
+        "multiComplete": "The {item1} and the {item2} are done and behind you now. You've been working so hard \u2014 {highlight}.",
+        "multiCompleteHighlight": "it's okay to take it slow today",
+        "singleComplete": "{item} is behind you now. Take a deep breath \u2014 {highlight}.",
+        "singleCompleteHighlight": "you're making steady progress",
+        "highProductivity": "You've wrapped up {count} tasks this week. That's impressive \u2014 {highlight}.",
+        "highProductivityHighlight": "you've earned a moment to breathe",
+        "someProgress": "You're {count} tasks into the week already. Keep this momentum going \u2014 {highlight}.",
+        "someProgressHighlight": "you've got this",
+        "freshStart": "A new week stretches ahead. Take it one task at a time \u2014 {highlight}.",
+        "freshStartHighlight": "every small step counts"
+      }
     },
     "stats": {
       "wam": { "label": "Current WAM", "sub": "Weighted Average Mark" },

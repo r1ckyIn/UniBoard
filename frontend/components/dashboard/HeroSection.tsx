@@ -67,7 +67,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   const weekday = format(new Date(), "EEEE");
 
   // Encouragement text
-  const encouragement = defaultEncouragementProvider(mockActivity);
+  const encouragement = defaultEncouragementProvider(mockActivity, t);
 
   // Show Rough Notation annotations after 0.9s delay
   useEffect(() => {

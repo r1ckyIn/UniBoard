@@ -25,7 +25,19 @@
         "evening": "晚上好，{firstName}"
       },
       "date": "今天是{weekday}，第{semester}学期 第{weekNumber}周。",
-      "scrollPrompt": "你的仪表盘"
+      "scrollPrompt": "你的仪表盘",
+      "encourage": {
+        "multiComplete": "{item1} 和 {item2} 都已完成了。你一直很努力\u2014\u2014{highlight}\u3002",
+        "multiCompleteHighlight": "今天可以放慢脚步休息一下",
+        "singleComplete": "{item} 已经完成了。深呼吸\u2014\u2014{highlight}\u3002",
+        "singleCompleteHighlight": "你正在稳步前进",
+        "highProductivity": "这周你已经完成了 {count} 项任务。太厉害了\u2014\u2014{highlight}\u3002",
+        "highProductivityHighlight": "你值得喘口气",
+        "someProgress": "这周已经完成 {count} 项任务了。保持这个势头\u2014\u2014{highlight}\u3002",
+        "someProgressHighlight": "你一定可以的",
+        "freshStart": "新的一周在前方展开。一步一步来\u2014\u2014{highlight}\u3002",
+        "freshStartHighlight": "每一小步都很重要"
+      }
     },
     "stats": {
       "wam": { "label": "当前 WAM", "sub": "加权平均分" },
