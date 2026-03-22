@@ -159,7 +159,7 @@ export default function DashboardPage() {
       target: report?.target_wam ?? 0,
       gradeBand: courseGrades[0]?.grade_letter ?? "—",
       alertCount: alertList.length,
-      alertSummary: firstCourseAlert
+      alertCourse: firstCourseAlert
         ? `${firstCourseAlert.course_code}`
         : "",
       alertDeadlineCount: deadlineAlerts.length,
@@ -284,7 +284,7 @@ export default function DashboardPage() {
               target={statsData.target}
               gradeBand={statsData.gradeBand}
               alertCount={statsData.alertCount}
-              alertCourse={statsData.alertSummary}
+              alertCourse={statsData.alertCourse}
               alertDeadlineCount={statsData.alertDeadlineCount}
             />
           )}
