@@ -49,12 +49,12 @@ export default function RoughCard({
 
   useEffect(() => {
     // Double rAF to ensure layout is stable before reading dimensions
+    let innerRafId: number;
     const outerRafId = requestAnimationFrame(() => {
       innerRafId = requestAnimationFrame(() => {
         drawBorder();
       });
     });
-    let innerRafId: number;
 
     // Redraw on resize to keep borders aligned
     const el = containerRef.current;
