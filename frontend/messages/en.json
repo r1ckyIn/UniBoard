@@ -155,7 +155,7 @@
       "cta": "Validate & Connect",
       "validating": "Validating...",
       "errors": {
-        "canvas": "Canvas token format: {number}~{alphanumeric}. Check that you copied the full token including the ~ character.",
+        "canvas": "Canvas token format: '{number}'~'{alphanumeric}'. Check that you copied the full token including the ~ character.",
         "ed": "Ed token should be a shorter alphanumeric string. Check that you copied the full token."
       }
     },
