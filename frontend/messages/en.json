@@ -97,5 +97,75 @@
       "deadlineIntel": "Deadline Intelligence",
       "deadlineIntelDesc": "Three-source aggregation with AI prep summaries"
     }
+  },
+  "setup": {
+    "welcome": {
+      "title": "Welcome to UniBoard",
+      "description": "Let's connect your Canvas LMS and Ed Discussion accounts so we can start tracking your grades, deadlines, and course materials in one place.",
+      "subtitle": "This takes about 2 minutes. You'll need access to Canvas and Ed.",
+      "features": {
+        "readonly": "Read-only access",
+        "encrypted": "AES-256 encrypted",
+        "deletable": "Delete anytime"
+      },
+      "cta": "Get Started"
+    },
+    "tutorial": {
+      "title": "How to get your API tokens",
+      "description": "Follow these steps to generate tokens from Canvas and Ed. Don't worry, it's straightforward!",
+      "canvas": {
+        "name": "Canvas LMS",
+        "steps": {
+          "1": "Go to canvas.sydney.edu.au and log in",
+          "2": "Click your profile picture (bottom-left) \u2192 Settings",
+          "3": "Scroll down to Approved Integrations \u2192 click + New Access Token",
+          "4": "Enter purpose: UniBoard, leave expiry blank \u2192 click Generate Token",
+          "5": "Copy the token immediately \u2014 it won't be shown again!"
+        }
+      },
+      "ed": {
+        "name": "Ed Discussion",
+        "steps": {
+          "1": "Go to edstem.org/eu/login and log in",
+          "2": "Select region \u2192 Australia (critical \u2014 default may be wrong)",
+          "3": "Log in with your student credentials",
+          "4": "Navigate to API Tokens settings",
+          "5": "Click Generate Token, name it UniBoard, and copy it"
+        }
+      },
+      "back": "Back",
+      "cta": "I have my tokens"
+    },
+    "tokens": {
+      "title": "Connect your accounts",
+      "description": "Paste the API tokens you generated. We'll validate them instantly.",
+      "canvas": {
+        "label": "Canvas API Token",
+        "placeholder": "Paste your Canvas token here"
+      },
+      "ed": {
+        "label": "Ed Discussion API Token",
+        "placeholder": "Paste your Ed token here"
+      },
+      "security": {
+        "title": "Your tokens are safe.",
+        "description": "They are encrypted with AES-256-GCM and stored securely. UniBoard only uses read-only access \u2014 we never post, submit, or modify anything on your behalf."
+      },
+      "back": "Back",
+      "cta": "Validate & Connect",
+      "validating": "Validating...",
+      "errors": {
+        "canvas": "Canvas token should be a numeric string (~70 characters). Check that you copied the full token.",
+        "ed": "Ed token should be a shorter alphanumeric string. Check that you copied the full token."
+      }
+    },
+    "success": {
+      "title": "You're all set!",
+      "description": "Canvas and Ed are connected. We're syncing your courses, grades, and deadlines right now.",
+      "syncing": "Syncing your data...",
+      "synced": "{count} courses synced successfully",
+      "cta": "Go to Dashboard",
+      "toast": "Welcome! Your accounts are connected."
+    }
   }
 }

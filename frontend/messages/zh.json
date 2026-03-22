@@ -97,5 +97,75 @@
       "deadlineIntel": "截止日期智能",
       "deadlineIntelDesc": "三源聚合，配合 AI 准备摘要"
     }
+  },
+  "setup": {
+    "welcome": {
+      "title": "欢迎来到 UniBoard",
+      "description": "让我们连接你的 Canvas LMS 和 Ed Discussion 账户，一站式追踪你的成绩、截止日期和课程资料。",
+      "subtitle": "大约需要 2 分钟。你需要先登录 Canvas 和 Ed。",
+      "features": {
+        "readonly": "只读访问",
+        "encrypted": "AES-256 加密",
+        "deletable": "随时删除"
+      },
+      "cta": "开始设置"
+    },
+    "tutorial": {
+      "title": "如何获取 API 令牌",
+      "description": "按照以下步骤从 Canvas 和 Ed 生成令牌。别担心，非常简单！",
+      "canvas": {
+        "name": "Canvas LMS",
+        "steps": {
+          "1": "访问 canvas.sydney.edu.au 并登录",
+          "2": "点击个人头像（左下角）→ 设置",
+          "3": "向下滚动到已批准的集成 → 点击 + New Access Token",
+          "4": "用途填写：UniBoard，到期时间留空 → 点击生成令牌",
+          "5": "立即复制令牌 — 之后将无法再次查看！"
+        }
+      },
+      "ed": {
+        "name": "Ed Discussion",
+        "steps": {
+          "1": "访问 edstem.org/eu/login 并登录",
+          "2": "选择地区 → Australia（关键步骤 — 默认地区可能不正确）",
+          "3": "使用学生账号登录",
+          "4": "进入 API Tokens 设置页面",
+          "5": "点击生成令牌，命名为 UniBoard，并复制"
+        }
+      },
+      "back": "返回",
+      "cta": "我已获取令牌"
+    },
+    "tokens": {
+      "title": "连接你的账户",
+      "description": "粘贴你生成的 API 令牌。我们会立即验证。",
+      "canvas": {
+        "label": "Canvas API 令牌",
+        "placeholder": "在此粘贴你的 Canvas 令牌"
+      },
+      "ed": {
+        "label": "Ed Discussion API 令牌",
+        "placeholder": "在此粘贴你的 Ed 令牌"
+      },
+      "security": {
+        "title": "你的令牌安全无忧。",
+        "description": "我们使用 AES-256-GCM 加密存储。UniBoard 仅使用只读访问 — 绝不会代替你发布、提交或修改任何内容。"
+      },
+      "back": "返回",
+      "cta": "验证并连接",
+      "validating": "验证中...",
+      "errors": {
+        "canvas": "Canvas 令牌应为约 70 位的数字字符串。请检查是否完整复制了令牌。",
+        "ed": "Ed 令牌应为较短的字母数字字符串。请检查是否完整复制了令牌。"
+      }
+    },
+    "success": {
+      "title": "设置完成！",
+      "description": "Canvas 和 Ed 已连接。我们正在同步你的课程、成绩和截止日期。",
+      "syncing": "正在同步数据...",
+      "synced": "已成功同步 {count} 门课程",
+      "cta": "前往仪表盘",
+      "toast": "欢迎！你的账户已连接。"
+    }
   }
 }
