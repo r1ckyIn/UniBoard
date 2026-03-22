@@ -224,7 +224,7 @@ export default function DashboardPage() {
 
     return {
       name: userData?.display_name ?? authUser?.displayName ?? "Student",
-      faculty: "Computer Science",
+      faculty: "Faculty of Science",
       year: 3,
       semester: 1,
       courseCount: courseList.length,

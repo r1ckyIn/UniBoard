@@ -78,7 +78,7 @@ export default function AvatarMenu({
           onClick={item.onClick}
           className={cn(
             "flex items-center gap-3 w-full px-4 py-3 text-[0.82rem] text-text-2",
-            "transition-colors duration-[0.15s] hover:bg-card-bg-hover hover:text-text-1",
+            "hover:bg-card-bg-hover hover:text-text-1",
             "cursor-pointer border-none bg-transparent text-left"
           )}
         >
@@ -94,7 +94,7 @@ export default function AvatarMenu({
         onClick={onLogout}
         className={cn(
           "flex items-center gap-3 w-full px-4 py-3 text-[0.82rem] text-[#cc4455]",
-          "transition-colors duration-[0.15s] hover:bg-[rgba(204,68,85,.05)]",
+          "hover:bg-[rgba(204,68,85,.05)]",
           "cursor-pointer border-none bg-transparent text-left"
         )}
       >

@@ -49,7 +49,7 @@ export default function ExternalLinkDialog({
     <dialog
       ref={dialogRef}
       onCancel={handleCancel}
-      className="max-w-[360px] bg-white rounded-[12px] p-6 shadow-lg border-none backdrop:bg-black/30"
+      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[360px] w-[90vw] bg-white rounded-[14px] p-6 border-none backdrop:bg-black/30 shadow-[0_4px_20px_rgba(20,20,19,0.08)]"
     >
       {/* Title */}
       <h2 className="font-serif text-[0.88rem] font-semibold text-text-1 mb-2">

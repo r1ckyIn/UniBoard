@@ -139,7 +139,7 @@ export default function MiniCalendar({
   const monthLabel = format(new Date(viewYear, viewMonth, 1), "MMMM yyyy");
 
   return (
-    <RoughCard padding="py-4 px-5">
+    <RoughCard padding="py-4 px-5" disableHover>
       {/* Month navigation bar */}
       <div className="flex items-center justify-between mb-3">
         <button

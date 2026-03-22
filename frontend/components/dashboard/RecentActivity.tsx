@@ -77,7 +77,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
 
   return (
     <>
-      <RoughCard padding="p-5">
+      <RoughCard padding="p-5" disableHover>
         {/* Title */}
         <div className="flex items-center gap-2 text-[0.95rem] font-semibold mb-4">
           <Activity className="w-4 h-4 text-orange" />
