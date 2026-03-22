@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 4 context gathered
-last_updated: "2026-03-22T01:21:11.147Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-22T02:44:32.394Z"
 progress:
   total_phases: 24
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 03 — auth-page
+**Current focus:** Phase 04 — setup-page
 
 ## Current Position
 
-Phase: 03 (auth-page) — EXECUTING
-Plan: 4 of 4
+Phase: 04 (setup-page) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Plan: 4 of 4
 | Phase 03 P01 | 6min | 2 tasks | 11 files |
 | Phase 03 P02 | 5min | 2 tasks | 13 files |
 | Phase 03 P03 | 4min | 2 tasks | 8 files |
+| Phase 04 P01 | 6min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase 03-02]: BrandPanel uses min-[900px]:flex for exact 900px breakpoint matching prototype
 - [Phase 03]: URL search params (?mode=register) over useState for form mode persistence across locale switches
 - [Phase 03]: Suspense boundary required for useSearchParams consumers in Next.js 15 static builds
+- [Phase 04]: Moved guards from (auth) layout to page level: AuthGuard wraps auth/page.tsx, SetupGuard wraps setup/page.tsx
+- [Phase 04]: Canvas token regex /^\d{50,100}$/ for numeric tokens, Ed token regex /^[a-zA-Z0-9_-]{10,50}$/ for alphanumeric
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T01:21:11.141Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-setup-page/04-CONTEXT.md
+Last session: 2026-03-22T02:44:32.390Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None
