@@ -160,8 +160,9 @@ export default function DashboardPage() {
       gradeBand: courseGrades[0]?.grade_letter ?? "—",
       alertCount: alertList.length,
       alertSummary: firstCourseAlert
-        ? `${firstCourseAlert.course_code} · ${deadlineAlerts.length} deadline soon`
+        ? `${firstCourseAlert.course_code}`
         : "",
+      alertDeadlineCount: deadlineAlerts.length,
     };
   }, [gpa.data, alerts.data, courseGrades]);
 
@@ -197,10 +198,10 @@ export default function DashboardPage() {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const timeStr =
         diffHours < 1
-          ? "Just now"
+          ? t("time.justNow")
           : diffHours < 24
-            ? `${diffHours}h ago`
-            : `${Math.floor(diffHours / 24)}d ago`;
+            ? t("time.hoursAgo", { count: String(diffHours) })
+            : t("time.daysAgo", { count: String(Math.floor(diffHours / 24)) });
 
       return {
         id: n.id,
@@ -224,7 +225,6 @@ export default function DashboardPage() {
 
     return {
       name: userData?.display_name ?? authUser?.displayName ?? "Student",
-      email: userData?.email ?? authUser?.email ?? "",
       faculty: "Computer Science",
       year: 3,
       semester: 1,
@@ -284,7 +284,8 @@ export default function DashboardPage() {
               target={statsData.target}
               gradeBand={statsData.gradeBand}
               alertCount={statsData.alertCount}
-              alertSummary={statsData.alertSummary}
+              alertCourse={statsData.alertSummary}
+              alertDeadlineCount={statsData.alertDeadlineCount}
             />
           )}
         </div>
@@ -340,7 +341,6 @@ export default function DashboardPage() {
               ) : (
                 <ProfileCard
                   name={profileData.name}
-                  email={profileData.email}
                   faculty={profileData.faculty}
                   year={profileData.year}
                   semester={profileData.semester}

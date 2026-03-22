@@ -5,7 +5,6 @@ import RoughCard from "@/components/design-system/RoughCard";
 
 interface ProfileCardProps {
   name: string;
-  email: string;
   faculty: string;
   year: number;
   semester: number;

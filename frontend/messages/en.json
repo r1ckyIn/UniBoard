@@ -10,11 +10,7 @@
   },
   "header": {
     "brand": "UniBoard",
-    "search": "Search courses, files...",
-    "notifications": "Notifications",
-    "viewAll": "View all",
-    "profile": "Profile",
-    "logout": "Logout"
+    "search": "Search courses, files..."
   },
   "rightPanel": {
     "recentActivity": "Recent Activity",
@@ -58,7 +54,15 @@
     "profile": {
       "statLabels": { "courses": "Courses", "credits": "Credit Pts" }
     },
-    "calendar": { "monthFormat": "{month} {year}" },
+    "calendar": {
+      "monthFormat": "{month} {year}",
+      "days": { "mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun" }
+    },
+    "time": {
+      "justNow": "Just now",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago"
+    },
     "activity": {
       "title": "Recent Activity",
       "grade": "Grade posted \u2014 {course} {assignment}: {score}",

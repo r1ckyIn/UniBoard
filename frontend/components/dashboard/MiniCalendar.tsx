@@ -23,7 +23,7 @@ interface MiniCalendarProps {
   onDateClick: (date: Date) => void;
 }
 
-const DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 /**
  * Get Monday-based first day offset for a given month.
@@ -165,12 +165,12 @@ export default function MiniCalendar({
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-px text-center">
         {/* Day headers */}
-        {DAY_HEADERS.map((d) => (
+        {DAY_KEYS.map((key) => (
           <div
-            key={d}
+            key={key}
             className="text-[0.62rem] font-semibold text-text-3 py-1 uppercase"
           >
-            {d}
+            {t(`calendar.days.${key}`)}
           </div>
         ))}
 

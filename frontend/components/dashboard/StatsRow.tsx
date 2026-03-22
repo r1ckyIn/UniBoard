@@ -10,7 +10,8 @@ interface StatsRowProps {
   target: number;
   gradeBand: string;
   alertCount: number;
-  alertSummary: string;
+  alertCourse: string;
+  alertDeadlineCount: number;
 }
 
 export default function StatsRow({
@@ -18,17 +19,11 @@ export default function StatsRow({
   target,
   gradeBand,
   alertCount,
-  alertSummary,
+  alertCourse,
+  alertDeadlineCount,
 }: StatsRowProps) {
   const t = useTranslations("dashboard");
   const gap = Math.abs(target - wam).toFixed(1);
-
-  // Parse alertSummary to extract course and count for i18n
-  // Format expected: "COMP2017" and count as a number
-  // For now, pass raw alertSummary parts
-  const alertParts = alertSummary.split(" · ");
-  const alertCourse = alertParts[0] || "";
-  const alertDeadlineCount = alertParts[1] || "";
 
   return (
     <div className="grid grid-cols-3 gap-5">
@@ -161,7 +156,7 @@ export default function StatsRow({
           <p className="text-text-2" style={{ fontSize: "12px" }}>
             {t("stats.alerts.sub", {
               course: alertCourse,
-              count: alertDeadlineCount,
+              count: String(alertDeadlineCount),
             })}
           </p>
         </RoughCard>

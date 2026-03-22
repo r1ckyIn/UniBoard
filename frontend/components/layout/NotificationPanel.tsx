@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 import {
   Clock,
   CheckCircle,
@@ -69,6 +70,8 @@ export default function NotificationPanel({
   onItemClick,
 }: NotificationPanelProps) {
   const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
 
   return (
     <div
@@ -129,6 +132,7 @@ export default function NotificationPanel({
                 <div className="text-[0.66rem] text-text-3 mt-px">
                   {formatDistanceToNow(new Date(notification.created_at), {
                     addSuffix: true,
+                    locale: dateFnsLocale,
                   })}
                 </div>
               </div>

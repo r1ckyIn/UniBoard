@@ -10,11 +10,7 @@
   },
   "header": {
     "brand": "UniBoard",
-    "search": "搜索课程、文件...",
-    "notifications": "通知",
-    "viewAll": "查看全部",
-    "profile": "个人资料",
-    "logout": "退出登录"
+    "search": "搜索课程、文件..."
   },
   "rightPanel": {
     "recentActivity": "最近活动",
@@ -58,7 +54,15 @@
     "profile": {
       "statLabels": { "courses": "课程数", "credits": "学分" }
     },
-    "calendar": { "monthFormat": "{year}年{month}月" },
+    "calendar": {
+      "monthFormat": "{year}年{month}月",
+      "days": { "mon": "一", "tue": "二", "wed": "三", "thu": "四", "fri": "五", "sat": "六", "sun": "日" }
+    },
+    "time": {
+      "justNow": "刚刚",
+      "hoursAgo": "{count}小时前",
+      "daysAgo": "{count}天前"
+    },
     "activity": {
       "title": "最近动态",
       "grade": "成绩已发布 — {course} {assignment}: {score}",
