@@ -1,7 +1,6 @@
 "use client";
 
 import { Toaster } from "sonner";
-import { AuthGuard } from "@/components/auth/AuthGuard";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
 import LanguageSwitcher from "@/components/auth/LanguageSwitcher";
 
@@ -29,7 +28,7 @@ export default function AuthLayout({
           },
         }}
       />
-      <AuthGuard>{children}</AuthGuard>
+      {children}
     </div>
   );
 }
