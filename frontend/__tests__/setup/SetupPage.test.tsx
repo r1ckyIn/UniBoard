@@ -3,6 +3,23 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import SetupPage from "@/components/setup/SetupPage";
 
+// Track router.replace calls for URL update verification
+const mockReplace = vi.fn();
+
+// Mock next/navigation (useSearchParams)
+let mockSearchParamStep: string | null = null;
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => ({
+    get: (key: string) => (key === "step" ? mockSearchParamStep : null),
+  }),
+}));
+
+// Mock @/lib/i18n/navigation (useRouter, usePathname)
+vi.mock("@/lib/i18n/navigation", () => ({
+  useRouter: () => ({ replace: mockReplace }),
+  usePathname: () => "/setup",
+}));
+
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations:
@@ -113,6 +130,8 @@ vi.mock("@/components/setup/SuccessStep", () => ({
 describe("SetupPage", () => {
   beforeEach(() => {
     capturedStep = null;
+    mockSearchParamStep = null;
+    mockReplace.mockClear();
   });
 
   it("shows step 1 (Welcome) on initial render", () => {
@@ -204,5 +223,41 @@ describe("SetupPage", () => {
 
     expect(screen.getByTestId("step-indicator")).toBeInTheDocument();
     expect(screen.getByText("Step: 1")).toBeInTheDocument();
+  });
+
+  it("reads initial step from URL search param ?step=2", () => {
+    mockSearchParamStep = "2";
+    render(<SetupPage />);
+
+    expect(screen.getByTestId("tutorial-step")).toBeInTheDocument();
+    expect(screen.queryByTestId("welcome-step")).not.toBeInTheDocument();
+    expect(capturedStep).toBe(2);
+  });
+
+  it("reads initial step from URL search param ?step=3", () => {
+    mockSearchParamStep = "3";
+    render(<SetupPage />);
+
+    expect(screen.getByTestId("token-step")).toBeInTheDocument();
+    expect(capturedStep).toBe(3);
+  });
+
+  it("defaults to step 1 for invalid URL search param", () => {
+    mockSearchParamStep = "invalid";
+    render(<SetupPage />);
+
+    expect(screen.getByTestId("welcome-step")).toBeInTheDocument();
+    expect(capturedStep).toBe(1);
+  });
+
+  it("updates URL when step changes", async () => {
+    const user = userEvent.setup();
+    render(<SetupPage />);
+
+    await user.click(screen.getByText("Get Started"));
+
+    expect(mockReplace).toHaveBeenCalledWith("/setup?step=2", {
+      scroll: false,
+    });
   });
 });
