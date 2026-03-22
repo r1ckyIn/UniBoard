@@ -61,9 +61,9 @@ Exceptions (multiples of 4, outside standard set, with justification):
 
 | Role | Size | Weight | Line Height | Font Family | Usage |
 |------|------|--------|-------------|-------------|-------|
-| Display | 28px | 600 | 1.15 | Source Serif 4 | Hero greeting (2.8rem at 15px base ≈ 42px, but constrained to Display role -- see Brand Exception below), stat-value (2rem ≈ 30px, mapped to Display) |
+| Display | 28px | 600 | 1.15 | Source Serif 4 | Hero greeting (2.8rem at 15px base = 42px, but constrained to Display role -- see Brand Exception below), stat-value (2rem = 30px, mapped to Display) |
 | Heading | 16px | 600 | 1.4 | Source Serif 4 | Card titles (0.95rem), calendar month name, profile name, dropdown-title, header brand |
-| Body | 12px | 400 | 1.5 | Inter | Table cells (0.82rem), stat-sub (0.78rem), activity text (0.76rem), dropdown text (0.78rem), deadline name (0.84rem), profile detail (0.76rem), hero date (1.25rem→mapped to Body at larger contextual size) |
+| Body | 12px | 400 | 1.5 | Inter | Table cells (0.82rem), stat-sub (0.78rem), activity text (0.76rem), dropdown text (0.78rem), deadline name (0.84rem), profile detail (0.76rem) |
 | Small | 10px | 600 | 1.4 | Inter | Stat-label (0.74rem), table headers (0.7rem), grade badges (0.7rem), calendar headers (0.62rem), calendar days (0.74rem), activity time (0.66rem), target badges (0.7rem), predict link (0.68rem), pstat-label (0.66rem) |
 
 **NOTE:** The prototype uses `html { font-size: 15px }` as base, so all rem values are relative to 15px. The 4 roles above consolidate the prototype's ~15 distinct rem values into 4 bands:
@@ -73,11 +73,10 @@ Exceptions (multiples of 4, outside standard set, with justification):
 - **Small band** (0.62-0.74rem sans): labels, badges, table headers, calendar cells, timestamps
 
 Brand-fixed exceptions (outside typographic scale):
-- Hero greeting: 2.8rem (42px at 15px base), weight 700, Source Serif 4 -- single hero element, significantly larger than any content text, letter-spacing -0.02em
-- Hero date: 1.25rem (18.75px), weight 400, Inter -- hero-specific contextual size between Display and Heading
-- Hero encouragement: 1.15rem (17.25px), weight 400, Inter, italic -- hero-specific, pairs with date line
+- Hero greeting: 2.8rem (42px at 15px base), weight 600, Source Serif 4 -- single hero element, significantly larger than any content text, letter-spacing -0.02em. Visual emphasis achieved by large Display size + serif font, no need for 700 weight.
+- Hero body (date + encouragement): 1.2rem (18px at 15px base), weight 400, Inter -- unified hero-specific size for both the date line and the encouragement line. Encouragement uses italic for differentiation.
 
-Font weights: 400 (regular) and 600 (semibold) only. Exception: 700 used in hero greeting and stat values (Source Serif 4 Display role only -- brand emphasis).
+Font weights: 400 (regular) and 600 (semibold) only. Hero greeting uses 600 + large Display size for emphasis. Stat values and earned cells use 600 at Display size for visual weight.
 
 ---
 
@@ -331,7 +330,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | External link dialog title | Open external link? |
 | External link dialog body | You are about to leave UniBoard and open an external page. |
 | External link dialog confirm | Open link |
-| External link dialog cancel | Cancel |
+| External link dialog cancel | Stay on UniBoard |
 | Notification panel title | Notifications |
 | Notification panel footer | View all notifications |
 | Avatar menu items | Profile, Settings, API Tokens, Log out |
@@ -377,7 +376,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | External link dialog title | 打开外部链接？ |
 | External link dialog body | 你即将离开 UniBoard 并打开一个外部页面。 |
 | External link dialog confirm | 打开链接 |
-| External link dialog cancel | 取消 |
+| External link dialog cancel | 留在 UniBoard |
 | Notification panel title | 通知 |
 | Notification panel footer | 查看所有通知 |
 | Avatar menu items | 个人资料, 设置, API 令牌, 退出登录 |
@@ -394,9 +393,9 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 |---------|--------------|
 | Container | min-height calc(100vh - 56px), flex column, align-items flex-start, padding 15vh 48px 40px, text-align left, overflow hidden |
 | Hero content | position relative, z-index 1, max-width 600px |
-| Greeting | Source Serif 4, 2.8rem, 700 weight, line-height 1.15, letter-spacing -0.02em, text-1 color, margin-bottom 20px |
-| Date line | Inter, 1.25rem, 400 weight, text-2, line-height 1.6, margin-bottom 20px (snapped from 18px) |
-| Encouragement | Inter, 1.15rem, 400 weight, text-2, line-height 1.65, italic |
+| Greeting | Source Serif 4, 2.8rem, 600 weight, line-height 1.15, letter-spacing -0.02em, text-1 color, margin-bottom 20px |
+| Date line | Inter, 1.2rem, 400 weight, text-2, line-height 1.6, margin-bottom 20px (snapped from 18px) |
+| Encouragement | Inter, 1.2rem, 400 weight, text-2, line-height 1.65, italic |
 | Scroll prompt | position absolute, bottom 18vh, centered, flex column, align-items center, gap 8px (snapped from 10px), text-3, cursor pointer |
 | Scroll text | Source Serif 4, italic, 1rem, 400 weight, letter-spacing 0.04em, opacity 0.5 |
 | Scroll arrow | SVG 24x24, stroke currentColor, strokeWidth 1.8, gentleBob animation |
@@ -412,7 +411,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | Grid | 3 columns, gap 20px (snapped from 18px) |
 | Stat card padding | 20px 24px 20px 32px |
 | Label | 12px (Small role), text-3, 600 weight, uppercase, letter-spacing 0.06em, margin-bottom 8px |
-| Value | Source Serif 4, 2rem (Display role), 700 weight, line-height 1.1, margin-bottom 4px (snapped from 5px) |
+| Value | Source Serif 4, 2rem (Display role), 600 weight, line-height 1.1, margin-bottom 4px (snapped from 5px) |
 | WAM value color | var(--orange) |
 | Target value color | var(--blue) |
 | Alerts value color | var(--amber) |
@@ -428,7 +427,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | TD | 16px 12px padding, Body role (12px), text-2, center-aligned (first left, last right) |
 | Course code | 600 weight, text-1 |
 | Course name | Small role, text-3 |
-| Earned cell | Source Serif 4, 700 weight, Display role, course-specific color |
+| Earned cell | Source Serif 4, 600 weight, Display role, course-specific color |
 | Progress bar | Rough.js canvas, 120x14px, hand-drawn rectangle bg #eae7e0 stroke #d5d2ca, filled portion in course color, roughness 1.2/1.6 |
 | Progress % text | Small role, text-3, margin-top 4px |
 | Target badge | Small role, 600 weight, 4px 8px padding (snapped from 3px 10px), 6px radius, course-color soft bg + base color text |
@@ -449,7 +448,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | Item bg: later | rgba(120,140,93,.05) |
 | Item hover | translateX(4px), 0.15s ease |
 | DL name | Body role (12px), 600 weight |
-| DL days badge | Small role, 600 weight, 2px 8px padding, 5px→4px radius (snapped), color-matched soft bg |
+| DL days badge | Small role, 600 weight, 2px 8px padding, 5px->4px radius (snapped), color-matched soft bg |
 | "see details" button | Small role, 600 weight, orange text, positioned left of days badge, opacity 0 -> 1 on item hover |
 | DL course | Small role (12px), text-3 |
 
@@ -462,7 +461,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | Donut radii | outer 95px, inner 55px |
 | Segments | cross-hatch fill (fillWeight 1.8), roughness 1.5, course-palette colors |
 | Leader lines | start at outerR+14, elbow at outerR+42, tail 30px |
-| Labels | percentage: Source Serif 4, 15px, 700, color-matched; name: Inter, 12px, text-2 |
+| Labels | percentage: Source Serif 4, 15px, 600, color-matched; name: Inter, 12px, text-2 |
 | Highlight (active segment) | Increased fillWeight 2.5, strokeWidth 2, slightly separated outward by 4px |
 
 ### Right Panel: Profile Card
@@ -470,12 +469,12 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | Element | Specification |
 |---------|--------------|
 | Container | text-align center, padding 24px 20px |
-| Avatar | 52px (snapped from 54px), 14px radius, gradient linear-gradient(135deg, orange, #e8956e), Source Serif 4, 700, 22px→ Display role, white, shadow 0 2px 10px rgba(217,119,87,.25) |
+| Avatar | 52px (snapped from 54px), 14px radius, gradient linear-gradient(135deg, orange, #e8956e), Source Serif 4, 600, 22px-> Display role, white, shadow 0 2px 10px rgba(217,119,87,.25) |
 | Name | Source Serif 4, Heading role, 600 weight |
 | Detail | Body role, text-3, 2px margin-top between lines |
 | Stats grid | 2 columns, gap 8px, margin-top 16px |
 | Pstat | border 1px card-border, radius-sm, padding 8px (snapped from 10px 6px to uniform 8px) |
-| Pstat value | Source Serif 4, Display role, 700 weight |
+| Pstat value | Source Serif 4, Display role, 600 weight |
 | Pstat label | Small role, text-3, uppercase, letter-spacing 0.04em |
 
 ### Right Panel: Mini Calendar
@@ -504,7 +503,7 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | Icon | 32px (snapped from 30px), 8px radius, color-coded bg + icon color |
 | Icon colors | grade: green-soft bg, green icon (check-circle 14px); discussion: blue-soft bg, blue icon (message-circle 14px); deadline: orange-soft bg, orange icon (alert-circle 14px); endorsed: green-soft bg, green icon (star 14px) |
 | Text | Body role, text-2, line-height 1.4, strong=text-1 600 weight |
-| Time | Small role, text-3, margin-top 1px→0 (minimal) |
+| Time | Small role, text-3, margin-top 1px->0 (minimal) |
 | Item click | Opens ExternalLinkDialog, cursor pointer |
 
 ### Header Dropdowns
@@ -524,11 +523,11 @@ These colors apply to: earned-cell text, progress bar fill, target badge (when c
 | Dropdown footer | 12px 16px padding (snapped from 10px), center, Small role, 600, orange, border-top 1px divider |
 | Avatar panel | 240px wide |
 | Avatar panel header | flex, gap 12px, 16px padding |
-| Panel avatar | 40px, 10px radius, gradient bg, white text, Source Serif 4 700 17px→Heading role |
+| Panel avatar | 40px, 10px radius, gradient bg, white text, Source Serif 4 600 17px->Heading role |
 | Panel name | Heading role, 600 weight |
 | Panel email | Small role, text-3 |
 | Menu divider | 1px height, bg divider, 4px vertical margin |
-| Menu item | flex, gap 12px (snapped from 10px), 12px (snapped from 9px) 16px padding, Body role, text-2, icons 15px→16px |
+| Menu item | flex, gap 12px (snapped from 10px), 12px (snapped from 9px) 16px padding, Body role, text-2, icons 15px->16px |
 | Menu item hover | bg card-bg-hover, text-1 |
 | Logout item | color #cc4455, hover bg rgba(204,68,85,.05) |
 
