@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-03-21T09:46:27.714Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-03-22T03:06:18.709Z"
 progress:
   total_phases: 24
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 4
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 03 — auth-page
+**Current focus:** Phase 04 — setup-page
 
 ## Current Position
 
-Phase: 03 (auth-page) — EXECUTING
-Plan: 4 of 4
+Phase: 04 (setup-page) — EXECUTING
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -54,6 +54,9 @@ Plan: 4 of 4
 | Phase 03 P01 | 6min | 2 tasks | 11 files |
 | Phase 03 P02 | 5min | 2 tasks | 13 files |
 | Phase 03 P03 | 4min | 2 tasks | 8 files |
+| Phase 04 P01 | 6min | 2 tasks | 9 files |
+| Phase 04 P02 | 4min | 2 tasks | 6 files |
+| Phase 04 P03 | 7min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -94,6 +97,12 @@ Recent decisions affecting current work:
 - [Phase 03-02]: BrandPanel uses min-[900px]:flex for exact 900px breakpoint matching prototype
 - [Phase 03]: URL search params (?mode=register) over useState for form mode persistence across locale switches
 - [Phase 03]: Suspense boundary required for useSearchParams consumers in Next.js 15 static builds
+- [Phase 04]: Moved guards from (auth) layout to page level: AuthGuard wraps auth/page.tsx, SetupGuard wraps setup/page.tsx
+- [Phase 04]: Canvas token regex /^\d{50,100}$/ for numeric tokens, Ed token regex /^[a-zA-Z0-9_-]{10,50}$/ for alphanumeric
+- [04-02]: GuideCard uses CSS max-height transition (0/500px) for collapsible animation
+- [04-02]: Step icons (ExternalLink, Settings, Key, Copy) as decorative elements alongside numbered circles
+- [Phase 04]: Used scope 'all' for sync trigger API body matching OpenAPI spec instead of domains array
+- [Phase 04]: Tailwind animate-spin with custom animation-duration for spinner instead of styled-jsx
 
 ### Pending Todos
 
@@ -105,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T09:23:42.914Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-03-22T03:01:15.493Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
