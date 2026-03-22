@@ -35,15 +35,20 @@ export default function RightPanel() {
       ref={panelRef}
       className={cn(
         "w-[var(--spacing-right-panel-w)] flex-shrink-0",
-        "hidden xl:flex xl:flex-col",
+        "hidden xl:flex xl:flex-col items-start",
         "gap-[18px] sticky top-[calc(var(--spacing-header-h)+28px)]",
         "self-start max-h-[calc(100vh-var(--spacing-header-h)-56px)]",
         "overflow-y-auto overflow-x-hidden",
-        // Auto-hide scrollbar styles
+        // Auto-hide scrollbar: WebKit
+        "[&::-webkit-scrollbar]:w-[5px]",
         "[&::-webkit-scrollbar-thumb]:bg-transparent",
         "[&::-webkit-scrollbar-thumb]:transition-[background]",
         "[&::-webkit-scrollbar-thumb]:duration-300",
-        "[&.scrolling::-webkit-scrollbar-thumb]:bg-card-border"
+        "[&.scrolling::-webkit-scrollbar-thumb]:bg-card-border",
+        // Auto-hide scrollbar: Firefox + IE/Edge legacy
+        "[scrollbar-width:none]",
+        "[-ms-overflow-style:none]",
+        "[&.scrolling]:[scrollbar-width:thin]"
       )}
     >
       <div id="right-panel-slot" className="flex flex-col gap-5" />
