@@ -32,7 +32,6 @@ export default function SuccessStep() {
     const timer = setTimeout(() => {
       setCourseNames(MOCK_COURSES);
       setSyncStatus("complete");
-      useAuthStore.getState().setTokenConfigured(true);
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -41,7 +40,8 @@ export default function SuccessStep() {
 
   const handleGoToDashboard = () => {
     toast.success(t("toast"));
-    router.push("/dashboard");
+    useAuthStore.getState().setTokenConfigured(true);
+    router.push("/");
   };
 
   return (

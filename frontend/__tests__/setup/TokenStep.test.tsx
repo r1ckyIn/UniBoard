@@ -53,8 +53,8 @@ vi.mock("@/hooks/use-sync", () => ({
   }),
 }));
 
-// Valid tokens for tests
-const VALID_CANVAS_TOKEN = "1234567890".repeat(7); // 70 digits
+// Valid tokens for tests (Canvas: {id}~{secret}, Ed: alphanumeric 10-50 chars)
+const VALID_CANVAS_TOKEN = "3156~PR7xCaBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789abcde";
 const VALID_ED_TOKEN = "abcdef1234567890"; // 16 chars
 const INVALID_CANVAS_TOKEN = "abc123";
 const INVALID_ED_TOKEN = "ab"; // too short
