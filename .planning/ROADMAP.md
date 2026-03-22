@@ -131,7 +131,14 @@ Plans:
   3. Course grades table displays all enrolled courses with grade band indicators
   4. Deadline timeline shows upcoming deadlines in chronological order
   5. Assessment weight donut chart renders per-course weight breakdown
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — i18n dashboard namespace, encouragement provider, course-colors utility, SkeletonCard
+- [ ] 05-02-PLAN.md — NotificationPanel, AvatarMenu, Header refactor to data-driven dropdowns
+- [ ] 05-03-PLAN.md — HeroSection (Motion entrance, parallax fade), StatsRow, CourseGradesTable, RoughProgressBar
+- [ ] 05-04-PLAN.md — ProfileCard, MiniCalendar (month nav, deadline color-depth), RecentActivity, ExternalLinkDialog
+- [ ] 05-05-PLAN.md — DeadlineTimeline, AssessmentDonut (converge animation), DashboardPage orchestrator, page.tsx, RightPanel refactor
 
 ### Phase 6: Courses Page
 **Goal**: Users can browse all enrolled courses with grade summaries
@@ -356,7 +363,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
 | 3. Auth Page | M1 | 2/4 | UAT gap closure | - |
 | 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
-| 5. Dashboard Page | M1 | 0/TBD | Not started | - |
+| 5. Dashboard Page | M1 | 0/5 | Planned | - |
 | 6. Courses Page | M1 | 0/TBD | Not started | - |
 | 7. Course Detail Page | M1 | 0/TBD | Not started | - |
 | 8. Deadlines Page | M1 | 0/TBD | Not started | - |
