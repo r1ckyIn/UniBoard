@@ -4,12 +4,12 @@ milestone: v2.0
 milestone_name: milestone
 status: unknown
 stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-22T09:43:06.209Z"
+last_updated: "2026-03-22T09:44:17.733Z"
 progress:
   total_phases: 24
   completed_phases: 4
   total_plans: 22
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 05 (dashboard-page) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Plan: 2 of 6
 | Phase 04 P05 | 5min | 2 tasks | 4 files |
 | Phase 05 P00 | 3min | 2 tasks | 13 files |
 | Phase 05 P01 | 5min | 2 tasks | 6 files |
+| Phase 05 P02 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase 05-00]: Used it.todo() over it.skip() for cleaner vitest reporting and intent clarity
 - [Phase 05]: SkeletonCard uses variant map pattern (Record<SkeletonVariant, React.FC>) instead of conditional rendering
 - [Phase 05]: skeleton-shimmer animation added to globals.css @theme block (Tailwind v4 CSS config)
+- [05-02]: NotificationPanel receives data as props (not calling hooks directly) for testability
+- [05-02]: AvatarMenu uses button elements (not anchor tags) with onClick handlers for SPA navigation
+- [05-02]: Header computes initials from displayName with first+last letter logic
 
 ### Pending Todos
 
@@ -126,6 +130,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T09:43:06.199Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-22T09:43:18Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
