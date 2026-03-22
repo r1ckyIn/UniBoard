@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import rough from "roughjs";
 import { PieChart } from "lucide-react";
 import RoughCard from "@/components/design-system/RoughCard";
 
@@ -21,7 +20,7 @@ interface AssessmentDonutProps {
 
 // Generate a palette of segment colors based on the primary course color
 function generateSegmentPalette(baseColor: string, count: number): string[] {
-  // Parse hex color to HSL-like variations
+  // Parse hex color to RGB variations
   const hex = baseColor.replace("#", "");
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
@@ -65,6 +64,56 @@ interface SegmentData {
   percentage: number;
 }
 
+// SVG donut geometry constants (from prototype)
+const SVG_W = 360;
+const SVG_H = 300;
+const CX = SVG_W / 2; // 180
+const CY = SVG_H / 2; // 150
+const OUTER_R = 95;
+const INNER_R = 55;
+const LEADER_START_R = OUTER_R + 14; // 109
+const LEADER_ELBOW_R = OUTER_R + 42; // 137
+const TAIL_LEN = 30;
+const HIGHLIGHT_PUSH = 4;
+const SEPARATION_MAX = 20;
+
+/**
+ * Build an SVG arc path for a donut segment (annular ring).
+ * M x1outer y1outer
+ * A outerR outerR 0 largeArcFlag 1 x2outer y2outer
+ * L x1inner y1inner
+ * A innerR innerR 0 largeArcFlag 0 x2inner y2inner
+ * Z
+ */
+function buildSegmentPath(
+  cx: number,
+  cy: number,
+  outerR: number,
+  innerR: number,
+  startAngle: number,
+  endAngle: number
+): string {
+  const x1o = cx + outerR * Math.cos(startAngle);
+  const y1o = cy + outerR * Math.sin(startAngle);
+  const x2o = cx + outerR * Math.cos(endAngle);
+  const y2o = cy + outerR * Math.sin(endAngle);
+  const x1i = cx + innerR * Math.cos(endAngle);
+  const y1i = cy + innerR * Math.sin(endAngle);
+  const x2i = cx + innerR * Math.cos(startAngle);
+  const y2i = cy + innerR * Math.sin(startAngle);
+
+  const sweep = endAngle - startAngle;
+  const large = sweep > Math.PI ? 1 : 0;
+
+  return [
+    `M ${x1o} ${y1o}`,
+    `A ${outerR} ${outerR} 0 ${large} 1 ${x2o} ${y2o}`,
+    `L ${x1i} ${y1i}`,
+    `A ${innerR} ${innerR} 0 ${large} 0 ${x2i} ${y2i}`,
+    "Z",
+  ].join(" ");
+}
+
 export default function AssessmentDonut({
   weights,
   highlightType,
@@ -72,7 +121,6 @@ export default function AssessmentDonut({
   courseCode,
 }: AssessmentDonutProps) {
   const t = useTranslations("dashboard");
-  const svgRef = useRef<SVGSVGElement>(null);
   const [animationProgress, setAnimationProgress] = useState(0);
 
   // Compute segment data
@@ -123,7 +171,7 @@ export default function AssessmentDonut({
       const elapsed = timestamp - startTime;
       const rawProgress = Math.min(elapsed / duration, 1);
 
-      // Cubic bezier approximation: cubic-bezier(.16,1,.3,1) — fast start, gentle settle
+      // Cubic bezier approximation: fast start, gentle settle
       const eased =
         rawProgress < 0.5
           ? 4 * rawProgress * rawProgress * rawProgress
@@ -144,127 +192,90 @@ export default function AssessmentDonut({
     };
   }, [weights]);
 
-  // Draw donut with Rough.js
-  useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg || segments.length === 0) return;
+  // Compute all SVG element data declaratively
+  const svgElements = useMemo(() => {
+    if (segments.length === 0) return null;
 
-    svg.replaceChildren();
+    const separationOffset = SEPARATION_MAX * (1 - animationProgress);
+    const showLeaders = animationProgress >= 0.95;
 
-    const rc = rough.svg(svg);
-    const cx = 180;
-    const cy = 150;
-    const outerR = 95;
-    const separationOffset = 20 * (1 - animationProgress);
-
-    segments.forEach((seg, idx) => {
+    const segmentPaths = segments.map((seg) => {
       const isHighlighted = highlightType === seg.weight.name;
 
       // Compute separation offset along midpoint angle direction
       const offsetX = Math.cos(seg.midAngle) * separationOffset;
       const offsetY = Math.sin(seg.midAngle) * separationOffset;
 
-      // If highlighted, add 4px extra push outward
-      const highlightPush = isHighlighted ? 4 : 0;
-      const totalOffsetX =
-        offsetX + Math.cos(seg.midAngle) * highlightPush;
-      const totalOffsetY =
-        offsetY + Math.sin(seg.midAngle) * highlightPush;
+      // If highlighted, add extra push outward
+      const push = isHighlighted ? HIGHLIGHT_PUSH : 0;
+      const totalOffsetX = offsetX + Math.cos(seg.midAngle) * push;
+      const totalOffsetY = offsetY + Math.sin(seg.midAngle) * push;
 
-      const segCx = cx + totalOffsetX;
-      const segCy = cy + totalOffsetY;
+      const segCx = CX + totalOffsetX;
+      const segCy = CY + totalOffsetY;
 
-      // Draw arc segment
-      const arc = rc.arc(
+      const d = buildSegmentPath(
         segCx,
         segCy,
-        outerR * 2,
-        outerR * 2,
+        OUTER_R,
+        INNER_R,
         seg.startAngle,
-        seg.endAngle,
-        false,
-        {
-          stroke: seg.color,
-          strokeWidth: isHighlighted ? 2 : 40,
-          roughness: 1.5,
-          fill: seg.color,
-          fillStyle: "cross-hatch",
-          fillWeight: isHighlighted ? 2.5 : 1.8,
-          seed: 42 + idx,
-        }
+        seg.endAngle
       );
 
-      // Wrap in a group for potential transform
-      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      g.appendChild(arc);
-      svg.appendChild(g);
+      return {
+        d,
+        fill: seg.color,
+        stroke: seg.color,
+        strokeWidth: isHighlighted ? 2 : 1,
+        key: `seg-${seg.weight.name}`,
+      };
     });
 
-    // Draw leader lines and labels
-    segments.forEach((seg) => {
-      const leaderStartR = outerR + 14;
-      const leaderElbowR = outerR + 42;
-      const tailLength = 30;
+    // Leader lines and labels (only show after animation completes)
+    const leaders = showLeaders
+      ? segments.map((seg) => {
+          const mid = seg.midAngle;
+          const isRight = Math.cos(mid) >= 0;
 
-      const startX = cx + Math.cos(seg.midAngle) * leaderStartR;
-      const startY = cy + Math.sin(seg.midAngle) * leaderStartR;
-      const elbowX = cx + Math.cos(seg.midAngle) * leaderElbowR;
-      const elbowY = cy + Math.sin(seg.midAngle) * leaderElbowR;
+          // Points: start on outer edge -> elbow -> horizontal tail
+          const sx = CX + LEADER_START_R * Math.cos(mid);
+          const sy = CY + LEADER_START_R * Math.sin(mid);
+          const ex = CX + LEADER_ELBOW_R * Math.cos(mid);
+          const ey = CY + LEADER_ELBOW_R * Math.sin(mid);
+          const tx = isRight ? ex + TAIL_LEN : ex - TAIL_LEN;
 
-      // Determine side
-      const isRight = seg.midAngle > -Math.PI / 2 && seg.midAngle < Math.PI / 2;
-      const tailEndX = isRight ? elbowX + tailLength : elbowX - tailLength;
+          const anchor: "start" | "end" = isRight ? "start" : "end";
+          const labelX = isRight ? tx + 5 : tx - 5;
 
-      // Draw leader line
-      const leaderLine = rc.linearPath(
-        [
-          [startX, startY],
-          [elbowX, elbowY],
-          [tailEndX, elbowY],
-        ],
-        {
-          stroke: "#d5d2ca",
-          strokeWidth: 0.8,
-          roughness: 0.5,
-          seed: 100 + segments.indexOf(seg),
-        }
-      );
-      svg.appendChild(leaderLine);
+          return {
+            key: `leader-${seg.weight.name}`,
+            color: seg.color,
+            // Small dot at start
+            dot: { cx: sx, cy: sy, r: 2 },
+            // Radial line: start -> elbow
+            line1: { x1: sx, y1: sy, x2: ex, y2: ey },
+            // Horizontal tail: elbow -> end
+            line2: { x1: ex, y1: ey, x2: tx, y2: ey },
+            // Labels
+            pctLabel: {
+              x: labelX,
+              y: ey - 1,
+              anchor,
+              text: `${seg.percentage}%`,
+            },
+            nameLabel: {
+              x: labelX,
+              y: ey + 15,
+              anchor,
+              text: seg.weight.name,
+            },
+          };
+        })
+      : [];
 
-      // Add text labels using SVG text elements
-      const labelX = isRight ? tailEndX + 4 : tailEndX - 4;
-      const textAnchor = isRight ? "start" : "end";
-
-      // Percentage label
-      const pctText = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "text"
-      );
-      pctText.setAttribute("x", String(labelX));
-      pctText.setAttribute("y", String(elbowY - 2));
-      pctText.setAttribute("text-anchor", textAnchor);
-      pctText.setAttribute("font-family", "var(--font-serif)");
-      pctText.setAttribute("font-size", "15");
-      pctText.setAttribute("font-weight", "600");
-      pctText.setAttribute("fill", seg.color);
-      pctText.textContent = `${seg.percentage}%`;
-      svg.appendChild(pctText);
-
-      // Assessment name label
-      const nameText = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "text"
-      );
-      nameText.setAttribute("x", String(labelX));
-      nameText.setAttribute("y", String(elbowY + 12));
-      nameText.setAttribute("text-anchor", textAnchor);
-      nameText.setAttribute("font-family", "var(--font-sans)");
-      nameText.setAttribute("font-size", "12");
-      nameText.setAttribute("fill", "#6b6b65");
-      nameText.textContent = seg.weight.name;
-      svg.appendChild(nameText);
-    });
-  }, [segments, animationProgress, highlightType, courseColor]);
+    return { segmentPaths, leaders };
+  }, [segments, animationProgress, highlightType]);
 
   // Compute soft badge background from courseColor
   const badgeBg = `${courseColor}1c`; // ~11% opacity in hex
@@ -314,11 +325,75 @@ export default function AssessmentDonut({
         </div>
       ) : (
         <svg
-          ref={svgRef}
-          viewBox="0 0 360 300"
+          viewBox={`0 0 ${SVG_W} ${SVG_H}`}
           className="w-full"
-          style={{ maxHeight: "300px" }}
-        />
+          style={{ maxHeight: "300px", overflow: "visible" }}
+        >
+          {/* Donut segments */}
+          {svgElements?.segmentPaths.map((seg) => (
+            <path
+              key={seg.key}
+              d={seg.d}
+              fill={seg.fill}
+              stroke={seg.stroke}
+              strokeWidth={seg.strokeWidth}
+            />
+          ))}
+
+          {/* Leader lines + labels */}
+          {svgElements?.leaders.map((leader) => (
+            <g key={leader.key}>
+              {/* Small filled dot at start point on donut edge */}
+              <circle
+                cx={leader.dot.cx}
+                cy={leader.dot.cy}
+                r={leader.dot.r}
+                fill={leader.color}
+              />
+              {/* Radial line: start -> elbow */}
+              <line
+                x1={leader.line1.x1}
+                y1={leader.line1.y1}
+                x2={leader.line1.x2}
+                y2={leader.line1.y2}
+                stroke={leader.color}
+                strokeWidth={1}
+              />
+              {/* Horizontal tail line: elbow -> end */}
+              <line
+                x1={leader.line2.x1}
+                y1={leader.line2.y1}
+                x2={leader.line2.x2}
+                y2={leader.line2.y2}
+                stroke={leader.color}
+                strokeWidth={1}
+              />
+              {/* Percentage label */}
+              <text
+                x={leader.pctLabel.x}
+                y={leader.pctLabel.y}
+                textAnchor={leader.pctLabel.anchor}
+                fontFamily="'Source Serif 4', Georgia, serif"
+                fontSize={15}
+                fontWeight={700}
+                fill={leader.color}
+              >
+                {leader.pctLabel.text}
+              </text>
+              {/* Assessment name label */}
+              <text
+                x={leader.nameLabel.x}
+                y={leader.nameLabel.y}
+                textAnchor={leader.nameLabel.anchor}
+                fontFamily="'Inter', sans-serif"
+                fontSize={12}
+                fill="#6b6b65"
+              >
+                {leader.nameLabel.text}
+              </text>
+            </g>
+          ))}
+        </svg>
       )}
     </RoughCard>
   );
