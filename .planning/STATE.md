@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-00-PLAN.md
-last_updated: "2026-03-22T09:41:16.694Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-22T09:43:06.209Z"
 progress:
   total_phases: 24
   completed_phases: 4
   total_plans: 22
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -60,6 +60,7 @@ Plan: 2 of 6
 | Phase 04 P04 | 3min | 2 tasks | 9 files |
 | Phase 04 P05 | 5min | 2 tasks | 4 files |
 | Phase 05 P00 | 3min | 2 tasks | 13 files |
+| Phase 05 P01 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 04]: Two-layer RoughCard: outer div with 10px padding gap (no bg) + inner div with bg/shadow, so rough.js border wobble is visible against page background
 - [Phase 04]: URL search params (?step=N) for setup step persistence across language switches, leveraging existing LanguageSwitcher search param preservation
 - [Phase 05-00]: Used it.todo() over it.skip() for cleaner vitest reporting and intent clarity
+- [Phase 05]: SkeletonCard uses variant map pattern (Record<SkeletonVariant, React.FC>) instead of conditional rendering
+- [Phase 05]: skeleton-shimmer animation added to globals.css @theme block (Tailwind v4 CSS config)
 
 ### Pending Todos
 
@@ -123,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T09:41:16.684Z
-Stopped at: Completed 05-00-PLAN.md
+Last session: 2026-03-22T09:43:06.199Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
