@@ -9,6 +9,16 @@ import {
   validateEdToken,
 } from "@/lib/validations/token";
 
+function resetField(
+  setValue: (v: string) => void,
+  setStatus: (s: "idle" | "valid" | "invalid") => void,
+  setError: (e: string | undefined) => void,
+) {
+  setValue("");
+  setStatus("idle");
+  setError(undefined);
+}
+
 interface TokenStepProps {
   onBack: () => void;
   onSuccess: () => void;
@@ -85,6 +95,7 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
           onChange={setCanvasValue}
           status={canvasStatus}
           error={canvasError}
+          onClear={() => { resetField(setCanvasValue, setCanvasStatus, setCanvasError); }}
         />
       </div>
 
@@ -95,6 +106,7 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
           onChange={setEdValue}
           status={edStatus}
           error={edError}
+          onClear={() => { resetField(setEdValue, setEdStatus, setEdError); }}
         />
       </div>
 

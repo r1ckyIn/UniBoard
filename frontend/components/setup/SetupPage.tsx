@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
+import { useRouter, usePathname } from "@/lib/i18n/navigation";
 import RoughCard from "@/components/design-system/RoughCard";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import StepIndicator from "./StepIndicator";
@@ -12,13 +14,42 @@ import SuccessStep from "./SuccessStep";
 
 const EASE_OUT: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
+type StepValue = 1 | 2 | 3 | "success";
+
+/**
+ * Parse step value from URL search param string.
+ * Valid: "1", "2", "3", "success". Anything else defaults to 1.
+ */
+function parseStep(raw: string | null): StepValue {
+  if (raw === "2") return 2;
+  if (raw === "3") return 3;
+  if (raw === "success") return "success";
+  return 1;
+}
+
 /**
  * Top-level setup page orchestrator: manages step state (1/2/3/success),
  * renders StepIndicator + step content inside RoughCard with AnimatePresence
- * crossfade transitions.
+ * crossfade transitions. Step is persisted in URL ?step=N so language
+ * switches (which remount this component) preserve the current step.
  */
 export default function SetupPage() {
-  const [step, setStep] = useState<1 | 2 | 3 | "success">(1);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [step, setStep] = useState<StepValue>(() =>
+    parseStep(searchParams.get("step"))
+  );
+
+  // Update both React state and URL search param
+  const setStepWithUrl = useCallback(
+    (newStep: StepValue) => {
+      setStep(newStep);
+      router.replace(`${pathname}?step=${newStep}`, { scroll: false });
+    },
+    [router, pathname]
+  );
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-10 px-5">
@@ -44,18 +75,18 @@ export default function SetupPage() {
                 }}
               >
                 {step === 1 && (
-                  <WelcomeStep onNext={() => setStep(2)} />
+                  <WelcomeStep onNext={() => setStepWithUrl(2)} />
                 )}
                 {step === 2 && (
                   <TutorialStep
-                    onNext={() => setStep(3)}
-                    onBack={() => setStep(1)}
+                    onNext={() => setStepWithUrl(3)}
+                    onBack={() => setStepWithUrl(1)}
                   />
                 )}
                 {step === 3 && (
                   <TokenStep
-                    onBack={() => setStep(2)}
-                    onSuccess={() => setStep("success")}
+                    onBack={() => setStepWithUrl(2)}
+                    onSuccess={() => setStepWithUrl("success")}
                   />
                 )}
                 {step === "success" && <SuccessStep />}

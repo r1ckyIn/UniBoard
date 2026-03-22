@@ -112,12 +112,14 @@ Plans:
   2. Each step includes visual guides showing where to find Canvas/Ed tokens
   3. Token paste fields validate format before accepting
   4. Completion redirects to dashboard with success confirmation
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
 - [ ] 04-01-PLAN.md — i18n setup namespace, SetupGuard, token validation, auth layout restructure, route entry
 - [ ] 04-02-PLAN.md — StepIndicator, WelcomeStep, TutorialStep, GuideCard display components
 - [ ] 04-03-PLAN.md — TokenInput, TokenStep, SuccessStep, SetupPage orchestrator, route wiring
+- [ ] 04-04-PLAN.md — UAT gap closure: fix Canvas token regex, clear button, tutorial i18n, SuccessStep routing & hydration
+- [ ] 04-05-PLAN.md — UAT gap closure: RoughCard two-layer structure, setup step URL persistence
 
 ### Phase 5: Dashboard Page
 **Goal**: Users see their complete academic overview at a glance
@@ -353,7 +355,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 1. Design System & Foundation | M1 | 2/2 | Complete | 2026-03-20 |
 | 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
 | 3. Auth Page | M1 | 2/4 | UAT gap closure | - |
-| 4. Setup Page | M1 | 0/3 | Planning complete | - |
+| 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
 | 5. Dashboard Page | M1 | 0/TBD | Not started | - |
 | 6. Courses Page | M1 | 0/TBD | Not started | - |
 | 7. Course Detail Page | M1 | 0/TBD | Not started | - |

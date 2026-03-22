@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-03-22T03:06:18.709Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-03-22T04:38:02.853Z"
 progress:
   total_phases: 24
   completed_phases: 4
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 16
+  completed_plans: 16
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 04 (setup-page) — EXECUTING
-Plan: 3 of 3
+Phase: 04 (setup-page) — COMPLETE
+Plan: 5 of 5 (all complete)
 
 ## Performance Metrics
 
@@ -57,6 +57,8 @@ Plan: 3 of 3
 | Phase 04 P01 | 6min | 2 tasks | 9 files |
 | Phase 04 P02 | 4min | 2 tasks | 6 files |
 | Phase 04 P03 | 7min | 2 tasks | 7 files |
+| Phase 04 P04 | 3min | 2 tasks | 9 files |
+| Phase 04 P05 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -103,6 +105,11 @@ Recent decisions affecting current work:
 - [04-02]: Step icons (ExternalLink, Settings, Key, Copy) as decorative elements alongside numbered circles
 - [Phase 04]: Used scope 'all' for sync trigger API body matching OpenAPI spec instead of domains array
 - [Phase 04]: Tailwind animate-spin with custom animation-duration for spinner instead of styled-jsx
+- [Phase 04]: Canvas regex /^\d+~[A-Za-z0-9]{20,}$/ accepts real Canvas API token format with tilde separator
+- [Phase 04]: setTokenConfigured deferred to click handler to prevent SetupGuard unmounting SuccessStep during sync
+- [Phase 04]: not-found.tsx uses div wrapper (no html/body) since Next.js root layout already provides them
+- [Phase 04]: Two-layer RoughCard: outer div with 10px padding gap (no bg) + inner div with bg/shadow, so rough.js border wobble is visible against page background
+- [Phase 04]: URL search params (?step=N) for setup step persistence across language switches, leveraging existing LanguageSwitcher search param preservation
 
 ### Pending Todos
 
@@ -114,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T03:01:15.493Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-03-22T04:32:09.042Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None

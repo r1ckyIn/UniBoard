@@ -26,17 +26,26 @@ describe("RoughCard", () => {
     expect(screen.getByText("Hello Card")).toBeInTheDocument();
   });
 
-  it("applies default styling classes", () => {
+  it("applies two-layer structure: outer has padding gap, inner has bg/shadow", () => {
     const { container } = render(
       <RoughCard>
         <span>Content</span>
       </RoughCard>
     );
 
-    const cardDiv = container.firstChild as HTMLElement;
-    expect(cardDiv.className).toContain("bg-card-bg");
-    expect(cardDiv.className).toContain("rounded-card");
-    expect(cardDiv.className).toContain("shadow-card");
+    // Outer wrapper: padding gap for visible rough border, no bg
+    const outerDiv = container.firstChild as HTMLElement;
+    expect(outerDiv.className).toContain("p-[10px]");
+    expect(outerDiv.className).toContain("overflow-visible");
+    expect(outerDiv.className).not.toContain("bg-card-bg");
+
+    // Inner wrapper: has card bg, rounded corners, shadow
+    const innerDiv = outerDiv.querySelector(
+      ".bg-card-bg"
+    ) as HTMLElement;
+    expect(innerDiv).toBeInTheDocument();
+    expect(innerDiv.className).toContain("rounded-card");
+    expect(innerDiv.className).toContain("shadow-card");
   });
 
   it("renders SVG element for hand-drawn border", () => {
@@ -54,25 +63,29 @@ describe("RoughCard", () => {
     expect(svgClass).toContain("z-[2]");
   });
 
-  it("accepts custom className", () => {
+  it("accepts custom className on outer wrapper", () => {
     const { container } = render(
       <RoughCard className="custom-class">
         <span>Content</span>
       </RoughCard>
     );
 
-    const cardDiv = container.firstChild as HTMLElement;
-    expect(cardDiv.className).toContain("custom-class");
+    const outerDiv = container.firstChild as HTMLElement;
+    expect(outerDiv.className).toContain("custom-class");
   });
 
-  it("accepts custom padding override", () => {
+  it("accepts custom padding override on inner wrapper", () => {
     const { container } = render(
       <RoughCard padding="p-4">
         <span>Content</span>
       </RoughCard>
     );
 
-    const cardDiv = container.firstChild as HTMLElement;
-    expect(cardDiv.className).toContain("p-4");
+    // Padding should be on inner wrapper, not outer
+    const outerDiv = container.firstChild as HTMLElement;
+    const innerDiv = outerDiv.querySelector(
+      ".bg-card-bg"
+    ) as HTMLElement;
+    expect(innerDiv.className).toContain("p-4");
   });
 });

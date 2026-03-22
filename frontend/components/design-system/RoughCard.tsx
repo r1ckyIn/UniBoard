@@ -49,12 +49,12 @@ export default function RoughCard({
 
   useEffect(() => {
     // Double rAF to ensure layout is stable before reading dimensions
+    let innerRafId: number;
     const outerRafId = requestAnimationFrame(() => {
       innerRafId = requestAnimationFrame(() => {
         drawBorder();
       });
     });
-    let innerRafId: number;
 
     // Redraw on resize to keep borders aligned
     const el = containerRef.current;
@@ -93,11 +93,11 @@ export default function RoughCard({
   return (
     <div
       ref={containerRef}
+      data-testid="rough-card-outer"
       className={cn(
-        "relative overflow-visible bg-card-bg rounded-card shadow-card",
+        "relative overflow-visible p-[10px]",
         "transition-shadow duration-[0.28s] ease-[cubic-bezier(.4,0,.2,1)]",
         !disableHover && "hover:shadow-card-hover hover:-translate-y-px",
-        padding,
         className
       )}
     >
@@ -105,7 +105,14 @@ export default function RoughCard({
         ref={svgRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-visible"
       />
-      <div className="relative z-[1]">{children}</div>
+      <div
+        className={cn(
+          "relative bg-card-bg rounded-card shadow-card overflow-hidden",
+          padding
+        )}
+      >
+        <div className="relative z-[1]">{children}</div>
+      </div>
     </div>
   );
 }
