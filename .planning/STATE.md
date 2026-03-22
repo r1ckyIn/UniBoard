@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-22T09:44:17.733Z"
+stopped_at: Completed 05-04-PLAN.md
+last_updated: "2026-03-22T09:51:00.844Z"
 progress:
   total_phases: 24
   completed_phases: 4
   total_plans: 22
-  completed_plans: 19
+  completed_plans: 21
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 05 (dashboard-page) — EXECUTING
-Plan: 3 of 6
+Plan: 5 of 6
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Plan: 3 of 6
 | Phase 05 P00 | 3min | 2 tasks | 13 files |
 | Phase 05 P01 | 5min | 2 tasks | 6 files |
 | Phase 05 P02 | 6min | 2 tasks | 4 files |
+| Phase 05 P04 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [05-02]: NotificationPanel receives data as props (not calling hooks directly) for testability
 - [05-02]: AvatarMenu uses button elements (not anchor tags) with onClick handlers for SPA navigation
 - [05-02]: Header computes initials from displayName with first+last letter logic
+- [Phase 05-04]: Native HTML dialog over custom modal for built-in focus trap and Escape handling
+- [Phase 05-04]: 3-tier deadline dot opacity thresholds based on cumulative weight (0.08/0.15/0.22)
 
 ### Pending Todos
 
@@ -130,6 +133,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T09:43:18Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-22T09:50:50.251Z
+Stopped at: Completed 05-04-PLAN.md
 Resume file: None
