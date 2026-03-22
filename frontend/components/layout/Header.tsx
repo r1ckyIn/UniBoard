@@ -1,17 +1,45 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Bell, User, Settings, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { Search, Bell } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/lib/auth/store";
+import { useNotifications } from "@/hooks/use-notifications";
+import NotificationPanel from "./NotificationPanel";
+import AvatarMenu from "./AvatarMenu";
 
 export default function Header() {
   const t = useTranslations("header");
-  const navT = useTranslations("nav");
+  const router = useRouter();
+  const locale = useLocale();
   const [notifOpen, setNotifOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
+
+  // Data sources
+  const user = useAuthStore((s) => s.user);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+  const notifications = useNotifications();
+
+  // Derive initials from displayName (first letter of first + last name, or first 2 chars)
+  const initials = useMemo(() => {
+    const name = user?.displayName ?? "U";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }, [user?.displayName]);
+
+  // Check if there are unread notifications
+  const hasUnread = useMemo(() => {
+    const items = notifications.data?.data;
+    return items?.some((n) => !n.is_read) ?? false;
+  }, [notifications.data?.data]);
 
   // Close dropdowns on outside click (only listen when a dropdown is open)
   useEffect(() => {
@@ -77,55 +105,22 @@ export default function Header() {
             )}
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-[6px] right-[6px] w-[7px] h-[7px] bg-orange rounded-full border-[1.5px] border-card-bg" />
+            {hasUnread && (
+              <span className="absolute top-[6px] right-[6px] w-[7px] h-[7px] bg-orange rounded-full border-[1.5px] border-card-bg" />
+            )}
           </button>
 
           {/* Notification dropdown */}
           {notifOpen && (
-            <div
-              className={cn(
-                "absolute top-[calc(100%+12px)] right-0",
-                "bg-white rounded-[12px] border-[1.5px] border-card-border",
-                "shadow-dropdown z-[200] overflow-hidden",
-                "animate-drop-in w-[320px]"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Arrow notch */}
-              <div className="absolute -top-[7px] right-[14px] w-3 h-3 bg-white border-t-[1.5px] border-l-[1.5px] border-card-border rotate-45 z-[1]" />
-
-              <div className="font-serif text-[0.88rem] font-semibold px-4 pt-[14px] pb-[10px] text-text-1">
-                {t("notifications")}
-              </div>
-              <div className="max-h-[260px] overflow-y-auto overflow-x-hidden">
-                {/* Placeholder notification items */}
-                <div className="flex gap-[10px] items-start px-4 py-[10px] bg-[rgba(217,119,87,.05)] cursor-pointer transition-colors duration-[0.15s] hover:bg-[rgba(217,119,87,.09)]">
-                  <div className="w-7 h-7 rounded-[7px] bg-green-soft grid place-items-center flex-shrink-0 text-green">
-                    <span className="text-xs font-bold">A</span>
-                  </div>
-                  <div>
-                    <div className="text-[0.78rem] text-text-2 leading-[1.4]">
-                      <strong className="text-text-1 font-semibold">Assignment 1</strong> graded: 85%
-                    </div>
-                    <div className="text-[0.66rem] text-text-3 mt-px">2h ago</div>
-                  </div>
-                </div>
-                <div className="flex gap-[10px] items-start px-4 py-[10px] cursor-pointer transition-colors duration-[0.15s] hover:bg-card-bg-hover">
-                  <div className="w-7 h-7 rounded-[7px] bg-blue-soft grid place-items-center flex-shrink-0 text-blue">
-                    <span className="text-xs font-bold">D</span>
-                  </div>
-                  <div>
-                    <div className="text-[0.78rem] text-text-2 leading-[1.4]">
-                      New reply in <strong className="text-text-1 font-semibold">Ed Discussion</strong>
-                    </div>
-                    <div className="text-[0.66rem] text-text-3 mt-px">5h ago</div>
-                  </div>
-                </div>
-              </div>
-              <div className="px-4 py-[10px] text-center text-[0.76rem] font-semibold text-orange border-t border-divider cursor-pointer transition-colors duration-[0.15s] hover:bg-card-bg-hover">
-                {t("viewAll")}
-              </div>
-            </div>
+            <NotificationPanel
+              notifications={notifications.data?.data ?? []}
+              onViewAll={() => {
+                setNotifOpen(false);
+              }}
+              onItemClick={() => {
+                setNotifOpen(false);
+              }}
+            />
           )}
         </div>
 
@@ -143,62 +138,27 @@ export default function Header() {
               "grid place-items-center text-white font-semibold text-xs cursor-pointer ml-1"
             )}
           >
-            RQ
+            {initials}
           </button>
 
           {/* Avatar dropdown */}
           {avatarOpen && (
-            <div
-              className={cn(
-                "absolute top-[calc(100%+12px)] right-0",
-                "bg-white rounded-[12px] border-[1.5px] border-card-border",
-                "shadow-dropdown z-[200] overflow-hidden",
-                "animate-drop-in w-[240px]"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Arrow notch */}
-              <div className="absolute -top-[7px] right-[14px] w-3 h-3 bg-white border-t-[1.5px] border-l-[1.5px] border-card-border rotate-45 z-[1]" />
-
-              {/* Avatar header */}
-              <div className="flex gap-3 items-center p-4">
-                <div className="w-10 h-10 rounded-[10px] bg-gradient-to-br from-orange to-[#e8956e] grid place-items-center text-white font-serif font-bold text-[17px] flex-shrink-0">
-                  R
-                </div>
-                <div>
-                  <div className="font-semibold text-[0.88rem]">Ricky Qin</div>
-                  <div className="text-[0.72rem] text-text-3">rickyqin919@gmail.com</div>
-                </div>
-              </div>
-
-              <div className="h-px bg-divider my-1" />
-
-              {/* Menu items */}
-              <a
-                href="#"
-                className="flex items-center gap-[10px] px-4 py-[9px] text-[0.82rem] text-text-2 no-underline transition-colors duration-[0.15s] hover:bg-card-bg-hover hover:text-text-1"
-              >
-                <User className="w-4 h-4" />
-                {t("profile")}
-              </a>
-              <a
-                href="#"
-                className="flex items-center gap-[10px] px-4 py-[9px] text-[0.82rem] text-text-2 no-underline transition-colors duration-[0.15s] hover:bg-card-bg-hover hover:text-text-1"
-              >
-                <Settings className="w-4 h-4" />
-                {navT("settings")}
-              </a>
-
-              <div className="h-px bg-divider my-1" />
-
-              <a
-                href="#"
-                className="flex items-center gap-[10px] px-4 py-[9px] text-[0.82rem] text-[#c45] no-underline transition-colors duration-[0.15s] hover:bg-[rgba(204,68,85,.05)]"
-              >
-                <LogOut className="w-4 h-4" />
-                {t("logout")}
-              </a>
-            </div>
+            <AvatarMenu
+              user={{
+                name: user?.displayName ?? "User",
+                email: user?.email ?? "",
+                initials,
+              }}
+              onNavigate={(path) => {
+                setAvatarOpen(false);
+                router.push(`/${locale}${path}`);
+              }}
+              onLogout={() => {
+                setAvatarOpen(false);
+                clearAuth();
+                router.push(`/${locale}/auth`);
+              }}
+            />
           )}
         </div>
       </div>
