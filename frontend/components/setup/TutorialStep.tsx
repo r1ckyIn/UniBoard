@@ -8,33 +8,25 @@ interface TutorialStepProps {
   onBack: () => void;
 }
 
-/**
- * Step 2 of the setup flow: Tutorial showing how to get Canvas and Ed API tokens.
- * Renders two independently collapsible GuideCards, both default expanded.
- */
 export default function TutorialStep({ onNext, onBack }: TutorialStepProps) {
   const t = useTranslations("setup.tutorial");
 
   return (
     <div>
-      {/* Title */}
       <h2 className="text-[21px] font-serif font-semibold text-text-1 text-center">
         {t("title")}
       </h2>
 
-      {/* Description */}
       <p className="text-base text-text-2 leading-[1.6] text-center mt-2 mb-6">
         {t("description")}
       </p>
 
-      {/* Guide cards */}
-      <GuideCard platform="canvas" defaultExpanded={true} />
-      <div className="mt-4" />
-      <GuideCard platform="ed" defaultExpanded={true} />
+      <div className="flex flex-col gap-4">
+        <GuideCard platform="canvas" />
+        <GuideCard platform="ed" />
+      </div>
 
-      {/* Button row */}
       <div className="flex items-center justify-between mt-8">
-        {/* Back button */}
         <button
           type="button"
           onClick={onBack}
@@ -43,7 +35,6 @@ export default function TutorialStep({ onNext, onBack }: TutorialStepProps) {
           {t("back")}
         </button>
 
-        {/* "I have my tokens" button */}
         <button
           type="button"
           onClick={onNext}

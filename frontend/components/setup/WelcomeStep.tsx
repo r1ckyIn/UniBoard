@@ -29,36 +29,27 @@ const FEATURE_BADGES = [
   },
 ] as const;
 
-/**
- * Step 1 of the setup flow: Welcome screen with logo, description,
- * feature badges (read-only, encrypted, deletable), and Get Started CTA.
- */
 export default function WelcomeStep({ onNext }: WelcomeStepProps) {
   const t = useTranslations("setup.welcome");
 
   return (
     <div className="flex flex-col items-center text-center">
-      {/* Logo block */}
       <div className="w-[60px] h-[60px] bg-[#d97757] rounded-2xl flex items-center justify-center">
         <span className="font-serif text-[30px] font-semibold text-white leading-none">
           U
         </span>
       </div>
 
-      {/* Title */}
       <h1 className="text-[28px] font-serif font-semibold leading-[1.2] text-text-1 mt-5">
         {t("title")}
       </h1>
 
-      {/* Description */}
       <p className="text-base text-text-2 leading-[1.6] max-w-[420px] mx-auto mt-3">
         {t("description")}
       </p>
 
-      {/* Italic subtitle */}
       <p className="text-base italic text-text-3 mt-2">{t("subtitle")}</p>
 
-      {/* Feature badges */}
       <div
         className={cn(
           "flex items-center justify-center gap-4 mt-6",
@@ -88,7 +79,6 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
         ))}
       </div>
 
-      {/* CTA button */}
       <button
         type="button"
         onClick={onNext}

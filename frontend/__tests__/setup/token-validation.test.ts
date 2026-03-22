@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateCanvasToken, validateEdToken } from "@/lib/validation/token";
+import { validateCanvasToken, validateEdToken } from "@/lib/validations/token";
 
 describe("validateCanvasToken", () => {
   it("accepts a 70-digit numeric string", () => {

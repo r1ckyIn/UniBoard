@@ -10,10 +10,6 @@ interface StepIndicatorProps {
 
 const STEPS = [1, 2, 3] as const;
 
-/**
- * 3-circle step progress indicator for the setup flow.
- * Displays active (orange), completed (green + check), and upcoming (border) states.
- */
 export default function StepIndicator({ currentStep }: StepIndicatorProps) {
   const stepNum = currentStep === "success" ? 4 : currentStep;
   const isSuccess = currentStep === "success";
@@ -30,7 +26,6 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
 
         return (
           <Fragment key={step}>
-            {/* Connecting line before step (except first) */}
             {index > 0 && (
               <div
                 data-testid={`step-line-${index}`}
@@ -43,7 +38,6 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
               />
             )}
 
-            {/* Step circle */}
             <div
               aria-label={`Step ${step}`}
               className={cn(

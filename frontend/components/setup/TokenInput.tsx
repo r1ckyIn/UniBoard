@@ -1,8 +1,9 @@
 "use client";
 
-import { CheckCircle, XCircle, LayoutDashboard, MessageCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils/cn";
+import { PLATFORM_CONFIG } from "./platform-config";
 
 interface TokenInputProps {
   platform: "canvas" | "ed";
@@ -12,23 +13,6 @@ interface TokenInputProps {
   error?: string;
 }
 
-const PLATFORM_CONFIG = {
-  canvas: {
-    icon: LayoutDashboard,
-    iconBg: "rgba(217,60,50,.08)",
-    iconColor: "#d93c32",
-  },
-  ed: {
-    icon: MessageCircle,
-    iconBg: "rgba(106,155,204,.11)",
-    iconColor: "#6a9bcc",
-  },
-} as const;
-
-/**
- * Token input field with platform-specific icon, validation status indicator,
- * and error message display. Used within TokenStep for Canvas and Ed tokens.
- */
 export default function TokenInput({
   platform,
   value,
@@ -42,7 +26,6 @@ export default function TokenInput({
 
   return (
     <div>
-      {/* Label row */}
       <div className="flex items-center gap-2 mb-1.5">
         <div
           className="w-6 h-6 rounded-lg flex items-center justify-center"
@@ -55,7 +38,6 @@ export default function TokenInput({
         </label>
       </div>
 
-      {/* Input wrapper */}
       <div className="flex items-center relative">
         <input
           type="text"
@@ -70,7 +52,6 @@ export default function TokenInput({
             status === "invalid" && "border-[#cc4455]",
           )}
         />
-        {/* Status icon */}
         {status === "valid" && (
           <div
             data-testid={`status-valid-${platform}`}
@@ -89,7 +70,6 @@ export default function TokenInput({
         )}
       </div>
 
-      {/* Error text */}
       {error && (
         <p className="text-sm text-[#cc4455] mt-1" aria-live="polite">
           {error}
