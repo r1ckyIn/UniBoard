@@ -56,8 +56,11 @@ export default function MiniCalendar({
 }: MiniCalendarProps) {
   const t = useTranslations("dashboard");
   const now = new Date();
-  const [viewYear, setViewYear] = useState(now.getFullYear());
-  const [viewMonth, setViewMonth] = useState(now.getMonth());
+  const [view, setView] = useState({
+    year: now.getFullYear(),
+    month: now.getMonth(),
+  });
+  const { year: viewYear, month: viewMonth } = view;
 
   // Build a lookup map for deadline days: "YYYY-MM-DD" -> totalWeight
   const deadlineMap = useMemo(() => {
@@ -68,25 +71,21 @@ export default function MiniCalendar({
     return map;
   }, [deadlineDays]);
 
-  // Navigate months
+  // Navigate months atomically
   const goToPrevMonth = useCallback(() => {
-    setViewMonth((prev) => {
-      if (prev === 0) {
-        setViewYear((y) => y - 1);
-        return 11;
-      }
-      return prev - 1;
-    });
+    setView((prev) =>
+      prev.month === 0
+        ? { year: prev.year - 1, month: 11 }
+        : { year: prev.year, month: prev.month - 1 }
+    );
   }, []);
 
   const goToNextMonth = useCallback(() => {
-    setViewMonth((prev) => {
-      if (prev === 11) {
-        setViewYear((y) => y + 1);
-        return 0;
-      }
-      return prev + 1;
-    });
+    setView((prev) =>
+      prev.month === 11
+        ? { year: prev.year + 1, month: 0 }
+        : { year: prev.year, month: prev.month + 1 }
+    );
   }, []);
 
   // Build calendar grid cells

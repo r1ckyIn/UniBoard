@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Search, Bell } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { getInitials } from "@/lib/utils/initials";
 import { useAuthStore } from "@/lib/auth/store";
 import { useNotifications } from "@/hooks/use-notifications";
 import NotificationPanel from "./NotificationPanel";
@@ -25,15 +26,10 @@ export default function Header() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const notifications = useNotifications();
 
-  // Derive initials from displayName (first letter of first + last name, or first 2 chars)
-  const initials = useMemo(() => {
-    const name = user?.displayName ?? "U";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  }, [user?.displayName]);
+  const initials = useMemo(
+    () => getInitials(user?.displayName ?? "U"),
+    [user?.displayName]
+  );
 
   // Check if there are unread notifications
   const hasUnread = useMemo(() => {

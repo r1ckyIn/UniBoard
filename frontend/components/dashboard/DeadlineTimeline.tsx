@@ -129,7 +129,8 @@ export default function DeadlineTimeline({
       cancelAnimationFrame(outerRafId);
       cancelAnimationFrame(innerRafId);
     };
-  }, [drawTimeline, deadlines, selectedDeadlineId]);
+  // selectedDeadlineId is excluded: selection styling is handled in JSX, not SVG
+  }, [drawTimeline, deadlines]);
 
   return (
     <RoughCard>

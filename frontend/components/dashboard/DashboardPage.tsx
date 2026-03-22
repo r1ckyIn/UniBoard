@@ -159,9 +159,7 @@ export default function DashboardPage() {
       target: report?.target_wam ?? 0,
       gradeBand: courseGrades[0]?.grade_letter ?? "—",
       alertCount: alertList.length,
-      alertCourse: firstCourseAlert
-        ? `${firstCourseAlert.course_code}`
-        : "",
+      alertCourse: firstCourseAlert?.course_code ?? "",
       alertDeadlineCount: deadlineAlerts.length,
     };
   }, [gpa.data, alerts.data, courseGrades]);
@@ -240,10 +238,12 @@ export default function DashboardPage() {
 
   const handleSeeDetails = useCallback(
     (id: string) => {
-      // Find the deadline's course to navigate to deadlines page
       const dl = deadlineItems.find((d) => d.id === id);
       if (dl) {
-        router.push(`/deadlines?date=${format(new Date(), "yyyy-MM-dd")}`);
+        // Approximate due date from days_remaining
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + dl.days_remaining);
+        router.push(`/deadlines?date=${format(dueDate, "yyyy-MM-dd")}`);
       }
     },
     [deadlineItems, router]

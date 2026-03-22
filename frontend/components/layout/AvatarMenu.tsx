@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { User, Settings, Key, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -23,23 +24,26 @@ export default function AvatarMenu({
 }: AvatarMenuProps) {
   const t = useTranslations("dashboard");
 
-  const menuItems = [
-    {
-      icon: User,
-      label: t("avatarMenu.profile"),
-      onClick: () => onNavigate("/settings"),
-    },
-    {
-      icon: Settings,
-      label: t("avatarMenu.settings"),
-      onClick: () => onNavigate("/settings"),
-    },
-    {
-      icon: Key,
-      label: t("avatarMenu.apiTokens"),
-      onClick: () => onNavigate("/setup"),
-    },
-  ];
+  const menuItems = useMemo(
+    () => [
+      {
+        icon: User,
+        label: t("avatarMenu.profile"),
+        onClick: () => onNavigate("/settings"),
+      },
+      {
+        icon: Settings,
+        label: t("avatarMenu.settings"),
+        onClick: () => onNavigate("/settings"),
+      },
+      {
+        icon: Key,
+        label: t("avatarMenu.apiTokens"),
+        onClick: () => onNavigate("/setup"),
+      },
+    ],
+    [t, onNavigate]
+  );
 
   return (
     <div

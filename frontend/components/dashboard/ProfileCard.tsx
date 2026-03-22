@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import RoughCard from "@/components/design-system/RoughCard";
+import { getInitials } from "@/lib/utils/initials";
 
 interface ProfileCardProps {
   name: string;
@@ -10,21 +11,6 @@ interface ProfileCardProps {
   semester: number;
   courseCount: number;
   creditPoints: number;
-}
-
-/**
- * Compute initials from a display name.
- * If name has a space, take first letter of first + last word.
- * Otherwise take first 2 characters.
- */
-function getInitials(name: string): string {
-  const trimmed = name.trim();
-  if (!trimmed) return "?";
-  const parts = trimmed.split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return trimmed.slice(0, 2).toUpperCase();
 }
 
 export default function ProfileCard({
