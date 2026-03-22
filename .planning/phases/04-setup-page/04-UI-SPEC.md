@@ -36,41 +36,41 @@ Declared values (must be multiples of 4):
 
 | Token | Value | Usage in this phase |
 |-------|-------|---------------------|
-| xs | 4px | Token error text margin-top, step-num margin-top offset (1px adjusted) |
-| sm | 8px | Icon gaps (guide-header gap 10px rounded), step-circle margin, inline gaps |
-| md | 16px | Guide card margin-bottom, card-header margin-bottom, guide-steps gap 12px |
-| lg | 24px | Tutorial desc margin-bottom, token input section spacing |
-| xl | 32px | Step indicator margin-bottom, welcome features margin-top 28px |
+| xs | 4px | Token error text margin-top, minor offsets |
+| sm | 8px | Icon gaps, step-circle margin, inline gaps, code snippet horizontal padding |
+| md | 16px | Guide card margin-bottom, card-header margin-bottom, guide card gap, token input padding, security note padding |
+| lg | 24px | Tutorial desc margin-bottom, token input section spacing, step number circles (24px diameter) |
+| xl | 32px | Step indicator margin-bottom, step circle diameter (32px) |
 | 2xl | 48px | Step line width (48px connectors) |
 | 3xl | 64px | Success check circle size (64px) |
 
-Exceptions:
-- Card inner padding: 40px 36px (desktop), 28px 20px (mobile < 680px) -- matches prototype exactly
-- "Get Started" button padding: 12px 40px -- wider CTA for emphasis
-- Welcome logo: 60px square -- fixed brand element
-- Step circles: 34px diameter -- specific to step indicator
-- Touch target minimum: 44px height on primary buttons (btn-primary-wide)
+Exceptions (multiples of 4, outside standard set, with justification):
+
+- 12px: "Get Started" button vertical padding, steps gap between numbered items -- tighter than 16px for visual density within cards
+- 20px: Guide card inner padding (20px 22px on smaller side), token group margin-bottom -- intermediate spacing for medium-density content areas
+- 28px: Card inner padding mobile (28px vertical) -- compromise between 24px (too tight) and 32px (too loose) on mobile
+- 36px: Card inner padding desktop (horizontal) -- pairs with 40px vertical to create slightly narrower horizontal padding
+- 40px: Card inner padding desktop (vertical), "Get Started" button horizontal padding -- wider CTA emphasis and card breathing room
+- 44px: Touch target minimum height on primary buttons (btn-primary-wide) -- WCAG touch target guideline
+- 60px: Welcome logo square size -- fixed brand element, not repeated elsewhere
 
 ---
 
 ## Typography
 
-All sizes relative to html base 15px.
+4 declared sizes + 1 brand-fixed exception:
 
 | Role | Size | Weight | Line Height | Font Family | Usage |
 |------|------|--------|-------------|-------------|-------|
-| Display | 1.8rem (27px) | 600 | 1.2 | Source Serif 4 | Welcome title "Welcome to UniBoard" |
-| Heading | 1.6rem (24px) | 600 | 1.2 | Source Serif 4 | Success title "You're all set!" |
-| Subheading | 1.4rem (21px) | 600 | 1.2 | Source Serif 4 | Step titles "How to get your API tokens", "Connect your accounts" |
-| Body | 0.88rem (13.2px) | 400 | 1.7 | Inter | Welcome desc, success desc, CTA buttons |
-| Body-sm | 0.84rem (12.6px) | 400 | 1.5 | Inter | Tutorial desc, step text, button labels |
-| Label | 0.82rem (12.3px) | 600 | 1.4 | Inter | Token label text, token input text |
-| Caption | 0.78rem (11.7px) | 400 | 1.55 | Inter | Italic subtitle, code snippets |
-| Caption-sm | 0.76rem (11.4px) | 400 | 1.55 | Inter | Security note text, sync status text |
-| Badge | 0.74rem (11.1px) | 600 | 1.4 | Inter | Feature badge labels |
-| Micro | 0.72rem (10.8px) | 600 | 1.4 | Inter | Step number circles, error text |
-| Platform name | 1rem (15px) | 600 | 1.4 | Source Serif 4 | Guide card platform names |
-| Logo | 30px | 700 | 1.0 | Source Serif 4 | "U" logo block |
+| Display | 28px | 600 | 1.2 | Source Serif 4 | Welcome title "Welcome to UniBoard", Success title "You're all set!" |
+| Subheading | 21px | 600 | 1.2 | Source Serif 4 | Step titles ("How to get your API tokens", "Connect your accounts"), platform names in guide cards |
+| Body | 16px | 400 | 1.6 | Inter | Welcome description, success description, CTA button text, tutorial description, step text, button labels, security note text, sync status text, italic subtitle |
+| Small | 14px | 600 | 1.4 | Inter | Token labels, token input text, feature badge labels, step number circles, error text, code snippets (monospace) |
+
+Brand-fixed exception (outside typographic scale):
+- Logo "U": 30px, weight 600, Source Serif 4 -- single-character brand mark in the logo block, not part of content typography
+
+Font weights: 400 (regular) and 600 (semibold) only. No 700.
 
 ---
 
@@ -126,7 +126,7 @@ All sizes relative to html base 15px.
 | Ruled lines | -1 | body::after |
 
 ### Step Indicator
-- 3 circles (34px diameter) + 2 connecting lines (48px wide, 2px height, 8px horizontal margin)
+- 3 circles (32px diameter) + 2 connecting lines (48px wide, 2px height, 8px horizontal margin)
 - Centered horizontally, 32px below top of container
 - Circle states:
   - Active: bg orange (#d97757), white text, white number
@@ -345,59 +345,59 @@ Success → "Go to Dashboard" → /dashboard
 
 | Element | Specification |
 |---------|--------------|
-| Logo "U" block | 60px square, bg orange, border-radius 16px, Source Serif 4 700 30px, white text, centered |
-| Title | 1.8rem Source Serif 4 600, centered |
-| Description | 0.88rem Inter 400, text-2, max-width 420px, centered, line-height 1.7 |
-| Italic subtitle | 0.78rem Inter 400 italic, text-3 |
-| Feature badges | 3 items in a row (flex, gap 16px, centered), each: column layout with icon (40px square, 10px border-radius) + label (0.74rem, 600, text-2) |
+| Logo "U" block | 60px square, bg orange, border-radius 16px, Source Serif 4 600 30px (brand exception), white text, centered |
+| Title | 28px Source Serif 4 600, centered |
+| Description | 16px Inter 400, text-2, max-width 420px, centered, line-height 1.6 |
+| Italic subtitle | 16px Inter 400 italic, text-3 |
+| Feature badges | 3 items in a row (flex, gap 16px, centered), each: column layout with icon (40px square, 8px border-radius) + label (14px, 600, text-2) |
 | Badge 1 icon | shield-check (18px), orange-soft bg, orange color |
 | Badge 2 icon | lock (18px), blue-soft bg, blue color |
 | Badge 3 icon | trash-2 (18px), green-soft bg, green color |
-| CTA button | centered, 12px 40px padding, 0.88rem, primary style |
+| CTA button | centered, 12px 40px padding, 16px, primary style |
 | Mobile (<680px) | Badges stack vertically, each badge row layout (icon + label side-by-side) |
 
 ### Step 2: Token Tutorial
 
 | Element | Specification |
 |---------|--------------|
-| Guide card border | 1px solid card-border, border-radius 14px, padding 20px 22px |
+| Guide card border | 1px solid card-border, border-radius 16px, padding 20px 24px |
 | Platform icon | 32px square, 8px border-radius |
 | Canvas icon | layout-dashboard (16px), bg rgba(217,60,50,.08), color #d93c32 |
 | Ed icon | message-circle (16px), bg blue-soft, color blue |
-| Platform name | Source Serif 4, 1rem (15px), weight 600 |
+| Platform name | Source Serif 4, 21px, weight 600 |
 | Chevron toggle | chevron-down (18px), text-3, rotates -90deg when collapsed |
-| Step numbers | 24px circle, bg orange, white text, 0.72rem weight 600 |
+| Step numbers | 24px circle, bg orange, white text, 14px weight 600 |
 | Step icons | 14px, text-3 color (external-link, settings, key, copy) |
-| Step text | 0.84rem, text-2, line-height 1.5 |
+| Step text | 16px, text-2, line-height 1.5 |
 | Links in steps | orange color, weight 600, underline on hover |
-| Code snippets | 0.78rem, monospace, bg rgba(217,119,87,.08), orange color, 2px 6px padding, 4px border-radius |
-| Steps gap | 12px between steps |
+| Code snippets | 14px, monospace, bg rgba(217,119,87,.08), orange color, 4px 8px padding, 4px border-radius |
+| Steps gap | 12px between steps (exception, see Spacing Scale) |
 | Guide card gap | 16px between Canvas and Ed cards |
 
 ### Step 3: Paste Tokens
 
 | Element | Specification |
 |---------|--------------|
-| Token label icon | 22px square, 6px border-radius |
-| Token label text | 0.82rem, weight 600, text-2 |
-| Token input | monospace font, 0.82rem, padding 11px 14px, 1.5px border, radius-sm (8px), cream bg |
+| Token label icon | 24px square, 8px border-radius |
+| Token label text | 14px, weight 600, text-2 |
+| Token input | monospace font, 14px, padding 12px 16px, 1.5px border, radius-sm (8px), cream bg |
 | Input placeholder | text-3 color, Inter font (not monospace) |
 | Status icon area | 24px wide flex-shrink-0, centered |
-| Token error text | 0.72rem, red, margin-top 4px, hidden by default |
-| Token group spacing | 20px margin-bottom |
-| Security note | padding 14px 16px, radius-sm, bg rgba(120,140,93,.04), border 1px solid rgba(120,140,93,.12) |
+| Token error text | 14px, red, margin-top 4px, hidden by default |
+| Token group spacing | 20px margin-bottom (exception, see Spacing Scale) |
+| Security note | padding 16px, radius-sm, bg rgba(120,140,93,.04), border 1px solid rgba(120,140,93,.12) |
 | Security note icon | shield (16px), green color |
-| Security note text | 0.76rem, text-2, line-height 1.55, strong text in text-1 weight 600 |
+| Security note text | 16px, text-2, line-height 1.6, strong text in text-1 weight 600 |
 
 ### Success State
 
 | Element | Specification |
 |---------|--------------|
 | Check circle | 64px diameter, green-soft bg, green check icon (30px) |
-| Title | 1.6rem Source Serif 4 600 |
-| Description | 0.88rem, text-2, line-height 1.65, max-width 400px centered |
+| Title | 28px Source Serif 4 600 |
+| Description | 16px, text-2, line-height 1.6, max-width 400px centered |
 | Sync spinner | 14px, 2px border, card-border base + orange top-color, 0.8s linear spin |
-| Sync text | 0.76rem, text-3, italic, flex row with gap 6px |
+| Sync text | 16px, text-3, italic, flex row with gap 8px |
 | Sync complete | green color, weight 600, non-italic |
 | Dashboard button | primary wide, inline-flex, auto width, 12px 40px padding, layout-dashboard icon (16px) + text, gap 8px |
 
@@ -407,10 +407,10 @@ Success → "Go to Dashboard" → /dashboard
 
 | Variant | Padding | Font | Border | Background | Hover |
 |---------|---------|------|--------|------------|-------|
-| Primary | 10px 28px | 0.84rem 600 white | none | #d97757 | bg #c5674a, translateY(-1px) |
-| Primary wide | 12px 40px | 0.88rem 600 white | none | #d97757 | bg #c5674a, translateY(-1px) |
+| Primary | 12px 28px | 16px 600 white | none | #d97757 | bg #c5674a, translateY(-1px) |
+| Primary wide | 12px 40px | 16px 600 white | none | #d97757 | bg #c5674a, translateY(-1px) |
 | Primary disabled | -- | -- | -- | opacity 0.6 | cursor: default, no transform |
-| Secondary | 10px 24px | 0.84rem 600 text-2 | 1.5px solid card-border | transparent | bg card-bg-hover, color text-1 |
+| Secondary | 12px 24px | 16px 600 text-2 | 1.5px solid card-border | transparent | bg card-bg-hover, color text-1 |
 
 All buttons: border-radius 8px (radius-sm), cursor pointer, transition 0.15s ease.
 
