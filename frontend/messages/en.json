@@ -22,8 +22,65 @@
     "creditPts": "Credit Pts"
   },
   "dashboard": {
-    "welcome": "Welcome to UniBoard",
-    "subtitle": "Your academic dashboard is ready"
+    "hero": {
+      "greeting": {
+        "morning": "Good morning, {firstName}",
+        "afternoon": "Good afternoon, {firstName}",
+        "evening": "Good evening, {firstName}"
+      },
+      "date": "It's {weekday}, {weekNumber} of Semester {semester}.",
+      "scrollPrompt": "your dashboard"
+    },
+    "stats": {
+      "wam": { "label": "Current WAM", "sub": "Weighted Average Mark" },
+      "target": { "label": "GPA Target", "sub": "{gradeBand}", "badge": "+{gap} to go" },
+      "alerts": { "label": "Alerts", "sub": "{course} below target \u00b7 {count} deadline soon" }
+    },
+    "grades": {
+      "title": "Course Grades Overview",
+      "badge": "{year} S{semester}",
+      "th": { "course": "Course", "assessed": "Assessed", "earned": "Earned", "target": "Target" },
+      "predictLink": "predict \u2192"
+    },
+    "deadlines": {
+      "title": "Upcoming Deadlines",
+      "badge": "7 days",
+      "days": "{count} days",
+      "seeDetails": "see details"
+    },
+    "donut": {
+      "title": "Assessment Weights",
+      "empty": {
+        "heading": "No upcoming deadlines",
+        "body": "Assessment weights will appear when you have upcoming deadlines."
+      }
+    },
+    "profile": {
+      "statLabels": { "courses": "Courses", "credits": "Credit Pts" }
+    },
+    "calendar": { "monthFormat": "{month} {year}" },
+    "activity": {
+      "title": "Recent Activity",
+      "grade": "Grade posted \u2014 {course} {assignment}: {score}",
+      "discussion": "Staff reply on {course} {topic}",
+      "deadline": "Reminder \u2014 {course} {assignment} in {days} days",
+      "endorsed": "Endorsed answer on {course} \"{topic}\""
+    },
+    "externalLink": {
+      "title": "Open external link?",
+      "body": "You are about to leave UniBoard and open an external page.",
+      "confirm": "Open link",
+      "cancel": "Stay on UniBoard"
+    },
+    "notifications": { "title": "Notifications", "footer": "View all notifications" },
+    "avatarMenu": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "apiTokens": "API Tokens",
+      "logout": "Log out"
+    },
+    "error": { "message": "Something went wrong loading this section.", "retry": "Try again" },
+    "loading": { "aria": "Loading..." }
   },
   "common": {
     "loading": "Loading...",
