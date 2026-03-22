@@ -118,7 +118,9 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
                     : undefined
                 }
                 className={cn(
-                  "flex gap-[10px] items-start",
+                  "flex gap-[10px] items-start rounded-[8px] px-2 py-2 -mx-2",
+                  "transition-all duration-150 ease-out",
+                  "hover:bg-[rgba(217,119,87,.04)] hover:shadow-[0_2px_8px_rgba(217,119,87,.10)] hover:-translate-y-[1px]",
                   item.externalUrl && "cursor-pointer"
                 )}
               >

@@ -92,7 +92,7 @@ export default function NotificationPanel({
       </div>
 
       {/* Scrollable notification list */}
-      <div className="max-h-[260px] overflow-y-auto overflow-x-hidden scroll-smooth [WebkitOverflowScrolling:touch]">
+      <div className="max-h-[260px] overflow-y-auto overflow-x-hidden [-webkit-overflow-scrolling:touch] [will-change:scroll-position]">
         {notifications.map((notification) => {
           const mapping = ICON_MAP[notification.type] ?? DEFAULT_ICON;
           const Icon = mapping.icon;
@@ -101,7 +101,7 @@ export default function NotificationPanel({
             <div
               key={notification.id}
               className={cn(
-                "flex gap-3 items-start px-4 py-3 cursor-pointer transition-colors duration-[0.15s]",
+                "flex gap-3 items-start px-4 py-3 cursor-pointer",
                 notification.is_read
                   ? "bg-transparent hover:bg-card-bg-hover"
                   : "bg-[rgba(217,119,87,.05)] hover:bg-[rgba(217,119,87,.09)]"

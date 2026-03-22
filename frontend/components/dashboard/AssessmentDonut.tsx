@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import rough from "roughjs";
 import { PieChart } from "lucide-react";
 import RoughCard from "@/components/design-system/RoughCard";
 
@@ -20,16 +21,14 @@ interface AssessmentDonutProps {
 
 // Generate a palette of segment colors based on the primary course color
 function generateSegmentPalette(baseColor: string, count: number): string[] {
-  // Parse hex color to RGB variations
   const hex = baseColor.replace("#", "");
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
 
-  // Create variations by adjusting lightness/saturation
   const palette: string[] = [];
   for (let i = 0; i < count; i++) {
-    const factor = 0.6 + (i / Math.max(count - 1, 1)) * 0.6; // Range 0.6 to 1.2
+    const factor = 0.6 + (i / Math.max(count - 1, 1)) * 0.6;
     const nr = Math.min(255, Math.round(r * factor));
     const ng = Math.min(255, Math.round(g * factor));
     const nb = Math.min(255, Math.round(b * factor));
@@ -46,9 +45,8 @@ function desaturateColor(hex: string): string {
   const r = parseInt(c.slice(0, 2), 16);
   const g = parseInt(c.slice(2, 4), 16);
   const b = parseInt(c.slice(4, 6), 16);
-  // Mix with gray for desaturation
   const gray = Math.round(r * 0.299 + g * 0.587 + b * 0.114);
-  const mix = 0.4; // 40% desaturation
+  const mix = 0.4;
   const nr = Math.round(r * (1 - mix) + gray * mix);
   const ng = Math.round(g * (1 - mix) + gray * mix);
   const nb = Math.round(b * (1 - mix) + gray * mix);
@@ -67,23 +65,17 @@ interface SegmentData {
 // SVG donut geometry constants (from prototype)
 const SVG_W = 360;
 const SVG_H = 300;
-const CX = SVG_W / 2; // 180
-const CY = SVG_H / 2; // 150
+const CX = SVG_W / 2;
+const CY = SVG_H / 2;
 const OUTER_R = 95;
 const INNER_R = 55;
-const LEADER_START_R = OUTER_R + 14; // 109
-const LEADER_ELBOW_R = OUTER_R + 42; // 137
+const LEADER_START_R = OUTER_R + 14;
+const LEADER_ELBOW_R = OUTER_R + 42;
 const TAIL_LEN = 30;
-const HIGHLIGHT_PUSH = 4;
-const SEPARATION_MAX = 20;
+const NS = "http://www.w3.org/2000/svg";
 
 /**
- * Build an SVG arc path for a donut segment (annular ring).
- * M x1outer y1outer
- * A outerR outerR 0 largeArcFlag 1 x2outer y2outer
- * L x1inner y1inner
- * A innerR innerR 0 largeArcFlag 0 x2inner y2inner
- * Z
+ * Build an SVG arc path string for a donut segment (annular ring).
  */
 function buildSegmentPath(
   cx: number,
@@ -121,7 +113,8 @@ export default function AssessmentDonut({
   courseCode,
 }: AssessmentDonutProps) {
   const t = useTranslations("dashboard");
-  const [animationProgress, setAnimationProgress] = useState(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [animationDone, setAnimationDone] = useState(false);
 
   // Compute segment data
   const segments = useMemo<SegmentData[]>(() => {
@@ -130,7 +123,7 @@ export default function AssessmentDonut({
     const totalWeight = weights.reduce((sum, w) => sum + w.weight, 0);
     const palette = generateSegmentPalette(courseColor, weights.length);
 
-    let currentAngle = -Math.PI / 2; // Start at top
+    let currentAngle = -Math.PI / 2;
     return weights.map((w, i) => {
       const proportion = totalWeight > 0 ? w.weight / totalWeight : 0;
       const sweepAngle = proportion * Math.PI * 2;
@@ -155,130 +148,165 @@ export default function AssessmentDonut({
     });
   }, [weights, courseColor]);
 
-  // Converge entry animation
+  // Draw donut imperatively with Rough.js (matching prototype exactly)
+  const drawDonut = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg || segments.length === 0) return;
+
+    // Clear previous content
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    const rc = rough.svg(svg);
+
+    // Draw slices with cross-hatch fill (matching prototype)
+    for (const seg of segments) {
+      const d = buildSegmentPath(CX, CY, OUTER_R, INNER_R, seg.startAngle, seg.endAngle);
+      const isHighlighted = highlightType === seg.weight.name;
+
+      const node = rc.path(d, {
+        fill: seg.color,
+        fillStyle: "cross-hatch",
+        fillWeight: 1.8,
+        stroke: seg.color,
+        strokeWidth: isHighlighted ? 2 : 1,
+        roughness: 1.5,
+      });
+      svg.appendChild(node);
+    }
+
+    // Draw leader lines + labels (matching prototype)
+    for (const seg of segments) {
+      const mid = seg.midAngle;
+      const isRight = Math.cos(mid) >= 0;
+
+      const sx = CX + LEADER_START_R * Math.cos(mid);
+      const sy = CY + LEADER_START_R * Math.sin(mid);
+      const ex = CX + LEADER_ELBOW_R * Math.cos(mid);
+      const ey = CY + LEADER_ELBOW_R * Math.sin(mid);
+      const tx = isRight ? ex + TAIL_LEN : ex - TAIL_LEN;
+
+      // Hand-drawn leader line (two segments)
+      svg.appendChild(
+        rc.line(sx, sy, ex, ey, {
+          stroke: seg.color,
+          strokeWidth: 1,
+          roughness: 1.2,
+        })
+      );
+      svg.appendChild(
+        rc.line(ex, ey, tx, ey, {
+          stroke: seg.color,
+          strokeWidth: 1,
+          roughness: 1.2,
+        })
+      );
+
+      // Small dot at start
+      svg.appendChild(
+        rc.circle(sx, sy, 4, {
+          fill: seg.color,
+          fillStyle: "solid",
+          stroke: seg.color,
+          strokeWidth: 0.5,
+          roughness: 1,
+        })
+      );
+
+      // Text labels (SVG text for readability)
+      const anchor = isRight ? "start" : "end";
+      const labelX = isRight ? tx + 5 : tx - 5;
+
+      const pctText = document.createElementNS(NS, "text");
+      pctText.setAttribute("x", String(labelX));
+      pctText.setAttribute("y", String(ey - 1));
+      pctText.setAttribute("text-anchor", anchor);
+      pctText.setAttribute("font-family", "'Source Serif 4', Georgia, serif");
+      pctText.setAttribute("font-size", "15");
+      pctText.setAttribute("font-weight", "700");
+      pctText.setAttribute("fill", seg.color);
+      pctText.textContent = `${seg.percentage}%`;
+      svg.appendChild(pctText);
+
+      const nameText = document.createElementNS(NS, "text");
+      nameText.setAttribute("x", String(labelX));
+      nameText.setAttribute("y", String(ey + 15));
+      nameText.setAttribute("text-anchor", anchor);
+      nameText.setAttribute("font-family", "'Inter', sans-serif");
+      nameText.setAttribute("font-size", "12");
+      nameText.setAttribute("fill", "#6b6b65");
+      nameText.textContent = seg.weight.name;
+      svg.appendChild(nameText);
+    }
+  }, [segments, highlightType]);
+
+  // Converge entry animation, then draw final state with Rough.js
   useEffect(() => {
     if (weights.length === 0) return;
 
-    setAnimationProgress(0);
+    const svg = svgRef.current;
+    if (!svg) return;
 
-    // Use rAF-based animation with cubic-bezier easing
-    const duration = 800; // ms
+    setAnimationDone(false);
+
+    // Animate: segments start separated, converge to center
+    const duration = 800;
     let startTime: number | null = null;
     let rafId: number;
+    const separationMax = 20;
 
-    const animate = (timestamp: number) => {
+    const animateFrame = (timestamp: number) => {
       if (startTime === null) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const rawProgress = Math.min(elapsed / duration, 1);
-
-      // Cubic bezier approximation: fast start, gentle settle
       const eased =
         rawProgress < 0.5
           ? 4 * rawProgress * rawProgress * rawProgress
           : 1 - Math.pow(-2 * rawProgress + 2, 3) / 2;
 
-      setAnimationProgress(eased);
+      const separationOffset = separationMax * (1 - eased);
+
+      // Clear and redraw at current offset (simple solid fill during animation for performance)
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      for (const seg of segments) {
+        const offsetX = Math.cos(seg.midAngle) * separationOffset;
+        const offsetY = Math.sin(seg.midAngle) * separationOffset;
+        const segCx = CX + offsetX;
+        const segCy = CY + offsetY;
+
+        const d = buildSegmentPath(segCx, segCy, OUTER_R, INNER_R, seg.startAngle, seg.endAngle);
+
+        // Use simple path during animation for smooth 60fps
+        const path = document.createElementNS(NS, "path");
+        path.setAttribute("d", d);
+        path.setAttribute("fill", seg.color);
+        path.setAttribute("stroke", seg.color);
+        path.setAttribute("stroke-width", "1");
+        path.setAttribute("opacity", String(0.3 + eased * 0.7));
+        svg.appendChild(path);
+      }
 
       if (rawProgress < 1) {
-        rafId = requestAnimationFrame(animate);
+        rafId = requestAnimationFrame(animateFrame);
+      } else {
+        // Animation done — draw final Rough.js version
+        setAnimationDone(true);
       }
     };
 
-    // Start animation on next frame
-    rafId = requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animateFrame);
+    return () => cancelAnimationFrame(rafId);
+  }, [weights, segments]);
 
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
-  }, [weights]);
-
-  // Compute all SVG element data declaratively
-  const svgElements = useMemo(() => {
-    if (segments.length === 0) return null;
-
-    const separationOffset = SEPARATION_MAX * (1 - animationProgress);
-    const showLeaders = animationProgress >= 0.95;
-
-    const segmentPaths = segments.map((seg) => {
-      const isHighlighted = highlightType === seg.weight.name;
-
-      // Compute separation offset along midpoint angle direction
-      const offsetX = Math.cos(seg.midAngle) * separationOffset;
-      const offsetY = Math.sin(seg.midAngle) * separationOffset;
-
-      // If highlighted, add extra push outward
-      const push = isHighlighted ? HIGHLIGHT_PUSH : 0;
-      const totalOffsetX = offsetX + Math.cos(seg.midAngle) * push;
-      const totalOffsetY = offsetY + Math.sin(seg.midAngle) * push;
-
-      const segCx = CX + totalOffsetX;
-      const segCy = CY + totalOffsetY;
-
-      const d = buildSegmentPath(
-        segCx,
-        segCy,
-        OUTER_R,
-        INNER_R,
-        seg.startAngle,
-        seg.endAngle
-      );
-
-      return {
-        d,
-        fill: seg.color,
-        stroke: seg.color,
-        strokeWidth: isHighlighted ? 2 : 1,
-        key: `seg-${seg.weight.name}`,
-      };
-    });
-
-    // Leader lines and labels (only show after animation completes)
-    const leaders = showLeaders
-      ? segments.map((seg) => {
-          const mid = seg.midAngle;
-          const isRight = Math.cos(mid) >= 0;
-
-          // Points: start on outer edge -> elbow -> horizontal tail
-          const sx = CX + LEADER_START_R * Math.cos(mid);
-          const sy = CY + LEADER_START_R * Math.sin(mid);
-          const ex = CX + LEADER_ELBOW_R * Math.cos(mid);
-          const ey = CY + LEADER_ELBOW_R * Math.sin(mid);
-          const tx = isRight ? ex + TAIL_LEN : ex - TAIL_LEN;
-
-          const anchor: "start" | "end" = isRight ? "start" : "end";
-          const labelX = isRight ? tx + 5 : tx - 5;
-
-          return {
-            key: `leader-${seg.weight.name}`,
-            color: seg.color,
-            // Small dot at start
-            dot: { cx: sx, cy: sy, r: 2 },
-            // Radial line: start -> elbow
-            line1: { x1: sx, y1: sy, x2: ex, y2: ey },
-            // Horizontal tail: elbow -> end
-            line2: { x1: ex, y1: ey, x2: tx, y2: ey },
-            // Labels
-            pctLabel: {
-              x: labelX,
-              y: ey - 1,
-              anchor,
-              text: `${seg.percentage}%`,
-            },
-            nameLabel: {
-              x: labelX,
-              y: ey + 15,
-              anchor,
-              text: seg.weight.name,
-            },
-          };
-        })
-      : [];
-
-    return { segmentPaths, leaders };
-  }, [segments, animationProgress, highlightType]);
+  // Draw final Rough.js rendering after animation completes
+  useEffect(() => {
+    if (animationDone) {
+      drawDonut();
+    }
+  }, [animationDone, drawDonut]);
 
   // Compute soft badge background from courseColor
-  const badgeBg = `${courseColor}1c`; // ~11% opacity in hex
+  const badgeBg = `${courseColor}1c`;
 
   return (
     <RoughCard className="h-full">
@@ -325,75 +353,11 @@ export default function AssessmentDonut({
         </div>
       ) : (
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${SVG_W} ${SVG_H}`}
           className="w-full"
           style={{ maxHeight: "300px", overflow: "visible" }}
-        >
-          {/* Donut segments */}
-          {svgElements?.segmentPaths.map((seg) => (
-            <path
-              key={seg.key}
-              d={seg.d}
-              fill={seg.fill}
-              stroke={seg.stroke}
-              strokeWidth={seg.strokeWidth}
-            />
-          ))}
-
-          {/* Leader lines + labels */}
-          {svgElements?.leaders.map((leader) => (
-            <g key={leader.key}>
-              {/* Small filled dot at start point on donut edge */}
-              <circle
-                cx={leader.dot.cx}
-                cy={leader.dot.cy}
-                r={leader.dot.r}
-                fill={leader.color}
-              />
-              {/* Radial line: start -> elbow */}
-              <line
-                x1={leader.line1.x1}
-                y1={leader.line1.y1}
-                x2={leader.line1.x2}
-                y2={leader.line1.y2}
-                stroke={leader.color}
-                strokeWidth={1}
-              />
-              {/* Horizontal tail line: elbow -> end */}
-              <line
-                x1={leader.line2.x1}
-                y1={leader.line2.y1}
-                x2={leader.line2.x2}
-                y2={leader.line2.y2}
-                stroke={leader.color}
-                strokeWidth={1}
-              />
-              {/* Percentage label */}
-              <text
-                x={leader.pctLabel.x}
-                y={leader.pctLabel.y}
-                textAnchor={leader.pctLabel.anchor}
-                fontFamily="'Source Serif 4', Georgia, serif"
-                fontSize={15}
-                fontWeight={700}
-                fill={leader.color}
-              >
-                {leader.pctLabel.text}
-              </text>
-              {/* Assessment name label */}
-              <text
-                x={leader.nameLabel.x}
-                y={leader.nameLabel.y}
-                textAnchor={leader.nameLabel.anchor}
-                fontFamily="'Inter', sans-serif"
-                fontSize={12}
-                fill="#6b6b65"
-              >
-                {leader.nameLabel.text}
-              </text>
-            </g>
-          ))}
-        </svg>
+        />
       )}
     </RoughCard>
   );
