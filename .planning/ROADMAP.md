@@ -364,7 +364,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
 | 3. Auth Page | M1 | 2/4 | UAT gap closure | - |
 | 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
-| 5. Dashboard Page | M1 | 0/6 | Planned | - |
+| 5. Dashboard Page | 5/6 | In Progress|  | - |
 | 6. Courses Page | M1 | 0/TBD | Not started | - |
 | 7. Course Detail Page | M1 | 0/TBD | Not started | - |
 | 8. Deadlines Page | M1 | 0/TBD | Not started | - |
