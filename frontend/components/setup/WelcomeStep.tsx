@@ -1,0 +1,101 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { ShieldCheck, Lock, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
+
+interface WelcomeStepProps {
+  onNext: () => void;
+}
+
+const FEATURE_BADGES = [
+  {
+    icon: ShieldCheck,
+    key: "readonly" as const,
+    bg: "bg-[rgba(217,119,87,.11)]",
+    color: "text-[#d97757]",
+  },
+  {
+    icon: Lock,
+    key: "encrypted" as const,
+    bg: "bg-[rgba(106,155,204,.11)]",
+    color: "text-[#6a9bcc]",
+  },
+  {
+    icon: Trash2,
+    key: "deletable" as const,
+    bg: "bg-[rgba(120,140,93,.11)]",
+    color: "text-[#788c5d]",
+  },
+] as const;
+
+/**
+ * Step 1 of the setup flow: Welcome screen with logo, description,
+ * feature badges (read-only, encrypted, deletable), and Get Started CTA.
+ */
+export default function WelcomeStep({ onNext }: WelcomeStepProps) {
+  const t = useTranslations("setup.welcome");
+
+  return (
+    <div className="flex flex-col items-center text-center">
+      {/* Logo block */}
+      <div className="w-[60px] h-[60px] bg-[#d97757] rounded-2xl flex items-center justify-center">
+        <span className="font-serif text-[30px] font-semibold text-white leading-none">
+          U
+        </span>
+      </div>
+
+      {/* Title */}
+      <h1 className="text-[28px] font-serif font-semibold leading-[1.2] text-text-1 mt-5">
+        {t("title")}
+      </h1>
+
+      {/* Description */}
+      <p className="text-base text-text-2 leading-[1.6] max-w-[420px] mx-auto mt-3">
+        {t("description")}
+      </p>
+
+      {/* Italic subtitle */}
+      <p className="text-base italic text-text-3 mt-2">{t("subtitle")}</p>
+
+      {/* Feature badges */}
+      <div
+        className={cn(
+          "flex items-center justify-center gap-4 mt-6",
+          "max-[680px]:flex-col",
+        )}
+      >
+        {FEATURE_BADGES.map(({ icon: Icon, key, bg, color }) => (
+          <div
+            key={key}
+            className={cn(
+              "flex flex-col items-center gap-2",
+              "max-[680px]:flex-row max-[680px]:gap-3",
+            )}
+          >
+            <div
+              className={cn(
+                "w-10 h-10 rounded-lg flex items-center justify-center",
+                bg,
+              )}
+            >
+              <Icon size={18} className={color} />
+            </div>
+            <span className="text-sm font-semibold text-text-2">
+              {t(`features.${key}`)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA button */}
+      <button
+        type="button"
+        onClick={onNext}
+        className="mt-8 bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-10 rounded-lg transition-all duration-150 ease-in-out hover:-translate-y-px"
+      >
+        {t("cta")}
+      </button>
+    </div>
+  );
+}
