@@ -19,7 +19,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 2: API Contracts & Mock Layer** — OpenAPI spec, TypeScript codegen, Route Handler mocks, TanStack Query hooks
 - [ ] **Phase 3: Auth Page** — Login and register flows with form validation
 - [ ] **Phase 4: Setup Page** — 3-step API token onboarding with visual guides
-- [ ] **Phase 5: Dashboard Page** — Hero welcome, stats row, course grades, deadline timeline, assessment weights
+- [x] **Phase 5: Dashboard Page** — Hero welcome, stats row, course grades, deadline timeline, assessment weights ✓ 2026-03-23
 - [ ] **Phase 6: Courses Page** — Card grid with grade overview and course navigation
 - [ ] **Phase 7: Course Detail Page** — Assessment breakdown, materials browser, Ed posts
 - [ ] **Phase 8: Deadlines Page** — Calendar view, filterable timeline, AI chat panel placeholder
@@ -134,15 +134,15 @@ Plans:
 **Plans**: 9 plans
 
 Plans:
-- [ ] 05-00-PLAN.md — Wave 0: test stubs for all 13 dashboard components and utilities
-- [ ] 05-01-PLAN.md — i18n dashboard namespace, encouragement provider, course-colors utility, SkeletonCard
-- [ ] 05-02-PLAN.md — NotificationPanel, AvatarMenu, Header refactor to data-driven dropdowns
-- [ ] 05-03-PLAN.md — HeroSection (Motion entrance, parallax fade), StatsRow, RoughProgressBar, CourseGradesTable
-- [ ] 05-04-PLAN.md — ProfileCard, MiniCalendar (month nav, deadline color-depth), RecentActivity, ExternalLinkDialog
-- [ ] 05-05-PLAN.md — DeadlineTimeline, AssessmentDonut (converge animation), DashboardPage orchestrator, page.tsx, RightPanel refactor
-- [ ] 05-06-PLAN.md — UAT gap closure: grade band calculation, encouragement i18n, skeleton shimmer, right sidebar fixes
-- [ ] 05-07-PLAN.md — UAT gap closure: AssessmentDonut full rewrite (smooth SVG donut matching prototype)
-- [ ] 05-08-PLAN.md — UAT gap closure: profile card faculty, hover effects, avatar delay, dialog centering, hero stagger, bottom row height
+- [x] 05-00-PLAN.md — Wave 0: test stubs for all 13 dashboard components and utilities
+- [x] 05-01-PLAN.md — i18n dashboard namespace, encouragement provider, course-colors utility, SkeletonCard
+- [x] 05-02-PLAN.md — NotificationPanel, AvatarMenu, Header refactor to data-driven dropdowns
+- [x] 05-03-PLAN.md — HeroSection (Motion entrance, parallax fade), StatsRow, RoughProgressBar, CourseGradesTable
+- [x] 05-04-PLAN.md — ProfileCard, MiniCalendar (month nav, deadline color-depth), RecentActivity, ExternalLinkDialog
+- [x] 05-05-PLAN.md — DeadlineTimeline, AssessmentDonut (converge animation), DashboardPage orchestrator, page.tsx, RightPanel refactor
+- [x] 05-06-PLAN.md — UAT gap closure: grade band calculation, encouragement i18n, skeleton shimmer, right sidebar fixes
+- [x] 05-07-PLAN.md — UAT gap closure: AssessmentDonut full rewrite (smooth SVG donut matching prototype)
+- [x] 05-08-PLAN.md — UAT gap closure: profile card faculty, hover effects, avatar delay, dialog centering, hero stagger, bottom row height
 
 ### Phase 6: Courses Page
 **Goal**: Users can browse all enrolled courses with grade summaries
