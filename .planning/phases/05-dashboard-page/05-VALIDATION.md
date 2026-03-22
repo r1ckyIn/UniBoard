@@ -2,7 +2,7 @@
 phase: 5
 slug: dashboard-page
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-22
 ---
@@ -38,19 +38,42 @@ created: 2026-03-22
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | TBD | UI-01 | unit + visual | `pnpm vitest run` | ❌ W0 | ⬜ pending |
+| 00-T1 | 05-00 | 0 | UI-01 | scaffold | `pnpm vitest run -- __tests__/dashboard/` | W0 creates | pending |
+| 00-T2 | 05-00 | 0 | UI-01 | scaffold | `pnpm vitest run -- __tests__/layout/NotificationPanel __tests__/layout/AvatarMenu` | W0 creates | pending |
+| 01-T1 | 05-01 | 1 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/encouragement __tests__/dashboard/course-colors` | W0 | pending |
+| 01-T2 | 05-01 | 1 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/SkeletonCard` | W0 | pending |
+| 02-T1 | 05-02 | 1 | UI-01 | unit | `pnpm vitest run -- __tests__/layout/NotificationPanel` | W0 | pending |
+| 02-T2 | 05-02 | 1 | UI-01 | unit | `pnpm vitest run -- __tests__/layout/AvatarMenu` | W0 | pending |
+| 03-T1 | 05-03 | 2 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/HeroSection` | W0 | pending |
+| 03-T2 | 05-03 | 2 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/StatsRow` | W0 | pending |
+| 03-T3 | 05-03 | 2 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/CourseGradesTable` | W0 | pending |
+| 04-T1 | 05-04 | 2 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/ExternalLinkDialog` | W0 | pending |
+| 04-T2 | 05-04 | 2 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/MiniCalendar __tests__/dashboard/RecentActivity` | W0 | pending |
+| 05-T1 | 05-05 | 3 | UI-01 | unit | `pnpm vitest run -- __tests__/dashboard/DeadlineTimeline __tests__/dashboard/AssessmentDonut` | W0 | pending |
+| 05-T2 | 05-05 | 3 | UI-01 | unit + integration | `pnpm vitest run` | W0 | pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: pending / green / red / flaky*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] Test stubs for Dashboard page sections (hero, stats, grades, deadlines, donut, right panel)
-- [ ] Test stubs for Header dropdown components (notification panel, avatar menu)
-- [ ] Test fixtures extend existing mock data patterns from Phase 2
+Plan 05-00 creates all 13 test stub files:
+- [x] `__tests__/dashboard/HeroSection.test.tsx`
+- [x] `__tests__/dashboard/StatsRow.test.tsx`
+- [x] `__tests__/dashboard/CourseGradesTable.test.tsx`
+- [x] `__tests__/dashboard/DeadlineTimeline.test.tsx`
+- [x] `__tests__/dashboard/AssessmentDonut.test.tsx`
+- [x] `__tests__/dashboard/MiniCalendar.test.tsx`
+- [x] `__tests__/dashboard/RecentActivity.test.tsx`
+- [x] `__tests__/dashboard/ExternalLinkDialog.test.tsx`
+- [x] `__tests__/dashboard/SkeletonCard.test.tsx`
+- [x] `__tests__/dashboard/encouragement.test.ts`
+- [x] `__tests__/dashboard/course-colors.test.ts`
+- [x] `__tests__/layout/NotificationPanel.test.tsx`
+- [x] `__tests__/layout/AvatarMenu.test.tsx`
 
-*Existing infrastructure covers test framework setup — vitest + testing-library already configured from prior phases.*
+*Existing infrastructure covers test framework setup -- vitest + testing-library already configured from prior phases.*
 
 ---
 
@@ -71,11 +94,11 @@ created: 2026-03-22
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (05-00-PLAN.md)
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** pending execution
