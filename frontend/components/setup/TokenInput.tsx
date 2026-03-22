@@ -11,6 +11,7 @@ interface TokenInputProps {
   onChange: (value: string) => void;
   status: "idle" | "valid" | "invalid";
   error?: string;
+  onClear?: () => void;
 }
 
 export default function TokenInput({
@@ -19,6 +20,7 @@ export default function TokenInput({
   onChange,
   status,
   error,
+  onClear,
 }: TokenInputProps) {
   const t = useTranslations("setup.tokens");
   const config = PLATFORM_CONFIG[platform];
@@ -61,12 +63,24 @@ export default function TokenInput({
           </div>
         )}
         {status === "invalid" && (
-          <div
-            data-testid={`status-invalid-${platform}`}
-            className="absolute right-3 flex-shrink-0"
-          >
-            <XCircle size={20} className="text-[#cc4455]" />
-          </div>
+          onClear ? (
+            <button
+              type="button"
+              onClick={onClear}
+              aria-label="Clear input"
+              data-testid={`status-invalid-${platform}`}
+              className="absolute right-3 flex-shrink-0 cursor-pointer"
+            >
+              <XCircle size={20} className="text-[#cc4455]" />
+            </button>
+          ) : (
+            <div
+              data-testid={`status-invalid-${platform}`}
+              className="absolute right-3 flex-shrink-0"
+            >
+              <XCircle size={20} className="text-[#cc4455]" />
+            </div>
+          )
         )}
       </div>
 

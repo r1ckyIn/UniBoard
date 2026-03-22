@@ -119,7 +119,7 @@
           "1": "Go to canvas.sydney.edu.au and log in",
           "2": "Click your profile picture (bottom-left) \u2192 Settings",
           "3": "Scroll down to Approved Integrations \u2192 click + New Access Token",
-          "4": "Enter purpose: UniBoard, leave expiry blank \u2192 click Generate Token",
+          "4": "Enter purpose: UniBoard, set expiry to max 120 days \u2192 click Generate Token",
           "5": "Copy the token immediately \u2014 it won't be shown again!"
         }
       },
@@ -130,7 +130,7 @@
           "2": "Select region \u2192 Australia (critical \u2014 default may be wrong)",
           "3": "Log in with your student credentials",
           "4": "Navigate to API Tokens settings",
-          "5": "Click Generate Token, name it UniBoard, and copy it"
+          "5": "Click Generate Token, name it UniBoard, and copy it. Ed tokens don't expire."
         }
       },
       "back": "Back",
@@ -155,7 +155,7 @@
       "cta": "Validate & Connect",
       "validating": "Validating...",
       "errors": {
-        "canvas": "Canvas token should be a numeric string (~70 characters). Check that you copied the full token.",
+        "canvas": "Canvas token format: {number}~{alphanumeric}. Check that you copied the full token including the ~ character.",
         "ed": "Ed token should be a shorter alphanumeric string. Check that you copied the full token."
       }
     },

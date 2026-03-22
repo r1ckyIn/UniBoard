@@ -1,10 +1,10 @@
 /**
- * Canvas tokens are numeric strings, typically ~70 characters.
- * Pattern: digits only, length between 50-100 (generous range).
+ * Canvas tokens have format {numeric_id}~{alphanumeric_secret},
+ * e.g. 3156~PR7xCaBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789abcde
  */
 export function validateCanvasToken(value: string): boolean {
   const trimmed = value.trim();
-  return /^\d{50,100}$/.test(trimmed);
+  return /^\d+~[A-Za-z0-9]{20,}$/.test(trimmed);
 }
 
 /**

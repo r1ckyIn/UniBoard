@@ -85,6 +85,7 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
           onChange={setCanvasValue}
           status={canvasStatus}
           error={canvasError}
+          onClear={() => { setCanvasValue(""); setCanvasStatus("idle"); setCanvasError(undefined); }}
         />
       </div>
 
@@ -95,6 +96,7 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
           onChange={setEdValue}
           status={edStatus}
           error={edError}
+          onClear={() => { setEdValue(""); setEdStatus("idle"); setEdError(undefined); }}
         />
       </div>
 
