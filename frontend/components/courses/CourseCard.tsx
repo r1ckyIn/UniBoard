@@ -187,7 +187,7 @@ export default function CourseCard({
             </span>
             {currentMark != null && bandKey && (
               <span
-                className="text-[0.62rem] font-bold px-[6px] py-[2px] rounded-[4px]"
+                className="ml-auto text-[0.62rem] font-bold px-[6px] py-[2px] rounded-[4px]"
                 style={{ backgroundColor: colorSoft, color: colorBase }}
               >
                 {t(bandKey)}
@@ -196,15 +196,17 @@ export default function CourseCard({
           </div>
 
           <div className="flex items-center gap-[8px]">
-            <RoughProgressBarClient
-              progress={completedWeight}
-              color={colorBase}
-              width={160}
-              height={10}
-            />
-            <span className="text-[0.66rem] font-medium text-[#9b9b94]">
+            <span className="text-[0.66rem] font-medium text-[#9b9b94] flex-shrink-0">
               {`${Math.round(completedWeight * 100)}% ${t("assessedSuffix")}`}
             </span>
+            <div className="flex-1 min-w-0">
+              <RoughProgressBarClient
+                progress={completedWeight}
+                color={colorBase}
+                width={240}
+                height={10}
+              />
+            </div>
           </div>
         </div>
       </div>

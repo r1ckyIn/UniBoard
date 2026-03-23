@@ -35,6 +35,8 @@ export default function RightPanel() {
       ref={panelRef}
       className={cn(
         "w-[var(--spacing-right-panel-w)] flex-shrink-0",
+        // Auto-collapse when right-panel-slot has no portal content
+        "[&:has(>#right-panel-slot:empty)]:hidden",
         "hidden xl:flex xl:flex-col items-start",
         "gap-[18px] sticky top-0",
         "max-h-[calc(100vh-var(--spacing-header-h)-56px)]",
