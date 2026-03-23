@@ -1,7 +1,5 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
-import rough from "roughjs";
 import { differenceInCalendarDays } from "date-fns";
 import { getUrgency, URGENCY_COLORS } from "@/lib/deadlines/urgency";
 import { getCourseColor } from "@/lib/dashboard/course-colors";
@@ -18,53 +16,9 @@ interface DeadlineTimelineViewProps {
   onToggleExpand: (id: string) => void;
 }
 
-/**
- * Rough.js dot rendered alongside each deadline card.
- * Wrapped with withClientOnly for SSR safety.
- */
-function RoughDot({
-  color,
-  filled,
-}: {
-  color: string;
-  filled: boolean;
-}) {
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  const draw = useCallback(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
-    svg.replaceChildren();
-    const rc = rough.svg(svg);
-    const circle = rc.circle(10, 10, 10, {
-      stroke: color,
-      strokeWidth: 1.2,
-      roughness: 1.5,
-      fill: filled ? color : "none",
-      fillStyle: "solid",
-      seed: 42,
-    });
-    svg.appendChild(circle);
-  }, [color, filled]);
-
-  useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      draw();
-    });
-    return () => cancelAnimationFrame(rafId);
-  }, [draw]);
-
-  return (
-    <svg
-      ref={svgRef}
-      className="absolute left-[-30px] top-[16px] w-[20px] h-[20px] pointer-events-none overflow-visible"
-    />
-  );
-}
-
-// SSR-safe wrapper for the Rough.js dot
+// SSR-safe wrapper — real dynamic import for proper code-splitting
 const ClientRoughDot = withClientOnly(
-  () => Promise.resolve({ default: RoughDot })
+  () => import("@/components/deadlines/RoughDot")
 );
 
 export default function DeadlineTimelineView({
