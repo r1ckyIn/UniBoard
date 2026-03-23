@@ -19,9 +19,21 @@ vi.mock("roughjs", () => ({
   },
 }));
 
-// Mock next-intl
+// Mock next-intl — supports both "deadlines" and "dashboard" namespaces
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string, params?: Record<string, string>) => {
+  useTranslations: (namespace: string) => (key: string, params?: Record<string, string>) => {
+    if (namespace === "dashboard") {
+      const dashMap: Record<string, string> = {
+        "calendar.days.mon": "Mon",
+        "calendar.days.tue": "Tue",
+        "calendar.days.wed": "Wed",
+        "calendar.days.thu": "Thu",
+        "calendar.days.fri": "Fri",
+        "calendar.days.sat": "Sat",
+        "calendar.days.sun": "Sun",
+      };
+      return dashMap[key] ?? key;
+    }
     const map: Record<string, string> = {
       title: "Deadlines",
       semester: "2026 S1",
@@ -247,9 +259,46 @@ describe("DeadlinesPage", () => {
     const calBtn = screen.getByTestId("view-calendar");
     fireEvent.click(calBtn);
 
-    // Calendar placeholder shown
-    expect(
-      screen.getByText("Calendar view coming in Plan 03")
-    ).toBeTruthy();
+    // Calendar view renders (check for calendar grid via day headers)
+    expect(screen.getByTestId("calendar-view")).toBeTruthy();
+    expect(screen.getByText("Mon")).toBeTruthy();
+
+    // Switch back to timeline
+    const timelineBtn = screen.getByTestId("view-timeline");
+    fireEvent.click(timelineBtn);
+    expect(screen.getByText("Assignment 2")).toBeTruthy();
+  });
+
+  it("calendar date filter shows filtered timeline below calendar", () => {
+    mockDeadlinesReturn = {
+      data: { data: mockDeadlines },
+      isLoading: false,
+      isError: false,
+    };
+    render(<DeadlinesPage />);
+
+    // Switch to calendar view
+    const calBtn = screen.getByTestId("view-calendar");
+    fireEvent.click(calBtn);
+
+    // Calendar should be visible
+    expect(screen.getByTestId("calendar-view")).toBeTruthy();
+
+    // Initially, no filtered timeline below (no selectedDate)
+    expect(screen.queryByText("Assignment 2")).toBeNull();
+
+    // Find a cell that has a deadline and click it
+    const today = new Date();
+    const deadlineDate = new Date(Date.now() + 2 * 86400000);
+    // Only click if the deadline is in the current month
+    if (deadlineDate.getMonth() === today.getMonth()) {
+      const cellTestId = `calendar-cell-${deadlineDate.getDate()}`;
+      const cell = screen.queryByTestId(cellTestId);
+      if (cell) {
+        fireEvent.click(cell);
+        // After clicking, filtered timeline should appear below calendar
+        expect(screen.getByText("Assignment 2")).toBeTruthy();
+      }
+    }
   });
 });
