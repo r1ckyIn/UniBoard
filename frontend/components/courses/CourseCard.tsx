@@ -7,13 +7,51 @@ import { useRouter } from "@/lib/i18n/navigation";
 import { getGradeBand } from "@/lib/utils/grade-band";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
 
-// SSR-safe dynamic imports for Rough.js components
 const BannerDecoClient = withClientOnly(
   () => import("@/components/courses/BannerDeco")
 );
-const RoughProgressBarClient = withClientOnly(
-  () => import("@/components/dashboard/RoughProgressBar")
-);
+// Inline progress bar that fills remaining width via CSS
+function ProgressBarFill({ progress, color }: { progress: number; color: string }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const draw = useCallback(() => {
+    const svg = svgRef.current;
+    const container = containerRef.current;
+    if (!svg || !container) return;
+
+    const w = container.offsetWidth;
+    const h = 10;
+    svg.setAttribute("viewBox", `-2 -2 ${w + 4} ${h + 4}`);
+    svg.replaceChildren();
+
+    const rc = rough.svg(svg);
+    svg.appendChild(rc.rectangle(0, 0, w, h, {
+      stroke: "#d5d2ca", fill: "#eae7e0", fillStyle: "solid", roughness: 1.2, seed: 42,
+    }));
+    if (progress > 0) {
+      svg.appendChild(rc.rectangle(0, 0, w * Math.min(progress, 1), h, {
+        stroke: color, fill: color, fillStyle: "solid", roughness: 1.6, seed: 42,
+      }));
+    }
+  }, [progress, color]);
+
+  useEffect(() => {
+    draw();
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => draw());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [draw]);
+
+  return (
+    <div ref={containerRef} className="flex-1 min-w-0">
+      <svg ref={svgRef} className="w-full overflow-visible" style={{ height: 14 }}
+        aria-label={`${Math.round(progress * 100)}% assessed`} role="img" />
+    </div>
+  );
+}
 
 interface CourseCardProps {
   id: string;
@@ -199,14 +237,7 @@ export default function CourseCard({
             <span className="text-[0.66rem] font-medium text-[#9b9b94] flex-shrink-0">
               {`${Math.round(completedWeight * 100)}% ${t("assessedSuffix")}`}
             </span>
-            <div className="flex-1 min-w-0 [&_svg]:w-full">
-              <RoughProgressBarClient
-                progress={completedWeight}
-                color={colorBase}
-                width={240}
-                height={10}
-              />
-            </div>
+            <ProgressBarFill progress={completedWeight} color={colorBase} />
           </div>
         </div>
       </div>
