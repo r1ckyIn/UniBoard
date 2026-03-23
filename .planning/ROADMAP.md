@@ -170,12 +170,13 @@ Plans:
   2. Materials browser displays course folders with file listings
   3. Ed Discussion section shows recent posts with endorsed/staff badges
   4. Navigation between course detail sections (assessments, materials, posts) works smoothly
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 07-01-PLAN.md — i18n courseDetail namespace, useCourseDeadlines hook, page.tsx route, Wave 0 test stubs
 - [ ] 07-02-PLAN.md — CourseBanner, AssessmentSection (prediction inputs + GradeSummary with countUp), MaterialsSection, AiChatPlaceholder
 - [ ] 07-03-PLAN.md — QuickLinksPanel, CourseDeadlinesPanel, EdPostsPanel, CourseDetailPage orchestrator with portal-slot
+- [ ] 07-04-PLAN.md — UAT gap closure: RoughCard wrapper for right-panel cards, EdPostsPanel author + locale timestamps
 
 ### Phase 8: Deadlines Page
 **Goal**: Users can view and filter all upcoming deadlines with an AI chat placeholder
@@ -380,7 +381,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
 | 5. Dashboard Page | M1 | 9/11 | UAT gap closure | - |
 | 6. Courses Page | M1 | 0/2 | Planned | - |
-| 7. Course Detail Page | M1 | 0/3 | Planned | - |
+| 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
 | 8. Deadlines Page | M1 | 0/TBD | Not started | - |
 | 9. Predict Page | M1 | 0/TBD | Not started | - |
 | 10. Digest Page | M1 | 0/TBD | Not started | - |
