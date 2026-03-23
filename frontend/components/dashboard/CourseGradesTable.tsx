@@ -196,37 +196,35 @@ export default function CourseGradesTable({ courses }: CourseGradesTableProps) {
                   </td>
 
                   {/* Target badge + predict link */}
-                  <td className="text-center" style={{ padding: "16px 12px" }}>
-                    <div className="flex items-center justify-center gap-2">
-                      {course.grade_letter && (
-                        <span
-                          className="rounded"
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            padding: "1px 8px",
-                            borderRadius: "6px",
-                            backgroundColor: soft,
-                            color: base,
-                          }}
-                        >
-                          {course.grade_letter}
-                        </span>
-                      )}
-                      <button
-                        onClick={(e) => handlePredictClick(e, course.course_id)}
-                        className="ml-2 opacity-0 group-hover:opacity-100 bg-transparent border-none cursor-pointer"
+                  <td className="text-center relative" style={{ padding: "16px 12px" }}>
+                    {course.grade_letter && (
+                      <span
+                        className="rounded"
                         style={{
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "var(--color-orange)",
-                          transition: "opacity 0.4s ease",
+                          padding: "1px 8px",
+                          borderRadius: "6px",
+                          backgroundColor: soft,
+                          color: base,
                         }}
-                        aria-label={`Predict ${course.code} grade`}
                       >
-                        {t("grades.predictLink")}
-                      </button>
-                    </div>
+                        {course.grade_letter}
+                      </span>
+                    )}
+                    <button
+                      onClick={(e) => handlePredictClick(e, course.course_id)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-transparent border-none cursor-pointer"
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: "var(--color-orange)",
+                        transition: "opacity 0.4s ease",
+                      }}
+                      aria-label={`Predict ${course.code} grade`}
+                    >
+                      {t("grades.predictLink")}
+                    </button>
                   </td>
                 </tr>
               );

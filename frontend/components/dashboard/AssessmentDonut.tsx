@@ -64,7 +64,7 @@ const LEADER_START_R = OUTER_R + 14;
 const LEADER_ELBOW_R = OUTER_R + 42;
 const TAIL_LEN = 30;
 const NS = "http://www.w3.org/2000/svg";
-const HIGHLIGHT_POP = 6;
+const HIGHLIGHT_POP = 25;
 
 /**
  * Build an SVG arc path string for a donut segment (annular ring).
@@ -176,9 +176,9 @@ export default function AssessmentDonut({
       const node = rc.path(d, {
         fill: seg.color,
         fillStyle: "cross-hatch",
-        fillWeight: 1.8,
-        stroke: seg.color,
-        strokeWidth: 1,
+        fillWeight: isHighlighted ? 2.5 : 1.8,
+        stroke: isHighlighted ? "#2d2d2a" : seg.color,
+        strokeWidth: isHighlighted ? 2 : 1,
         roughness: 1.5,
       });
       svg.appendChild(node);
