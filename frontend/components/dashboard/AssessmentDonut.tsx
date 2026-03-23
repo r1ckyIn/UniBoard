@@ -191,11 +191,15 @@ export default function AssessmentDonut({
     for (const seg of segments) {
       const mid = seg.midAngle;
       const isRight = Math.cos(mid) >= 0;
+      const isHighlighted = highlightType === seg.weight.name;
 
-      const sx = CX + LEADER_START_R * Math.cos(mid);
-      const sy = CY + LEADER_START_R * Math.sin(mid);
-      const ex = CX + LEADER_ELBOW_R * Math.cos(mid);
-      const ey = CY + LEADER_ELBOW_R * Math.sin(mid);
+      // Offset leader line origin to track popped-out segment
+      const popX = isHighlighted ? Math.cos(mid) * HIGHLIGHT_POP : 0;
+      const popY = isHighlighted ? Math.sin(mid) * HIGHLIGHT_POP : 0;
+      const sx = CX + popX + LEADER_START_R * Math.cos(mid);
+      const sy = CY + popY + LEADER_START_R * Math.sin(mid);
+      const ex = CX + popX + LEADER_ELBOW_R * Math.cos(mid);
+      const ey = CY + popY + LEADER_ELBOW_R * Math.sin(mid);
       const tx = isRight ? ex + TAIL_LEN : ex - TAIL_LEN;
 
       // Hand-drawn leader line (two segments)

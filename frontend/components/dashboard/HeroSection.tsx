@@ -69,7 +69,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   const timeOfDay = getTimeOfDay();
   const greeting = t(`hero.greeting.${timeOfDay}`, { firstName });
 
-  // Date line — locale-aware weekday (e.g. "Monday" in en, "星期一" in zh)
+  // Date line — locale-aware weekday (e.g. "Monday" in en, full-form weekday in zh)
   const weekday = format(new Date(), "EEEE", { locale: dateFnsLocale });
 
   // Encouragement text
