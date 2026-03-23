@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
-import rough from "roughjs";
+import RoughCard from "@/components/design-system/RoughCard";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
 
 const BannerDecoClient = withClientOnly(
@@ -18,7 +17,7 @@ interface CourseBannerProps {
 }
 
 /**
- * Full-width course banner with hand-drawn border, colour strip,
+ * Full-width course banner with RoughCard border, colour strip,
  * course info, and decorative Rough.js doodle overlay.
  */
 export default function CourseBanner({
@@ -29,51 +28,6 @@ export default function CourseBanner({
   courseColor,
   patternIndex,
 }: CourseBannerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  const drawBorder = useCallback(() => {
-    const el = containerRef.current;
-    const svg = svgRef.current;
-    if (!el || !svg) return;
-
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
-    svg.replaceChildren();
-
-    const rc = rough.svg(svg);
-    const rect = rc.rectangle(0, 0, w, h, {
-      stroke: "#d0cdc4",
-      strokeWidth: 0.8,
-      roughness: 1,
-      bowing: 1,
-      fill: "none",
-      seed: 42,
-    });
-    svg.appendChild(rect);
-  }, []);
-
-  useEffect(() => {
-    let innerRafId: number;
-    const outerRafId = requestAnimationFrame(() => {
-      innerRafId = requestAnimationFrame(() => {
-        drawBorder();
-      });
-    });
-
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => drawBorder());
-    observer.observe(el);
-
-    return () => {
-      cancelAnimationFrame(outerRafId);
-      cancelAnimationFrame(innerRafId);
-      observer.disconnect();
-    };
-  }, [drawBorder]);
-
   // Compute a slightly darker shade for gradient end
   const darkerShade = courseColor
     .replace(/^#/, "")
@@ -86,18 +40,8 @@ export default function CourseBanner({
     .join("");
 
   return (
-    <div
-      ref={containerRef}
-      className="relative overflow-visible p-[10px]"
-      style={{ background: "transparent" }}
-    >
-      {/* Hand-drawn border SVG */}
-      <svg
-        ref={svgRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-visible"
-      />
-
-      <div className="bg-[#f6f5f0] overflow-hidden">
+    <RoughCard disableHover padding="">
+      <div className="overflow-hidden">
         {/* Banner colour strip */}
         <div
           className="relative w-full px-[32px] py-[28px] flex items-center justify-between"
@@ -139,6 +83,6 @@ export default function CourseBanner({
           </div>
         </div>
       </div>
-    </div>
+    </RoughCard>
   );
 }

@@ -1,18 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-// Mock roughjs since jsdom can't render SVG paths
-vi.mock("roughjs", () => ({
-  default: {
-    svg: () => ({
-      circle: () => document.createElementNS("http://www.w3.org/2000/svg", "g"),
-      line: () => document.createElementNS("http://www.w3.org/2000/svg", "g"),
-      path: () => document.createElementNS("http://www.w3.org/2000/svg", "g"),
-      polygon: () => document.createElementNS("http://www.w3.org/2000/svg", "g"),
-      rectangle: () =>
-        document.createElementNS("http://www.w3.org/2000/svg", "g"),
-    }),
-  },
+// Mock RoughCard since it uses roughjs internally (jsdom can't render SVG paths)
+vi.mock("@/components/design-system/RoughCard", () => ({
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="rough-card">{children}</div>
+  ),
 }));
 
 // Mock next-intl

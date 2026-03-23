@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useMemo } from "react";
-import rough from "roughjs";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { GraduationCap, BookOpen } from "lucide-react";
 import type { components } from "@/lib/api/types.gen";
+import RoughCard from "@/components/design-system/RoughCard";
 import AssessmentRow from "@/components/course-detail/AssessmentRow";
 import GradeSummary from "@/components/course-detail/GradeSummary";
 
@@ -20,7 +20,7 @@ interface AssessmentSectionProps {
 }
 
 /**
- * Assessment section card: two-layer hand-drawn border, assessment table
+ * Assessment section card: RoughCard border, assessment table
  * with prediction inputs, and grade summary with animated projected final.
  */
 export default function AssessmentSection({
@@ -32,50 +32,6 @@ export default function AssessmentSection({
   semester,
 }: AssessmentSectionProps) {
   const t = useTranslations("courseDetail");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  const drawBorder = useCallback(() => {
-    const el = containerRef.current;
-    const svg = svgRef.current;
-    if (!el || !svg) return;
-
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
-    svg.replaceChildren();
-
-    const rc = rough.svg(svg);
-    const rect = rc.rectangle(0, 0, w, h, {
-      stroke: "#d0cdc4",
-      strokeWidth: 0.8,
-      roughness: 1,
-      bowing: 1,
-      fill: "none",
-      seed: 42,
-    });
-    svg.appendChild(rect);
-  }, []);
-
-  useEffect(() => {
-    let innerRafId: number;
-    const outerRafId = requestAnimationFrame(() => {
-      innerRafId = requestAnimationFrame(() => {
-        drawBorder();
-      });
-    });
-
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => drawBorder());
-    observer.observe(el);
-
-    return () => {
-      cancelAnimationFrame(outerRafId);
-      cancelAnimationFrame(innerRafId);
-      observer.disconnect();
-    };
-  }, [drawBorder]);
 
   // Compute grade metrics
   const { currentAvg, projectedFinal, assessedWeight } = useMemo(() => {
@@ -113,38 +69,20 @@ export default function AssessmentSection({
   // Empty state
   if (assessments.length === 0) {
     return (
-      <div
-        ref={containerRef}
-        className="relative overflow-visible p-[10px]"
-        style={{ background: "transparent" }}
-      >
-        <svg
-          ref={svgRef}
-          className="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-visible"
-        />
-        <div className="bg-[#f6f5f0] px-[22px] py-[26px]">
+      <RoughCard disableHover padding="">
+        <div className="px-[22px] py-[26px]">
           <div className="flex flex-col items-center justify-center py-[32px] text-[#9b9b94]">
             <BookOpen size={24} className="mb-[8px]" />
             <span className="text-[0.84rem]">{t("empty.noAssessments")}</span>
           </div>
         </div>
-      </div>
+      </RoughCard>
     );
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="relative overflow-visible p-[10px]"
-      style={{ background: "transparent" }}
-    >
-      {/* Hand-drawn border SVG */}
-      <svg
-        ref={svgRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-visible"
-      />
-
-      <div className="bg-[#f6f5f0] overflow-hidden">
+    <RoughCard disableHover padding="">
+      <div className="overflow-hidden">
         <div className="px-[26px] py-[22px]">
           {/* Card header */}
           <div className="flex items-center justify-between mb-[12px]">
@@ -215,6 +153,6 @@ export default function AssessmentSection({
           courseColor={courseColor}
         />
       </div>
-    </div>
+    </RoughCard>
   );
 }

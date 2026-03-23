@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
-import rough from "roughjs";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useCourseDiscussions } from "@/hooks/use-discussions";
+import RoughCard from "@/components/design-system/RoughCard";
 import ExternalLinkDialog from "@/components/dashboard/ExternalLinkDialog";
 
 interface EdPostsPanelProps {
@@ -22,54 +22,10 @@ export default function EdPostsPanel({
   edCourseId,
 }: EdPostsPanelProps) {
   const t = useTranslations("courseDetail");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
   const { data, isLoading } = useCourseDiscussions(courseId, "high_value");
 
   // Track which post's dialog is open
   const [openUrl, setOpenUrl] = useState<string | null>(null);
-
-  const drawBorder = useCallback(() => {
-    const el = containerRef.current;
-    const svg = svgRef.current;
-    if (!el || !svg) return;
-
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
-    svg.replaceChildren();
-
-    const rc = rough.svg(svg);
-    const rect = rc.rectangle(0, 0, w, h, {
-      stroke: "#d0cdc4",
-      strokeWidth: 0.8,
-      roughness: 1,
-      bowing: 1,
-      fill: "none",
-      seed: 42,
-    });
-    svg.appendChild(rect);
-  }, []);
-
-  useEffect(() => {
-    let innerRafId: number;
-    const outerRafId = requestAnimationFrame(() => {
-      innerRafId = requestAnimationFrame(() => {
-        drawBorder();
-      });
-    });
-
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => drawBorder());
-    observer.observe(el);
-
-    return () => {
-      cancelAnimationFrame(outerRafId);
-      cancelAnimationFrame(innerRafId);
-      observer.disconnect();
-    };
-  }, [drawBorder]);
 
   const discussions = data?.data ?? [];
 
@@ -85,18 +41,8 @@ export default function EdPostsPanel({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="relative overflow-visible p-[10px]"
-      style={{ background: "transparent" }}
-    >
-      {/* Hand-drawn border SVG */}
-      <svg
-        ref={svgRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-visible"
-      />
-
-      <div className="bg-[#f6f5f0] px-[18px] py-[16px]">
+    <>
+      <RoughCard disableHover padding="px-[18px] py-[16px]">
         {/* Title */}
         <div className="text-[0.92rem] font-semibold flex items-center gap-[8px] mb-[12px]">
           <MessageCircle size={16} className="text-[#d97757]" />
@@ -171,15 +117,15 @@ export default function EdPostsPanel({
             ))}
           </div>
         )}
-      </div>
+      </RoughCard>
 
-      {/* Shared ExternalLinkDialog */}
+      {/* Shared ExternalLinkDialog - outside RoughCard to avoid clipping */}
       <ExternalLinkDialog
         open={openUrl !== null}
         url={openUrl ?? ""}
         onConfirm={() => setOpenUrl(null)}
         onCancel={() => setOpenUrl(null)}
       />
-    </div>
+    </>
   );
 }
