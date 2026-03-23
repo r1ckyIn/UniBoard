@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 07-03-PLAN.md
-last_updated: "2026-03-23T07:50:09.908Z"
+stopped_at: Completed 07-04-PLAN.md
+last_updated: "2026-03-23T09:17:22.723Z"
 progress:
   total_phases: 24
   completed_phases: 7
-  total_plans: 32
-  completed_plans: 32
+  total_plans: 33
+  completed_plans: 33
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 07 (course-detail-page) — EXECUTING
-Plan: 3 of 3
+Phase: 07 (course-detail-page) — COMPLETE
+Plan: 4 of 4
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Plan: 3 of 3
 | Phase 07 P01 | 3min | 2 tasks | 10 files |
 | Phase 07 P02 | 5min | 2 tasks | 10 files |
 | Phase 07 P03 | 5min | 2 tasks | 7 files |
+| Phase 07 P04 | 6min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -158,6 +159,8 @@ Recent decisions affecting current work:
 - [07-02]: Grade calculation: currentAvg over graded weight only, projectedFinal over total weight when all filled
 - [Phase 07]: getCourseColor returns { base, soft } - adapted CourseDetailPage to use base instead of main
 - [Phase 07]: Shared ExternalLinkDialog per panel via useState URL tracking (fewer DOM nodes)
+- [Phase 07]: CourseBanner and AssessmentSection use empty padding RoughCard since they manage their own internal layout
+- [Phase 07]: ExternalLinkDialog placed outside RoughCard as Fragment sibling to avoid overflow clipping
 
 ### Pending Todos
 
@@ -169,6 +172,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T07:40:58.185Z
-Stopped at: Completed 07-03-PLAN.md
+Last session: 2026-03-23T09:17:22.718Z
+Stopped at: Completed 07-04-PLAN.md
 Resume file: None
