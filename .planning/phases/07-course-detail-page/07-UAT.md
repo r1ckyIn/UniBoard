@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 07-course-detail-page
 source: [07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md]
 started: 2026-03-23T08:15:00Z
-updated: 2026-03-23T08:28:00Z
+updated: 2026-03-23T08:35:00Z
 ---
 
 ## Current Test
@@ -70,22 +70,30 @@ skipped: 0
 
 ## Gaps
 
-- truth: "CourseDeadlinesPanel shows deadlines with colored stripe, day badge (e.g. in 3d), and hand-drawn border consistent with Dashboard right panel"
+- truth: "CourseDeadlinesPanel shows deadlines with hand-drawn border consistent with Dashboard right panel"
   status: failed
   reason: "User reported: 功能不对，和dashboard不一致，没有手绘元素没有天数标签"
   severity: major
   test: 8
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Inline Rough.js border code instead of shared RoughCard component. Missing burst-rAF animation smoothing, hover elevation, design tokens (bg-card-bg). Dashboard's DeadlineTimeline uses <RoughCard> wrapper."
+  artifacts:
+    - path: "frontend/components/course-detail/CourseDeadlinesPanel.tsx"
+      issue: "Inline drawBorder/SVG/ResizeObserver duplicates RoughCard with degraded quality"
+  missing:
+    - "Replace inline border code with <RoughCard> wrapper (same as DeadlineTimeline.tsx line 136)"
+  debug_session: ".planning/debug/course-deadlines-panel-gaps.md"
 
-- truth: "EdPostsPanel shows high-value posts with endorsed/staff badges, author, and relative timestamp consistent with Dashboard right panel"
+- truth: "EdPostsPanel shows high-value posts with author info and locale-aware timestamps consistent with Dashboard right panel"
   status: failed
   reason: "User reported: 功能缺失，与dashboard右侧栏不一致，缺少endorsed/staff标签、作者、时间戳"
   severity: major
   test: 9
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Plan-level omission: d.author never rendered in JSX despite data being available in API schema and mock fixtures. formatDistanceToNow called without locale option (always English). Endorsed/staff badges ARE present but at very small size (.58rem)."
+  artifacts:
+    - path: "frontend/components/course-detail/EdPostsPanel.tsx"
+      issue: "Missing d.author render; formatDistanceToNow without locale"
+  missing:
+    - "Add d.author display between title and badges"
+    - "Import useLocale + date-fns locales, pass locale to formatDistanceToNow (ref: NotificationPanel.tsx pattern)"
+    - "Increase badge font size for better visibility"
+  debug_session: ".planning/debug/edpostspanel-missing-features.md"
