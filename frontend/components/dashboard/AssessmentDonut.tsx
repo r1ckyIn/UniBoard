@@ -10,6 +10,7 @@ export interface AssessmentWeight {
   name: string;
   weight: number;
   status: "graded" | "submitted" | "upcoming";
+  group_name?: string;
 }
 
 interface AssessmentDonutProps {

@@ -595,6 +595,8 @@ export interface components {
             max_score: number;
             /** @enum {string} */
             status: "graded" | "upcoming" | "submitted";
+            /** Assessment type group (e.g. Assignments, Quizzes, Exams, Labs, Projects, Reports) */
+            group_name: string;
             /** Format: date-time */
             due_date?: string;
         };

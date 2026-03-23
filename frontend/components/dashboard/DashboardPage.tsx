@@ -126,6 +126,7 @@ export default function DashboardPage() {
       name: aw.name,
       weight: aw.weight,
       status: aw.status,
+      group_name: aw.group_name,
     }));
   }, [donutCourseId, courseDetail.data]);
 
