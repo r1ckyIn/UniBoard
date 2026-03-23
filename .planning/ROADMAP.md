@@ -187,7 +187,12 @@ Plans:
   2. Timeline view lists all deadlines with filterable course/type dropdowns
   3. AI chat panel placeholder renders with "coming soon" state
   4. Deadline cards show assignment name, course, due date, and countdown
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — i18n deadlines namespace, shared urgency utility, route entry, Wave 0 test stubs
+- [ ] 08-02-PLAN.md — DeadlineCard (expandable with materials + AI chat), DeadlineTimelineView, DeadlineTitleRow, DeadlinesPage orchestrator
+- [ ] 08-03-PLAN.md — DeadlineCalendarView (full-width month grid with course-colored dots), wire into DeadlinesPage
 
 ### Phase 9: Predict Page
 **Goal**: Users can simulate future GPA outcomes by adjusting hypothetical scores
@@ -382,7 +387,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 5. Dashboard Page | M1 | 9/11 | UAT gap closure | - |
 | 6. Courses Page | M1 | 0/2 | Planned | - |
 | 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
-| 8. Deadlines Page | M1 | 0/TBD | Not started | - |
+| 8. Deadlines Page | M1 | 0/3 | Planned | - |
 | 9. Predict Page | M1 | 0/TBD | Not started | - |
 | 10. Digest Page | M1 | 0/TBD | Not started | - |
 | 11. Timetable Page | M1 | 0/TBD | Not started | - |
