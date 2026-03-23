@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 07-04-PLAN.md
-last_updated: "2026-03-23T09:22:44.041Z"
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-23T10:26:19.258Z"
 progress:
   total_phases: 24
   completed_phases: 7
-  total_plans: 33
-  completed_plans: 33
+  total_plans: 36
+  completed_plans: 34
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 07 — course-detail-page
+**Current focus:** Phase 08 — deadlines-page
 
 ## Current Position
 
-Phase: 07 (course-detail-page) — COMPLETE
-Plan: 4 of 4
+Phase: 08 (deadlines-page) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Plan: 4 of 4
 | Phase 07 P02 | 5min | 2 tasks | 10 files |
 | Phase 07 P03 | 5min | 2 tasks | 7 files |
 | Phase 07 P04 | 6min | 2 tasks | 10 files |
+| Phase 08 P01 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,7 @@ Recent decisions affecting current work:
 - [Phase 07]: Shared ExternalLinkDialog per panel via useState URL tracking (fewer DOM nodes)
 - [Phase 07]: CourseBanner and AssessmentSection use empty padding RoughCard since they manage their own internal layout
 - [Phase 07]: ExternalLinkDialog placed outside RoughCard as Fragment sibling to avoid overflow clipping
+- [Phase 08]: Urgency utility extracted as shared lib rather than modifying existing DeadlineTimeline — dashboard migration deferred
 
 ### Pending Todos
 
@@ -172,6 +174,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T09:17:22.718Z
-Stopped at: Completed 07-04-PLAN.md
+Last session: 2026-03-23T10:26:19.246Z
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None

@@ -59,7 +59,7 @@ Requirements for full release across 4 milestones.
 
 - [x] **UI-01**: Dashboard page with hero welcome, stats row (WAM/Target/Alerts), course grades table, deadline timeline, assessment weight chart
 - [x] **UI-02**: Courses page showing all enrolled courses with grade overview, assessment breakdown, and file navigation
-- [ ] **UI-03**: Deadlines page with full calendar view, filterable timeline, and AI chat panel
+- [x] **UI-03**: Deadlines page with full calendar view, filterable timeline, and AI chat panel
 - [ ] **UI-04**: Predict page with interactive What-if GPA simulator (slider-based score input, real-time calculation)
 - [ ] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
 - [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
