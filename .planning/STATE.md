@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-03-23T02:34:58.621Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-23T02:52:30.411Z"
 progress:
   total_phases: 24
   completed_phases: 5
-  total_plans: 27
-  completed_plans: 27
+  total_plans: 29
+  completed_plans: 28
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 05 — dashboard-page
+**Current focus:** Phase 06 — courses-page
 
 ## Current Position
 
-Phase: 05 (dashboard-page) — EXECUTING
-Plan: 1 of 11
+Phase: 06 (courses-page) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Plan: 1 of 11
 | Phase 05 P08 | 2min | 2 tasks | 10 files |
 | Phase 05 P09 | 5min | 2 tasks | 7 files |
 | Phase 05 P10 | 3min | 2 tasks | 6 files |
+| Phase 06 P01 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,8 @@ Recent decisions affecting current work:
 - [Phase 05]: Pop-out highlight (6px midAngle offset) replaces stroke-width for donut segment selection
 - [Phase 05]: date-fns zhCN locale outputs full-form weekday (星期一) as standard Chinese
 - [Phase 05]: Main element as scroll container (overflow-y-auto + maxHeight) for sticky sidebar positioning
+- [Phase 06]: BannerDeco uses inline style pointerEvents:none + className overflow-visible for SVG layering
+- [Phase 06]: roughjs mock uses createElementNS g stubs for jsdom SVG testing compatibility
 
 ### Pending Todos
 
@@ -152,6 +155,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T02:34:58.611Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-courses-page/06-UI-SPEC.md
+Last session: 2026-03-23T02:52:30.401Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None
