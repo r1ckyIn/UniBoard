@@ -64,7 +64,7 @@ result: pass
 
 total: 11
 passed: 9
-issues: 2
+issues: 5
 pending: 0
 skipped: 0
 
@@ -97,3 +97,49 @@ skipped: 0
     - "Import useLocale + date-fns locales, pass locale to formatDistanceToNow (ref: NotificationPanel.tsx pattern)"
     - "Increase badge font size for better visibility"
   debug_session: ".planning/debug/edpostspanel-missing-features.md"
+
+- truth: "CourseBanner hand-drawn border aligns with content border"
+  status: failed
+  reason: "User reported: 主内容区的头部展示课程代号和全称的卡片的手绘边框和真实边框没有对齐"
+  severity: major
+  test: post-UAT
+  root_cause: "Inline Rough.js border drawing with hardcoded viewBox offset produces misalignment vs inner content div"
+  artifacts:
+    - path: "frontend/components/course-detail/CourseBanner.tsx"
+      issue: "Inline drawBorder misaligned with content boundary"
+  missing:
+    - "Replace inline border with RoughCard wrapper for consistent alignment"
+  debug_session: ""
+
+- truth: "Right sidebar components match Dashboard design with complete borders (no clipping)"
+  status: failed
+  reason: "User reported: 右侧边栏所有组件不符合dashboard设计，右边框缺失，风格不一致"
+  severity: major
+  test: post-UAT
+  root_cause: "Right panel container or overflow setting clips the Rough.js SVG border overflow (-4px viewBox extension). All 3 sidebar panels use inline border code instead of RoughCard."
+  artifacts:
+    - path: "frontend/components/course-detail/QuickLinksPanel.tsx"
+      issue: "Right border clipped; inline border instead of RoughCard"
+    - path: "frontend/components/course-detail/CourseDeadlinesPanel.tsx"
+      issue: "Right border clipped; inline border instead of RoughCard"
+    - path: "frontend/components/course-detail/EdPostsPanel.tsx"
+      issue: "Right border clipped; inline border instead of RoughCard"
+  missing:
+    - "Replace inline borders with RoughCard in all 3 sidebar panels"
+    - "Fix right panel container overflow to allow SVG border overshoot"
+  debug_session: ""
+
+- truth: "All main content cards have aligned borders (CourseBanner, AssessmentSection, MaterialsSection)"
+  status: failed
+  reason: "User reported: 主内容区所有卡片的边框需要对齐，头部卡片和assessment卡片边框没有对齐"
+  severity: major
+  test: post-UAT
+  root_cause: "Each component implements its own inline Rough.js border with potentially different padding/offset. Using shared RoughCard would enforce consistent outer padding and viewBox."
+  artifacts:
+    - path: "frontend/components/course-detail/CourseBanner.tsx"
+      issue: "Inline border with different effective width than AssessmentSection"
+    - path: "frontend/components/course-detail/AssessmentSection.tsx"
+      issue: "Inline border with different effective width than CourseBanner"
+  missing:
+    - "Replace all inline borders with RoughCard for uniform alignment"
+  debug_session: ""
