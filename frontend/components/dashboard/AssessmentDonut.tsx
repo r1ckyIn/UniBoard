@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { useRef, useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import rough from "roughjs";
 import { PieChart } from "lucide-react";
@@ -16,29 +16,19 @@ export interface AssessmentWeight {
 interface AssessmentDonutProps {
   weights: AssessmentWeight[];
   highlightType?: string;
-  courseColor: string;
   courseCode: string;
 }
 
-// Generate a palette of segment colors based on the primary course color
-function generateSegmentPalette(baseColor: string, count: number): string[] {
-  const hex = baseColor.replace("#", "");
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
-
-  const palette: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const factor = 0.6 + (i / Math.max(count - 1, 1)) * 0.6;
-    const nr = Math.min(255, Math.round(r * factor));
-    const ng = Math.min(255, Math.round(g * factor));
-    const nb = Math.min(255, Math.round(b * factor));
-    palette.push(
-      `#${nr.toString(16).padStart(2, "0")}${ng.toString(16).padStart(2, "0")}${nb.toString(16).padStart(2, "0")}`
-    );
-  }
-  return palette;
-}
+// Type-based color mapping (quiz=blue, exam=brown, assignment=green, lab/project=orange, report/other=gray)
+const TYPE_COLORS: Record<string, string> = {
+  Quizzes: "#6a9bcc",
+  Exams: "#c4956a",
+  Assignments: "#7ab87a",
+  Labs: "#d97757",
+  Projects: "#d97757",
+  Reports: "#9b9b94",
+};
+const DEFAULT_TYPE_COLOR = "#9b9b94";
 
 // Desaturate a color for upcoming segments
 function desaturateColor(hex: string): string {
@@ -61,6 +51,7 @@ interface SegmentData {
   color: string;
   weight: AssessmentWeight;
   percentage: number;
+  group_name: string;
 }
 
 // SVG donut geometry constants (from prototype)
@@ -74,6 +65,7 @@ const LEADER_START_R = OUTER_R + 14;
 const LEADER_ELBOW_R = OUTER_R + 42;
 const TAIL_LEN = 30;
 const NS = "http://www.w3.org/2000/svg";
+const HIGHLIGHT_POP = 6;
 
 /**
  * Build an SVG arc path string for a donut segment (annular ring).
@@ -110,22 +102,19 @@ function buildSegmentPath(
 export default function AssessmentDonut({
   weights,
   highlightType,
-  courseColor,
   courseCode,
 }: AssessmentDonutProps) {
   const t = useTranslations("dashboard");
   const svgRef = useRef<SVGSVGElement>(null);
-  const [animationDone, setAnimationDone] = useState(false);
 
-  // Compute segment data
+  // Compute segment data with type-based colors
   const segments = useMemo<SegmentData[]>(() => {
     if (weights.length === 0) return [];
 
     const totalWeight = weights.reduce((sum, w) => sum + w.weight, 0);
-    const palette = generateSegmentPalette(courseColor, weights.length);
 
     let currentAngle = -Math.PI / 2;
-    return weights.map((w, i) => {
+    return weights.map((w) => {
       const proportion = totalWeight > 0 ? w.weight / totalWeight : 0;
       const sweepAngle = proportion * Math.PI * 2;
       const startAngle = currentAngle;
@@ -133,7 +122,8 @@ export default function AssessmentDonut({
       const midAngle = startAngle + sweepAngle / 2;
       currentAngle = endAngle;
 
-      let color = palette[i];
+      const groupName = w.group_name ?? "other";
+      let color = TYPE_COLORS[groupName] ?? DEFAULT_TYPE_COLOR;
       if (w.status === "upcoming") {
         color = desaturateColor(color);
       }
@@ -145,11 +135,26 @@ export default function AssessmentDonut({
         color,
         weight: w,
         percentage: Math.round(proportion * 100),
+        group_name: groupName,
       };
     });
-  }, [weights, courseColor]);
+  }, [weights]);
 
-  // Draw donut imperatively with Rough.js (matching prototype exactly)
+  // Deduplicated legend types from segments
+  const uniqueTypes = useMemo(() => {
+    const seen = new Set<string>();
+    const result: { group: string; color: string }[] = [];
+    for (const seg of segments) {
+      const group = seg.group_name;
+      if (!seen.has(group)) {
+        seen.add(group);
+        result.push({ group, color: TYPE_COLORS[group] ?? DEFAULT_TYPE_COLOR });
+      }
+    }
+    return result;
+  }, [segments]);
+
+  // Draw donut imperatively with Rough.js — no animation, renders immediately
   const drawDonut = useCallback(() => {
     const svg = svgRef.current;
     if (!svg || segments.length === 0) return;
@@ -159,17 +164,24 @@ export default function AssessmentDonut({
 
     const rc = rough.svg(svg);
 
-    // Draw slices with cross-hatch fill (matching prototype)
+    // Draw slices with cross-hatch fill and pop-out highlight
     for (const seg of segments) {
-      const d = buildSegmentPath(CX, CY, OUTER_R, INNER_R, seg.startAngle, seg.endAngle);
       const isHighlighted = highlightType === seg.weight.name;
+
+      // Pop highlighted segment outward by HIGHLIGHT_POP px along midpoint angle
+      const offsetX = isHighlighted ? Math.cos(seg.midAngle) * HIGHLIGHT_POP : 0;
+      const offsetY = isHighlighted ? Math.sin(seg.midAngle) * HIGHLIGHT_POP : 0;
+      const segCx = CX + offsetX;
+      const segCy = CY + offsetY;
+
+      const d = buildSegmentPath(segCx, segCy, OUTER_R, INNER_R, seg.startAngle, seg.endAngle);
 
       const node = rc.path(d, {
         fill: seg.color,
         fillStyle: "cross-hatch",
         fillWeight: 1.8,
         stroke: seg.color,
-        strokeWidth: isHighlighted ? 2 : 1,
+        strokeWidth: 1,
         roughness: 1.5,
       });
       svg.appendChild(node);
@@ -240,74 +252,10 @@ export default function AssessmentDonut({
     }
   }, [segments, highlightType]);
 
-  // Converge entry animation, then draw final state with Rough.js
+  // Render donut immediately on segment/highlight change — no animation
   useEffect(() => {
-    if (weights.length === 0) return;
-
-    const svg = svgRef.current;
-    if (!svg) return;
-
-    setAnimationDone(false);
-
-    // Animate: segments start separated, converge to center
-    const duration = 800;
-    let startTime: number | null = null;
-    let rafId: number;
-    const separationMax = 20;
-
-    const animateFrame = (timestamp: number) => {
-      if (startTime === null) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const rawProgress = Math.min(elapsed / duration, 1);
-      const eased =
-        rawProgress < 0.5
-          ? 4 * rawProgress * rawProgress * rawProgress
-          : 1 - Math.pow(-2 * rawProgress + 2, 3) / 2;
-
-      const separationOffset = separationMax * (1 - eased);
-
-      // Clear and redraw at current offset (simple solid fill during animation for performance)
-      while (svg.firstChild) svg.removeChild(svg.firstChild);
-
-      for (const seg of segments) {
-        const offsetX = Math.cos(seg.midAngle) * separationOffset;
-        const offsetY = Math.sin(seg.midAngle) * separationOffset;
-        const segCx = CX + offsetX;
-        const segCy = CY + offsetY;
-
-        const d = buildSegmentPath(segCx, segCy, OUTER_R, INNER_R, seg.startAngle, seg.endAngle);
-
-        // Use simple path during animation for smooth 60fps
-        const path = document.createElementNS(NS, "path");
-        path.setAttribute("d", d);
-        path.setAttribute("fill", seg.color);
-        path.setAttribute("stroke", seg.color);
-        path.setAttribute("stroke-width", "1");
-        path.setAttribute("opacity", String(0.3 + eased * 0.7));
-        svg.appendChild(path);
-      }
-
-      if (rawProgress < 1) {
-        rafId = requestAnimationFrame(animateFrame);
-      } else {
-        // Animation done — draw final Rough.js version
-        setAnimationDone(true);
-      }
-    };
-
-    rafId = requestAnimationFrame(animateFrame);
-    return () => cancelAnimationFrame(rafId);
-  }, [weights, segments]);
-
-  // Draw final Rough.js rendering after animation completes
-  useEffect(() => {
-    if (animationDone) {
-      drawDonut();
-    }
-  }, [animationDone, drawDonut]);
-
-  // Compute soft badge background from courseColor
-  const badgeBg = `${courseColor}1c`;
+    drawDonut();
+  }, [drawDonut]);
 
   return (
     <RoughCard className="h-full">
@@ -324,14 +272,13 @@ export default function AssessmentDonut({
         </div>
         {courseCode && (
           <span
-            className="rounded"
+            className="rounded text-text-2"
             style={{
               fontSize: "12px",
               fontWeight: 600,
               padding: "1px 8px",
               borderRadius: "4px",
-              backgroundColor: badgeBg,
-              color: courseColor,
+              backgroundColor: "var(--color-cream-2)",
             }}
           >
             {courseCode}
@@ -353,12 +300,29 @@ export default function AssessmentDonut({
           </p>
         </div>
       ) : (
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-          className="w-full"
-          style={{ maxHeight: "300px", overflow: "visible" }}
-        />
+        <>
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+            className="w-full"
+            style={{ maxHeight: "300px", overflow: "visible" }}
+          />
+
+          {/* Legend: colored squares with type labels */}
+          <div className="flex flex-wrap gap-x-3 gap-y-1 justify-end mt-2" style={{ fontSize: "11px" }}>
+            {uniqueTypes.map(({ group, color }) => (
+              <div key={group} className="flex items-center gap-1">
+                <span
+                  className="inline-block rounded-sm"
+                  style={{ width: 10, height: 10, backgroundColor: color }}
+                />
+                <span className="text-text-3">
+                  {t(`donut.legend.${group.toLowerCase()}`)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </RoughCard>
   );

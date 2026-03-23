@@ -13,7 +13,6 @@ import { useUpcomingDeadlines } from "@/hooks/use-deadlines";
 import { useNotifications, useAlerts } from "@/hooks/use-notifications";
 import { useCurrentUser } from "@/hooks/use-user";
 import { useAuthStore } from "@/lib/auth/store";
-import { getCourseColor } from "@/lib/dashboard/course-colors";
 import { getGradeBand } from "@/lib/utils/grade-band";
 
 // Components
@@ -129,10 +128,6 @@ export default function DashboardPage() {
       group_name: aw.group_name,
     }));
   }, [donutCourseId, courseDetail.data]);
-
-  const donutColor = donutCourseCode
-    ? getCourseColor(donutCourseCode).base
-    : "#9b9b94";
 
   // Course grades for table
   const courseGrades = useMemo(() => {
@@ -325,7 +320,6 @@ export default function DashboardPage() {
                     ? selectedDeadline.title
                     : undefined
                 }
-                courseColor={donutColor}
                 courseCode={donutCourseCode ?? ""}
               />
             )}

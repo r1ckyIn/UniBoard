@@ -61,6 +61,15 @@
       "empty": {
         "heading": "暂无即将到来的截止日期",
         "body": "当你有即将到来的截止日期时，评估权重将在此显示。"
+      },
+      "legend": {
+        "quizzes": "测验",
+        "exams": "考试",
+        "assignments": "作业",
+        "labs": "实验",
+        "projects": "项目",
+        "reports": "报告",
+        "other": "其他"
       }
     },
     "profile": {

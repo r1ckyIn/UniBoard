@@ -61,6 +61,15 @@
       "empty": {
         "heading": "No upcoming deadlines",
         "body": "Assessment weights will appear when you have upcoming deadlines."
+      },
+      "legend": {
+        "quizzes": "Quiz",
+        "exams": "Exam",
+        "assignments": "Assignment",
+        "labs": "Lab",
+        "projects": "Project",
+        "reports": "Report",
+        "other": "Other"
       }
     },
     "profile": {
