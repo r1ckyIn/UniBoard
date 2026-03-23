@@ -86,9 +86,11 @@ export default function AssessmentSection({
 
     assessments.forEach((a, i) => {
       if (a.score !== null) {
-        gradedSumSW += a.score * a.weight;
+        // Normalize score to 0-1 scale before weighting
+        const normalized = a.max_score > 0 ? a.score / a.max_score : 0;
+        gradedSumSW += normalized * a.weight;
         gradedSumW += a.weight;
-        totalSumSW += a.score * a.weight;
+        totalSumSW += normalized * a.weight;
       } else {
         const pred = predictions[i];
         if (pred !== null && pred !== undefined) {
