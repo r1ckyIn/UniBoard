@@ -25,6 +25,7 @@
         "evening": "Good evening, {firstName}"
       },
       "date": "It's {weekday}, {weekNumber} of Semester {semester}.",
+      "weekLabel": "Week {weekNumber}",
       "scrollPrompt": "your dashboard",
       "encourage": {
         "multiComplete": "The {item1} and the {item2} are done and behind you now. You've been working so hard \u2014 {highlight}.",

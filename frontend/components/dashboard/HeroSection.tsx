@@ -2,8 +2,10 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, type Variants } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { format } from "date-fns";
+import { zhCN } from "date-fns/locale/zh-CN";
+import { enUS } from "date-fns/locale/en-US";
 import { ChevronDown } from "lucide-react";
 import RoughNotationWrapper from "@/components/design-system/RoughNotationWrapper";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
@@ -52,6 +54,8 @@ const mockActivity = {
 
 export default function HeroSection({ userName, onScrollClick }: HeroSectionProps) {
   const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [showUnderline, setShowUnderline] = useState(false);
@@ -65,8 +69,8 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   const timeOfDay = getTimeOfDay();
   const greeting = t(`hero.greeting.${timeOfDay}`, { firstName });
 
-  // Date line
-  const weekday = format(new Date(), "EEEE");
+  // Date line — locale-aware weekday (e.g. "Monday" in en, "星期一" in zh)
+  const weekday = format(new Date(), "EEEE", { locale: dateFnsLocale });
 
   // Encouragement text
   const encouragement = defaultEncouragementProvider(mockActivity, t);
@@ -174,7 +178,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
             strokeWidth={2}
             padding={4}
           >
-            Week 4
+            {t("hero.weekLabel", { weekNumber: "4" })}
           </RoughNotationWrapper>
         );
       }

@@ -24,7 +24,8 @@
         "afternoon": "下午好，{firstName}",
         "evening": "晚上好，{firstName}"
       },
-      "date": "今天是{weekday}，第{semester}学期 第{weekNumber}周。",
+      "date": "今天是{weekday}，第{semester}学期{weekNumber}。",
+      "weekLabel": "第{weekNumber}周",
       "scrollPrompt": "你的仪表盘",
       "encourage": {
         "multiComplete": "{item1} 和 {item2} 都已完成了。你一直很努力\u2014\u2014{highlight}\u3002",
