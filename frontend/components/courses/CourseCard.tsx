@@ -65,7 +65,6 @@ export default function CourseCard({
     const h = el.offsetHeight;
     svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
 
-    // Clear previous SVG children before drawing
     svg.replaceChildren();
 
     const rc = rough.svg(svg);
@@ -132,20 +131,15 @@ export default function CourseCard({
       onClick={() => router.push(`/courses/${id}`)}
       className="cursor-pointer relative overflow-visible p-[6px] transition-transform duration-[0.28s] ease-[cubic-bezier(.4,0,.2,1)] hover:-translate-y-[3px]"
     >
-      {/* Hand-drawn SVG border */}
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-[10] overflow-visible"
       />
 
-      {/* Inner card */}
       <div className="bg-[#f6f5f0] overflow-hidden shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)]">
-        {/* Banner section */}
         <div className="relative h-[120px] overflow-hidden">
-          {/* Background color layer */}
           <div className="absolute inset-0" style={{ backgroundColor: colorBase }} />
 
-          {/* Gradient overlay */}
           <div
             className="absolute inset-0"
             style={{
@@ -154,14 +148,12 @@ export default function CourseCard({
             }}
           />
 
-          {/* Banner deco pattern */}
           <BannerDecoClient
             patternIndex={decoIndex}
             width={300}
             height={120}
           />
 
-          {/* Text overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-[14px_18px] z-[1]">
             <div
               className="text-[0.72rem] font-semibold font-sans text-white/90"
@@ -178,14 +170,11 @@ export default function CourseCard({
           </div>
         </div>
 
-        {/* Info section */}
         <div className="p-[14px_18px_16px]">
-          {/* Term row */}
           <div className="text-[0.7rem] font-medium text-[#9b9b94] mb-[8px]">
             {t("termPrefix")} {semester}
           </div>
 
-          {/* Grade row */}
           <div className="flex items-center gap-[8px] mb-[8px]">
             <span className="text-[0.72rem] font-medium text-[#6b6b65]">
               {t("gradeLabel")}
@@ -206,7 +195,6 @@ export default function CourseCard({
             )}
           </div>
 
-          {/* Progress row */}
           <div className="flex items-center gap-[8px]">
             <RoughProgressBarClient
               progress={completedWeight}

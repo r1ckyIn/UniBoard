@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 // Mock roughjs since jsdom can't render SVG paths
@@ -98,6 +98,10 @@ const mockCourses = [
 ];
 
 describe("CoursesPage", () => {
+  beforeEach(() => {
+    mockCoursesReturn = { data: undefined, isLoading: false, isError: false };
+  });
+
   it("renders course cards when data loads", () => {
     mockCoursesReturn = {
       data: { data: mockCourses },
