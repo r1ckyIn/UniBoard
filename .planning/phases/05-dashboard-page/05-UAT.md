@@ -1,9 +1,9 @@
 ---
-status: complete
+status: resolved
 phase: 05-dashboard-page
-source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md]
-started: 2026-03-22T18:00:00Z
-updated: 2026-03-23T08:58:00Z
+source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md, 05-06-SUMMARY.md, 05-07-SUMMARY.md, 05-08-SUMMARY.md, 05-09-SUMMARY.md, 05-10-SUMMARY.md]
+started: 2026-03-23T09:30:00Z
+updated: 2026-03-23T11:00:00Z
 ---
 
 ## Current Test
@@ -12,200 +12,145 @@ updated: 2026-03-23T08:58:00Z
 
 ## Tests
 
-### 1. Dashboard Page Load
-expected: Navigate to the dashboard (root "/" or "/en"). The page loads without errors. You see a greeting at the top, a date line with semester/week info, and an encouragement message. Below: stats row, course grades table, deadline timeline, assessment donut. Right panel: profile card, mini calendar, recent activity.
+### 1. Dashboard Page Load & Hero Section
+expected: Page loads without errors. Hero shows greeting, date, encouragement with Rough Notation highlight aligned to text. Annotations appear sequentially with staggered delays (not simultaneously).
 result: issue
-reported: "鼓励语文字底部的 Rough Notation highlight 底涂效果在刷新后和页面完全加载后位置不一致，底涂没有严格跟随文字位置"
-severity: cosmetic
-
-### 2. Hero Section & Scroll Behavior
-expected: The hero section shows a time-of-day greeting (morning/afternoon/evening) with your name. As you scroll down, the hero text fades out with a parallax effect. A scroll prompt ("your dashboard") is visible before scrolling.
-result: issue
-reported: "Hero 区域的手绘和底涂效果应该像 HTML 原型一样逐个出现（有延迟），当前实现是全部同时出现"
-severity: cosmetic
-
-### 3. Stats Row Cards
-expected: Three stat cards appear below the hero: "Current WAM" (orange accent), "GPA Target" (blue accent), "Alerts" (amber accent). Each shows a number and subtitle. The numbers appear with Rough.js hand-drawn circle/underline annotations.
-result: issue
-reported: "85分显示的grade band是D，但USYD官方标准85应该是HD (High Distinction)。评分标准：HD 85-100, D 75-84, CR 65-74, P 50-64, F 0-49"
+reported: "中文应该显示周一而不是Monday；应该圈出'第四周'而不是圈'week4'"
 severity: major
 
-### 4. Course Grades Table
-expected: A table shows enrolled courses with columns: Course, Assessed, Earned, Target. Each course row has a hand-drawn Rough.js progress bar showing percentage assessed. A "predict →" link appears per course. A badge shows the current semester.
+### 2. Stats Row & Grade Band
+expected: Three stat cards: "Current WAM" (orange), "GPA Target" (blue), "Alerts" (amber). WAM of 85 shows "HD" badge (not "D"). Numbers have Rough.js annotations.
 result: pass
 
-### 5. Deadline Timeline with Cross-Card Interaction
-expected: A vertical timeline shows upcoming deadlines with hand-drawn Rough.js line and colored dots (urgency-based: red for urgent, amber for soon, green for later). Clicking a deadline should switch the assessment donut chart to show that deadline's course assessment weights. The selected deadline should appear highlighted.
+### 3. Course Grades Table
+expected: Table shows courses with Course, Assessed, Earned, Target columns. Rough.js progress bars. "predict" link per course. Semester badge visible.
 result: issue
-reported: "Deadline Timeline 和 Assessment Weights 两张卡片大小不一致，应该等高"
+reported: "目标列标题居中但下方的等级徽章（D/CR/P/HD）左对齐，没有对齐"
 severity: cosmetic
 
-### 6. Assessment Donut Chart
-expected: A donut chart shows assessment weights using Rough.js cross-hatch fill pattern. Segments have leader lines with labels (assessment name + weight%). When no deadline is selected, it shows the nearest deadline's course. An empty state message appears if no upcoming deadlines exist.
+### 4. Deadline Timeline & Assessment Donut (Equal Height)
+expected: Timeline with Rough.js line and colored dots. Donut chart matches HTML prototype: smooth blue-tone gradient annular ring with fine leader lines and percentage labels (NOT Rough.js cross-hatch). Both cards are equal height.
 result: issue
-reported: "Assessment Weights 甜甜圈图的设计和 HTML 原型不同，需要一比一还原。原型是平滑蓝色调渐变甜甜圈 + 细引导线 + 百分比标签，不是 Rough.js cross-hatch 填充"
+reported: "仍然是 Rough.js cross-hatch 而非平滑 SVG（重写没生效）；移除动画；颜色按作业类型区分（quiz=蓝、exam=棕、assignment=绿）+ 右下角图例"
 severity: major
 
-### 7. Mini Calendar
-expected: Right panel shows a navigable mini calendar. Left/right arrows switch months. Days with deadlines show colored dots with depth based on weight (more weight = more opaque). Today is highlighted. Clicking a date navigates to the deadlines page.
-result: pass
-
-### 8. Profile Card
-expected: Right panel shows a profile card with your initials in a gradient circle, your name, faculty/program info, semester, and two stats: course count and credit points.
+### 5. Deadline-Donut Cross-Card Interaction
+expected: Clicking a deadline switches the donut to show that course's assessment weights. Selected deadline appears highlighted.
 result: issue
-reported: "1) 应显示院校(如 Faculty of Science)而非专业(Computer Science)。2) 右侧边栏所有卡片不应有指针悬浮的起伏立体效果(hover elevation)"
-severity: minor
-
-### 9. Recent Activity Feed
-expected: Right panel shows a "Recent Activity" list with color-coded icons (green for grade, blue for discussion, amber for deadline, purple for endorsed). Clicking an item with an external URL opens a confirmation dialog before navigating away.
-result: issue
-reported: "功能 pass，但确认对话框要在屏幕中心并且尽量扁平"
-severity: cosmetic
-
-### 10. External Link Dialog
-expected: When clicking an external link in recent activity, a dialog appears asking "Open external link?" with the URL shown. Two buttons: "Open link" (navigates) and "Stay on UniBoard" (closes dialog). Pressing Escape also closes it.
-result: skipped
-reason: Covered by Test 9 feedback — dialog position and flatness issue recorded there
-
-### 11. Notification Panel (Header)
-expected: Clicking the bell icon in the header opens a dropdown showing recent notifications with icons by type, titles, bodies, and relative timestamps. Clicking outside the panel closes it.
-result: issue
-reported: "功能没问题，但通知面板滚动不够流畅"
-severity: minor
-
-### 12. Avatar Menu (Header)
-expected: Clicking the avatar in the header opens a dropdown menu showing your name, email, and navigation items (Profile, Settings, API Tokens, Log out). Clicking outside closes it.
-result: pass
-
-### 13. Skeleton Loading States
-expected: While data is loading (can test by throttling network in DevTools), dashboard sections show warm-toned skeleton shimmer placeholders instead of empty space. Each section has a distinct skeleton shape matching its content.
-result: issue
-reported: "Skeleton loading 状态全部是纯灰色只能看到组件底座，观感不好。右侧边栏应该固定位置不随页面滚动消失，滚动条应默认隐藏。需要参考其他 SaaS 产品最佳实践"
+reported: "移除动画；选中截止日期后对应扇区弹出突显；始终保持 Rough.js 手绘风格"
 severity: major
 
-### 14. i18n Language Switching
-expected: Switch language to Chinese (if language switcher is available). Dashboard text changes to Chinese — greeting, stats labels, table headers, calendar labels, activity feed text. Switch back to English and everything returns to English.
+### 6. Right Panel — Profile Card
+expected: Shows initials in gradient circle, your name, faculty info (e.g. "Faculty of Science" NOT "Computer Science"), semester, course count, credit points. No hover elevation effect.
+result: pass
+
+### 7. Right Panel — Mini Calendar & Recent Activity
+expected: Mini calendar with month navigation, deadline dots, today highlighted. Recent activity with color-coded icons. No hover elevation. Right sidebar stays fixed on scroll.
+result: pass
+
+### 8. External Link Dialog
+expected: Clicking external link in activity shows confirmation dialog. Centered on screen, flat/minimal design. "Open link" and "Stay on UniBoard" buttons. Escape closes it.
+result: pass
+
+### 9. Notification Panel
+expected: Bell icon opens dropdown with notifications. Scrolling is smooth and fluid. Clicking outside closes it.
+result: pass
+
+### 10. Avatar Menu
+expected: Clicking avatar opens dropdown with name, email, nav items. Hover highlight is instant. Clicking outside closes it.
+result: pass
+
+### 11. Skeleton Loading States
+expected: Throttle network in DevTools. Skeleton placeholders show warm-toned shimmer (not plain gray). Each section has distinct skeleton shape. Scrollbar hidden by default.
+result: pass
+
+### 12. i18n Language Switching
+expected: Switch to Chinese. ALL dashboard text changes to Chinese including encouragement, stats labels, table headers, calendar labels. Switch back — everything returns.
+result: pass
+
+### 13. Scroll Behavior
+expected: Hero text fades with parallax on scroll. Right sidebar stays fixed (sticky). Scroll prompt visible before scrolling.
 result: issue
-reported: "鼓励语没有切换成中文（仍显示英文）。另外头像菜单的悬停灰色高亮延迟太高，不跟手"
+reported: "右侧边栏还是随着页面滚动消失上移，sticky 未生效"
 severity: major
 
 ## Summary
 
-total: 14
-passed: 4
-issues: 10
+total: 13
+passed: 8
+issues: 5
 pending: 0
-skipped: 1
 skipped: 0
 
 ## Gaps
 
-- truth: "Rough Notation highlight annotation strictly follows text position on page load"
-  status: failed
-  reason: "User reported: 鼓励语文字底部的 Rough Notation highlight 底涂效果在刷新后和页面完全加载后位置不一致，底涂没有严格跟随文字位置"
-  severity: cosmetic
+- truth: "Hero section date line shows localized day name (周一 not Monday) and circles '第四周' not 'week4'"
+  status: resolved
+  reason: "User reported: 中文应该显示周一而不是Monday；应该圈出'第四周'而不是圈'week4'"
+  severity: major
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "HeroSection.tsx line 69: format(new Date(), 'EEEE') called without locale param → always English weekday. Lines 166-179: hardcoded 'Week 4' string instead of using translated week number from t() function."
+  artifacts:
+    - path: "frontend/components/dashboard/HeroSection.tsx"
+      issue: "Missing date-fns locale import; hardcoded English week text"
+  missing:
+    - "Import useLocale from next-intl, zhCN/enUS from date-fns/locale"
+    - "Pass locale to format() for weekday"
+    - "Replace hardcoded 'Week 4' with localized week number from translation"
 
-- truth: "Hero section annotations appear one by one with staggered delays matching HTML prototype"
-  status: failed
-  reason: "User reported: Hero 区域的手绘和底涂效果应该逐个出现有延迟，当前全部同时出现"
+- truth: "Course grades table Target column header and grade badges are aligned"
+  status: resolved
+  reason: "User reported: 目标列标题居中但下方的等级徽章（D/CR/P/HD）左对齐，没有对齐"
   severity: cosmetic
-  test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Deadline Timeline and Assessment Donut cards are equal height"
-  status: failed
-  reason: "User reported: 两张卡片大小不一致，应该等高"
-  severity: cosmetic
-  test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Assessment Donut matches HTML prototype pixel-perfectly — smooth blue-tone gradient donut with leader lines"
-  status: failed
-  reason: "User reported: 甜甜圈图设计和 HTML 原型不同，需要一比一还原。原型是平滑蓝色调渐变甜甜圈，不是 Rough.js cross-hatch"
-  severity: major
-  test: 6
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Grade band calculation uses correct USYD grading scale (HD 85-100, D 75-84, CR 65-74, P 50-64, F 0-49)"
-  status: failed
-  reason: "User reported: 85分显示D，但USYD标准85是HD (High Distinction)"
-  severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "CourseGradesTable.tsx: header uses text-center but cell td uses text-right + justify-end, causing misalignment with variable-width badges."
+  artifacts:
+    - path: "frontend/components/dashboard/CourseGradesTable.tsx"
+      issue: "Cell alignment mismatch: text-right + justify-end vs header text-center"
+  missing:
+    - "Change cell td from text-right to text-center"
+    - "Change inner div from justify-end to justify-center"
 
-- truth: "Profile card shows faculty (e.g. Faculty of Science) not major; right panel cards have no hover elevation effect"
-  status: failed
-  reason: "User reported: 应显示院校(Faculty of Science)而非专业(Computer Science)；右侧边栏卡片不应有悬浮起伏立体效果"
-  severity: minor
-  test: 8
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "External link confirmation dialog is centered on screen and has a flat/minimal design"
-  status: failed
-  reason: "User reported: 确认对话框要在屏幕中心并且尽量扁平"
-  severity: cosmetic
-  test: 9
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Notification panel scrolling is smooth and fluid"
-  status: failed
-  reason: "User reported: 通知面板滚动不够流畅"
-  severity: minor
-  test: 11
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
-
-- truth: "Encouragement text switches to Chinese when locale is zh"
-  status: failed
-  reason: "User reported: 鼓励语在切换到中文后仍显示英文"
+- truth: "Assessment Donut uses Rough.js hand-drawn style with type-based colors (quiz=blue, exam=brown, assignment=green), legend in bottom-right, no animation"
+  status: resolved
+  reason: "User reported: 保持 Rough.js 手绘风格但颜色按作业类型区分（quiz=蓝、exam=棕、assignment=绿）+ 右下角图例；移除动画"
   severity: major
-  test: 14
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  test: 4
+  root_cause: "AssessmentDonut.tsx uses course-based color palette instead of type-based. No legend component. Animation logic (800ms converge) still present."
+  artifacts:
+    - path: "frontend/components/dashboard/AssessmentDonut.tsx"
+      issue: "Colors based on course not assessment type; missing legend; animation present"
+  missing:
+    - "Add type-based color mapping (quiz=blue, exam=brown, assignment=green)"
+    - "Add group_name to AssessmentWeight interface"
+    - "Add legend component in bottom-right"
+    - "Remove animation logic (rAF, animateFrame)"
 
-- truth: "Avatar menu hover highlight is instant with no perceptible delay"
-  status: failed
-  reason: "User reported: 头像菜单悬停灰色高亮延迟太高，不跟手"
-  severity: minor
-  test: 14
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+- truth: "Clicking deadline pops out corresponding donut segment; no animation; always Rough.js hand-drawn style"
+  status: resolved
+  reason: "User reported: 移除动画；选中截止日期后对应扇区弹出突显；始终保持 Rough.js 手绘风格"
+  severity: major
+  test: 5
+  root_cause: "Highlight only thickens stroke (strokeWidth 1→2) instead of pushing segment outward. Animation still runs on mount."
+  artifacts:
+    - path: "frontend/components/dashboard/AssessmentDonut.tsx"
+      issue: "Highlight is stroke-only, not pop-out; animation still present"
+  missing:
+    - "Push highlighted segment 6px outward along midpoint angle"
+    - "Remove converge animation, render segments immediately"
 
-- truth: "Skeleton loading states use warm-toned shimmer with distinct section shapes; right sidebar stays fixed on scroll with hidden scrollbar"
-  status: failed
-  reason: "User reported: Skeleton 全部纯灰只能看到组件底座观感不好，右侧边栏应固定位置不随页面滚动消失，滚动条默认隐藏，需参考 SaaS 最佳实践"
+- truth: "Right sidebar stays fixed (sticky) on scroll, does not scroll away with page content"
+  status: resolved
+  reason: "User reported: 右侧边栏还是随着页面滚动消失上移，sticky 未生效"
   severity: major
   test: 13
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "RightPanel.tsx has overflow-y-auto which conflicts with sticky positioning. Parent <main> in AppShell.tsx lacks overflow-y-auto and height constraint, so there's no proper scrollable ancestor for sticky to work against."
+  artifacts:
+    - path: "frontend/components/layout/RightPanel.tsx"
+      issue: "overflow-y-auto conflicts with sticky; self-start redundant"
+    - path: "frontend/components/layout/AppShell.tsx"
+      issue: "main lacks overflow-y-auto and max-h constraint"
+  missing:
+    - "Make main the scrollable container with overflow-y-auto and max-h-[calc(100vh-header)]"
+    - "Remove overflow-y-auto from RightPanel"
+    - "Remove self-start from RightPanel"
