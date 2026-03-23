@@ -84,7 +84,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  // Parallax fade-out on scroll
+  // Parallax fade-out on scroll (uses main scroll container, not window)
   const handleScroll = useCallback(() => {
     const hero = heroRef.current;
     const content = contentRef.current;
@@ -93,14 +93,15 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
     const heroHeight = hero.offsetHeight;
     if (heroHeight === 0) return;
 
-    const scrollY =
-      typeof window !== "undefined" ? window.scrollY || window.pageYOffset : 0;
+    const scrollContainer = hero.closest("main");
+    const scrollY = scrollContainer ? scrollContainer.scrollTop : 0;
     const opacity = Math.max(0, 1 - scrollY / heroHeight);
     content.style.opacity = String(opacity);
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const scrollContainer = heroRef.current?.closest("main");
+    if (!scrollContainer) return;
 
     let rafId: number | null = null;
     const onScroll = () => {
@@ -108,9 +109,9 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
       rafId = requestAnimationFrame(handleScroll);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    scrollContainer.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      scrollContainer.removeEventListener("scroll", onScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [handleScroll]);

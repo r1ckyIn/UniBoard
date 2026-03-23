@@ -36,8 +36,8 @@ export default function RightPanel() {
       className={cn(
         "w-[var(--spacing-right-panel-w)] flex-shrink-0",
         "hidden xl:flex xl:flex-col items-start",
-        "gap-[18px] sticky top-[calc(var(--spacing-header-h)+28px)]",
-        "self-start max-h-[calc(100vh-var(--spacing-header-h)-56px)]",
+        "gap-[18px] sticky top-0",
+        "max-h-[calc(100vh-var(--spacing-header-h)-56px)]",
         "overflow-y-auto overflow-x-hidden",
         // Auto-hide scrollbar: WebKit
         "[&::-webkit-scrollbar]:w-[5px]",
