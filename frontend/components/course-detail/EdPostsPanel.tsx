@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 import { useCourseDiscussions } from "@/hooks/use-discussions";
 import RoughCard from "@/components/design-system/RoughCard";
 import ExternalLinkDialog from "@/components/dashboard/ExternalLinkDialog";
@@ -15,13 +16,15 @@ interface EdPostsPanelProps {
 
 /**
  * Right panel card showing high-value Ed Discussion posts
- * (endorsed or staff-answered) with badges and relative time.
+ * (endorsed or staff-answered) with author, badges, and locale-aware relative time.
  */
 export default function EdPostsPanel({
   courseId,
   edCourseId,
 }: EdPostsPanelProps) {
   const t = useTranslations("courseDetail");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
   const { data, isLoading } = useCourseDiscussions(courseId, "high_value");
 
   // Track which post's dialog is open
@@ -30,11 +33,11 @@ export default function EdPostsPanel({
   const discussions = data?.data ?? [];
 
   /**
-   * Format relative time for a post creation date.
+   * Format relative time for a post creation date using locale-aware formatting.
    */
   function formatTime(createdAt: string): string {
     try {
-      return formatDistanceToNow(new Date(createdAt), { addSuffix: true });
+      return formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: dateFnsLocale });
     } catch {
       return createdAt;
     }
@@ -84,31 +87,36 @@ export default function EdPostsPanel({
                       `https://edstem.org/au/courses/${edCourseId}/discussion/${d.ed_thread_id}`
                     )
                   }
-                  className="flex items-center gap-[10px] px-[10px] py-[8px] rounded-[8px] hover:bg-[var(--card-bg-hover)] cursor-pointer w-full text-left transition-colors"
+                  className="flex flex-col gap-[3px] px-[10px] py-[8px] rounded-[8px] hover:bg-[var(--card-bg-hover)] cursor-pointer w-full text-left transition-colors"
                 >
-                  {/* Title */}
-                  <span className="text-[0.78rem] font-semibold text-[var(--text-1)] truncate flex-1">
+                  {/* Row 1: Title */}
+                  <span className="text-[0.78rem] font-semibold text-[var(--text-1)] truncate">
                     {d.title}
                   </span>
 
-                  {/* Badges */}
-                  <span className="flex items-center gap-[4px] flex-shrink-0">
+                  {/* Row 2: Author + Badges + Time */}
+                  <div className="flex items-center gap-[6px]">
+                    <span className="text-[0.66rem] text-[var(--text-3)]">
+                      {d.author}
+                    </span>
+                    {(d.is_endorsed || d.is_staff_post) && (
+                      <span className="text-[0.5rem] text-[var(--text-3)]">&middot;</span>
+                    )}
                     {d.is_endorsed && (
-                      <span className="text-[0.58rem] font-bold bg-[rgba(120,140,93,.11)] text-[#788c5d] rounded-[4px] px-[6px] py-[1px]">
+                      <span className="text-[0.64rem] font-bold bg-[rgba(120,140,93,.11)] text-[#788c5d] rounded-[4px] px-[6px] py-[1px]">
                         {t("edPosts.endorsed")}
                       </span>
                     )}
                     {d.is_staff_post && (
-                      <span className="text-[0.58rem] font-bold bg-[rgba(106,155,204,.11)] text-[#6a9bcc] rounded-[4px] px-[6px] py-[1px]">
+                      <span className="text-[0.64rem] font-bold bg-[rgba(106,155,204,.11)] text-[#6a9bcc] rounded-[4px] px-[6px] py-[1px]">
                         {t("edPosts.staffPost")}
                       </span>
                     )}
-                  </span>
-
-                  {/* Time */}
-                  <span className="text-[0.64rem] text-[var(--text-3)] flex-shrink-0">
-                    {formatTime(d.created_at)}
-                  </span>
+                    <span className="flex-1" />
+                    <span className="text-[0.64rem] text-[var(--text-3)]">
+                      {formatTime(d.created_at)}
+                    </span>
+                  </div>
                 </button>
                 {i < discussions.length - 1 && (
                   <div className="border-b border-[var(--divider)]" />

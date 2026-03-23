@@ -20,6 +20,7 @@ vi.mock("next-intl", () => ({
     }
     return key;
   },
+  useLocale: () => "en",
 }));
 
 // Mock ExternalLinkDialog
@@ -103,5 +104,15 @@ describe("EdPostsPanel", () => {
     });
     render(<EdPostsPanel {...defaultProps} />);
     expect(screen.getByText("edPosts.empty")).toBeInTheDocument();
+  });
+
+  it("renders author name for each post", () => {
+    render(<EdPostsPanel {...defaultProps} />);
+    // Each post should display its author. Some authors repeat, so use getAllByText.
+    const uniqueAuthors = [...new Set(highValuePosts.map((p) => p.author))];
+    for (const author of uniqueAuthors) {
+      const authorCount = highValuePosts.filter((p) => p.author === author).length;
+      expect(screen.getAllByText(author)).toHaveLength(authorCount);
+    }
   });
 });
