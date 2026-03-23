@@ -159,7 +159,7 @@ export default function DashboardPage() {
       alertCourse: firstCourseAlert?.course_code ?? "",
       alertDeadlineCount: deadlineAlerts.length,
     };
-  }, [gpa.data, alerts.data, courseGrades]);
+  }, [gpa.data, alerts.data]);
 
   // Calendar deadline days: group upcoming deadlines by date, sum weights
   const calendarDeadlineDays = useMemo(() => {

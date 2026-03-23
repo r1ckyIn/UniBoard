@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { useTranslations, useLocale } from "next-intl";
 import { format } from "date-fns";
@@ -75,8 +75,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   // Encouragement text
   const encouragement = defaultEncouragementProvider(mockActivity, t);
 
-  // Show Rough Notation annotations one-by-one with staggered delays
-  // Underline at 900ms (duration 600ms), circle at 1500ms (duration 800ms), highlight at 2300ms (duration 1000ms)
+  // Staggered Rough Notation annotations
   useEffect(() => {
     const t1 = setTimeout(() => setShowUnderline(true), 900);
     const t2 = setTimeout(() => setShowCircle(true), 1500);
@@ -84,29 +83,22 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  // Parallax fade-out on scroll (uses main scroll container, not window)
-  const handleScroll = useCallback(() => {
+  // Parallax fade-out on scroll (main is the scroll container)
+  useEffect(() => {
     const hero = heroRef.current;
     const content = contentRef.current;
-    if (!hero || !content) return;
-
-    const heroHeight = hero.offsetHeight;
-    if (heroHeight === 0) return;
-
-    const scrollContainer = hero.closest("main");
-    const scrollY = scrollContainer ? scrollContainer.scrollTop : 0;
-    const opacity = Math.max(0, 1 - scrollY / heroHeight);
-    content.style.opacity = String(opacity);
-  }, []);
-
-  useEffect(() => {
-    const scrollContainer = heroRef.current?.closest("main");
-    if (!scrollContainer) return;
+    const scrollContainer = hero?.closest("main");
+    if (!hero || !content || !scrollContainer) return;
 
     let rafId: number | null = null;
     const onScroll = () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(handleScroll);
+      rafId = requestAnimationFrame(() => {
+        const heroHeight = hero.offsetHeight;
+        if (heroHeight === 0) return;
+        const opacity = Math.max(0, 1 - scrollContainer.scrollTop / heroHeight);
+        content.style.opacity = String(opacity);
+      });
     };
 
     scrollContainer.addEventListener("scroll", onScroll, { passive: true });
@@ -114,7 +106,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
       scrollContainer.removeEventListener("scroll", onScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [handleScroll]);
+  }, []);
 
   // Split the encouragement message to wrap the highlightPhrase
   const renderEncouragement = () => {
@@ -151,7 +143,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
 
   const renderDateLine = () => {
     // Split date text around placeholders
-    const parts = dateText.split(/(__ WEEKDAY__|__WEEKDAY__|__WEEKNUMBER__|__ WEEKNUMBER__)/);
+    const parts = dateText.split(/(__WEEKDAY__|__WEEKNUMBER__)/);
     return parts.map((part, i) => {
       if (part === "__WEEKDAY__") {
         return (

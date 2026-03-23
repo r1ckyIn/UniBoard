@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo, useCallback } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import rough from "roughjs";
 import { PieChart } from "lucide-react";
@@ -19,7 +19,6 @@ interface AssessmentDonutProps {
   courseCode: string;
 }
 
-// Type-based color mapping (quiz=blue, exam=brown, assignment=green, lab/project=orange, report/other=gray)
 const TYPE_COLORS: Record<string, string> = {
   Quizzes: "#6a9bcc",
   Exams: "#c4956a",
@@ -154,12 +153,10 @@ export default function AssessmentDonut({
     return result;
   }, [segments]);
 
-  // Draw donut imperatively with Rough.js — no animation, renders immediately
-  const drawDonut = useCallback(() => {
+  useEffect(() => {
     const svg = svgRef.current;
     if (!svg || segments.length === 0) return;
 
-    // Clear previous content
     while (svg.firstChild) svg.removeChild(svg.firstChild);
 
     const rc = rough.svg(svg);
@@ -187,7 +184,6 @@ export default function AssessmentDonut({
       svg.appendChild(node);
     }
 
-    // Draw leader lines + labels (matching prototype)
     for (const seg of segments) {
       const mid = seg.midAngle;
       const isRight = Math.cos(mid) >= 0;
@@ -202,7 +198,6 @@ export default function AssessmentDonut({
       const ey = CY + popY + LEADER_ELBOW_R * Math.sin(mid);
       const tx = isRight ? ex + TAIL_LEN : ex - TAIL_LEN;
 
-      // Hand-drawn leader line (two segments)
       svg.appendChild(
         rc.line(sx, sy, ex, ey, {
           stroke: seg.color,
@@ -218,7 +213,6 @@ export default function AssessmentDonut({
         })
       );
 
-      // Small dot at start
       svg.appendChild(
         rc.circle(sx, sy, 4, {
           fill: seg.color,
@@ -229,7 +223,6 @@ export default function AssessmentDonut({
         })
       );
 
-      // Text labels (SVG text for readability)
       const anchor = isRight ? "start" : "end";
       const labelX = isRight ? tx + 5 : tx - 5;
 
@@ -255,11 +248,6 @@ export default function AssessmentDonut({
       svg.appendChild(nameText);
     }
   }, [segments, highlightType]);
-
-  // Render donut immediately on segment/highlight change — no animation
-  useEffect(() => {
-    drawDonut();
-  }, [drawDonut]);
 
   return (
     <RoughCard className="h-full">

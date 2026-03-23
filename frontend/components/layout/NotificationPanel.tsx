@@ -92,7 +92,7 @@ export default function NotificationPanel({
       </div>
 
       {/* Scrollable notification list */}
-      <div className="max-h-[260px] overflow-y-auto overflow-x-hidden [-webkit-overflow-scrolling:touch] [will-change:scroll-position]">
+      <div className="max-h-[260px] overflow-y-auto overflow-x-hidden [-webkit-overflow-scrolling:touch]">
         {notifications.map((notification) => {
           const mapping = ICON_MAP[notification.type] ?? DEFAULT_ICON;
           const Icon = mapping.icon;
