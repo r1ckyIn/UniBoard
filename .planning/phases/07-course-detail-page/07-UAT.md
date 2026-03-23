@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 07-course-detail-page
 source: [07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md]
 started: 2026-03-23T08:15:00Z
-updated: 2026-03-23T08:35:00Z
+updated: 2026-03-23T09:45:00Z
 ---
 
 ## Current Test
@@ -71,7 +71,7 @@ skipped: 0
 ## Gaps
 
 - truth: "CourseDeadlinesPanel shows deadlines with hand-drawn border consistent with Dashboard right panel"
-  status: failed
+  status: resolved
   reason: "User reported: 功能不对，和dashboard不一致，没有手绘元素没有天数标签"
   severity: major
   test: 8
@@ -84,7 +84,7 @@ skipped: 0
   debug_session: ".planning/debug/course-deadlines-panel-gaps.md"
 
 - truth: "EdPostsPanel shows high-value posts with author info and locale-aware timestamps consistent with Dashboard right panel"
-  status: failed
+  status: resolved
   reason: "User reported: 功能缺失，与dashboard右侧栏不一致，缺少endorsed/staff标签、作者、时间戳"
   severity: major
   test: 9
@@ -99,7 +99,7 @@ skipped: 0
   debug_session: ".planning/debug/edpostspanel-missing-features.md"
 
 - truth: "CourseBanner hand-drawn border aligns with content border"
-  status: failed
+  status: resolved
   reason: "User reported: 主内容区的头部展示课程代号和全称的卡片的手绘边框和真实边框没有对齐"
   severity: major
   test: post-UAT
@@ -112,7 +112,7 @@ skipped: 0
   debug_session: ""
 
 - truth: "Right sidebar components match Dashboard design with complete borders (no clipping)"
-  status: failed
+  status: resolved
   reason: "User reported: 右侧边栏所有组件不符合dashboard设计，右边框缺失，风格不一致"
   severity: major
   test: post-UAT
@@ -130,7 +130,7 @@ skipped: 0
   debug_session: ""
 
 - truth: "All main content cards have aligned borders (CourseBanner, AssessmentSection, MaterialsSection)"
-  status: failed
+  status: resolved
   reason: "User reported: 主内容区所有卡片的边框需要对齐，头部卡片和assessment卡片边框没有对齐"
   severity: major
   test: post-UAT
