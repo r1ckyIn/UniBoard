@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 07-01-PLAN.md
+stopped_at: Completed 07-02-PLAN.md
 last_updated: "2026-03-23T07:22:46.450Z"
 progress:
   total_phases: 24
   completed_phases: 6
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 07 (course-detail-page) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Plan: 2 of 3
 | Phase 06 P01 | 3min | 2 tasks | 7 files |
 | Phase 06 P02 | 5min | 2 tasks | 5 files |
 | Phase 07 P01 | 3min | 2 tasks | 10 files |
+| Phase 07 P02 | 5min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -150,6 +151,10 @@ Recent decisions affecting current work:
 - [Phase 06]: withClientOnly wraps both BannerDeco and RoughProgressBar for SSR safety
 - [Phase 06]: Skeleton cards inline for courses (no SkeletonCard course variant), unique 120px banner structure
 - [Phase 07]: Created placeholder CourseDetailPage component to avoid TypeScript errors until Plan 03 implements the full component
+- [07-02]: useCountUp hook uses ease-out cubic easing over 400ms for smooth projected grade animation
+- [07-02]: AssessmentRow uses React.memo for performance since parent re-renders on prediction changes
+- [07-02]: MaterialsSection marks last Ed lesson (with slide_count) as New via index comparison heuristic
+- [07-02]: Grade calculation: currentAvg over graded weight only, projectedFinal over total weight when all filled
 
 ### Pending Todos
 
@@ -161,6 +166,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T07:22:46.445Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-03-23T07:29:37Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
