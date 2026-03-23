@@ -255,6 +255,33 @@
       "noCourse": "Course not found"
     }
   },
+  "deadlines": {
+    "title": "Deadlines",
+    "semester": "2026 S1",
+    "filterBadge": "{count} upcoming",
+    "modeAll": "All",
+    "modeWeek": "This Week",
+    "viewTimeline": "Timeline",
+    "viewCalendar": "Calendar",
+    "filterCourse": "All Courses",
+    "filterType": "All Types",
+    "expandHint": "Click to expand materials & AI chat",
+    "relatedMaterials": "Related Materials",
+    "askAbout": "Ask about this deadline",
+    "aiContextNote": "Materials auto-included in context",
+    "aiPlaceholder": "Ask about this deadline...",
+    "aiComingSoon": "Coming Soon",
+    "aiDisclaimer": "AI responses are for study reference only",
+    "daysRemaining": "{count} days",
+    "dayRemaining": "1 day",
+    "pastDue": "Past due",
+    "emptyTitle": "No Deadlines",
+    "emptyBody": "No upcoming deadlines found. Enjoy the break!",
+    "errorMessage": "Failed to load deadlines. Please try refreshing the page.",
+    "calendar": {
+      "today": "Today"
+    }
+  },
   "setup": {
     "welcome": {
       "title": "Welcome to UniBoard",

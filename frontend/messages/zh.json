@@ -255,6 +255,33 @@
       "noCourse": "未找到课程"
     }
   },
+  "deadlines": {
+    "title": "截止日期",
+    "semester": "2026 S1",
+    "filterBadge": "{count} 个即将到期",
+    "modeAll": "全部",
+    "modeWeek": "本周",
+    "viewTimeline": "时间线",
+    "viewCalendar": "日历",
+    "filterCourse": "所有课程",
+    "filterType": "所有类型",
+    "expandHint": "点击展开材料和AI助手",
+    "relatedMaterials": "相关材料",
+    "askAbout": "关于此截止日期提问",
+    "aiContextNote": "材料已自动包含在上下文中",
+    "aiPlaceholder": "关于此截止日期提问...",
+    "aiComingSoon": "即将推出",
+    "aiDisclaimer": "AI回答仅供学习参考",
+    "daysRemaining": "{count} 天",
+    "dayRemaining": "1 天",
+    "pastDue": "已过期",
+    "emptyTitle": "没有截止日期",
+    "emptyBody": "没有即将到期的任务。享受休息时间吧！",
+    "errorMessage": "加载截止日期失败。请刷新页面重试。",
+    "calendar": {
+      "today": "今天"
+    }
+  },
   "setup": {
     "welcome": {
       "title": "欢迎来到 UniBoard",
