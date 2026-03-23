@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-03-23T07:22:46.450Z"
+stopped_at: Completed 07-03-PLAN.md
+last_updated: "2026-03-23T07:40:58.191Z"
 progress:
   total_phases: 24
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 32
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Project State
@@ -74,6 +74,7 @@ Plan: 3 of 3
 | Phase 06 P02 | 5min | 2 tasks | 5 files |
 | Phase 07 P01 | 3min | 2 tasks | 10 files |
 | Phase 07 P02 | 5min | 2 tasks | 10 files |
+| Phase 07 P03 | 5min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,8 @@ Recent decisions affecting current work:
 - [07-02]: AssessmentRow uses React.memo for performance since parent re-renders on prediction changes
 - [07-02]: MaterialsSection marks last Ed lesson (with slide_count) as New via index comparison heuristic
 - [07-02]: Grade calculation: currentAvg over graded weight only, projectedFinal over total weight when all filled
+- [Phase 07]: getCourseColor returns { base, soft } - adapted CourseDetailPage to use base instead of main
+- [Phase 07]: Shared ExternalLinkDialog per panel via useState URL tracking (fewer DOM nodes)
 
 ### Pending Todos
 
@@ -166,6 +169,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T07:29:37Z
-Stopped at: Completed 07-02-PLAN.md
+Last session: 2026-03-23T07:40:58.185Z
+Stopped at: Completed 07-03-PLAN.md
 Resume file: None
