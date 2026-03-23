@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion, type Variants } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { format } from "date-fns";
+import { zhCN } from "date-fns/locale/zh-CN";
+import { enUS } from "date-fns/locale/en-US";
 import { ChevronDown } from "lucide-react";
 import RoughNotationWrapper from "@/components/design-system/RoughNotationWrapper";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
@@ -52,9 +54,13 @@ const mockActivity = {
 
 export default function HeroSection({ userName, onScrollClick }: HeroSectionProps) {
   const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [showAnnotations, setShowAnnotations] = useState(false);
+  const [showUnderline, setShowUnderline] = useState(false);
+  const [showCircle, setShowCircle] = useState(false);
+  const [showHighlight, setShowHighlight] = useState(false);
 
   // Extract first name from userName
   const firstName = userName.split(" ")[0];
@@ -63,50 +69,44 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   const timeOfDay = getTimeOfDay();
   const greeting = t(`hero.greeting.${timeOfDay}`, { firstName });
 
-  // Date line
-  const weekday = format(new Date(), "EEEE");
+  // Date line — locale-aware weekday (e.g. "Monday" in en, full-form weekday in zh)
+  const weekday = format(new Date(), "EEEE", { locale: dateFnsLocale });
 
   // Encouragement text
-  const encouragement = defaultEncouragementProvider(mockActivity);
+  const encouragement = defaultEncouragementProvider(mockActivity, t);
 
-  // Show Rough Notation annotations after 0.9s delay
+  // Staggered Rough Notation annotations
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAnnotations(true);
-    }, 900);
-    return () => clearTimeout(timer);
+    const t1 = setTimeout(() => setShowUnderline(true), 900);
+    const t2 = setTimeout(() => setShowCircle(true), 1500);
+    const t3 = setTimeout(() => setShowHighlight(true), 2300);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  // Parallax fade-out on scroll
-  const handleScroll = useCallback(() => {
+  // Parallax fade-out on scroll (main is the scroll container)
+  useEffect(() => {
     const hero = heroRef.current;
     const content = contentRef.current;
-    if (!hero || !content) return;
-
-    const heroHeight = hero.offsetHeight;
-    if (heroHeight === 0) return;
-
-    const scrollY =
-      typeof window !== "undefined" ? window.scrollY || window.pageYOffset : 0;
-    const opacity = Math.max(0, 1 - scrollY / heroHeight);
-    content.style.opacity = String(opacity);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+    const scrollContainer = hero?.closest("main");
+    if (!hero || !content || !scrollContainer) return;
 
     let rafId: number | null = null;
     const onScroll = () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(handleScroll);
+      rafId = requestAnimationFrame(() => {
+        const heroHeight = hero.offsetHeight;
+        if (heroHeight === 0) return;
+        const opacity = Math.max(0, 1 - scrollContainer.scrollTop / heroHeight);
+        content.style.opacity = String(opacity);
+      });
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    scrollContainer.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      scrollContainer.removeEventListener("scroll", onScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [handleScroll]);
+  }, []);
 
   // Split the encouragement message to wrap the highlightPhrase
   const renderEncouragement = () => {
@@ -123,8 +123,8 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
         <RoughNotationWrapper
           type="highlight"
           color="rgba(217,119,87,0.10)"
-          show={showAnnotations}
-          animationDuration={800}
+          show={showHighlight}
+          animationDuration={1000}
           padding={4}
         >
           {highlightPhrase}
@@ -143,7 +143,7 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
 
   const renderDateLine = () => {
     // Split date text around placeholders
-    const parts = dateText.split(/(__ WEEKDAY__|__WEEKDAY__|__WEEKNUMBER__|__ WEEKNUMBER__)/);
+    const parts = dateText.split(/(__WEEKDAY__|__WEEKNUMBER__)/);
     return parts.map((part, i) => {
       if (part === "__WEEKDAY__") {
         return (
@@ -151,8 +151,8 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
             key={i}
             type="underline"
             color="#d97757"
-            show={showAnnotations}
-            animationDuration={800}
+            show={showUnderline}
+            animationDuration={600}
             strokeWidth={2}
             padding={2}
           >
@@ -166,12 +166,12 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
             key={i}
             type="circle"
             color="#6a9bcc"
-            show={showAnnotations}
-            animationDuration={1200}
+            show={showCircle}
+            animationDuration={800}
             strokeWidth={2}
             padding={4}
           >
-            Week 4
+            {t("hero.weekLabel", { weekNumber: "4" })}
           </RoughNotationWrapper>
         );
       }

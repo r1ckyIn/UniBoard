@@ -13,7 +13,7 @@ import { useUpcomingDeadlines } from "@/hooks/use-deadlines";
 import { useNotifications, useAlerts } from "@/hooks/use-notifications";
 import { useCurrentUser } from "@/hooks/use-user";
 import { useAuthStore } from "@/lib/auth/store";
-import { getCourseColor } from "@/lib/dashboard/course-colors";
+import { getGradeBand } from "@/lib/utils/grade-band";
 
 // Components
 import HeroSection from "@/components/dashboard/HeroSection";
@@ -125,12 +125,9 @@ export default function DashboardPage() {
       name: aw.name,
       weight: aw.weight,
       status: aw.status,
+      group_name: aw.group_name,
     }));
   }, [donutCourseId, courseDetail.data]);
-
-  const donutColor = donutCourseCode
-    ? getCourseColor(donutCourseCode).base
-    : "#9b9b94";
 
   // Course grades for table
   const courseGrades = useMemo(() => {
@@ -157,12 +154,12 @@ export default function DashboardPage() {
     return {
       wam: report?.current_wam ?? 0,
       target: report?.target_wam ?? 0,
-      gradeBand: courseGrades[0]?.grade_letter ?? "—",
+      gradeBand: getGradeBand(report?.target_wam ?? 0),
       alertCount: alertList.length,
       alertCourse: firstCourseAlert?.course_code ?? "",
       alertDeadlineCount: deadlineAlerts.length,
     };
-  }, [gpa.data, alerts.data, courseGrades]);
+  }, [gpa.data, alerts.data]);
 
   // Calendar deadline days: group upcoming deadlines by date, sum weights
   const calendarDeadlineDays = useMemo(() => {
@@ -223,7 +220,7 @@ export default function DashboardPage() {
 
     return {
       name: userData?.display_name ?? authUser?.displayName ?? "Student",
-      faculty: "Computer Science",
+      faculty: "Faculty of Science",
       year: 3,
       semester: 1,
       courseCount: courseList.length,
@@ -299,7 +296,7 @@ export default function DashboardPage() {
 
         {/* Bottom row: Deadlines + Donut */}
         <div className="grid grid-cols-1 min-[900px]:grid-cols-2 gap-6">
-          <AnimatedEntry delay={5}>
+          <AnimatedEntry delay={5} className="h-full">
             {deadlines.isLoading ? (
               <SkeletonCard variant="timeline" />
             ) : (
@@ -312,7 +309,7 @@ export default function DashboardPage() {
             )}
           </AnimatedEntry>
 
-          <AnimatedEntry delay={6}>
+          <AnimatedEntry delay={6} className="h-full">
             {deadlines.isLoading || courseDetail.isLoading ? (
               <SkeletonCard variant="donut" />
             ) : (
@@ -323,7 +320,6 @@ export default function DashboardPage() {
                     ? selectedDeadline.title
                     : undefined
                 }
-                courseColor={donutColor}
                 courseCode={donutCourseCode ?? ""}
               />
             )}

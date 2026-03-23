@@ -131,15 +131,20 @@ Plans:
   3. Course grades table displays all enrolled courses with grade band indicators
   4. Deadline timeline shows upcoming deadlines in chronological order
   5. Assessment weight donut chart renders per-course weight breakdown
-**Plans**: 6 plans
+**Plans**: 11 plans
 
 Plans:
-- [ ] 05-00-PLAN.md — Wave 0: test stubs for all 13 dashboard components and utilities
-- [ ] 05-01-PLAN.md — i18n dashboard namespace, encouragement provider, course-colors utility, SkeletonCard
-- [ ] 05-02-PLAN.md — NotificationPanel, AvatarMenu, Header refactor to data-driven dropdowns
-- [ ] 05-03-PLAN.md — HeroSection (Motion entrance, parallax fade), StatsRow, RoughProgressBar, CourseGradesTable
-- [ ] 05-04-PLAN.md — ProfileCard, MiniCalendar (month nav, deadline color-depth), RecentActivity, ExternalLinkDialog
-- [ ] 05-05-PLAN.md — DeadlineTimeline, AssessmentDonut (converge animation), DashboardPage orchestrator, page.tsx, RightPanel refactor
+- [x] 05-00-PLAN.md — Wave 0: test stubs for all 13 dashboard components and utilities
+- [x] 05-01-PLAN.md — i18n dashboard namespace, encouragement provider, course-colors utility, SkeletonCard
+- [x] 05-02-PLAN.md — NotificationPanel, AvatarMenu, Header refactor to data-driven dropdowns
+- [x] 05-03-PLAN.md — HeroSection (Motion entrance, parallax fade), StatsRow, RoughProgressBar, CourseGradesTable
+- [x] 05-04-PLAN.md — ProfileCard, MiniCalendar (month nav, deadline color-depth), RecentActivity, ExternalLinkDialog
+- [x] 05-05-PLAN.md — DeadlineTimeline, AssessmentDonut (converge animation), DashboardPage orchestrator, page.tsx, RightPanel refactor
+- [x] 05-06-PLAN.md — UAT gap closure: grade band calculation, encouragement i18n, skeleton shimmer, right sidebar fixes
+- [x] 05-07-PLAN.md — UAT gap closure: AssessmentDonut full rewrite (smooth SVG donut matching prototype)
+- [x] 05-08-PLAN.md — UAT gap closure: profile card faculty, hover effects, avatar delay, dialog centering, hero stagger, bottom row height
+- [ ] 05-09-PLAN.md — UAT gap closure: AssessmentDonut type-based colors, legend, pop-out highlight, remove animation
+- [ ] 05-10-PLAN.md — UAT gap closure: hero date localization, Target column alignment, sticky sidebar fix
 
 ### Phase 6: Courses Page
 **Goal**: Users can browse all enrolled courses with grade summaries
@@ -364,7 +369,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
 | 3. Auth Page | M1 | 2/4 | UAT gap closure | - |
 | 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
-| 5. Dashboard Page | 5/6 | In Progress|  | - |
+| 5. Dashboard Page | M1 | 9/11 | UAT gap closure | - |
 | 6. Courses Page | M1 | 0/TBD | Not started | - |
 | 7. Course Detail Page | M1 | 0/TBD | Not started | - |
 | 8. Deadlines Page | M1 | 0/TBD | Not started | - |

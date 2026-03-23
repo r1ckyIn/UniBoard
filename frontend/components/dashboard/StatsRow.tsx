@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import RoughCard from "@/components/design-system/RoughCard";
 import RoughNotationWrapper from "@/components/design-system/RoughNotationWrapper";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
+import { getGradeBand } from "@/lib/utils/grade-band";
 
 interface StatsRowProps {
   wam: number;
@@ -73,7 +74,7 @@ export default function StatsRow({
                 color: "var(--color-orange)",
               }}
             >
-              D
+              {getGradeBand(wam)}
             </span>
           </div>
           <p className="text-text-2" style={{ fontSize: "12px" }}>

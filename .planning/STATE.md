@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-05-PLAN.md
-last_updated: "2026-03-22T10:06:59.003Z"
+stopped_at: Completed 05-10-PLAN.md
+last_updated: "2026-03-23T01:06:25.352Z"
 progress:
   total_phases: 24
   completed_phases: 5
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 27
+  completed_plans: 27
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 05 (dashboard-page) — EXECUTING
-Plan: 5 of 6
+Plan: 1 of 11
 
 ## Performance Metrics
 
@@ -65,6 +65,11 @@ Plan: 5 of 6
 | Phase 05 P04 | 3min | 2 tasks | 4 files |
 | Phase 05 P03 | 3min | 3 tasks | 4 files |
 | Phase 05 P05 | 5min | 2 tasks | 5 files |
+| Phase 05 P07 | 2min | 1 tasks | 1 files |
+| Phase 05 P06 | 3min | 2 tasks | 9 files |
+| Phase 05 P08 | 2min | 2 tasks | 10 files |
+| Phase 05 P09 | 5min | 2 tasks | 7 files |
+| Phase 05 P10 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -128,6 +133,14 @@ Recent decisions affecting current work:
 - [Phase 05]: Portal-slot pattern (createPortal + #right-panel-slot) for injecting dashboard-specific content into RightPanel without modifying AppShell
 - [Phase 05]: useCourseDetail fetched on-demand based on donutCourseCode derived from selected/nearest deadline
 - [Phase 05]: rAF-based converge animation for AssessmentDonut to precisely control Rough.js SVG redraw timing
+- [Phase 05]: Removed Rough.js from AssessmentDonut; pure SVG path rendering for smooth fills matching prototype
+- [Phase 05]: Encouragement provider uses highlight placeholder in message template for consistent split rendering
+- [Phase 05]: Grade band returns em-dash for null/undefined/NaN inputs
+- [Phase 05]: Staggered annotation reveal: separate useState per annotation with sequential setTimeout delays (900/1500/2300ms)
+- [Phase 05]: TYPE_COLORS record mapping group_name to hex colors replaces course-color palette
+- [Phase 05]: Pop-out highlight (6px midAngle offset) replaces stroke-width for donut segment selection
+- [Phase 05]: date-fns zhCN locale outputs full-form weekday (星期一) as standard Chinese
+- [Phase 05]: Main element as scroll container (overflow-y-auto + maxHeight) for sticky sidebar positioning
 
 ### Pending Todos
 
@@ -139,6 +152,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T10:00:50.755Z
-Stopped at: Completed 05-05-PLAN.md
+Last session: 2026-03-23T01:06:25.347Z
+Stopped at: Completed 05-10-PLAN.md
 Resume file: None

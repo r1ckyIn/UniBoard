@@ -8,41 +8,75 @@ export interface EncouragementText {
   highlightPhrase: string;
 }
 
-export type EncouragementProvider = (activity: ActivitySummary) => EncouragementText;
+/** Translation function matching next-intl's useTranslations return type. */
+export type TranslateFn = (
+  key: string,
+  params?: Record<string, string>
+) => string;
 
-export const defaultEncouragementProvider: EncouragementProvider = (activity) => {
+export type EncouragementProvider = (
+  activity: ActivitySummary,
+  t: TranslateFn
+) => EncouragementText;
+
+export const defaultEncouragementProvider: EncouragementProvider = (
+  activity,
+  t
+) => {
   // Multiple completed items - acknowledge effort, suggest rest
   if (activity.recentCompletedItems.length >= 2) {
     const items = activity.recentCompletedItems.slice(0, 2);
+    const highlight = t("hero.encourage.multiCompleteHighlight");
     return {
-      message: `The ${items[0]} and the ${items[1]} are done and behind you now. You've been working so hard — it's okay to take it slow today.`,
-      highlightPhrase: "it's okay to take it slow today",
+      message: t("hero.encourage.multiComplete", {
+        item1: items[0],
+        item2: items[1],
+        highlight,
+      }),
+      highlightPhrase: highlight,
     };
   }
+
   // Single completed item - steady progress
   if (activity.recentCompletedItems.length === 1) {
+    const highlight = t("hero.encourage.singleCompleteHighlight");
     return {
-      message: `${activity.recentCompletedItems[0]} is behind you now. Take a deep breath — you're making steady progress.`,
-      highlightPhrase: "you're making steady progress",
+      message: t("hero.encourage.singleComplete", {
+        item: activity.recentCompletedItems[0],
+        highlight,
+      }),
+      highlightPhrase: highlight,
     };
   }
+
   // High productivity week
   if (activity.completedDeadlinesLast7Days > 3) {
+    const highlight = t("hero.encourage.highProductivityHighlight");
     return {
-      message: `You've wrapped up ${activity.completedDeadlinesLast7Days} tasks this week. That's impressive — you've earned a moment to breathe.`,
-      highlightPhrase: "you've earned a moment to breathe",
+      message: t("hero.encourage.highProductivity", {
+        count: String(activity.completedDeadlinesLast7Days),
+        highlight,
+      }),
+      highlightPhrase: highlight,
     };
   }
+
   // Some progress this week
   if (activity.completedDeadlinesLast7Days > 0) {
+    const highlight = t("hero.encourage.someProgressHighlight");
     return {
-      message: `You're ${activity.completedDeadlinesLast7Days} tasks into the week already. Keep this momentum going — you've got this.`,
-      highlightPhrase: "you've got this",
+      message: t("hero.encourage.someProgress", {
+        count: String(activity.completedDeadlinesLast7Days),
+        highlight,
+      }),
+      highlightPhrase: highlight,
     };
   }
+
   // Fresh start
+  const highlight = t("hero.encourage.freshStartHighlight");
   return {
-    message: "A new week stretches ahead. Take it one task at a time — every small step counts.",
-    highlightPhrase: "every small step counts",
+    message: t("hero.encourage.freshStart", { highlight }),
+    highlightPhrase: highlight,
   };
 };

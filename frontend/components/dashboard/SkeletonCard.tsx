@@ -16,7 +16,8 @@ function ShimmerBar({ className }: { className?: string }) {
       className={cn(
         "rounded-[6px] animate-skeleton-shimmer",
         "bg-[length:200%_100%]",
-        "bg-gradient-to-r from-[#f6f5f0] via-[#efede6] to-[#f6f5f0]",
+        "bg-[#ede9e1]",
+        "bg-gradient-to-r from-[#f0ede6] via-[#e8e3d9] to-[#f0ede6]",
         className
       )}
     />
@@ -144,6 +145,7 @@ export default function SkeletonCard({ variant, className }: SkeletonCardProps) 
       aria-label="Loading..."
       className={cn(
         "bg-card-bg rounded-card border border-card-border",
+        "shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)]",
         className
       )}
     >

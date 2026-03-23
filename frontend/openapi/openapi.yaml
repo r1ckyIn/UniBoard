@@ -1307,7 +1307,7 @@ components:
 
     AssessmentWeight:
       type: object
-      required: [name, weight, score, max_score, status]
+      required: [name, weight, score, max_score, status, group_name]
       properties:
         name:
           type: string
@@ -1320,6 +1320,9 @@ components:
         status:
           type: string
           enum: [graded, upcoming, submitted]
+        group_name:
+          type: string
+          description: "Assessment type group (e.g. Assignments, Quizzes, Exams, Labs, Projects, Reports)"
         due_date:
           type: string
           format: date-time

@@ -24,7 +24,7 @@ export default function ProfileCard({
   const t = useTranslations("dashboard");
 
   return (
-    <RoughCard className="text-center" padding="py-6 px-5">
+    <RoughCard className="text-center" padding="py-6 px-5" disableHover>
       {/* Avatar */}
       <div
         className="w-[52px] h-[52px] rounded-[14px] grid place-items-center text-white font-serif font-semibold text-[22px] mx-auto mb-3"

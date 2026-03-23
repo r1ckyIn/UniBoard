@@ -89,6 +89,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 85,
         max_score: 100,
         status: "graded",
+        group_name: "Assignments",
         due_date: "2026-03-07T23:59:00Z",
       },
       {
@@ -97,6 +98,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 78,
         max_score: 100,
         status: "graded",
+        group_name: "Assignments",
         due_date: "2026-03-21T23:59:00Z",
       },
       {
@@ -105,6 +107,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 84,
         max_score: 100,
         status: "graded",
+        group_name: "Exams",
         due_date: "2026-04-04T14:00:00Z",
       },
       {
@@ -113,6 +116,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Assignments",
         due_date: "2026-04-25T23:59:00Z",
       },
       {
@@ -121,6 +125,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Exams",
         due_date: "2026-06-05T09:00:00Z",
       },
     ],
@@ -135,6 +140,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 72,
         max_score: 100,
         status: "graded",
+        group_name: "Labs",
         due_date: "2026-03-14T23:59:00Z",
       },
       {
@@ -143,6 +149,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 68,
         max_score: 100,
         status: "graded",
+        group_name: "Projects",
         due_date: "2026-03-28T23:59:00Z",
       },
       {
@@ -151,6 +158,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "submitted",
+        group_name: "Projects",
         due_date: "2026-04-18T23:59:00Z",
       },
       {
@@ -159,6 +167,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Exams",
         due_date: "2026-06-07T14:00:00Z",
       },
     ],
@@ -173,6 +182,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 70,
         max_score: 100,
         status: "graded",
+        group_name: "Quizzes",
         due_date: "2026-03-05T10:00:00Z",
       },
       {
@@ -181,6 +191,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 55,
         max_score: 100,
         status: "graded",
+        group_name: "Quizzes",
         due_date: "2026-03-19T10:00:00Z",
       },
       {
@@ -189,6 +200,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 65,
         max_score: 100,
         status: "graded",
+        group_name: "Assignments",
         due_date: "2026-03-12T23:59:00Z",
       },
       {
@@ -197,6 +209,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 58,
         max_score: 100,
         status: "graded",
+        group_name: "Assignments",
         due_date: "2026-03-26T23:59:00Z",
       },
       {
@@ -205,6 +218,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Exams",
         due_date: "2026-06-04T09:00:00Z",
       },
     ],
@@ -219,6 +233,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 92,
         max_score: 100,
         status: "graded",
+        group_name: "Reports",
         due_date: "2026-03-10T23:59:00Z",
       },
       {
@@ -227,6 +242,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 88,
         max_score: 100,
         status: "graded",
+        group_name: "Projects",
         due_date: "2026-03-24T16:00:00Z",
       },
       {
@@ -235,6 +251,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: 94,
         max_score: 100,
         status: "graded",
+        group_name: "Reports",
         due_date: "2026-04-07T23:59:00Z",
       },
       {
@@ -243,6 +260,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Projects",
         due_date: "2026-05-16T23:59:00Z",
       },
       {
@@ -251,6 +269,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Reports",
         due_date: "2026-05-23T23:59:00Z",
       },
     ],
@@ -265,6 +284,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Quizzes",
         due_date: "2026-03-28T23:59:00Z",
       },
       {
@@ -273,6 +293,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Quizzes",
         due_date: "2026-04-25T23:59:00Z",
       },
       {
@@ -281,6 +302,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Assignments",
         due_date: "2026-04-11T23:59:00Z",
       },
       {
@@ -289,6 +311,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         score: null,
         max_score: 100,
         status: "upcoming",
+        group_name: "Exams",
         due_date: "2026-06-06T09:00:00Z",
       },
     ],

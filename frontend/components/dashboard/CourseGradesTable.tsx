@@ -109,7 +109,7 @@ export default function CourseGradesTable({ courses }: CourseGradesTableProps) {
                 {t("grades.th.earned")}
               </th>
               <th
-                className="text-right text-text-3 uppercase"
+                className="text-center text-text-3 uppercase"
                 style={{
                   fontSize: "12px",
                   fontWeight: 600,
@@ -196,8 +196,8 @@ export default function CourseGradesTable({ courses }: CourseGradesTableProps) {
                   </td>
 
                   {/* Target badge + predict link */}
-                  <td className="text-right" style={{ padding: "16px 12px" }}>
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="text-center" style={{ padding: "16px 12px" }}>
+                    <div className="flex items-center justify-center gap-2">
                       {course.grade_letter && (
                         <span
                           className="rounded"
