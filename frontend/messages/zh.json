@@ -266,6 +266,7 @@
     "filterCourse": "所有课程",
     "filterType": "所有类型",
     "expandHint": "点击展开材料和AI助手",
+    "aiSummaryPlaceholder": "关注核心概念，复习与此评估相关的课程笔记。",
     "relatedMaterials": "相关材料",
     "askAbout": "关于此截止日期提问",
     "aiContextNote": "材料已自动包含在上下文中",

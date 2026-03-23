@@ -21,7 +21,7 @@ vi.mock("roughjs", () => ({
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => {
+  useTranslations: () => (key: string, params?: Record<string, string>) => {
     const map: Record<string, string> = {
       expandHint: "Click to expand materials & AI chat",
       relatedMaterials: "Related Materials",
@@ -30,11 +30,19 @@ vi.mock("next-intl", () => ({
       aiPlaceholder: "Ask about this deadline...",
       aiComingSoon: "Coming Soon",
       aiDisclaimer: "AI responses are for study reference only",
-      daysRemaining: "2 days",
+      aiSummaryPlaceholder:
+        "Focus on key concepts and review lecture notes for this assessment.",
+      daysRemaining: "{count} days",
       dayRemaining: "1 day",
       pastDue: "Past due",
     };
-    return map[key] ?? key;
+    let result = map[key] ?? key;
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        result = result.replace(`{${k}}`, v);
+      }
+    }
+    return result;
   },
 }));
 

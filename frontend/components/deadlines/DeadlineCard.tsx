@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { differenceInCalendarDays, format } from "date-fns";
 import { getUrgency, URGENCY_COLORS } from "@/lib/deadlines/urgency";
-import { urgencyLabel } from "@/lib/deadlines/urgency";
 import type { components } from "@/lib/api/types.gen";
 import type { MouseEvent } from "react";
 
@@ -54,7 +53,6 @@ export default function DeadlineCard({
 }: DeadlineCardProps) {
   const t = useTranslations("deadlines");
 
-  // Compute days remaining from due_date (not using fixture days_remaining)
   const daysRemaining = differenceInCalendarDays(
     new Date(deadline.due_date),
     new Date()
@@ -104,7 +102,11 @@ export default function DeadlineCard({
               }}
               data-testid="urgency-badge"
             >
-              {urgencyLabel(daysRemaining)}
+              {daysRemaining <= 0
+                ? t("pastDue")
+                : daysRemaining === 1
+                  ? t("dayRemaining")
+                  : t("daysRemaining", { count: String(daysRemaining) })}
             </span>
           </div>
 
@@ -123,7 +125,7 @@ export default function DeadlineCard({
 
           {/* AI summary placeholder */}
           <div className="italic text-[0.78rem] text-[#6b6b65] leading-[1.5] border-t border-[#eae7e0] pt-[8px]">
-            Focus on key concepts and review lecture notes for this assessment.
+            {t("aiSummaryPlaceholder")}
           </div>
 
           {/* Expand hint */}
@@ -159,7 +161,6 @@ export default function DeadlineCard({
                   data-mat-item
                   className="flex items-center gap-[14px] py-[10px] px-[12px] rounded-[8px] transition-colors duration-150 cursor-pointer border-b border-[#eae7e0] last:border-b-0 hover:bg-[#efede6]"
                 >
-                  {/* Week badge */}
                   <span
                     className="text-[0.64rem] font-bold py-[3px] px-[8px] rounded-[5px] whitespace-nowrap flex-shrink-0 min-w-[48px] text-center"
                     style={{
@@ -169,11 +170,9 @@ export default function DeadlineCard({
                   >
                     {mat.week}
                   </span>
-                  {/* Icon */}
                   <div className="w-[30px] h-[30px] rounded-[8px] grid place-items-center flex-shrink-0">
                     <IconComponent size={16} className="text-[#6b6b65]" />
                   </div>
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="text-[0.8rem] font-semibold text-[#2d2d2a] whitespace-nowrap overflow-hidden text-ellipsis">
                       {mat.title}

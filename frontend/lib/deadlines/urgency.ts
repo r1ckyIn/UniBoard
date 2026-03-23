@@ -35,11 +35,3 @@ export const URGENCY_COLORS: Record<
   },
 };
 
-/**
- * Human-readable urgency label.
- */
-export function urgencyLabel(days: number): string {
-  if (days <= 0) return "Past due";
-  if (days === 1) return "1 day";
-  return `${days} days`;
-}

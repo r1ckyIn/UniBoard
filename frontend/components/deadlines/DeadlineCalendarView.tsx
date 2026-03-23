@@ -129,10 +129,8 @@ export default function DeadlineCalendarView({
     return cells;
   }, [viewYear, viewMonth]);
 
-  // Format month label
   const monthLabel = format(new Date(viewYear, viewMonth, 1), "MMMM yyyy");
 
-  // Handle cell click
   const handleCellClick = useCallback(
     (dateKey: string) => {
       if (selectedDate === dateKey) {

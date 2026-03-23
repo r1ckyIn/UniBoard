@@ -10,60 +10,56 @@ import DeadlineTitleRow from "@/components/deadlines/DeadlineTitleRow";
 import DeadlineTimelineView from "@/components/deadlines/DeadlineTimelineView";
 import DeadlineCalendarView from "@/components/deadlines/DeadlineCalendarView";
 import type { components } from "@/lib/api/types.gen";
+import type { ViewMode, FilterMode } from "@/lib/deadlines/types";
 
 type Deadline = components["schemas"]["Deadline"];
-type ViewMode = "timeline" | "calendar";
-type FilterMode = "all" | "week";
 
 export default function DeadlinesPage() {
   const t = useTranslations("deadlines");
   const { data, isLoading, isError } = useDeadlines();
   const deadlineList: Deadline[] = data?.data ?? [];
 
-  // State management
   const [viewMode, setViewMode] = useState<ViewMode>("timeline");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Client-side filtered + sorted deadlines
-  const filteredDeadlines = useMemo(() => {
+  // Client-side filtered + sorted deadlines, with upcoming count computed in the same pass
+  const { filteredDeadlines, upcomingCount } = useMemo(() => {
+    const now = new Date();
     let result = [...deadlineList];
 
-    // Filter by course
     if (selectedCourse) {
       result = result.filter((dl) => dl.course_code === selectedCourse);
     }
 
-    // Date filter (from calendar click)
     if (selectedDate) {
       result = result.filter(
         (dl) => format(new Date(dl.due_date), "yyyy-MM-dd") === selectedDate
       );
     }
 
-    // Filter by mode: "week" = days remaining <= 7 from due_date
     if (filterMode === "week") {
       result = result.filter((dl) => {
-        const days = differenceInCalendarDays(
-          new Date(dl.due_date),
-          new Date()
-        );
+        const days = differenceInCalendarDays(new Date(dl.due_date), now);
         return days >= 0 && days <= 7;
       });
     }
 
-    // Sort by due_date ascending
     result.sort(
       (a, b) =>
         new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
     );
 
-    return result;
+    let upcoming = 0;
+    for (const dl of result) {
+      if (differenceInCalendarDays(new Date(dl.due_date), now) >= 0) upcoming++;
+    }
+
+    return { filteredDeadlines: result, upcomingCount: upcoming };
   }, [deadlineList, selectedCourse, selectedDate, filterMode]);
 
-  // Extract unique course options from raw data
   const courseOptions = useMemo(() => {
     const seen = new Set<string>();
     return deadlineList.reduce<{ value: string; label: string }[]>(
@@ -77,12 +73,6 @@ export default function DeadlinesPage() {
       []
     );
   }, [deadlineList]);
-
-  // Count upcoming (non-past) deadlines in filtered set
-  const upcomingCount = filteredDeadlines.filter(
-    (dl) =>
-      differenceInCalendarDays(new Date(dl.due_date), new Date()) >= 0
-  ).length;
 
   // Clear selectedDate when switching away from calendar view
   const handleViewModeChange = (mode: ViewMode) => {

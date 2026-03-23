@@ -2,9 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Calendar, CalendarDays, List } from "lucide-react";
-
-type ViewMode = "timeline" | "calendar";
-type FilterMode = "all" | "week";
+import type { ViewMode, FilterMode } from "@/lib/deadlines/types";
 
 interface DeadlineTitleRowProps {
   upcomingCount: number;
@@ -69,19 +67,20 @@ export default function DeadlineTitleRow({
         {/* All / This Week toggle */}
         <div className="flex border border-[#e8e5dd] rounded-[8px] overflow-hidden">
           <button
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-none border-r border-[#e8e5dd] transition-colors duration-150 ${
+            type="button"
+            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-r border-[#e8e5dd] transition-colors duration-150 ${
               filterMode === "all"
                 ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
                 : "bg-white text-[#9b9b94]"
             }`}
-            style={{ borderRight: "1px solid #e8e5dd" }}
             onClick={() => onFilterModeChange("all")}
             data-testid="mode-all"
           >
             {t("modeAll")}
           </button>
           <button
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-none transition-colors duration-150 ${
+            type="button"
+            className={`text-[0.72rem] font-semibold px-3 py-[5px] transition-colors duration-150 ${
               filterMode === "week"
                 ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
                 : "bg-white text-[#9b9b94]"
@@ -96,19 +95,20 @@ export default function DeadlineTitleRow({
         {/* Timeline / Calendar toggle */}
         <div className="flex border border-[#e8e5dd] rounded-[8px] overflow-hidden">
           <button
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-none transition-colors duration-150 grid place-items-center ${
+            type="button"
+            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-r border-[#e8e5dd] transition-colors duration-150 grid place-items-center ${
               viewMode === "timeline"
                 ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
                 : "bg-white text-[#9b9b94]"
             }`}
-            style={{ borderRight: "1px solid #e8e5dd" }}
             onClick={() => onViewModeChange("timeline")}
             data-testid="view-timeline"
           >
             <List size={14} />
           </button>
           <button
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-none transition-colors duration-150 grid place-items-center ${
+            type="button"
+            className={`text-[0.72rem] font-semibold px-3 py-[5px] transition-colors duration-150 grid place-items-center ${
               viewMode === "calendar"
                 ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
                 : "bg-white text-[#9b9b94]"

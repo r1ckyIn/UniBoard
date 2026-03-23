@@ -36,18 +36,15 @@ export default function DeadlineTimelineView({
         const urgency = getUrgency(daysRemaining);
         const dotColor = URGENCY_COLORS[urgency].dot;
         const courseColor = getCourseColor(dl.course_code);
-        // Cap delay at 6 (max useful value in AnimatedEntry DELAY_MAP)
         const delay = Math.min(index + 2, 6) as 1 | 2 | 3 | 4 | 5 | 6;
 
         return (
           <AnimatedEntry key={dl.id} delay={delay}>
             <div className="relative">
-              {/* Rough.js dot */}
               <ClientRoughDot
                 color={dotColor}
                 filled={index === 0}
               />
-              {/* Card */}
               <DeadlineCard
                 deadline={dl}
                 isExpanded={expandedId === dl.id}
