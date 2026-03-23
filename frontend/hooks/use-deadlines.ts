@@ -7,6 +7,8 @@ type DeadlinesResponse =
   paths["/deadlines"]["get"]["responses"]["200"]["content"]["application/json"];
 type UpcomingResponse =
   paths["/deadlines/upcoming"]["get"]["responses"]["200"]["content"]["application/json"];
+type CourseDeadlinesResponse =
+  paths["/courses/{id}/deadlines"]["get"]["responses"]["200"]["content"]["application/json"];
 
 // ── Query key factory ───────────────────────────────────────────────────────
 export const deadlineKeys = {
@@ -15,6 +17,8 @@ export const deadlineKeys = {
   list: (filters?: { from?: string; to?: string; course_id?: string }) =>
     [...deadlineKeys.lists(), filters] as const,
   upcoming: () => [...deadlineKeys.all, "upcoming"] as const,
+  byCourse: (courseId: string) =>
+    [...deadlineKeys.all, "course", courseId] as const,
 };
 
 // ── queryOptions factory ────────────────────────────────────────────────────
@@ -41,6 +45,14 @@ export const deadlineOptions = {
       queryFn: () =>
         api.get("deadlines/upcoming").json<UpcomingResponse>(),
     }),
+  byCourse: (courseId: string) =>
+    queryOptions({
+      queryKey: deadlineKeys.byCourse(courseId),
+      queryFn: () =>
+        api
+          .get(`courses/${courseId}/deadlines`)
+          .json<CourseDeadlinesResponse>(),
+    }),
 };
 
 // ── Hooks ───────────────────────────────────────────────────────────────────
@@ -54,4 +66,8 @@ export function useDeadlines(filters?: {
 
 export function useUpcomingDeadlines() {
   return useQuery(deadlineOptions.upcoming());
+}
+
+export function useCourseDeadlines(courseId: string) {
+  return useQuery(deadlineOptions.byCourse(courseId));
 }

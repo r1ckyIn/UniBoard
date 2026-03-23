@@ -196,6 +196,65 @@
     "emptyBody": "与 Canvas 同步后，您的已注册课程将显示在此处。",
     "errorMessage": "加载课程失败，请尝试刷新页面。"
   },
+  "courseDetail": {
+    "backLink": "返回课程",
+    "assessment": {
+      "title": "评估",
+      "columns": {
+        "assessment": "评估项目",
+        "weight": "占比",
+        "due": "截止日期",
+        "score": "分数"
+      },
+      "gradedBadge": "已评分",
+      "scorePlaceholder": "?",
+      "variousDates": "多个日期"
+    },
+    "gradeSummary": {
+      "currentAverage": "当前平均",
+      "projectedFinal": "预计最终成绩",
+      "basedOnAssessed": "基于已评估的 {weight}%",
+      "enterPredicted": "请在上方输入预测分数",
+      "gradeBand": "{band} 等级",
+      "projectedNote": "当你输入未评分项目的预测分数时，预计成绩会实时更新。"
+    },
+    "materials": {
+      "title": "课程资料",
+      "weekBadge": "第{week}周",
+      "slideCount": "{count} 张幻灯片",
+      "newBadge": "新",
+      "empty": "暂无课程资料"
+    },
+    "aiChat": {
+      "title": "询问关于本课程的问题",
+      "placeholder": "问任何关于 {courseCode} 的问题...",
+      "disclaimer": "AI 回答仅供学习参考",
+      "comingSoon": "即将上线"
+    },
+    "quickLinks": {
+      "title": "快捷链接",
+      "canvas": "Canvas 主页",
+      "edDiscussion": "Ed 讨论区",
+      "edLessons": "Ed 课程"
+    },
+    "deadlines": {
+      "title": "即将到来",
+      "daysRemaining": "{days} 天",
+      "pastDue": "已逾期",
+      "tbd": "待定",
+      "empty": "暂无截止日期"
+    },
+    "edPosts": {
+      "title": "Ed 讨论区",
+      "endorsed": "已认可",
+      "staffPost": "教职员工",
+      "empty": "暂无高价值帖子"
+    },
+    "empty": {
+      "noAssessments": "未找到此课程的评估项目",
+      "noCourse": "未找到课程"
+    }
+  },
   "setup": {
     "welcome": {
       "title": "欢迎来到 UniBoard",

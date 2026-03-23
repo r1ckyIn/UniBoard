@@ -196,6 +196,65 @@
     "emptyBody": "Your enrolled courses will appear here after syncing with Canvas.",
     "errorMessage": "Failed to load courses. Please try refreshing the page."
   },
+  "courseDetail": {
+    "backLink": "My Courses",
+    "assessment": {
+      "title": "Assessment",
+      "columns": {
+        "assessment": "Assessment",
+        "weight": "Weight",
+        "due": "Due",
+        "score": "Score"
+      },
+      "gradedBadge": "graded",
+      "scorePlaceholder": "?",
+      "variousDates": "Various"
+    },
+    "gradeSummary": {
+      "currentAverage": "Current Average",
+      "projectedFinal": "Projected Final",
+      "basedOnAssessed": "Based on {weight}% assessed",
+      "enterPredicted": "Enter predicted scores above",
+      "gradeBand": "{band} grade band",
+      "projectedNote": "Projected grade updates live as you type predicted scores for ungraded assessments."
+    },
+    "materials": {
+      "title": "Course Materials",
+      "weekBadge": "Wk {week}",
+      "slideCount": "{count} slides",
+      "newBadge": "New",
+      "empty": "No materials available yet"
+    },
+    "aiChat": {
+      "title": "Ask about this course",
+      "placeholder": "Ask anything about {courseCode}...",
+      "disclaimer": "AI responses are for study reference only",
+      "comingSoon": "Coming Soon"
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "canvas": "Canvas Home",
+      "edDiscussion": "Ed Discussion",
+      "edLessons": "Ed Lessons"
+    },
+    "deadlines": {
+      "title": "Upcoming",
+      "daysRemaining": "{days} days",
+      "pastDue": "Past due",
+      "tbd": "TBD",
+      "empty": "No upcoming deadlines"
+    },
+    "edPosts": {
+      "title": "Ed Discussion",
+      "endorsed": "Endorsed",
+      "staffPost": "Staff",
+      "empty": "No high-value posts yet"
+    },
+    "empty": {
+      "noAssessments": "No assessments found for this course",
+      "noCourse": "Course not found"
+    }
+  },
   "setup": {
     "welcome": {
       "title": "Welcome to UniBoard",
