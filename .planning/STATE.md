@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 08-02-PLAN.md
+stopped_at: Completed 08-03-PLAN.md
 last_updated: "2026-03-23T10:40:04.164Z"
 progress:
   total_phases: 24
   completed_phases: 7
   total_plans: 36
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 08 (deadlines-page) — EXECUTING
-Plan: 3 of 3
+Phase: 08 (deadlines-page) — COMPLETE
+Plan: 3 of 3 (all done)
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Plan: 3 of 3
 | Phase 07 P04 | 6min | 2 tasks | 10 files |
 | Phase 08 P01 | 3min | 2 tasks | 8 files |
 | Phase 08 P02 | 10min | 2 tasks | 6 files |
+| Phase 08 P03 | 11min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -167,6 +168,9 @@ Recent decisions affecting current work:
 - [Phase 08]: Compute daysRemaining via differenceInCalendarDays(due_date, now) instead of using fixture days_remaining field
 - [Phase 08]: Client-side filtering (course + time mode) via useMemo for instant UI response
 - [Phase 08]: Placeholder materials and AI summary hardcoded since Deadline schema has no materials/summary fields
+- [08-03]: Reused MiniCalendar grid logic locally in DeadlineCalendarView rather than extracting shared util
+- [08-03]: Calendar shows all deadlines unfiltered; date click filters sub-timeline below
+- [08-03]: Course-colored dots per day (max 3 visible + overflow) instead of single weight-based dot
 
 ### Pending Todos
 
@@ -178,6 +182,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T10:40:04.069Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-03-23T10:53:20Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
