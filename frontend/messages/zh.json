@@ -181,6 +181,21 @@
       "deadlineIntelDesc": "三源聚合，配合 AI 准备摘要"
     }
   },
+  "courses": {
+    "title": "我的课程",
+    "filterBadge": "{count} 门已发布",
+    "termPrefix": "学期：",
+    "gradeLabel": "成绩：",
+    "assessedSuffix": "已评估",
+    "bandHD": "HD 85+",
+    "bandD": "D 75+",
+    "bandCR": "CR 65+",
+    "bandP": "P 50+",
+    "bandF": "F",
+    "emptyTitle": "暂无课程",
+    "emptyBody": "与 Canvas 同步后，您的已注册课程将显示在此处。",
+    "errorMessage": "加载课程失败，请尝试刷新页面。"
+  },
   "setup": {
     "welcome": {
       "title": "欢迎来到 UniBoard",

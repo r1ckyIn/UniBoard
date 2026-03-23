@@ -20,7 +20,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 3: Auth Page** — Login and register flows with form validation
 - [ ] **Phase 4: Setup Page** — 3-step API token onboarding with visual guides
 - [ ] **Phase 5: Dashboard Page** — Hero welcome, stats row, course grades, deadline timeline, assessment weights
-- [ ] **Phase 6: Courses Page** — Card grid with grade overview and course navigation
+- [x] **Phase 6: Courses Page** — Card grid with grade overview and course navigation (2026-03-23)
 - [ ] **Phase 7: Course Detail Page** — Assessment breakdown, materials browser, Ed posts
 - [ ] **Phase 8: Deadlines Page** — Calendar view, filterable timeline, AI chat panel placeholder
 - [ ] **Phase 9: Predict Page** — Slider-based What-if GPA simulator with real-time calculation
@@ -155,7 +155,11 @@ Plans:
   2. Each card shows course name, WAM, grade band (HD/D/CR/P/F), and percentage assessed
   3. Clicking a course card navigates to Course Detail page
   4. Rough.js card borders and hover animations match prototype
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [x] 06-01-PLAN.md — i18n courses namespace, course-colors MATH1005 entry, Wave 0 test stubs, BannerDeco Rough.js component
+- [x] 06-02-PLAN.md — CourseCard (two-layer Rough.js borders, banner, grade info), CoursesPage orchestrator, page.tsx route
 
 ### Phase 7: Course Detail Page
 **Goal**: Users can drill into a single course to see assessments, materials, and Ed Discussion posts
@@ -370,7 +374,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 3. Auth Page | M1 | 2/4 | UAT gap closure | - |
 | 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
 | 5. Dashboard Page | M1 | 9/11 | UAT gap closure | - |
-| 6. Courses Page | M1 | 0/TBD | Not started | - |
+| 6. Courses Page | M1 | 0/2 | Planned | - |
 | 7. Course Detail Page | M1 | 0/TBD | Not started | - |
 | 8. Deadlines Page | M1 | 0/TBD | Not started | - |
 | 9. Predict Page | M1 | 0/TBD | Not started | - |

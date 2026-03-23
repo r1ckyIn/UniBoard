@@ -181,6 +181,21 @@
       "deadlineIntelDesc": "Three-source aggregation with AI prep summaries"
     }
   },
+  "courses": {
+    "title": "My Courses",
+    "filterBadge": "{count} Published",
+    "termPrefix": "Term:",
+    "gradeLabel": "Grade:",
+    "assessedSuffix": "assessed",
+    "bandHD": "HD 85+",
+    "bandD": "D 75+",
+    "bandCR": "CR 65+",
+    "bandP": "P 50+",
+    "bandF": "F",
+    "emptyTitle": "No Courses Yet",
+    "emptyBody": "Your enrolled courses will appear here after syncing with Canvas.",
+    "errorMessage": "Failed to load courses. Please try refreshing the page."
+  },
   "setup": {
     "welcome": {
       "title": "Welcome to UniBoard",
