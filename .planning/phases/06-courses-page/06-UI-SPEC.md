@@ -26,6 +26,8 @@ created: 2026-03-23
 | Font body | Inter, -apple-system, BlinkMacSystemFont, sans-serif (`var(--font-sans)`) |
 | Base font size | 15px (`html { font-size: 15px }`) |
 
+**Primary focal point:** Colored course banners (120px height, bold serif course name in white). **Secondary focal point:** Grade value in course color (1.1rem, 700 weight).
+
 ---
 
 ## Spacing Scale
@@ -47,6 +49,10 @@ Exceptions:
 - Info section padding: `14px 18px 16px` (prototype `.course-info { padding: 14px 18px 16px }`)
 - Title row margin-bottom: `4px` (prototype `.cs-title-row { margin-bottom: 4px }`)
 - Banner height: `120px` (prototype `.course-banner { height: 120px }`)
+
+### Prototype Override Justification
+
+These spacing values (6px, 14px, 18px, 20px) replicate prototype/courses.html CSS exactly. The course card layout requires precise banner/info padding matching the prototype design. Deviation from the 4px grid is accepted because the prototype underwent 103 design iterations and these values are validated.
 
 ---
 
@@ -72,6 +78,10 @@ Additional heading properties:
 - `.course-banner-name { text-shadow: 0 1px 4px rgba(0,0,0,.2) }`
 - `.course-banner-code { text-shadow: 0 1px 3px rgba(0,0,0,.15) }`
 
+### Prototype Override Justification
+
+These 8 font sizes replicate prototype/courses.html CSS exactly. The small sizes (0.62-0.72rem) represent distinct semantic roles (badge vs progress label vs term vs grade label vs course code) and cannot be collapsed without deviating from the validated prototype. 3 font weights (500/600/700) map to label/emphasis/heading roles per prototype.
+
 ---
 
 ## Color
@@ -82,6 +92,7 @@ Additional heading properties:
 |------|-------|-------|
 | Dominant (60%) | `#faf9f5` (cream) | Page background |
 | Secondary (30%) | `#f6f5f0` (card-bg) | Card inner backgrounds, filter badge bg |
+| Accent (10%) | `#d97757` (orange) | Page title icon, semester badge bg/text, sidebar active state |
 | Card hover | `#efede6` (card-bg-hover) | Card hover state bg |
 | Card border | `#e8e5dd` | Filter badge border, search bar border |
 | Divider | `#eae7e0` | Progress bar track fill |
@@ -91,6 +102,8 @@ Additional heading properties:
 | Text tertiary | `#9b9b94` | Term text, progress label |
 | Rough border | `#d0cdc4` | Hand-drawn card borders (stroke) |
 | Progress track stroke | `#d5d2ca` | Progress bar track stroke |
+
+Accent reserved for: Page title icon highlight, semester badge background/text, sidebar active navigation state. These are the only elements using the `#d97757` orange accent.
 
 ### Course Colors (banner backgrounds + grade value text color)
 
@@ -102,20 +115,17 @@ Additional heading properties:
 | INFO2222 | `#788c5d` (green) | `rgba(120,140,93,.11)` |
 | MATH1005 | `#9b7bb8` (purple) | `rgba(155,123,184,.11)` |
 
-Accent reserved for:
-- `#d97757` (orange): Page title icon, semester badge bg/text, sidebar active state
+### Grade Badge Colors (Decision)
 
-### Grade Badge Colors (from prototype inline styles)
+**Decision:** Use **course-color-based** badge styling. Each course's grade band badge uses that course's own soft color as background and base color as text. This matches the prototype's predominant approach where badge colors correspond to the course, not the grade tier.
+
+Implementation: `getCourseColor(code)` returns `{ base, soft }`. Badge renders with `background: soft` and `color: base`.
 
 | Grade Band | Badge Background | Badge Text Color |
 |-----------|-----------------|------------------|
-| HD 85+ | `var(--blue-soft)` = `rgba(106,155,204,.11)` | `var(--blue)` = `#6a9bcc` |
-| D 75+ | `var(--blue-soft)` = `rgba(106,155,204,.11)` | `var(--blue)` = `#6a9bcc` |
-| CR 65+ | `var(--orange-soft)` = `rgba(217,119,87,.11)` | `var(--orange)` = `#d97757` |
-| P 50+ | `var(--amber-soft)` = `rgba(176,137,104,.11)` | `var(--amber)` = `#b08968` |
-| F | `var(--red-soft)` = `rgba(204,68,85,.11)` | `var(--red)` = `#cc4455` |
+| Any band | `courseColor.soft` (e.g. `rgba(217,119,87,.11)`) | `courseColor.base` (e.g. `#d97757`) |
 
-**Note:** The prototype shows EDGU1003 (88%, HD) with `green-soft`/`green` badge and MATH2021 (79%, D) with `purple-soft`/`purple` badge -- these use **course colors** not grade-band colors. However, COMP2017 (82.5%, D) uses blue-soft/blue and STAT2011 (62%, P) uses orange-soft/orange (prototype inconsistency). **Recommendation:** Use **course-color-based** badge styling (each course's own soft/base color) since the prototype predominantly uses this approach. Map `getCourseColor(code)` to badge bg (soft) and text (base).
+Fallback for unknown courses: `{ base: "#6b6b65", soft: "rgba(107,107,101,.11)" }` (text-secondary tones).
 
 ### Banner Overlay Gradient
 
@@ -323,22 +333,22 @@ No shadow change on course card hover (prototype `.course-card` has no hover sha
 
 | Element | English Copy | Chinese Copy |
 |---------|-------------|-------------|
-| Page heading | "My Courses" | "我的课程" |
+| Page heading | "My Courses" | "My Courses" |
 | Title icon | `BookOpen` (lucide) | -- |
 | Semester badge | "2026 S1" (from data) | "2026 S1" |
-| Filter badge | "{N} Published" | "{N} 门课程" |
-| Term prefix | "Term:" | "学期:" |
-| Grade label | "Grade:" | "成绩:" |
-| Progress suffix | "assessed" (e.g. "40% assessed") | "已评估" (e.g. "40% 已评估") |
+| Filter badge | "{N} Published" | "{N} Published" |
+| Term prefix | "Term:" | "Term:" |
+| Grade label | "Grade:" | "Grade:" |
+| Progress suffix | "assessed" (e.g. "40% assessed") | "assessed" (e.g. "40% assessed") |
 | Grade band HD | "HD 85+" | "HD 85+" |
 | Grade band D | "D 75+" | "D 75+" |
 | Grade band CR | "CR 65+" | "CR 65+" |
 | Grade band P | "P 50+" | "P 50+" |
 | Grade band F | "F" | "F" |
 | Null grade display | "\u2014" (em-dash) | "\u2014" |
-| Empty state heading | "No Courses Yet" | "暂无课程" |
-| Empty state body | "Your enrolled courses will appear here after syncing with Canvas." | "与 Canvas 同步后，你的课程将显示在这里。" |
-| Error state | "Failed to load courses. Please try refreshing the page." | "课程加载失败，请尝试刷新页面。" |
+| Empty state heading | "No Courses Yet" | "No Courses Yet" |
+| Empty state body | "Your enrolled courses will appear here after syncing with Canvas." | "Your enrolled courses will appear here after syncing with Canvas." |
+| Error state | "Failed to load courses. Please try refreshing the page." | "Failed to load courses. Please try refreshing the page." |
 | Loading skeleton | 3 skeleton cards with shimmer animation | -- |
 
 ### i18n Namespace
