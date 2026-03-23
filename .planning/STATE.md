@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-23T10:26:19.258Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-23T10:40:04.164Z"
 progress:
   total_phases: 24
   completed_phases: 7
   total_plans: 36
-  completed_plans: 34
+  completed_plans: 35
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 08 (deadlines-page) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Plan: 2 of 3
 | Phase 07 P03 | 5min | 2 tasks | 7 files |
 | Phase 07 P04 | 6min | 2 tasks | 10 files |
 | Phase 08 P01 | 3min | 2 tasks | 8 files |
+| Phase 08 P02 | 10min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -163,6 +164,9 @@ Recent decisions affecting current work:
 - [Phase 07]: CourseBanner and AssessmentSection use empty padding RoughCard since they manage their own internal layout
 - [Phase 07]: ExternalLinkDialog placed outside RoughCard as Fragment sibling to avoid overflow clipping
 - [Phase 08]: Urgency utility extracted as shared lib rather than modifying existing DeadlineTimeline — dashboard migration deferred
+- [Phase 08]: Compute daysRemaining via differenceInCalendarDays(due_date, now) instead of using fixture days_remaining field
+- [Phase 08]: Client-side filtering (course + time mode) via useMemo for instant UI response
+- [Phase 08]: Placeholder materials and AI summary hardcoded since Deadline schema has no materials/summary fields
 
 ### Pending Todos
 
@@ -174,6 +178,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T10:26:19.246Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-03-23T10:40:04.069Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
