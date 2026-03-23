@@ -199,7 +199,7 @@ export default function CourseCard({
             <span className="text-[0.66rem] font-medium text-[#9b9b94] flex-shrink-0">
               {`${Math.round(completedWeight * 100)}% ${t("assessedSuffix")}`}
             </span>
-            <div className="flex-1 min-w-0 [&>svg]:w-full">
+            <div className="flex-1 min-w-0 [&_svg]:w-full">
               <RoughProgressBarClient
                 progress={completedWeight}
                 color={colorBase}
