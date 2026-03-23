@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-09-PLAN.md
-last_updated: "2026-03-23T01:00:41.958Z"
+stopped_at: Completed 05-10-PLAN.md
+last_updated: "2026-03-23T01:06:25.352Z"
 progress:
   total_phases: 24
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 27
-  completed_plans: 26
+  completed_plans: 27
 ---
 
 # Project State
@@ -69,6 +69,7 @@ Plan: 1 of 11
 | Phase 05 P06 | 3min | 2 tasks | 9 files |
 | Phase 05 P08 | 2min | 2 tasks | 10 files |
 | Phase 05 P09 | 5min | 2 tasks | 7 files |
+| Phase 05 P10 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,8 @@ Recent decisions affecting current work:
 - [Phase 05]: Staggered annotation reveal: separate useState per annotation with sequential setTimeout delays (900/1500/2300ms)
 - [Phase 05]: TYPE_COLORS record mapping group_name to hex colors replaces course-color palette
 - [Phase 05]: Pop-out highlight (6px midAngle offset) replaces stroke-width for donut segment selection
+- [Phase 05]: date-fns zhCN locale outputs full-form weekday (星期一) as standard Chinese
+- [Phase 05]: Main element as scroll container (overflow-y-auto + maxHeight) for sticky sidebar positioning
 
 ### Pending Todos
 
@@ -149,6 +152,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T01:00:41.953Z
-Stopped at: Completed 05-09-PLAN.md
+Last session: 2026-03-23T01:06:25.347Z
+Stopped at: Completed 05-10-PLAN.md
 Resume file: None
