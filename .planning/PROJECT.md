@@ -61,7 +61,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [x] Dashboard (hero welcome, stats row, course grades, deadline timeline, assessment weights) — Validated in Phase 05: Dashboard Page
 - [x] Courses (card grid + grade overview) — Validated in Phase 06: Courses Page
 - [x] Course Detail (assessment breakdown, materials, Ed posts) — Validated in Phase 07: Course Detail Page
-- [ ] Deadlines (calendar + filterable timeline + AI chat)
+- [x] Deadlines (calendar + filterable timeline + AI chat) — Validated in Phase 08: Deadlines Page
 - [ ] Predict (slider-based What-if GPA simulator)
 - [ ] Digest (daily intelligence digest)
 - [ ] Timetable (weekly schedule view)
@@ -171,4 +171,4 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-23 — Phase 07 (Course Detail Page) complete*
+*Last updated: 2026-03-23 — Phase 08 (Deadlines Page) complete*
