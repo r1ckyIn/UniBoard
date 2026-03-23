@@ -82,11 +82,12 @@ export default function AssessmentSection({
     let gradedSumSW = 0;
     let gradedSumW = 0;
     let totalSumSW = 0;
+    let totalWeight = 0;
     let allFilled = true;
 
     assessments.forEach((a, i) => {
+      totalWeight += a.weight;
       if (a.score !== null) {
-        // Normalize score to 0-1 scale before weighting
         const normalized = a.max_score > 0 ? a.score / a.max_score : 0;
         gradedSumSW += normalized * a.weight;
         gradedSumW += a.weight;
@@ -94,14 +95,12 @@ export default function AssessmentSection({
       } else {
         const pred = predictions[i];
         if (pred !== null && pred !== undefined) {
-          totalSumSW += (pred / a.max_score) * a.weight;
+          totalSumSW += (a.max_score > 0 ? pred / a.max_score : 0) * a.weight;
         } else {
           allFilled = false;
         }
       }
     });
-
-    const totalWeight = assessments.reduce((s, a) => s + a.weight, 0);
     const avg = gradedSumW > 0 ? (gradedSumSW / gradedSumW) * 100 : null;
     const projected =
       allFilled && totalWeight > 0
@@ -198,7 +197,6 @@ export default function AssessmentSection({
                   dueDate={a.due_date}
                   score={a.score}
                   maxScore={a.max_score}
-                  status={a.status}
                   courseColor={courseColor}
                   courseSoft={courseSoft}
                   prediction={predictions[i] ?? null}

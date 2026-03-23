@@ -123,23 +123,21 @@ export default function MaterialsSection({
               <span className="text-[0.84rem]">{t("materials.empty")}</span>
             </div>
           ) : (
-            <div>
-              {materials.map((m, i) => (
-                <MaterialItem
-                  key={m.id}
-                  title={m.title}
-                  source={m.source}
-                  sourceType={m.source_type}
-                  itemCount={m.items?.length}
-                  slideCount={m.slide_count}
-                  url={m.url}
-                  weekNumber={extractWeek(m.title, i + 1)}
-                  courseColor={courseColor}
-                  courseSoft={courseSoft}
-                  isNew={i === lastEdLessonIndex}
-                />
-              ))}
-            </div>
+            materials.map((m, i) => (
+              <MaterialItem
+                key={m.id}
+                title={m.title}
+                source={m.source}
+                sourceType={m.source_type}
+                itemCount={m.items?.length}
+                slideCount={m.slide_count}
+                url={m.url}
+                weekNumber={extractWeek(m.title, i + 1)}
+                courseColor={courseColor}
+                courseSoft={courseSoft}
+                isNew={i === lastEdLessonIndex}
+              />
+            ))
           )}
         </div>
       </div>

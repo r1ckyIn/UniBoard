@@ -16,7 +16,6 @@ interface AssessmentRowProps {
   dueDate?: string;
   score: number | null;
   maxScore: number;
-  status: "graded" | "upcoming" | "submitted";
   courseColor: string;
   courseSoft: string;
   prediction: number | null;

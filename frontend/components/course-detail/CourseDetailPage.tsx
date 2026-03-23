@@ -72,10 +72,14 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
   }, [courseDetail.data]);
 
   // ── CSS custom properties for course color ──
-  const colorStyle = {
-    "--course-color": courseColor.base,
-    "--course-soft": courseColor.soft,
-  } as React.CSSProperties;
+  const colorStyle = useMemo(
+    () =>
+      ({
+        "--course-color": courseColor.base,
+        "--course-soft": courseColor.soft,
+      }) as React.CSSProperties,
+    [courseColor.base, courseColor.soft]
+  );
 
   // ── Loading state ──
   if (courseDetail.isLoading) {
