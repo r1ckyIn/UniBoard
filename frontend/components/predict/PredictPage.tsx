@@ -26,7 +26,7 @@ import {
   computeRequired,
 } from "@/lib/predict/wam-engine";
 import type { CourseComputeData } from "@/lib/predict/wam-engine";
-import { getLevelFromCode } from "@/lib/predict/faculty-weights";
+import { getLevelFromCode, FACULTY_WEIGHTS } from "@/lib/predict/faculty-weights";
 import type { FacultyScheme } from "@/lib/predict/faculty-weights";
 import { getCourseColor } from "@/lib/dashboard/course-colors";
 import type { components } from "@/lib/api/types.gen";
@@ -270,6 +270,7 @@ export default function PredictPage() {
                   isExpanded={expandedCards.has(course.course_id)}
                   onToggle={() => toggleCard(course.course_id)}
                   courseColor={courseColorsMap[course.code] ?? { base: "#9b9b94", soft: "rgba(155,155,148,0.11)" }}
+                  excluded={FACULTY_WEIGHTS[facultyScheme](getLevelFromCode(course.code)) === 0}
                 />
               </div>
             </AnimatedEntry>

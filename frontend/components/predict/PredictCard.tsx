@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Lock } from "lucide-react";
 import type { components } from "@/lib/api/types.gen";
 import type { MouseEvent } from "react";
 import { computeCurrent, computeProjected } from "@/lib/predict/wam-engine";
@@ -22,6 +22,7 @@ interface PredictCardProps {
   isExpanded: boolean;
   onToggle: () => void;
   courseColor: { base: string; soft: string };
+  excluded?: boolean;
 }
 
 /**
@@ -48,6 +49,7 @@ export default function PredictCard({
   isExpanded,
   onToggle,
   courseColor,
+  excluded = false,
 }: PredictCardProps) {
   const t = useTranslations("predict");
 
@@ -82,6 +84,7 @@ export default function PredictCard({
   const assessedPct = Math.round(assessedWeight * 100);
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (excluded) return;
     const target = e.target as HTMLElement;
     if (target.closest(".score-input") || target.closest("input")) {
       return;
@@ -92,7 +95,7 @@ export default function PredictCard({
   return (
     <div
       onClick={handleClick}
-      className={`relative ${isExpanded ? "cursor-default" : "cursor-pointer"}`}
+      className={`relative ${excluded ? "cursor-not-allowed opacity-45" : isExpanded ? "cursor-default" : "cursor-pointer"}`}
       data-testid="predict-card"
     >
       <div className="bg-[#f6f5f0] border-[1.5px] border-[#d0cdc4] rounded-[14px] shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)] overflow-hidden relative hover:shadow-[0_2px_8px_rgba(20,20,19,0.06),0_8px_24px_rgba(20,20,19,0.04)] transition-shadow duration-200">
@@ -190,14 +193,18 @@ export default function PredictCard({
 
             {/* Chevron */}
             <div className="w-[28px] flex justify-center">
-              <ChevronDown
-                size={16}
-                className="text-[#9b9b94] transition-transform duration-300"
-                style={{
-                  transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                }}
-                data-testid="chevron"
-              />
+              {excluded ? (
+                <Lock size={14} className="text-[#9b9b94]" data-testid="lock-icon" />
+              ) : (
+                <ChevronDown
+                  size={16}
+                  className="text-[#9b9b94] transition-transform duration-300"
+                  style={{
+                    transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                  data-testid="chevron"
+                />
+              )}
             </div>
           </div>
         </div>

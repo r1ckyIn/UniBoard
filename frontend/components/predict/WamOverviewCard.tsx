@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import RoughCard from "@/components/design-system/RoughCard";
+import { useCountUp } from "@/lib/hooks/use-count-up";
 import { getGradeBand } from "@/lib/utils/grade-band";
 import { wamToGpa } from "@/lib/predict/wam-to-gpa";
 
@@ -16,6 +17,7 @@ interface WamOverviewCardProps {
  */
 export default function WamOverviewCard({ wam, allFilled }: WamOverviewCardProps) {
   const t = useTranslations("predict");
+  const displayWam = useCountUp(wam);
 
   const band = getGradeBand(wam);
   const bandLabel = allFilled
@@ -27,7 +29,7 @@ export default function WamOverviewCard({ wam, allFilled }: WamOverviewCardProps
       <div className="text-center">
         {/* WAM number */}
         <div className="font-serif text-[2rem] font-bold text-[#d97757] leading-[1.1] inline-block">
-          {wam.toFixed(1)}
+          {(displayWam ?? wam).toFixed(1)}
         </div>
 
         {/* Grade band badge */}

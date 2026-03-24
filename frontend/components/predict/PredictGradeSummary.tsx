@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useCountUp } from "@/lib/hooks/use-count-up";
 import { getGradeBand } from "@/lib/utils/grade-band";
 
 interface PredictGradeSummaryProps {
@@ -21,6 +22,7 @@ export default function PredictGradeSummary({
   courseColor,
 }: PredictGradeSummaryProps) {
   const t = useTranslations("predict");
+  const displayProjected = useCountUp(projectedFinal);
 
   return (
     <div className="flex items-center justify-between gap-[20px] pt-[14px] mt-[12px] border-t-[1.5px] border-[#eae7e0]">
@@ -56,8 +58,8 @@ export default function PredictGradeSummary({
             color: projectedFinal !== null ? courseColor : "#9b9b94",
           }}
         >
-          {projectedFinal !== null
-            ? `${projectedFinal.toFixed(1)}%`
+          {displayProjected !== null
+            ? `${displayProjected.toFixed(1)}%`
             : "\u2014"}
         </span>
         <span className="text-[0.7rem] text-[#6b6b65] font-medium">
