@@ -417,5 +417,38 @@
       "loadFailed": "Failed to load prediction data",
       "retry": "Retry"
     }
+  },
+  "digest": {
+    "title": "Daily Digest",
+    "dateBadge": "{date}",
+    "generatedAgo": "Generated {time}",
+    "generatedJustNow": "Generated just now",
+    "refresh": "Refresh",
+    "urgentBanner": "{count} urgent items need your attention",
+    "filterAll": "All",
+    "filterGrade": "Grade",
+    "filterStaff": "Staff",
+    "filterDeadline": "Deadline",
+    "filterAnnouncement": "Announcement",
+    "filterExam": "Exam",
+    "updates": "updates",
+    "update": "update",
+    "viewThread": "View thread",
+    "source.canvas": "Canvas",
+    "source.ed": "Ed",
+    "urgency.critical": "critical",
+    "urgency.important": "important",
+    "urgency.informational": "informational",
+    "summary.title": "Today's Summary",
+    "summary.updates": "Updates",
+    "summary.courses": "Courses",
+    "summary.grades": "Grades",
+    "summary.urgent": "Urgent",
+    "history.title": "Recent Digests",
+    "history.items": "{count} items",
+    "emptyState": "No updates today",
+    "emptyStateDesc": "Check back tomorrow for your daily academic digest.",
+    "errorState": "Failed to load digest",
+    "retry": "Retry"
   }
 }
