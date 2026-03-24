@@ -401,7 +401,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
 | 8. Deadlines Page | M1 | 0/3 | Planned | - |
 | 9. Predict Page | M1 | 0/3 | Planned | - |
-| 10. Digest Page | M1 | 0/3 | Planned | - |
+| 10. Digest Page | 1/3 | In Progress|  | - |
 | 11. Timetable Page | M1 | 0/TBD | Not started | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
