@@ -35,6 +35,7 @@ type AssessmentWeight = components["schemas"]["AssessmentWeight"];
 
 const VALID_SCHEMES: FacultyScheme[] = ["standard", "engineering", "science_honours"];
 const LS_KEY = "uniboard-faculty-scheme";
+const EMPTY_PREDICTIONS: Record<number, number | null> = {};
 
 /**
  * Read faculty scheme from localStorage with validation.
@@ -89,13 +90,13 @@ export default function PredictPage() {
   >({});
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [facultyScheme, setFacultyScheme] = useState<FacultyScheme>(readFacultyScheme);
-  const [targetWam, setTargetWam] = useState<number>(
-    gpaReport.data?.data.target_wam ?? 85
-  );
+  const [targetWam, setTargetWam] = useState<number>(85);
 
-  // Update target when gpa data arrives
+  // Set target from API when data first arrives
+  const targetInitialized = useRef(false);
   useEffect(() => {
-    if (gpaReport.data?.data.target_wam != null) {
+    if (!targetInitialized.current && gpaReport.data?.data.target_wam != null) {
+      targetInitialized.current = true;
       setTargetWam(gpaReport.data.data.target_wam);
     }
   }, [gpaReport.data]);
@@ -178,15 +179,14 @@ export default function PredictPage() {
     return map;
   }, [courses]);
 
-  // ── Semester progress data ─────────────────────────────────────
   const progressData = useMemo(() => {
     return courses.map((c) => ({
       code: c.code,
       completedWeight: c.completed_weight,
       creditPoints: c.credit_points,
-      color: getCourseColor(c.code).base,
+      color: courseColorsMap[c.code]?.base ?? "#9b9b94",
     }));
-  }, [courses]);
+  }, [courses, courseColorsMap]);
 
   // ── Total credit points ────────────────────────────────────────
   const totalCp = useMemo(
@@ -230,13 +230,11 @@ export default function PredictPage() {
   // ── Render ─────────────────────────────────────────────────────
   return (
     <>
-      <AnimatedEntry delay={1}>
-        <PredictTitleRow
-          facultyScheme={facultyScheme}
-          onFacultyChange={handleFacultyChange}
-          totalCp={totalCp}
-        />
-      </AnimatedEntry>
+      <PredictTitleRow
+        facultyScheme={facultyScheme}
+        onFacultyChange={handleFacultyChange}
+        totalCp={totalCp}
+      />
 
       {/* Course prediction cards */}
       {isLoading ? (
@@ -261,13 +259,13 @@ export default function PredictPage() {
                 <PredictCard
                   course={course}
                   assessments={assessmentsMap[course.course_id] ?? []}
-                  predictions={allPredictions[course.course_id] ?? {}}
+                  predictions={allPredictions[course.course_id] ?? EMPTY_PREDICTIONS}
                   onPredictionChange={(i, v) =>
                     handlePredictionChange(course.course_id, i, v)
                   }
                   isExpanded={expandedCards.has(course.course_id)}
                   onToggle={() => toggleCard(course.course_id)}
-                  courseColor={getCourseColor(course.code)}
+                  courseColor={courseColorsMap[course.code] ?? { base: "#9b9b94", soft: "rgba(155,155,148,0.11)" }}
                 />
               </div>
             </AnimatedEntry>
