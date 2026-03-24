@@ -1,11 +1,11 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Radio, RefreshCw } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
-import { enUS, zhCN } from "date-fns/locale";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import { cn } from "@/lib/utils/cn";
+import { useDateFnsLocale } from "@/lib/utils/date-fns-locale";
 
 interface DigestTitleRowProps {
   generatedAt: string;
@@ -23,8 +23,7 @@ export default function DigestTitleRow({
   isFetching,
 }: DigestTitleRowProps) {
   const t = useTranslations("digest");
-  const locale = useLocale();
-  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
+  const dateFnsLocale = useDateFnsLocale();
 
   const date = new Date(generatedAt);
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
-import { enUS, zhCN } from "date-fns/locale";
 import Link from "next/link";
+import { useDateFnsLocale } from "@/lib/utils/date-fns-locale";
 import { cn } from "@/lib/utils/cn";
 import {
   HIGHLIGHT_CONFIG,
@@ -35,8 +35,7 @@ export default function HighlightItem({
   courseCode,
 }: HighlightItemProps) {
   const t = useTranslations("digest");
-  const locale = useLocale();
-  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
+  const dateFnsLocale = useDateFnsLocale();
 
   const config = HIGHLIGHT_CONFIG[type] ?? HIGHLIGHT_CONFIG.new_grade;
   const colorCls = COLOR_CLASSES[config.color] ?? COLOR_CLASSES.green;

@@ -20,7 +20,6 @@ export type DigestFilterType =
 // ── Highlight configuration ──────────────────────────────────────
 interface HighlightMeta {
   icon: LucideIcon;
-  iconClass: string;
   color: string;
   label: string;
 }
@@ -28,55 +27,46 @@ interface HighlightMeta {
 export const HIGHLIGHT_CONFIG: Record<string, HighlightMeta> = {
   new_grade: {
     icon: CheckCircle,
-    iconClass: "grade",
     color: "green",
     label: "New Grade",
   },
   grade_published: {
     icon: CheckCircle,
-    iconClass: "grade",
     color: "green",
     label: "Grade Published",
   },
   grade_alert: {
     icon: CheckCircle,
-    iconClass: "grade",
     color: "green",
     label: "Grade Alert",
   },
   staff_post: {
     icon: MessageCircle,
-    iconClass: "staff",
     color: "blue",
     label: "Staff Post",
   },
   deadline_change: {
     icon: CalendarClock,
-    iconClass: "deadline-change",
     color: "purple",
     label: "Deadline Change",
   },
   deadline_approaching: {
     icon: CalendarClock,
-    iconClass: "deadline-change",
     color: "purple",
     label: "Deadline",
   },
   endorsed_post: {
     icon: Star,
-    iconClass: "endorsed",
     color: "amber",
     label: "Endorsed Post",
   },
   new_announcement: {
     icon: Megaphone,
-    iconClass: "announcement",
     color: "orange",
     label: "Announcement",
   },
   exam_info: {
     icon: GraduationCap,
-    iconClass: "exam",
     color: "red",
     label: "Exam Info",
   },
@@ -139,18 +129,17 @@ interface CourseWithHighlights {
 export function sortCoursesByUrgency<T extends CourseWithHighlights>(
   courses: T[],
 ): T[] {
+  const priority = new Map<T, number>(
+    courses.map((c) => [
+      c,
+      c.highlights.reduce(
+        (min, h) => Math.min(min, URGENCY_PRIORITY[h.urgency] ?? 99),
+        Infinity,
+      ),
+    ]),
+  );
   return [...courses].sort((a, b) => {
-    // Find the highest urgency (lowest priority number) in each course
-    const minA = Math.min(
-      ...a.highlights.map((h) => URGENCY_PRIORITY[h.urgency] ?? 99),
-    );
-    const minB = Math.min(
-      ...b.highlights.map((h) => URGENCY_PRIORITY[h.urgency] ?? 99),
-    );
-
-    if (minA !== minB) return minA - minB;
-
-    // Tiebreaker: more highlights first
-    return b.highlights.length - a.highlights.length;
+    const diff = priority.get(a)! - priority.get(b)!;
+    return diff !== 0 ? diff : b.highlights.length - a.highlights.length;
   });
 }

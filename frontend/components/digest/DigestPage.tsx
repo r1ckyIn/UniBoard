@@ -96,14 +96,6 @@ export default function DigestPage() {
     return sortCoursesByUrgency(courses);
   }, [digestData, activeFilter]);
 
-  // ── Critical count ─────────────────────────────────────────────
-  const criticalCount = useMemo(() => {
-    if (!digestData?.data?.courses) return 0;
-    return digestData.data.courses
-      .flatMap((c) => c.highlights)
-      .filter((h) => h.urgency === "critical").length;
-  }, [digestData]);
-
   // ── Summary stats ──────────────────────────────────────────────
   const summaryStats = useMemo(() => {
     if (!digestData?.data?.courses)
@@ -113,7 +105,7 @@ export default function DigestPage() {
       updates: allHighlights.length,
       courses: digestData.data.courses.length,
       grades: allHighlights.filter((h) =>
-        ["new_grade", "grade_published", "grade_alert"].includes(h.type)
+        FILTER_TYPE_MAP.grade.includes(h.type)
       ).length,
       urgent: allHighlights.filter((h) => h.urgency === "critical").length,
     };
@@ -241,7 +233,7 @@ export default function DigestPage() {
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
         />
-        <DigestUrgentBanner criticalCount={criticalCount} />
+        <DigestUrgentBanner criticalCount={summaryStats.urgent} />
         {filteredCourses.map((course, i) => (
           <CourseSectionCard
             key={course.code}

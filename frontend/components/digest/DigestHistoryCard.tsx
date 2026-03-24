@@ -1,9 +1,9 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Clock, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { enUS, zhCN } from "date-fns/locale";
+import { useDateFnsLocale } from "@/lib/utils/date-fns-locale";
 import { cn } from "@/lib/utils/cn";
 import { withClientOnly } from "@/components/design-system/ClientOnly";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
@@ -21,7 +21,6 @@ interface DigestHistoryCardProps {
   }>;
   selectedId: string | null;
   onSelect: (digestId: string) => void;
-  isLoading?: boolean;
 }
 
 /**
@@ -35,8 +34,7 @@ export default function DigestHistoryCard({
   onSelect,
 }: DigestHistoryCardProps) {
   const t = useTranslations("digest");
-  const locale = useLocale();
-  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
+  const dateFnsLocale = useDateFnsLocale();
 
   return (
     <AnimatedEntry delay={7}>

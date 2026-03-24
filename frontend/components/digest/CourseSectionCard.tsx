@@ -33,8 +33,7 @@ export default function CourseSectionCard({
 
   return (
     <AnimatedEntry delay={delay ?? 3}>
-      <div className="relative">
-        <div className="bg-[#f6f5f0] border-[1.5px] border-[#d0cdc4] rounded-[14px] shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)] overflow-hidden relative hover:shadow-[0_2px_8px_rgba(20,20,19,0.06),0_8px_24px_rgba(20,20,19,0.04)] transition-shadow duration-150">
+      <div className="bg-[#f6f5f0] border-[1.5px] border-[#d0cdc4] rounded-[14px] shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)] overflow-hidden relative hover:shadow-[0_2px_8px_rgba(20,20,19,0.06),0_8px_24px_rgba(20,20,19,0.04)] transition-shadow duration-150">
           {/* Left color stripe */}
           <div
             className="absolute left-0 top-0 bottom-0 w-[5px] z-[3]"
@@ -81,7 +80,6 @@ export default function CourseSectionCard({
               />
             ))}
           </div>
-        </div>
       </div>
     </AnimatedEntry>
   );
