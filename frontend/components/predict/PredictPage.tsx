@@ -71,7 +71,9 @@ export default function PredictPage() {
     gpaReport.isLoading ||
     courseDetailQueries.some((q) => q.isLoading);
 
-  // Build assessments map: courseId -> AssessmentWeight[]
+  // Stable key for assessments map — changes when any query data changes
+  const detailDataKey = courseDetailQueries.map((q) => q.dataUpdatedAt).join(",");
+
   const assessmentsMap = useMemo<Record<string, AssessmentWeight[]>>(() => {
     const map: Record<string, AssessmentWeight[]> = {};
     courses.forEach((c, i) => {
@@ -82,7 +84,7 @@ export default function PredictPage() {
     });
     return map;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses, ...courseDetailQueries.map((q) => q.data)]);
+  }, [courses, detailDataKey]);
 
   // ── State ──────────────────────────────────────────────────────
   const [allPredictions, setAllPredictions] = useState<
