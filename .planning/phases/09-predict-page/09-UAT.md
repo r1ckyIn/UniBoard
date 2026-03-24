@@ -1,5 +1,5 @@
 ---
-status: complete
+status: resolved
 phase: 09-predict-page
 source: [09-01-SUMMARY.md, 09-02-SUMMARY.md, 09-03-SUMMARY.md]
 started: 2026-03-24T15:30:00+11:00
@@ -67,7 +67,7 @@ skipped: 0
 ## Gaps
 
 - truth: "Grade summary and WAM numbers update with smooth counting animation like courses page"
-  status: failed
+  status: resolved
   reason: "User reported: 是实时更新但是表现形式和courses的不太一样，没有平滑滚动"
   severity: cosmetic
   test: 3
@@ -83,7 +83,7 @@ skipped: 0
   debug_session: ""
 
 - truth: "Excluded course cards show visual lock/dimmed state and disable expand/input when faculty scheme excludes them"
-  status: failed
+  status: resolved
   reason: "User reported: 下面会排除但是卡片没有相应，卡片也加一个锁住的动画，然后功能禁用"
   severity: minor
   test: 8
