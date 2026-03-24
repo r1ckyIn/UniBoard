@@ -41,13 +41,14 @@ export default function PredictAssessmentTable({
       return;
     }
 
-    // Only allow numeric input
-    const num = parseInt(raw, 10);
-    if (Number.isNaN(num)) return;
-
-    // Clamp 0-100
-    const clamped = Math.max(0, Math.min(100, num));
-    onPredictionChange(index, String(clamped));
+    // Allow trailing dot/decimal during typing (e.g. "85." or "85.5")
+    if (/^\d+\.?\d*$/.test(raw)) {
+      const num = parseFloat(raw);
+      if (Number.isNaN(num)) return;
+      const clamped = Math.max(0, Math.min(100, num));
+      // Preserve raw string if user is still typing decimals
+      onPredictionChange(index, raw.endsWith(".") ? raw : String(clamped));
+    }
   };
 
   return (
@@ -140,8 +141,8 @@ export default function PredictAssessmentTable({
                     <>
                       <input
                         type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
+                        inputMode="decimal"
+                        pattern="[0-9]*\.?[0-9]*"
                         className="score-input w-[56px] border-0 border-b-2 border-dashed border-[#d0cdc4] bg-transparent font-serif font-bold text-[1.05rem] text-center outline-none px-[4px] py-[2px] transition-colors duration-150 focus:border-b-current"
                         style={
                           {

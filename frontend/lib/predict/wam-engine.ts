@@ -137,9 +137,12 @@ function getKnownScores(course: CourseComputeData): {
  * needed on remaining assessments to achieve the target WAM.
  *
  * Algorithm (adapted from prototype predict.html):
- * 1. For the target course, solve for required average on remaining weight.
- * 2. For all other courses, assume they score their current average on remaining.
- * 3. WAM equation: targetWAM = sum(final * cp * lw) / sum(cp * lw)
+ * Per-course calculation: what average score on remaining assessments
+ * is needed for THIS course's final mark to reach targetWAM.
+ *
+ * finalMark = knownSum * 100 + required * remainWeight
+ * targetWAM = knownSum * 100 + required * remainWeight
+ * required = (targetWAM - knownSum * 100) / remainWeight
  */
 export function computeRequired(
   courses: CourseComputeData[],
@@ -148,13 +151,7 @@ export function computeRequired(
 ): RequiredScoreResult[] {
   const getLW = FACULTY_WEIGHTS[scheme];
 
-  // Total denominator across all courses
-  const totalDen = courses.reduce(
-    (sum, c) => sum + c.creditPoints * getLW(c.level),
-    0
-  );
-
-  return courses.map((course, idx) => {
+  return courses.map((course) => {
     const lw = getLW(course.level);
 
     // Excluded from WAM under this scheme
@@ -174,27 +171,12 @@ export function computeRequired(
       };
     }
 
-    // Assume other courses maintain their current average on remaining work
-    let otherNum = 0;
-    courses.forEach((o, oi) => {
-      if (oi === idx) return;
-      const oLw = getLW(o.level);
-      if (oLw === 0) return;
-
-      const { knownSum: oKS, knownWeight: oKW } = getKnownScores(o);
-      const oRemain = 1.0 - oKW;
-      const oAvg = oKW > 0 ? oKS / oKW : targetWAM / 100;
-      // Final mark = (knownSum + avg * remainWeight) * 100
-      const oFinal = (oKS + oAvg * oRemain) * 100;
-      otherNum += oFinal * o.creditPoints * oLw;
-    });
-
-    // Solve: targetWAM * totalDen = otherNum + finalMark * cp * lw
-    const neededFinal = (targetWAM * totalDen - otherNum) / (course.creditPoints * lw);
-    // neededFinal is on 0-100 scale, knownSum is on 0-1 scale
-    // finalMark = knownSum * 100 + requiredAvg * remainWeight
-    // => requiredAvg = (neededFinal - knownSum * 100) / remainWeight
-    const required = (neededFinal - knownSum * 100) / remainWeight;
+    // Solve per-course: what remaining avg makes this course's final = targetWAM
+    // finalMark = (knownSum + requiredAvg_01 * remainWeight) * 100
+    // targetWAM = (knownSum + requiredAvg_01 * remainWeight) * 100
+    // requiredAvg_01 = (targetWAM / 100 - knownSum) / remainWeight
+    // requiredAvg_pct = requiredAvg_01 * 100
+    const required = ((targetWAM / 100 - knownSum) / remainWeight) * 100;
 
     return { code: course.code, required, locked: false };
   });

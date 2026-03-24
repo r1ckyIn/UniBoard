@@ -185,7 +185,7 @@ describe("PredictCard", () => {
     const input1 = screen.getByTestId("score-input-3");
     expect(input0).toBeInTheDocument();
     expect(input1).toBeInTheDocument();
-    expect(input0).toHaveAttribute("inputMode", "numeric");
+    expect(input0).toHaveAttribute("inputMode", "decimal");
   });
 
   it("clamps input to 0-100 range", () => {

@@ -119,7 +119,9 @@ export default function PredictPage() {
         }));
         return;
       }
-      const num = Number(value);
+      // Allow trailing dot during decimal typing
+      if (value.endsWith(".")) return;
+      const num = parseFloat(value);
       if (isNaN(num)) return;
       const clamped = Math.min(100, Math.max(0, num));
       setAllPredictions((prev) => ({

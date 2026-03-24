@@ -247,6 +247,33 @@ describe("wam-engine", () => {
       });
     });
 
+    it("per-course: required score makes this course's final mark equal target", () => {
+      // COMP2017: 40% assessed, current avg = 82.0
+      // knownSum = (85*0.1 + 78*0.15 + 84*0.15) / 100 on 0-1 scale
+      // knownSum = 0.1*85/100 + 0.15*78/100 + 0.15*84/100 = 0.085 + 0.117 + 0.126 = 0.328
+      // Wait, knownSum = sum((score/maxScore) * weight) for graded
+      // = (85/100)*0.1 + (78/100)*0.15 + (84/100)*0.15 = 0.085 + 0.117 + 0.126 = 0.328
+      // remainWeight = 1 - 0.4 = 0.6, target = 74
+      // required = ((74/100 - 0.328) / 0.6) * 100 = (0.412 / 0.6) * 100 = 68.67
+      const course: CourseComputeData = {
+        courseId: "c1",
+        code: "COMP2017",
+        creditPoints: 6,
+        level: 2,
+        assessments: [
+          { weight: 0.1, score: 85, maxScore: 100 },
+          { weight: 0.15, score: 78, maxScore: 100 },
+          { weight: 0.15, score: 84, maxScore: 100 },
+          { weight: 0.2, score: null, maxScore: 100 },
+          { weight: 0.4, score: null, maxScore: 100 },
+        ],
+        predictions: {},
+      };
+      const results = computeRequired([course], 74, "standard");
+      expect(results[0].required).toBeCloseTo(68.67, 1);
+      // Verify: final = (0.328 + 0.6867 * 0.6) * 100 = (0.328 + 0.412) * 100 = 74.0
+    });
+
     it("marks locked courses (100% graded) correctly", () => {
       const fullyGradedCourse: CourseComputeData = {
         courseId: "locked",
