@@ -352,5 +352,61 @@
       "cta": "Go to Dashboard",
       "toast": "Welcome! Your accounts are connected."
     }
+  },
+  "predict": {
+    "title": "Grade Predictor",
+    "semesterBadge": "2026 S1",
+    "cpBadge": "{cp} cp",
+    "facultyLabel": "Weighting",
+    "facultyStandard": "Standard",
+    "facultyEngineering": "Engineering",
+    "facultyScienceHonours": "Science Honours",
+    "assessed": "{pct}% assessed",
+    "current": "Current",
+    "projected": "Projected",
+    "columns": {
+      "assessment": "Assessment",
+      "weight": "Weight",
+      "score": "Score"
+    },
+    "scorePlaceholder": "?",
+    "gradedBadge": "graded",
+    "gradeSummary": {
+      "current": "Current",
+      "projected": "Projected",
+      "assessedSub": "{pct}% assessed",
+      "gradeBand": "{band} grade band",
+      "enterScores": "Enter scores above",
+      "note": "Projected grade updates live as you type predicted scores."
+    },
+    "wamOverview": {
+      "fillPredictions": "Fill predictions",
+      "gpa": "GPA: {gpa} / 4.0",
+      "basisPartial": "Based on current marks (partial)",
+      "basisAll": "Based on all predicted scores"
+    },
+    "target": {
+      "label": "Target WAM",
+      "toGo": "+{gap} to go",
+      "onTrack": "On track!"
+    },
+    "required": {
+      "title": "Min. Scores Needed",
+      "note": "Average on remaining assessments",
+      "excluded": "Excluded",
+      "locked": "Locked"
+    },
+    "progress": {
+      "title": "Semester Progress",
+      "overall": "{pct}% of semester assessed"
+    },
+    "empty": {
+      "noCourses": "No courses available",
+      "noAssessments": "No assessments for this course"
+    },
+    "error": {
+      "loadFailed": "Failed to load prediction data",
+      "retry": "Retry"
+    }
   }
 }
