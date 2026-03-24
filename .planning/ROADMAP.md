@@ -24,7 +24,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 7: Course Detail Page** — Assessment breakdown, materials browser, Ed posts
 - [ ] **Phase 8: Deadlines Page** — Calendar view, filterable timeline, AI chat panel placeholder
 - [ ] **Phase 9: Predict Page** — Slider-based What-if GPA simulator with real-time calculation
-- [ ] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI
+- [x] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI (completed 2026-03-24)
 - [ ] **Phase 11: Timetable Page** — Weekly schedule view
 - [ ] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile
 
@@ -211,15 +211,22 @@ Plans:
 - [ ] 09-03-PLAN.md — Right panel cards (WAM Overview, Target Slider, Required Scores, Semester Progress), PredictPage orchestrator, route page
 
 ### Phase 10: Digest Page
-**Goal**: Users can review their daily academic digest with AI-scored relevance
+**Goal**: Users can review their daily academic digest with course-grouped highlights and type filtering
 **Depends on**: Phase 2
 **Requirements**: UI-05
 **Success Criteria** (what must be TRUE):
-  1. Digest entries display with date grouping (today, yesterday, this week)
-  2. Each entry shows source (Canvas/Ed), type (deadline/grade/announcement), and relevance score
-  3. Entries are expandable to show full content
-  4. Filter controls allow filtering by source, type, and date range
-**Plans**: TBD
+  1. Digest entries display grouped by course with colored left stripe and urgency-based ordering
+  2. Each entry shows source (Canvas/Ed), type icon, summary, and urgency badge (critical/important/informational)
+  3. All highlights fully expanded (single-line summaries, no collapse)
+  4. Type filter pills allow filtering by Grade, Staff, Deadline, Announcement, Exam
+  5. Right panel shows Today's Summary stats and Recent Digests history list
+  6. Urgent banner displays when critical highlights exist
+**Plans**: 3 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — i18n digest namespace, enriched fixture data (all 6 highlight types), type config module, Wave 0 test stubs
+- [ ] 10-02-PLAN.md — DigestTitleRow, DigestFilterBar, DigestUrgentBanner, CourseSectionCard, HighlightItem components
+- [ ] 10-03-PLAN.md — DigestSummaryCard, DigestHistoryCard (right panel), DigestPage orchestrator, route page.tsx
 
 ### Phase 11: Timetable Page
 **Goal**: Users can view their weekly class schedule
@@ -394,7 +401,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
 | 8. Deadlines Page | M1 | 0/3 | Planned | - |
 | 9. Predict Page | M1 | 0/3 | Planned | - |
-| 10. Digest Page | M1 | 0/TBD | Not started | - |
+| 10. Digest Page | 3/3 | Complete    | 2026-03-24 | - |
 | 11. Timetable Page | M1 | 0/TBD | Not started | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |

@@ -417,5 +417,38 @@
       "loadFailed": "预测数据加载失败",
       "retry": "重试"
     }
+  },
+  "digest": {
+    "title": "每日摘要",
+    "dateBadge": "{date}",
+    "generatedAgo": "{time}前生成",
+    "generatedJustNow": "刚刚生成",
+    "refresh": "刷新",
+    "urgentBanner": "{count} 项紧急事项需要您的注意",
+    "filterAll": "全部",
+    "filterGrade": "成绩",
+    "filterStaff": "教师",
+    "filterDeadline": "截止日期",
+    "filterAnnouncement": "公告",
+    "filterExam": "考试",
+    "updates": "条更新",
+    "update": "条更新",
+    "viewThread": "查看帖子",
+    "source.canvas": "Canvas",
+    "source.ed": "Ed",
+    "urgency.critical": "紧急",
+    "urgency.important": "重要",
+    "urgency.informational": "一般",
+    "summary.title": "今日概况",
+    "summary.updates": "更新",
+    "summary.courses": "课程",
+    "summary.grades": "成绩",
+    "summary.urgent": "紧急",
+    "history.title": "近期摘要",
+    "history.items": "{count} 条",
+    "emptyState": "今天没有更新",
+    "emptyStateDesc": "明天再来查看您的每日学术摘要。",
+    "errorState": "加载摘要失败",
+    "retry": "重试"
   }
 }
