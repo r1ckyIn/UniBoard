@@ -3,14 +3,13 @@
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Calendar, AlertCircle } from "lucide-react";
-import { differenceInCalendarDays, format } from "date-fns";
+import { differenceInCalendarDays } from "date-fns";
 import { useDeadlines } from "@/hooks/use-deadlines";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import DeadlineTitleRow from "@/components/deadlines/DeadlineTitleRow";
 import DeadlineTimelineView from "@/components/deadlines/DeadlineTimelineView";
-import DeadlineCalendarView from "@/components/deadlines/DeadlineCalendarView";
 import type { components } from "@/lib/api/types.gen";
-import type { ViewMode, FilterMode } from "@/lib/deadlines/types";
+import type { FilterMode } from "@/lib/deadlines/types";
 
 type Deadline = components["schemas"]["Deadline"];
 
@@ -19,25 +18,16 @@ export default function DeadlinesPage() {
   const { data, isLoading, isError } = useDeadlines();
   const deadlineList: Deadline[] = data?.data ?? [];
 
-  const [viewMode, setViewMode] = useState<ViewMode>("timeline");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Client-side filtered + sorted deadlines, with upcoming count computed in the same pass
   const { filteredDeadlines, upcomingCount } = useMemo(() => {
     const now = new Date();
     let result = [...deadlineList];
 
     if (selectedCourse) {
       result = result.filter((dl) => dl.course_code === selectedCourse);
-    }
-
-    if (selectedDate) {
-      result = result.filter(
-        (dl) => format(new Date(dl.due_date), "yyyy-MM-dd") === selectedDate
-      );
     }
 
     if (filterMode === "week") {
@@ -58,7 +48,7 @@ export default function DeadlinesPage() {
     }
 
     return { filteredDeadlines: result, upcomingCount: upcoming };
-  }, [deadlineList, selectedCourse, selectedDate, filterMode]);
+  }, [deadlineList, selectedCourse, filterMode]);
 
   const courseOptions = useMemo(() => {
     const seen = new Set<string>();
@@ -74,13 +64,6 @@ export default function DeadlinesPage() {
     );
   }, [deadlineList]);
 
-  // Clear selectedDate when switching away from calendar view
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode);
-    setSelectedDate(null);
-  };
-
-  // Toggle expanded card (accordion behavior)
   const handleToggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
@@ -91,8 +74,6 @@ export default function DeadlinesPage() {
         <DeadlineTitleRow
           upcomingCount={upcomingCount}
           semester={t("semester")}
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
           filterMode={filterMode}
           onFilterModeChange={setFilterMode}
           courseOptions={courseOptions}
@@ -124,55 +105,24 @@ export default function DeadlinesPage() {
         </div>
       )}
 
-      {/* Empty state (timeline mode only — calendar always renders its grid) */}
-      {!isLoading &&
-        !isError &&
-        viewMode === "timeline" &&
-        filteredDeadlines.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-12">
-            <Calendar size={48} className="text-[#9b9b94]" />
-            <h2 className="text-[1.1rem] font-semibold font-serif text-[#2d2d2a]">
-              {t("emptyTitle")}
-            </h2>
-            <p className="text-[0.85rem] text-[#6b6b65]">{t("emptyBody")}</p>
-          </div>
-        )}
+      {/* Empty state */}
+      {!isLoading && !isError && filteredDeadlines.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-12">
+          <Calendar size={48} className="text-[#9b9b94]" />
+          <h2 className="text-[1.1rem] font-semibold font-serif text-[#2d2d2a]">
+            {t("emptyTitle")}
+          </h2>
+          <p className="text-[0.85rem] text-[#6b6b65]">{t("emptyBody")}</p>
+        </div>
+      )}
 
       {/* Timeline content */}
-      {!isLoading &&
-        !isError &&
-        viewMode === "timeline" &&
-        filteredDeadlines.length > 0 && (
-          <DeadlineTimelineView
-            deadlines={filteredDeadlines}
-            expandedId={expandedId}
-            onToggleExpand={handleToggleExpand}
-          />
-        )}
-
-      {/* Calendar content */}
-      {!isLoading && !isError && viewMode === "calendar" && (
-        <>
-          <DeadlineCalendarView
-            deadlines={deadlineList}
-            onDateFilter={setSelectedDate}
-            selectedDate={selectedDate}
-          />
-          {selectedDate && filteredDeadlines.length > 0 && (
-            <div className="mt-4">
-              <DeadlineTimelineView
-                deadlines={filteredDeadlines}
-                expandedId={expandedId}
-                onToggleExpand={handleToggleExpand}
-              />
-            </div>
-          )}
-          {selectedDate && filteredDeadlines.length === 0 && (
-            <p className="text-center text-[0.85rem] text-[#9b9b94] py-6">
-              {t("emptyBody")}
-            </p>
-          )}
-        </>
+      {!isLoading && !isError && filteredDeadlines.length > 0 && (
+        <DeadlineTimelineView
+          deadlines={filteredDeadlines}
+          expandedId={expandedId}
+          onToggleExpand={handleToggleExpand}
+        />
       )}
     </div>
   );

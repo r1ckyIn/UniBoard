@@ -1,14 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Calendar, CalendarDays, List } from "lucide-react";
-import type { ViewMode, FilterMode } from "@/lib/deadlines/types";
+import { Calendar } from "lucide-react";
+import type { FilterMode } from "@/lib/deadlines/types";
 
 interface DeadlineTitleRowProps {
   upcomingCount: number;
   semester: string;
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
   filterMode: FilterMode;
   onFilterModeChange: (mode: FilterMode) => void;
   courseOptions: { value: string; label: string }[];
@@ -19,8 +17,6 @@ interface DeadlineTitleRowProps {
 export default function DeadlineTitleRow({
   upcomingCount,
   semester,
-  viewMode,
-  onViewModeChange,
   filterMode,
   onFilterModeChange,
   courseOptions,
@@ -42,7 +38,7 @@ export default function DeadlineTitleRow({
         </span>
       </div>
 
-      {/* Right side: filter badge + course dropdown + filter mode + view mode */}
+      {/* Right side: filter badge + course dropdown + filter mode */}
       <div className="flex items-center gap-[8px]">
         {/* Filter count badge */}
         <span className="text-[0.7rem] font-semibold text-[#6b6b65] bg-[#f6f5f0] border border-[#e8e5dd] px-[10px] py-[4px] rounded-[6px]">
@@ -89,34 +85,6 @@ export default function DeadlineTitleRow({
             data-testid="mode-week"
           >
             {t("modeWeek")}
-          </button>
-        </div>
-
-        {/* Timeline / Calendar toggle */}
-        <div className="flex border border-[#e8e5dd] rounded-[8px] overflow-hidden">
-          <button
-            type="button"
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-r border-[#e8e5dd] transition-colors duration-150 grid place-items-center ${
-              viewMode === "timeline"
-                ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
-                : "bg-white text-[#9b9b94]"
-            }`}
-            onClick={() => onViewModeChange("timeline")}
-            data-testid="view-timeline"
-          >
-            <List size={14} />
-          </button>
-          <button
-            type="button"
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] transition-colors duration-150 grid place-items-center ${
-              viewMode === "calendar"
-                ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
-                : "bg-white text-[#9b9b94]"
-            }`}
-            onClick={() => onViewModeChange("calendar")}
-            data-testid="view-calendar"
-          >
-            <CalendarDays size={14} />
           </button>
         </div>
       </div>

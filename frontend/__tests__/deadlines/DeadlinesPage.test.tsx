@@ -19,29 +19,15 @@ vi.mock("roughjs", () => ({
   },
 }));
 
-// Mock next-intl — supports both "deadlines" and "dashboard" namespaces
+// Mock next-intl
 vi.mock("next-intl", () => ({
-  useTranslations: (namespace: string) => (key: string, params?: Record<string, string>) => {
-    if (namespace === "dashboard") {
-      const dashMap: Record<string, string> = {
-        "calendar.days.mon": "Mon",
-        "calendar.days.tue": "Tue",
-        "calendar.days.wed": "Wed",
-        "calendar.days.thu": "Thu",
-        "calendar.days.fri": "Fri",
-        "calendar.days.sat": "Sat",
-        "calendar.days.sun": "Sun",
-      };
-      return dashMap[key] ?? key;
-    }
+  useTranslations: () => (key: string, params?: Record<string, string>) => {
     const map: Record<string, string> = {
       title: "Deadlines",
       semester: "2026 S1",
       filterBadge: `${params?.count ?? "0"} upcoming`,
       modeAll: "All",
       modeWeek: "This Week",
-      viewTimeline: "Timeline",
-      viewCalendar: "Calendar",
       filterCourse: "All Courses",
       expandHint: "Click to expand materials & AI chat",
       relatedMaterials: "Related Materials",
@@ -50,6 +36,8 @@ vi.mock("next-intl", () => ({
       aiPlaceholder: "Ask about this deadline...",
       aiComingSoon: "Coming Soon",
       aiDisclaimer: "AI responses are for study reference only",
+      aiSummaryPlaceholder:
+        "Focus on key concepts and review lecture notes for this assessment.",
       daysRemaining: `${params?.count ?? "0"} days`,
       dayRemaining: "1 day",
       pastDue: "Past due",
@@ -244,61 +232,4 @@ describe("DeadlinesPage", () => {
     expect(screen.queryByText("Project Milestone")).toBeNull();
   });
 
-  it("switches between timeline and calendar view", () => {
-    mockDeadlinesReturn = {
-      data: { data: mockDeadlines },
-      isLoading: false,
-      isError: false,
-    };
-    render(<DeadlinesPage />);
-
-    // Default: timeline view shows cards
-    expect(screen.getByText("Assignment 2")).toBeTruthy();
-
-    // Switch to calendar view
-    const calBtn = screen.getByTestId("view-calendar");
-    fireEvent.click(calBtn);
-
-    // Calendar view renders (check for calendar grid via day headers)
-    expect(screen.getByTestId("calendar-view")).toBeTruthy();
-    expect(screen.getByText("Mon")).toBeTruthy();
-
-    // Switch back to timeline
-    const timelineBtn = screen.getByTestId("view-timeline");
-    fireEvent.click(timelineBtn);
-    expect(screen.getByText("Assignment 2")).toBeTruthy();
-  });
-
-  it("calendar date filter shows filtered timeline below calendar", () => {
-    mockDeadlinesReturn = {
-      data: { data: mockDeadlines },
-      isLoading: false,
-      isError: false,
-    };
-    render(<DeadlinesPage />);
-
-    // Switch to calendar view
-    const calBtn = screen.getByTestId("view-calendar");
-    fireEvent.click(calBtn);
-
-    // Calendar should be visible
-    expect(screen.getByTestId("calendar-view")).toBeTruthy();
-
-    // Initially, no filtered timeline below (no selectedDate)
-    expect(screen.queryByText("Assignment 2")).toBeNull();
-
-    // Find a cell that has a deadline and click it
-    const today = new Date();
-    const deadlineDate = new Date(Date.now() + 2 * 86400000);
-    // Only click if the deadline is in the current month
-    if (deadlineDate.getMonth() === today.getMonth()) {
-      const cellTestId = `calendar-cell-${deadlineDate.getDate()}`;
-      const cell = screen.queryByTestId(cellTestId);
-      if (cell) {
-        fireEvent.click(cell);
-        // After clicking, filtered timeline should appear below calendar
-        expect(screen.getByText("Assignment 2")).toBeTruthy();
-      }
-    }
-  });
 });
