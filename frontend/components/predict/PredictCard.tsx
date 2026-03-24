@@ -126,76 +126,79 @@ export default function PredictCard({
           </div>
 
           {/* Right side stats — assessed, marks, grade, chevron */}
-          <div className="flex items-center gap-[18px] flex-shrink-0">
-            {/* Assessed badge */}
-            <span
-              className="text-[0.64rem] font-semibold py-[2px] px-[8px] rounded-[5px] whitespace-nowrap"
-              style={{
-                backgroundColor: courseColor.soft,
-                color: courseColor.base,
-              }}
-            >
-              {t("assessed", { pct: String(assessedPct) })}
-            </span>
-
-            {/* Current / Projected marks */}
-            <div className="flex items-center gap-[20px]">
-              {/* Current */}
-              <div className="flex flex-col items-center min-w-[52px]">
-                <span className="text-[0.6rem] font-semibold text-[#9b9b94] uppercase tracking-[0.04em]">
-                  {t("current")}
-                </span>
-                <span
-                  className="font-serif text-[1.1rem] font-bold leading-[1.2]"
-                  style={{
-                    color: getMarkColor(currentAvg, courseColor.base),
-                  }}
-                >
-                  {currentAvg !== null
-                    ? `${currentAvg.toFixed(1)}%`
-                    : "\u2014"}
-                </span>
-              </div>
-
-              {/* Projected */}
-              <div className="flex flex-col items-center min-w-[52px]">
-                <span className="text-[0.6rem] font-semibold text-[#9b9b94] uppercase tracking-[0.04em]">
-                  {t("projected")}
-                </span>
-                <span
-                  className="font-serif text-[1.1rem] font-bold leading-[1.2]"
-                  style={{
-                    color: getMarkColor(projectedFinal, courseColor.base),
-                  }}
-                >
-                  {projectedFinal !== null
-                    ? `${projectedFinal.toFixed(1)}%`
-                    : "\u2014"}
-                </span>
-              </div>
+          <div className="flex items-center flex-shrink-0">
+            {/* Assessed badge — fixed width for column alignment */}
+            <div className="w-[90px] flex justify-center">
+              <span
+                className="text-[0.64rem] font-semibold py-[2px] px-[8px] rounded-[5px] whitespace-nowrap"
+                style={{
+                  backgroundColor: courseColor.soft,
+                  color: courseColor.base,
+                }}
+              >
+                {t("assessed", { pct: String(assessedPct) })}
+              </span>
             </div>
 
-            {/* Grade badge */}
-            <span
-              className="text-[0.62rem] font-bold py-[2px] px-[8px] rounded-[4px] whitespace-nowrap"
-              style={{
-                backgroundColor: courseColor.soft,
-                color: courseColor.base,
-              }}
-              data-testid="grade-badge"
-            >
-              {gradeLabel}
-            </span>
+            {/* Current mark — fixed width for column alignment */}
+            <div className="w-[72px] flex flex-col items-center">
+              <span className="text-[0.6rem] font-semibold text-[#9b9b94] uppercase tracking-[0.04em]">
+                {t("current")}
+              </span>
+              <span
+                className="font-serif text-[1.1rem] font-bold leading-[1.2]"
+                style={{
+                  color: getMarkColor(currentAvg, courseColor.base),
+                }}
+              >
+                {currentAvg !== null
+                  ? `${currentAvg.toFixed(1)}%`
+                  : "\u2014"}
+              </span>
+            </div>
+
+            {/* Projected mark — fixed width for column alignment */}
+            <div className="w-[72px] flex flex-col items-center">
+              <span className="text-[0.6rem] font-semibold text-[#9b9b94] uppercase tracking-[0.04em]">
+                {t("projected")}
+              </span>
+              <span
+                className="font-serif text-[1.1rem] font-bold leading-[1.2]"
+                style={{
+                  color: getMarkColor(projectedFinal, courseColor.base),
+                }}
+              >
+                {projectedFinal !== null
+                  ? `${projectedFinal.toFixed(1)}%`
+                  : "\u2014"}
+              </span>
+            </div>
+
+            {/* Grade badge — fixed width for column alignment */}
+            <div className="w-[48px] flex justify-center">
+              <span
+                className="text-[0.62rem] font-bold py-[2px] px-[8px] rounded-[4px] whitespace-nowrap"
+                style={{
+                  backgroundColor: courseColor.soft,
+                  color: courseColor.base,
+                }}
+                data-testid="grade-badge"
+              >
+                {gradeLabel}
+              </span>
+            </div>
 
             {/* Chevron */}
-            <ChevronDown
-              size={16}
-              className="text-[#9b9b94] transition-transform duration-300"
-              style={{
-                transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-              }}
-              data-testid="chevron"
-            />
+            <div className="w-[28px] flex justify-center">
+              <ChevronDown
+                size={16}
+                className="text-[#9b9b94] transition-transform duration-300"
+                style={{
+                  transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+                data-testid="chevron"
+              />
+            </div>
           </div>
         </div>
 

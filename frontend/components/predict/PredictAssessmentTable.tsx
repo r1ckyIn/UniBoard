@@ -94,16 +94,18 @@ export default function PredictAssessmentTable({
 
               {/* Weight with progress bar */}
               <td
-                className={`py-[12px] px-[10px] text-center font-medium align-middle ${isLast ? "" : "border-b border-[#eae7e0]"}`}
+                className={`py-[12px] px-[10px] font-medium align-middle ${isLast ? "" : "border-b border-[#eae7e0]"}`}
               >
-                <RoughProgressBarClient
-                  progress={a.weight}
-                  color={courseColor}
-                  width={80}
-                  height={8}
-                />
-                <div className="text-[0.72rem] text-[#6b6b65] mt-[3px]">
-                  {Math.round(a.weight * 100)}%
+                <div className="flex items-center justify-center gap-[8px]">
+                  <RoughProgressBarClient
+                    progress={a.weight}
+                    color={courseColor}
+                    width={100}
+                    height={10}
+                  />
+                  <span className="text-[0.72rem] text-[#6b6b65] min-w-[28px] text-right">
+                    {Math.round(a.weight * 100)}%
+                  </span>
                 </div>
               </td>
 
