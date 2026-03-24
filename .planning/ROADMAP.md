@@ -24,7 +24,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 7: Course Detail Page** — Assessment breakdown, materials browser, Ed posts
 - [ ] **Phase 8: Deadlines Page** — Calendar view, filterable timeline, AI chat panel placeholder
 - [ ] **Phase 9: Predict Page** — Slider-based What-if GPA simulator with real-time calculation
-- [ ] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI
+- [x] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI (completed 2026-03-24)
 - [ ] **Phase 11: Timetable Page** — Weekly schedule view
 - [ ] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile
 
@@ -401,7 +401,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
 | 8. Deadlines Page | M1 | 0/3 | Planned | - |
 | 9. Predict Page | M1 | 0/3 | Planned | - |
-| 10. Digest Page | 2/3 | In Progress|  | - |
+| 10. Digest Page | 3/3 | Complete   | 2026-03-24 | - |
 | 11. Timetable Page | M1 | 0/TBD | Not started | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
