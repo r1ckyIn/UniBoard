@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 9 context gathered
-last_updated: "2026-03-24T02:33:06.542Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-24T03:47:28.981Z"
 progress:
   total_phases: 24
   completed_phases: 8
-  total_plans: 36
-  completed_plans: 36
+  total_plans: 39
+  completed_plans: 37
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 08 — deadlines-page
+**Current focus:** Phase 09 — predict-page
 
 ## Current Position
 
-Phase: 08 (deadlines-page) — COMPLETE
-Plan: 3 of 3 (all done)
+Phase: 09 (predict-page) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -79,6 +79,8 @@ Plan: 3 of 3 (all done)
 | Phase 08 P01 | 3min | 2 tasks | 8 files |
 | Phase 08 P02 | 10min | 2 tasks | 6 files |
 | Phase 08 P03 | 11min | 2 tasks | 4 files |
+| Phase 09 P01 | 4min | 2 tasks | 9 files |
+| Phase 09 P01 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -171,6 +173,10 @@ Recent decisions affecting current work:
 - [08-03]: Reused MiniCalendar grid logic locally in DeadlineCalendarView rather than extracting shared util
 - [08-03]: Calendar shows all deadlines unfiltered; date click filters sub-timeline below
 - [08-03]: Course-colored dots per day (max 3 visible + overflow) instead of single weight-based dot
+- [09-01]: Pure function engine pattern: WAM computation separate from React for testability
+- [09-01]: All WAM calculations use 0-1 weight scale (fixture format), not prototype 0-100 scale
+- [09-01]: Step-function GPA mapping (85+=4.0) matching prototype, not linear interpolation
+- [09-01]: CourseComputeData includes level field for faculty scheme switching
 
 ### Pending Todos
 
@@ -182,6 +188,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T02:33:06.531Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-predict-page/09-CONTEXT.md
+Last session: 2026-03-24T03:47:28.976Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: None
