@@ -56,22 +56,22 @@ export default function SemesterProgressCard({
       {courses.map((c) => (
         <div key={c.code} className="flex items-center gap-[8px] py-[6px]">
           {/* Code */}
-          <span className="text-[0.74rem] font-semibold text-[#2d2d2a] min-w-[72px]">
+          <span className="text-[0.74rem] font-semibold text-[#2d2d2a] min-w-[72px] flex-shrink-0">
             {c.code}
           </span>
 
           {/* Progress bar */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <RoughProgressBarClient
               progress={c.completedWeight}
               color={c.color}
-              width={160}
+              width={120}
               height={12}
             />
           </div>
 
           {/* Percentage */}
-          <span className="text-[0.68rem] font-medium text-[#9b9b94] min-w-[30px] text-right">
+          <span className="text-[0.68rem] font-medium text-[#9b9b94] min-w-[36px] text-right flex-shrink-0">
             {Math.round(c.completedWeight * 100)}%
           </span>
         </div>
