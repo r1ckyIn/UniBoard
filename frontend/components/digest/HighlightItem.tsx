@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -34,6 +35,8 @@ export default function HighlightItem({
   courseCode,
 }: HighlightItemProps) {
   const t = useTranslations("digest");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
 
   const config = HIGHLIGHT_CONFIG[type] ?? HIGHLIGHT_CONFIG.new_grade;
   const colorCls = COLOR_CLASSES[config.color] ?? COLOR_CLASSES.green;
@@ -75,6 +78,7 @@ export default function HighlightItem({
             <span>
               {formatDistanceToNow(new Date(createdAt), {
                 addSuffix: true,
+                locale: dateFnsLocale,
               })}
             </span>
           )}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Radio, RefreshCw } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import { cn } from "@/lib/utils/cn";
 
@@ -22,6 +23,8 @@ export default function DigestTitleRow({
   isFetching,
 }: DigestTitleRowProps) {
   const t = useTranslations("digest");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
 
   const date = new Date(generatedAt);
 
@@ -35,14 +38,14 @@ export default function DigestTitleRow({
             {t("title")}
           </h1>
           <span className="text-[0.68rem] font-semibold py-[3px] px-[10px] rounded-[6px] bg-[rgba(217,119,87,0.11)] text-[#d97757]">
-            {format(date, "EEE, d MMM")}
+            {format(date, "EEE, d MMM", { locale: dateFnsLocale })}
           </span>
         </div>
 
         {/* Right side: generated time + refresh button */}
         <div className="flex items-center gap-[8px]">
           <span className="text-[0.72rem] text-[#9b9b94] italic">
-            {t("generatedAgo", { time: formatDistanceToNow(date) })}
+            {t("generatedAgo", { time: formatDistanceToNow(date, { locale: dateFnsLocale }) })}
           </span>
           <button
             className="flex items-center gap-[5px] text-[0.74rem] font-semibold py-[6px] px-[12px] rounded-[8px] bg-[#f6f5f0] border border-[#e8e5dd] text-[#6b6b65] cursor-pointer hover:bg-[#efede6] hover:text-[#2d2d2a] transition-all duration-150"
