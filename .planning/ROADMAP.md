@@ -195,15 +195,20 @@ Plans:
 - [ ] 08-03-PLAN.md — DeadlineCalendarView (full-width month grid with course-colored dots), wire into DeadlinesPage
 
 ### Phase 9: Predict Page
-**Goal**: Users can simulate future GPA outcomes by adjusting hypothetical scores
+**Goal**: Users can simulate future GPA outcomes by adjusting hypothetical scores with faculty-aware WAM calculation
 **Depends on**: Phase 2
 **Requirements**: UI-04
 **Success Criteria** (what must be TRUE):
-  1. Slider controls for each pending assessment allow score input (0-100)
-  2. GPA/WAM recalculates in real-time as sliders change
-  3. Target GPA line displays on the visualization for comparison
-  4. Rough.js styled chart updates smoothly without flickering
-**Plans**: TBD
+  1. Number input fields for each pending assessment allow score input (0-100)
+  2. WAM/GPA recalculates in real-time as inputs change
+  3. Target WAM slider displays with required scores per course for comparison
+  4. Rough.js styled right panel cards update smoothly without flickering
+**Plans**: 3 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — WAM calculation engine (pure functions), faculty weights, WAM-to-GPA conversion, i18n predict namespace, Wave 0 test stubs
+- [ ] 09-02-PLAN.md — PredictTitleRow, PredictCard expandable shell, PredictAssessmentTable (3-col), PredictGradeSummary
+- [ ] 09-03-PLAN.md — Right panel cards (WAM Overview, Target Slider, Required Scores, Semester Progress), PredictPage orchestrator, route page
 
 ### Phase 10: Digest Page
 **Goal**: Users can review their daily academic digest with AI-scored relevance
@@ -388,7 +393,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 6. Courses Page | M1 | 0/2 | Planned | - |
 | 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
 | 8. Deadlines Page | M1 | 0/3 | Planned | - |
-| 9. Predict Page | M1 | 0/TBD | Not started | - |
+| 9. Predict Page | M1 | 0/3 | Planned | - |
 | 10. Digest Page | M1 | 0/TBD | Not started | - |
 | 11. Timetable Page | M1 | 0/TBD | Not started | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |

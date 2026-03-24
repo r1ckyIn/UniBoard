@@ -352,5 +352,70 @@
       "cta": "前往仪表盘",
       "toast": "欢迎！你的账户已连接。"
     }
+  },
+  "predict": {
+    "title": "成绩预测",
+    "semesterBadge": "2026 S1",
+    "cpBadge": "{cp} 学分",
+    "facultyLabel": "权重方案",
+    "facultyStandard": "标准",
+    "facultyEngineering": "工程学院",
+    "facultyScienceHonours": "理学院荣誉",
+    "assessed": "已评估 {pct}%",
+    "current": "当前",
+    "projected": "预计",
+    "columns": {
+      "assessment": "评估项",
+      "weight": "权重",
+      "score": "分数"
+    },
+    "scorePlaceholder": "?",
+    "gradedBadge": "已出分",
+    "gradeSummary": {
+      "current": "当前",
+      "projected": "预计",
+      "assessedSub": "已评估 {pct}%",
+      "gradeBand": "{band} 等级",
+      "enterScores": "请在上方输入分数",
+      "note": "预计成绩会在您输入分数时实时更新。"
+    },
+    "courseSubtitle": "{name} · {level} 级 · {cp} 学分",
+    "gradeName": {
+      "HD": "卓越",
+      "D": "优秀",
+      "CR": "良好",
+      "P": "及格",
+      "F": "不及格",
+      "—": "—"
+    },
+    "wamOverview": {
+      "fillPredictions": "填写预测分数",
+      "gpa": "GPA: {gpa} / 4.0",
+      "basisPartial": "基于当前已出分成绩（部分）",
+      "basisAll": "基于所有预测分数"
+    },
+    "target": {
+      "label": "目标 WAM",
+      "toGo": "还差 +{gap}",
+      "onTrack": "已达标！"
+    },
+    "required": {
+      "title": "各科目最低分数",
+      "note": "剩余评估的平均分",
+      "excluded": "已排除",
+      "locked": "已锁定"
+    },
+    "progress": {
+      "title": "学期进度",
+      "overall": "学期已评估 {pct}%"
+    },
+    "empty": {
+      "noCourses": "暂无课程数据",
+      "noAssessments": "该课程暂无评估项"
+    },
+    "error": {
+      "loadFailed": "预测数据加载失败",
+      "retry": "重试"
+    }
   }
 }
