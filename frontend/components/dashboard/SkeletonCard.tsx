@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils/cn";
 
-type SkeletonVariant = "stat" | "table" | "timeline" | "donut" | "profile" | "calendar" | "activity";
+type SkeletonVariant = "stat" | "table" | "timeline" | "donut" | "profile" | "calendar" | "activity" | "generic";
 
 interface SkeletonCardProps {
   variant: SkeletonVariant;
@@ -126,6 +126,17 @@ function ActivitySkeleton() {
   );
 }
 
+function GenericSkeleton() {
+  return (
+    <div className="py-[16px] px-[20px]">
+      <ShimmerBar className="h-4 w-32 mb-3" />
+      <ShimmerBar className="h-3 w-full mb-2" />
+      <ShimmerBar className="h-3 w-3/4 mb-2" />
+      <ShimmerBar className="h-3 w-1/2" />
+    </div>
+  );
+}
+
 const VARIANT_MAP: Record<SkeletonVariant, React.FC> = {
   stat: StatSkeleton,
   table: TableSkeleton,
@@ -134,6 +145,7 @@ const VARIANT_MAP: Record<SkeletonVariant, React.FC> = {
   profile: ProfileSkeleton,
   calendar: CalendarSkeleton,
   activity: ActivitySkeleton,
+  generic: GenericSkeleton,
 };
 
 export default function SkeletonCard({ variant, className }: SkeletonCardProps) {
