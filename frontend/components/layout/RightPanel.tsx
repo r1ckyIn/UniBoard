@@ -53,7 +53,7 @@ export default function RightPanel() {
         "[&.scrolling]:[scrollbar-width:thin]"
       )}
     >
-      <div id="right-panel-slot" className="flex flex-col gap-5" />
+      <div id="right-panel-slot" className="flex flex-col gap-5 w-full" />
     </div>
   );
 }
