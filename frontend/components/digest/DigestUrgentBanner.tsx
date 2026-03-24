@@ -27,9 +27,6 @@ export default function DigestUrgentBanner({
           className="text-[#cc4455] flex-shrink-0"
         />
         <span className="text-[0.82rem] text-[#2d2d2a] font-medium">
-          <strong className="text-[#cc4455] font-bold">
-            {criticalCount}
-          </strong>{" "}
           {t("urgentBanner", { count: String(criticalCount) })}
         </span>
         <span className="font-serif text-[1.1rem] font-bold text-[#cc4455] ml-auto flex-shrink-0">

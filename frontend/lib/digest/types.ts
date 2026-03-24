@@ -125,7 +125,7 @@ export const FILTER_TYPE_MAP: Record<
   string[]
 > = {
   grade: ["new_grade", "grade_published", "grade_alert"],
-  staff: ["staff_post"],
+  staff: ["staff_post", "endorsed_post"],
   deadline: ["deadline_change", "deadline_approaching"],
   announcement: ["new_announcement"],
   exam: ["exam_info"],
