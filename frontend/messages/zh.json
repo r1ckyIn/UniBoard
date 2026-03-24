@@ -379,6 +379,15 @@
       "enterScores": "请在上方输入分数",
       "note": "预计成绩会在您输入分数时实时更新。"
     },
+    "courseSubtitle": "{name} · {level} 级 · {cp} 学分",
+    "gradeName": {
+      "HD": "卓越",
+      "D": "优秀",
+      "CR": "良好",
+      "P": "及格",
+      "F": "不及格",
+      "—": "—"
+    },
     "wamOverview": {
       "fillPredictions": "填写预测分数",
       "gpa": "GPA: {gpa} / 4.0",

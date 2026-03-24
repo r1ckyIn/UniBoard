@@ -191,9 +191,10 @@ export function computeRequired(
 
     // Solve: targetWAM * totalDen = otherNum + finalMark * cp * lw
     const neededFinal = (targetWAM * totalDen - otherNum) / (course.creditPoints * lw);
-    // finalMark = (knownSum * 100 + requiredAvg * remainWeight * 100) / 100
-    // => requiredAvg = (neededFinal - knownSum * 100) / (remainWeight * 100)
-    const required = (neededFinal - knownSum * 100) / (remainWeight * 100);
+    // neededFinal is on 0-100 scale, knownSum is on 0-1 scale
+    // finalMark = knownSum * 100 + requiredAvg * remainWeight
+    // => requiredAvg = (neededFinal - knownSum * 100) / remainWeight
+    const required = (neededFinal - knownSum * 100) / remainWeight;
 
     return { code: course.code, required, locked: false };
   });

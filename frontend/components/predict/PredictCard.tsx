@@ -117,8 +117,11 @@ export default function PredictCard({
               {course.code}
             </div>
             <div className="text-[0.72rem] text-[#9b9b94] mt-[1px] whitespace-nowrap overflow-hidden text-ellipsis">
-              {course.name} &middot; Level {level} &middot;{" "}
-              {course.credit_points} cp
+              {t("courseSubtitle", {
+                name: course.name,
+                level,
+                cp: course.credit_points,
+              })}
             </div>
           </div>
 

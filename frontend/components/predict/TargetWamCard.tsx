@@ -4,14 +4,6 @@ import { useTranslations } from "next-intl";
 import RoughCard from "@/components/design-system/RoughCard";
 import { getGradeBand } from "@/lib/utils/grade-band";
 
-const GRADE_FULL_NAME: Record<string, string> = {
-  HD: "High Distinction",
-  D: "Distinction",
-  CR: "Credit",
-  P: "Pass",
-  F: "Fail",
-};
-
 interface TargetWamCardProps {
   targetWam: number;
   onTargetChange: (value: number) => void;
@@ -30,7 +22,7 @@ export default function TargetWamCard({
   const t = useTranslations("predict");
 
   const band = getGradeBand(targetWam);
-  const bandLabel = GRADE_FULL_NAME[band] ?? band;
+  const bandLabel = t(`gradeName.${band}`);
   const gap = targetWam - currentWam;
   const pct = ((targetWam - 50) / 50) * 100;
 

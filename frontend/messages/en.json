@@ -379,6 +379,15 @@
       "enterScores": "Enter scores above",
       "note": "Projected grade updates live as you type predicted scores."
     },
+    "courseSubtitle": "{name} · Level {level} · {cp} cp",
+    "gradeName": {
+      "HD": "High Distinction",
+      "D": "Distinction",
+      "CR": "Credit",
+      "P": "Pass",
+      "F": "Fail",
+      "—": "—"
+    },
     "wamOverview": {
       "fillPredictions": "Fill predictions",
       "gpa": "GPA: {gpa} / 4.0",

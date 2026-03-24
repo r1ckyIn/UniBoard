@@ -121,7 +121,7 @@ export default function PredictAssessmentTable({
                         {a.score}
                       </span>
                       <span className="font-serif font-semibold text-[0.88rem] text-[#9b9b94]">
-                        /100
+                        /{a.max_score}
                       </span>
                       <span
                         className="text-[0.6rem] font-semibold rounded-[4px] px-[7px] py-[2px] ml-[6px] align-middle"
@@ -160,7 +160,7 @@ export default function PredictAssessmentTable({
                         data-testid={`score-input-${i}`}
                       />
                       <span className="font-serif font-semibold text-[0.88rem] text-[#9b9b94]">
-                        /100
+                        /{a.max_score}
                       </span>
                     </>
                   )}

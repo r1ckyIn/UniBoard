@@ -5,14 +5,6 @@ import RoughCard from "@/components/design-system/RoughCard";
 import { getGradeBand } from "@/lib/utils/grade-band";
 import { wamToGpa } from "@/lib/predict/wam-to-gpa";
 
-const GRADE_FULL_NAME: Record<string, string> = {
-  HD: "High Distinction",
-  D: "Distinction",
-  CR: "Credit",
-  P: "Pass",
-  F: "Fail",
-};
-
 interface WamOverviewCardProps {
   wam: number;
   allFilled: boolean;
@@ -27,7 +19,7 @@ export default function WamOverviewCard({ wam, allFilled }: WamOverviewCardProps
 
   const band = getGradeBand(wam);
   const bandLabel = allFilled
-    ? GRADE_FULL_NAME[band] ?? band
+    ? t(`gradeName.${band}`)
     : t("wamOverview.fillPredictions");
 
   return (
@@ -47,11 +39,7 @@ export default function WamOverviewCard({ wam, allFilled }: WamOverviewCardProps
 
         {/* GPA line */}
         <div className="text-[0.82rem] text-[#6b6b65] mt-[6px]">
-          GPA:{" "}
-          <span className="font-serif font-bold text-[#2d2d2a]">
-            {wamToGpa(wam).toFixed(1)}
-          </span>{" "}
-          / 4.0
+          {t("wamOverview.gpa", { gpa: wamToGpa(wam).toFixed(1) })}
         </div>
 
         {/* Basis text */}
