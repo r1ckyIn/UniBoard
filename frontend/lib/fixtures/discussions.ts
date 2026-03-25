@@ -2,6 +2,30 @@ import type { components } from "@/lib/api/types.gen";
 
 type Discussion = components["schemas"]["Discussion"];
 
+// Chinese title translations keyed by discussion ID
+export const discussionTitleZh: Record<string, string> = {
+  disc_comp2017_1: "作业2澄清：缓冲区溢出处理",
+  disc_comp2017_2: "期中考试范围 — 已确认主题",
+  disc_comp2017_3: "使用 Valgrind 调试内存泄漏技巧",
+  disc_comp2017_4: "期末复习小组",
+  disc_comp2017_5: "作业3延期政策",
+  disc_comp3221_1: "项目里程碑2：gRPC vs REST 用于服务间通信",
+  disc_comp3221_2: "Raft 共识算法 — 考试提示",
+  disc_comp3221_3: "实验4 Docker 网络问题",
+  disc_comp3221_4: "往年考试卷已上传",
+  disc_comp3221_5: "向量时钟与 Lamport 时间戳的区别",
+  disc_stat2011_1: "测验2成绩与常见错误",
+  disc_stat2011_2: "作业2提示 — MLE 部分",
+  disc_stat2011_3: "推荐额外练习教材？",
+  disc_stat2011_4: "期末考试改为开卷",
+  disc_stat2011_5: "如何解读 QQ 图",
+  disc_stat2011_6: "这门课学得很吃力 — 求建议",
+  disc_math2021_1: "作业1提交格式",
+  disc_math2021_2: "测验1主题与形式",
+  disc_math2021_3: "格林定理与斯托克斯定理的区别",
+  disc_math2021_4: "第3讲录像缺少音频",
+};
+
 export const discussionsByCourse: Record<string, Discussion[]> = {
   crs_comp2017: [
     {

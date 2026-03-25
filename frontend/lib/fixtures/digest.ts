@@ -97,7 +97,7 @@ export const digestLatest: DigestLatestExt = {
     },
     {
       code: "STAT2011",
-      name: "Probability & Estimation",
+      name: "Probability and Estimation Theory",
       highlights: [
         {
           type: "exam_info",
@@ -135,7 +135,7 @@ export const digestLatest: DigestLatestExt = {
     },
     {
       code: "EDGU1003",
-      name: "Diet & Nutrition",
+      name: "Diet, Nutrition and Lifestyle",
       highlights: [
         {
           type: "new_grade",
@@ -161,7 +161,7 @@ export const digestLatest: DigestLatestExt = {
     },
     {
       code: "MATH2021",
-      name: "Vector Calculus",
+      name: "Vector Calculus and Differential Equations",
       highlights: [
         {
           type: "staff_post",

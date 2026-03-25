@@ -6,6 +6,7 @@ import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
 import { useCourseDiscussions } from "@/hooks/use-discussions";
+import { discussionTitleZh } from "@/lib/fixtures/discussions";
 import RoughCard from "@/components/design-system/RoughCard";
 import ExternalLinkDialog from "@/components/dashboard/ExternalLinkDialog";
 
@@ -52,16 +53,19 @@ export default function EdPostsPanel({
           {t("edPosts.title")}
         </div>
 
-        {/* Loading state */}
+        {/* Loading state — matches CourseDeadlinesPanel skeleton */}
         {isLoading && (
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-[6px]">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="flex items-center gap-[10px] px-[10px] py-[8px]"
+                className="flex gap-[10px] items-stretch px-[10px] py-[10px] rounded-[8px]"
               >
-                <div className="flex-1 h-[14px] rounded bg-[#e8e5dd] animate-[skeleton-shimmer_1.5s_infinite]" />
-                <div className="w-[50px] h-[14px] rounded bg-[#e8e5dd] animate-[skeleton-shimmer_1.5s_infinite]" />
+                <div className="w-[3px] rounded-[2px] bg-[#e8e5dd] animate-[skeleton-shimmer_1.5s_infinite]" />
+                <div className="flex-1 flex flex-col justify-center gap-[4px]">
+                  <div className="h-[12px] w-[70%] rounded bg-[#e8e5dd] animate-[skeleton-shimmer_1.5s_infinite]" />
+                  <div className="h-[10px] w-[50%] rounded bg-[#e8e5dd] animate-[skeleton-shimmer_1.5s_infinite]" />
+                </div>
               </div>
             ))}
           </div>
@@ -75,51 +79,50 @@ export default function EdPostsPanel({
           </div>
         )}
 
-        {/* Post list */}
+        {/* Post list — layout mirrors CourseDeadlinesPanel: stripe | info | badge */}
         {!isLoading && discussions.length > 0 && (
-          <div>
-            {discussions.map((d, i) => (
-              <div key={d.id}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenUrl(
-                      `https://edstem.org/au/courses/${edCourseId}/discussion/${d.ed_thread_id}`
-                    )
-                  }
-                  className="flex flex-col gap-[4px] px-[10px] py-[10px] rounded-[8px] hover:bg-[var(--card-bg-hover)] cursor-pointer w-full text-left transition-colors"
-                >
-                  {/* Row 1: Title (truncate to 1 line) */}
-                  <span className="text-[0.78rem] font-semibold text-[var(--text-1)] line-clamp-1">
-                    {d.title}
-                  </span>
+          <div className="flex flex-col gap-[6px]">
+            {discussions.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() =>
+                  setOpenUrl(
+                    `https://edstem.org/au/courses/${edCourseId}/discussion/${d.ed_thread_id}`
+                  )
+                }
+                className="flex gap-[10px] items-stretch px-[10px] py-[10px] rounded-[8px] hover:bg-[var(--card-bg-hover)] cursor-pointer w-full text-left transition-colors relative"
+              >
+                {/* Left color stripe — Ed blue */}
+                <div className="w-[3px] rounded-[2px] flex-shrink-0 bg-[#6a9bcc]" />
 
-                  {/* Row 2: Badges left, time right */}
-                  <div className="flex items-center justify-between gap-[6px]">
-                    <div className="flex items-center gap-[5px] min-w-0">
-                      <span className="text-[0.64rem] text-[var(--text-3)] shrink-0">
-                        {d.author}
-                      </span>
-                      {d.is_endorsed && (
-                        <span className="text-[0.6rem] font-bold bg-[rgba(120,140,93,.11)] text-[#788c5d] rounded-[4px] px-[5px] py-[1px] shrink-0">
-                          {t("edPosts.endorsed")}
-                        </span>
-                      )}
-                      {d.is_staff_post && (
-                        <span className="text-[0.6rem] font-bold bg-[rgba(106,155,204,.11)] text-[#6a9bcc] rounded-[4px] px-[5px] py-[1px] shrink-0">
-                          {t("edPosts.staffPost")}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[0.62rem] text-[var(--text-3)] shrink-0 whitespace-nowrap">
-                      {formatTime(d.created_at)}
-                    </span>
+                {/* Info column */}
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <div className="text-[0.72rem] font-semibold text-[var(--text-1)] truncate mb-[2px]">
+                    {locale === "zh" ? (discussionTitleZh[d.id] ?? d.title) : d.title}
                   </div>
-                </button>
-                {i < discussions.length - 1 && (
-                  <div className="border-b border-[var(--divider)]" />
-                )}
-              </div>
+                  <div className="flex items-center gap-[5px]">
+                    <span className="text-[0.64rem] text-[var(--text-3)]">
+                      {d.author}
+                    </span>
+                    {d.is_endorsed && (
+                      <span className="text-[0.58rem] font-bold bg-[rgba(120,140,93,.11)] text-[#788c5d] rounded-[4px] px-[5px] py-[1px]">
+                        {t("edPosts.endorsed")}
+                      </span>
+                    )}
+                    {d.is_staff_post && (
+                      <span className="text-[0.58rem] font-bold bg-[rgba(106,155,204,.11)] text-[#6a9bcc] rounded-[4px] px-[5px] py-[1px]">
+                        {t("edPosts.staffPost")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Time badge — positioned like deadline days badge */}
+                <span className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[0.62rem] text-[var(--text-3)] whitespace-nowrap">
+                  {formatTime(d.created_at)}
+                </span>
+              </button>
             ))}
           </div>
         )}
