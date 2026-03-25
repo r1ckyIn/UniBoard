@@ -19,7 +19,7 @@ import MaterialsSection from "@/components/course-detail/MaterialsSection";
 import AiChatPlaceholder from "@/components/course-detail/AiChatPlaceholder";
 import QuickLinksPanel from "@/components/course-detail/QuickLinksPanel";
 import CourseDeadlinesPanel from "@/components/course-detail/CourseDeadlinesPanel";
-import EdPostsPanel from "@/components/course-detail/EdPostsPanel";
+import CourseActivityPanel from "@/components/course-detail/CourseActivityPanel";
 
 interface CourseDetailPageProps {
   courseId: string;
@@ -184,10 +184,7 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
               />
             </AnimatedEntry>
             <AnimatedEntry delay={7}>
-              <EdPostsPanel
-                courseId={courseId}
-                edCourseId={course.ed_course_id ?? ""}
-              />
+              <CourseActivityPanel courseId={courseId} />
             </AnimatedEntry>
           </>,
           portalTarget
