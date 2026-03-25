@@ -9,6 +9,11 @@ import { useCurrentUser } from "@/hooks/use-user";
 import { useSyncStatus } from "@/hooks/use-sync";
 import SettingsNav from "@/components/settings/SettingsNav";
 import TokensSection from "@/components/settings/TokensSection";
+import GpaTargetSection from "@/components/settings/GpaTargetSection";
+import NotificationsSection from "@/components/settings/NotificationsSection";
+import CourseLinkingSection from "@/components/settings/CourseLinkingSection";
+import ProfileSection from "@/components/settings/ProfileSection";
+import DangerZoneSection from "@/components/settings/DangerZoneSection";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import RoughCard from "@/components/design-system/RoughCard";
 
@@ -92,6 +97,46 @@ export default function SettingsPage() {
     }, 800);
   }, []);
 
+  // ── Section renderer ─────────────────────────────────────────
+  const user = userData.data?.data;
+
+  const renderSection = (sectionId: string) => {
+    switch (sectionId) {
+      case "sec-tokens":
+        return user ? (
+          <>
+            <h2 className="font-serif text-[1.05rem] font-semibold text-[#2d2d2a] mb-[6px]">{t("tokens.title")}</h2>
+            <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">{t("tokens.desc")}</p>
+            <TokensSection user={user} />
+          </>
+        ) : null;
+      case "sec-gpa":
+        return user ? (
+          <>
+            <h2 className="font-serif text-[1.05rem] font-semibold text-[#2d2d2a] mb-[6px]">{t("gpa.title")}</h2>
+            <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">{t("gpa.desc")}</p>
+            <GpaTargetSection user={user} />
+          </>
+        ) : null;
+      case "sec-notifications":
+        return (
+          <>
+            <h2 className="font-serif text-[1.05rem] font-semibold text-[#2d2d2a] mb-[6px]">{t("notifications.title")}</h2>
+            <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">{t("notifications.desc")}</p>
+            <NotificationsSection />
+          </>
+        );
+      case "sec-courses":
+        return <CourseLinkingSection />;
+      case "sec-profile":
+        return user ? <ProfileSection user={user} /> : null;
+      case "sec-danger":
+        return <DangerZoneSection />;
+      default:
+        return null;
+    }
+  };
+
   // ── Render ────────────────────────────────────────────────────
   return (
     <>
@@ -117,19 +162,7 @@ export default function SettingsPage() {
             <div key={section.id} id={section.id}>
               <AnimatedEntry delay={section.animDelay}>
                 <RoughCard>
-                  <h2 className="font-serif text-[1.05rem] font-semibold text-[#2d2d2a] mb-[6px]">
-                    {t(section.titleKey)}
-                  </h2>
-                  <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">
-                    {t(section.descKey)}
-                  </p>
-                  {section.id === "sec-tokens" && userData.data?.data ? (
-                    <TokensSection user={userData.data.data} />
-                  ) : section.id !== "sec-tokens" ? (
-                    <div className="text-[0.78rem] text-[#9b9b94] italic">
-                      Section content coming in Plan 02/03
-                    </div>
-                  ) : null}
+                  {renderSection(section.id)}
                 </RoughCard>
               </AnimatedEntry>
             </div>
