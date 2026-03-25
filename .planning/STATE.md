@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-03-25T03:32:30Z"
+stopped_at: Completed 11-03-PLAN.md (Phase 11 complete)
+last_updated: "2026-03-25T03:40:02Z"
 progress:
   total_phases: 24
   completed_phases: 10
   total_plans: 45
-  completed_plans: 44
+  completed_plans: 45
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 11 (timetable-page) — EXECUTING
-Plan: 3 of 3
+Phase: 11 (timetable-page) — COMPLETE
+Plan: 3 of 3 (all complete)
 
 ## Performance Metrics
 
@@ -88,6 +88,7 @@ Plan: 3 of 3
 | Phase 10 P03 | 4min | 2 tasks | 4 files |
 | Phase 11 P01 | 7min | 2 tasks | 13 files |
 | Phase 11 P02 | 5min | 2 tasks | 6 files |
+| Phase 11 P03 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -197,6 +198,9 @@ Recent decisions affecting current work:
 - [11-02]: hexToRgb helper for dynamic rgba(base, 0.13) event backgrounds matching prototype
 - [11-02]: Tailwind group/group-hover pattern for deadline tooltip visibility
 - [11-02]: i18n-aware useRouter for event click navigation to /courses/{code}
+- [11-03]: MiniCalendar reused from dashboard via withClientOnly, empty deadlineDays for timetable right panel
+- [11-03]: computeCurrentWeek maps system date to semester position via differenceInWeeks, fallback to 4
+- [11-03]: Deadline urgency: <=2 urgent, <=4 warning, <=7 normal, >7 later
 
 ### Pending Todos
 
@@ -208,6 +212,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T03:32:30Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-03-25T03:40:02Z
+Stopped at: Completed 11-03-PLAN.md (Phase 11 complete)
 Resume file: None
