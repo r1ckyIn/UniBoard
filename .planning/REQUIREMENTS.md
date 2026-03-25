@@ -64,7 +64,7 @@ Requirements for full release across 4 milestones.
 - [x] **UI-05**: Digest page showing daily/weekly intelligence digest with AI-scored relevance
 - [ ] **UI-06**: Settings page for API token management, notification preferences, and GPA target configuration
 - [x] **UI-07**: All pages follow Anthropic-inspired design system: warm colors, paper texture, Rough.js hand-drawn borders, Source Serif 4 + Inter fonts
-- [ ] **UI-08**: Timetable page with weekly schedule view
+- [x] **UI-08**: Timetable page with weekly schedule view
 - [x] **UI-09**: Auth page with login and register flows
 - [x] **UI-10**: Setup page with 3-step API token onboarding flow
 - [x] **UI-11**: Course Detail page with assessment breakdown, materials browser, and Ed posts
