@@ -26,7 +26,7 @@ export function SetupGuard({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated) {
       router.replace("/auth");
     } else if (tokenConfigured) {
-      router.replace("/dashboard");
+      router.replace("/");
     }
   }, [hydrated, isAuthenticated, tokenConfigured, router]);
 

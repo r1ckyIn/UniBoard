@@ -69,7 +69,7 @@ describe("SetupGuard", () => {
       </SetupGuard>,
     );
 
-    expect(mockReplace).toHaveBeenCalledWith("/dashboard");
+    expect(mockReplace).toHaveBeenCalledWith("/");
     expect(screen.queryByTestId("setup-content")).not.toBeInTheDocument();
   });
 

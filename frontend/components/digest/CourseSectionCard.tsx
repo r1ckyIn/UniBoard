@@ -11,8 +11,10 @@ interface CourseSectionCardProps {
   highlights: Array<{
     type: string;
     summary: string;
+    summary_zh?: string;
     urgency: string;
     source_thread_id?: string;
+    source_url?: string;
     created_at?: string;
   }>;
   delay?: number;
@@ -73,8 +75,10 @@ export default function CourseSectionCard({
                 key={i}
                 type={hl.type}
                 summary={hl.summary}
+                summaryZh={hl.summary_zh}
                 urgency={hl.urgency}
                 sourceThreadId={hl.source_thread_id}
+                sourceUrl={hl.source_url}
                 createdAt={hl.created_at}
                 courseCode={code}
               />

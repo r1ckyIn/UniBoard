@@ -32,8 +32,10 @@ type EnrichedCourse = {
   highlights: Array<{
     type: string;
     summary: string;
+    summary_zh?: string;
     urgency: string;
     source_thread_id?: string;
+    source_url?: string;
     created_at?: string;
   }>;
 };

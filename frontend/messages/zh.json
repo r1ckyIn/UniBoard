@@ -434,18 +434,27 @@
     "updates": "条更新",
     "update": "条更新",
     "viewThread": "查看帖子",
-    "source.canvas": "Canvas",
-    "source.ed": "Ed",
-    "urgency.critical": "紧急",
-    "urgency.important": "重要",
-    "urgency.informational": "一般",
-    "summary.title": "今日概况",
-    "summary.updates": "更新",
-    "summary.courses": "课程",
-    "summary.grades": "成绩",
-    "summary.urgent": "紧急",
-    "history.title": "近期摘要",
-    "history.items": "{count} 条",
+    "viewNotification": "在 Canvas 查看",
+    "source": {
+      "canvas": "Canvas",
+      "ed": "Ed"
+    },
+    "urgency": {
+      "critical": "紧急",
+      "important": "重要",
+      "informational": "一般"
+    },
+    "summary": {
+      "title": "今日概况",
+      "updates": "更新",
+      "courses": "课程",
+      "grades": "成绩",
+      "urgent": "紧急"
+    },
+    "history": {
+      "title": "近期摘要",
+      "items": "{count} 条"
+    },
     "emptyState": "今天没有更新",
     "emptyStateDesc": "明天再来查看您的每日学术摘要。",
     "errorState": "加载摘要失败",

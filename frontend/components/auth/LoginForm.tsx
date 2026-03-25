@@ -36,7 +36,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       {
         onSuccess: () => {
           const { tokenConfigured } = useAuthStore.getState();
-          router.push(tokenConfigured ? "/dashboard" : "/setup");
+          router.push(tokenConfigured ? "/" : "/setup");
         },
       },
     );

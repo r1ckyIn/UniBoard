@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 10-digest-page
 source: 10-01-SUMMARY.md, 10-02-SUMMARY.md, 10-03-SUMMARY.md
 started: 2026-03-25T09:45:00Z
@@ -61,7 +61,13 @@ skipped: 0
   reason: "User reported: 点击近期摘要没有跳转，并且如果用户指针点击了记录应该立刻视觉高光，而不是用户指针离开后再显示高光"
   severity: major
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "1) DigestPage.selectedHistoryId state not used for data fetching — no /digest/{id} endpoint (M2 TODO). 2) Tailwind hover:bg overrides selected bg while pointer hovers, making highlight appear only after pointer leaves."
+  artifacts:
+    - path: "frontend/components/digest/DigestHistoryCard.tsx"
+      issue: "hover:bg overrides selected bg; no content switching on click"
+    - path: "frontend/components/digest/DigestPage.tsx"
+      issue: "selectedHistoryId not used in any query"
+  missing:
+    - "Add hover:bg-[rgba(217,119,87,0.15)] to selected state (CSS fix — DONE)"
+    - "Content switching requires M2 /digest/{id} endpoint — out of scope for M1"
   debug_session: ""

@@ -30,7 +30,8 @@ export default function RoughCard({
 
     const w = el.offsetWidth;
     const h = el.offsetHeight;
-    svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
+    // viewBox matches container exactly; rough wobble overflows via SVG overflow:visible
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
 
     // Clear previous SVG children before drawing
     svg.replaceChildren();
@@ -38,9 +39,9 @@ export default function RoughCard({
     const rc = rough.svg(svg);
     const rect = rc.rectangle(0, 0, w, h, {
       stroke: "#d0cdc4",
-      strokeWidth: 0.8,
-      roughness: 1.0,
-      bowing: 1,
+      strokeWidth: 1.4,
+      roughness: 1.5,
+      bowing: 1.2,
       fill: "none",
       seed: 42, // Fixed seed for deterministic hand-drawn paths (no jitter on redraw)
     });
@@ -95,7 +96,7 @@ export default function RoughCard({
       ref={containerRef}
       data-testid="rough-card-outer"
       className={cn(
-        "relative overflow-visible p-[10px]",
+        "relative overflow-visible",
         "transition-shadow duration-[0.28s] ease-[cubic-bezier(.4,0,.2,1)]",
         !disableHover && "hover:shadow-card-hover hover:-translate-y-px",
         className
@@ -107,7 +108,7 @@ export default function RoughCard({
       />
       <div
         className={cn(
-          "relative bg-card-bg rounded-card shadow-card overflow-hidden",
+          "relative bg-card-bg shadow-card overflow-hidden",
           padding
         )}
       >

@@ -68,7 +68,7 @@ describe("AuthGuard", () => {
       </AuthGuard>,
     );
 
-    expect(mockReplace).toHaveBeenCalledWith("/dashboard");
+    expect(mockReplace).toHaveBeenCalledWith("/");
   });
 
   it("redirects to /setup when isAuthenticated=true and tokenConfigured=false", () => {
