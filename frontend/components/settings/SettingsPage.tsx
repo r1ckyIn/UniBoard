@@ -8,6 +8,7 @@ import { Settings } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-user";
 import { useSyncStatus } from "@/hooks/use-sync";
 import SettingsNav from "@/components/settings/SettingsNav";
+import TokensSection from "@/components/settings/TokensSection";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import RoughCard from "@/components/design-system/RoughCard";
 
@@ -39,8 +40,8 @@ const SECTION_META = [
 export default function SettingsPage() {
   const t = useTranslations("settings");
 
-  // Data hooks (used by section components in Plan 02/03)
-  useCurrentUser();
+  // Data hooks
+  const userData = useCurrentUser();
   useSyncStatus();
 
   // ── Portal target ─────────────────────────────────────────────
@@ -111,7 +112,7 @@ export default function SettingsPage() {
             <p className="text-[0.82rem] text-[#6b6b65]">{t("subtitle")}</p>
           </AnimatedEntry>
 
-          {/* Section placeholder cards */}
+          {/* Section cards */}
           {SECTION_META.map((section) => (
             <div key={section.id} id={section.id}>
               <AnimatedEntry delay={section.animDelay}>
@@ -122,9 +123,13 @@ export default function SettingsPage() {
                   <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">
                     {t(section.descKey)}
                   </p>
-                  <div className="text-[0.78rem] text-[#9b9b94] italic">
-                    Section content coming in Plan 02/03
-                  </div>
+                  {section.id === "sec-tokens" && userData.data?.data ? (
+                    <TokensSection user={userData.data.data} />
+                  ) : section.id !== "sec-tokens" ? (
+                    <div className="text-[0.78rem] text-[#9b9b94] italic">
+                      Section content coming in Plan 02/03
+                    </div>
+                  ) : null}
                 </RoughCard>
               </AnimatedEntry>
             </div>
