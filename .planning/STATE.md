@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: unknown
-stopped_at: Completed 10-03-PLAN.md
-last_updated: "2026-03-24T09:33:49.698Z"
+status: active
+stopped_at: Phase 11 verified and complete
+last_updated: "2026-03-25T04:50:00Z"
 progress:
   total_phases: 24
-  completed_phases: 10
-  total_plans: 42
-  completed_plans: 42
+  completed_phases: 11
+  total_plans: 45
+  completed_plans: 45
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 10 — digest-page
+**Current focus:** Phase 11 — timetable-page
 
 ## Current Position
 
-Phase: 10 (digest-page) — EXECUTING
-Plan: 3 of 3
+Phase: 11 (timetable-page) — COMPLETE
+Plan: 3 of 3 (all complete)
 
 ## Performance Metrics
 
@@ -86,6 +86,9 @@ Plan: 3 of 3
 | Phase 10 P01 | 4min | 2 tasks | 8 files |
 | Phase 10 P02 | 2min | 2 tasks | 5 files |
 | Phase 10 P03 | 4min | 2 tasks | 4 files |
+| Phase 11 P01 | 7min | 2 tasks | 13 files |
+| Phase 11 P02 | 5min | 2 tasks | 6 files |
+| Phase 11 P03 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -190,6 +193,14 @@ Recent decisions affecting current work:
 - [Phase 10]: Extended DigestLatest/DigestHighlight types locally in fixture file for name and created_at fields not in OpenAPI schema
 - [Phase 10]: Used Tailwind class via cn() for HighlightItem thread link color instead of inline style string manipulation
 - [Phase 10]: Used EnrichedCourse local type assertion for fixture fields (name, created_at) not in OpenAPI schema
+- [Phase 11]: Transitive overlap with greedy column reuse: events sharing end/start time reuse columns
+- [Phase 11]: Week param in sessions API maps to teaching_week number (1-13), not slider position (1-14)
+- [11-02]: hexToRgb helper for dynamic rgba(base, 0.13) event backgrounds matching prototype
+- [11-02]: Tailwind group/group-hover pattern for deadline tooltip visibility
+- [11-02]: i18n-aware useRouter for event click navigation to /courses/{code}
+- [11-03]: MiniCalendar reused from dashboard via withClientOnly, empty deadlineDays for timetable right panel
+- [11-03]: computeCurrentWeek maps system date to semester position via differenceInWeeks, fallback to 4
+- [11-03]: Deadline urgency: <=2 urgent, <=4 warning, <=7 normal, >7 later
 
 ### Pending Todos
 
@@ -201,6 +212,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T09:29:52.485Z
-Stopped at: Completed 10-03-PLAN.md
+Last session: 2026-03-25T03:40:02Z
+Stopped at: Completed 11-03-PLAN.md (Phase 11 complete)
 Resume file: None

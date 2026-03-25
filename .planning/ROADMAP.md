@@ -25,7 +25,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 8: Deadlines Page** — Calendar view, filterable timeline, AI chat panel placeholder
 - [ ] **Phase 9: Predict Page** — Slider-based What-if GPA simulator with real-time calculation
 - [x] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI (completed 2026-03-24)
-- [ ] **Phase 11: Timetable Page** — Weekly schedule view
+- [x] **Phase 11: Timetable Page** — Weekly schedule view (completed 2026-03-25)
 - [ ] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile
 
 ### M2: Backend Core
@@ -229,15 +229,23 @@ Plans:
 - [ ] 10-03-PLAN.md — DigestSummaryCard, DigestHistoryCard (right panel), DigestPage orchestrator, route page.tsx
 
 ### Phase 11: Timetable Page
-**Goal**: Users can view their weekly class schedule
+**Goal**: Users can view their weekly class schedule with a 7-day time grid, week navigation, deadline overlays, and course legend
 **Depends on**: Phase 2
 **Requirements**: UI-08
 **Success Criteria** (what must be TRUE):
-  1. Weekly grid displays class sessions in correct time slots
-  2. Each session shows course name, location, and type (lecture/tutorial/lab)
-  3. Current day/time is highlighted
-  4. Week navigation allows browsing past and future weeks
-**Plans**: TBD
+  1. Weekly grid displays class sessions in correct time slots with dual-density axis (60px/h normal, 28px/h compressed evening)
+  2. Each session shows course name, location, and type (lecture/tutorial/lab) with course-colored blocks
+  3. Current day/time is highlighted with orange tint column and red now-line indicator
+  4. Week navigation (slider + prev/next + All Weeks / Current Week toggle) allows browsing all 14 weeks
+  5. Overlapping events display side-by-side using transitive group overlap algorithm
+  6. Deadline dashed lines with hover tooltips overlay on the grid at correct time positions
+  7. Right panel shows MiniCalendar, Upcoming Deadlines, and Course Legend via portal-slot
+**Plans**: 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Types, fixture data (19 sessions from ICS), OpenAPI schema, Route Handler mocks, TanStack Query hooks, time-utils, overlap algorithm, i18n messages
+- [ ] 11-02-PLAN.md — TimetableTitleRow (slider, nav, mode toggle), TimetableGrid (7-day dual-density), TimetableEvent, TimetableNowLine, TimetableDeadlineOverlay, TimetableBreakMessage
+- [ ] 11-03-PLAN.md — TimetableUpcomingDeadlines, TimetableCourseLegend, TimetableRightPanel, TimetablePage orchestrator, route page.tsx
 
 ### Phase 12: Settings Page
 **Goal**: Users can manage their API tokens, notification preferences, and GPA targets
@@ -402,7 +410,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 8. Deadlines Page | M1 | 0/3 | Planned | - |
 | 9. Predict Page | M1 | 0/3 | Planned | - |
 | 10. Digest Page | 3/3 | Complete    | 2026-03-24 | - |
-| 11. Timetable Page | M1 | 0/TBD | Not started | - |
+| 11. Timetable Page | 3/3 | Complete   | 2026-03-25 | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |

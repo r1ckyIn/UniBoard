@@ -418,6 +418,39 @@
       "retry": "重试"
     }
   },
+  "timetable": {
+    "title": "课程表",
+    "semesterBadge": "2026 第一学期",
+    "sliderLabel": "周",
+    "modeAll": "全部周",
+    "modeCurrent": "当前周",
+    "weekLabel": "第{week}周",
+    "breakLabel": "假期",
+    "breakTitle": "期中假期",
+    "breakDesc": "本周没有课程，好好享受吧！",
+    "semesterOverview": "2026年 第一学期",
+    "moreDeadlines": "还有 {count} 个截止日期",
+    "tooltipViewDetails": "查看详情",
+    "countdownToday": "今天",
+    "countdownOneDay": "1 天",
+    "countdownDays": "{count} 天",
+    "upcomingDeadlines": "即将到来的截止日期",
+    "courseLegend": "课程",
+    "enrolledBadge": "{count} 门已注册",
+    "errorState": "课程表加载失败",
+    "retry": "重试",
+    "emptyState": "暂无课程表数据",
+    "emptyStateDesc": "上传你的课程表 ICS 文件开始使用",
+    "days": {
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六",
+      "sun": "日"
+    }
+  },
   "digest": {
     "title": "每日摘要",
     "dateBadge": "{date}",

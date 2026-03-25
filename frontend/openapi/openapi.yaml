@@ -32,6 +32,8 @@ tags:
     description: Full-text search
   - name: health
     description: Health check
+  - name: timetable
+    description: Weekly timetable data
 
 paths:
   # ── Auth ──────────────────────────────────────────────────────────
@@ -1135,6 +1137,68 @@ paths:
                   meta:
                     $ref: "#/components/schemas/ResponseMeta"
 
+  # ── Timetable ──────────────────────────────────────────────────
+  /timetable/sessions:
+    get:
+      operationId: getTimetableSessions
+      summary: List timetable sessions, optionally filtered by teaching week
+      tags: [timetable]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: week
+          in: query
+          required: false
+          description: Teaching week number (1-13) to filter sessions
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 14
+      responses:
+        "200":
+          description: Timetable sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TimetableSession"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
+  /timetable/weeks:
+    get:
+      operationId: getSemesterWeeks
+      summary: List all semester weeks with teaching week mapping
+      tags: [timetable]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Semester week structure
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SemesterWeek"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
 # ════════════════════════════════════════════════════════════════════
 # Components
 # ════════════════════════════════════════════════════════════════════
@@ -1888,3 +1952,52 @@ components:
           type: string
         ai_policy:
           type: string
+
+    # ── Timetable ────────────────────────────────────────────────
+    TimetableSession:
+      type: object
+      required: [id, course_code, course_name, type, section, day, start_hour, end_hour, location, weeks]
+      properties:
+        id:
+          type: string
+        course_code:
+          type: string
+        course_name:
+          type: string
+        type:
+          type: string
+        section:
+          type: string
+        day:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: "0=Mon, 1=Tue, ..., 6=Sun"
+        start_hour:
+          type: number
+          description: "Decimal hour, e.g. 9, 14.5"
+        end_hour:
+          type: number
+        location:
+          type: string
+        weeks:
+          type: array
+          items:
+            type: integer
+          description: "Teaching weeks this session runs"
+
+    SemesterWeek:
+      type: object
+      required: [position, teaching_week, label, monday_date]
+      properties:
+        position:
+          type: integer
+          description: "1-14 slider position"
+        teaching_week:
+          type: integer
+          description: "0=break, 1-13=teaching week"
+        label:
+          type: string
+        monday_date:
+          type: string
+          format: date

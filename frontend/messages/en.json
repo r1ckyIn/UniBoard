@@ -418,6 +418,39 @@
       "retry": "Retry"
     }
   },
+  "timetable": {
+    "title": "Timetable",
+    "semesterBadge": "2026 S1",
+    "sliderLabel": "Weeks",
+    "modeAll": "All Weeks",
+    "modeCurrent": "Current Week",
+    "weekLabel": "Week {week}",
+    "breakLabel": "Break",
+    "breakTitle": "Mid-semester Break",
+    "breakDesc": "No classes this week. Enjoy!",
+    "semesterOverview": "Semester 1, 2026",
+    "moreDeadlines": "{count, plural, one {1 more deadline} other {# more deadlines}}",
+    "tooltipViewDetails": "View details",
+    "countdownToday": "Today",
+    "countdownOneDay": "1 day",
+    "countdownDays": "{count} days",
+    "upcomingDeadlines": "Upcoming Deadlines",
+    "courseLegend": "Courses",
+    "enrolledBadge": "{count} enrolled",
+    "errorState": "Failed to load timetable",
+    "retry": "Retry",
+    "emptyState": "No timetable data",
+    "emptyStateDesc": "Upload your timetable ICS to get started",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
   "digest": {
     "title": "Daily Digest",
     "dateBadge": "{date}",
