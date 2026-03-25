@@ -261,7 +261,7 @@ Plans:
   5. Deadline overlay filters by current week's Mon-Sun date range
   6. MiniCalendar in timetable shows deadline dots with weight-based opacity
   7. RoughCard has visible two-layer structure with hand-drawn border gap
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 11.1-01-PLAN.md — Real data replacement: all fixture files, course-colors, SuccessStep, test updates
@@ -432,7 +432,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 9. Predict Page | M1 | 3/3 | Complete | - |
 | 10. Digest Page | M1 | 3/3 | Complete | 2026-03-24 |
 | 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
-| 11.1. Real Data & UAT | 1/3 | In Progress|  | - |
+| 11.1. Real Data & UAT | 2/3 | In Progress|  | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |
