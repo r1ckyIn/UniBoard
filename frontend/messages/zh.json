@@ -70,6 +70,10 @@
         "labs": "实验",
         "projects": "项目",
         "reports": "报告",
+        "attendance": "出勤",
+        "tasks": "任务",
+        "weekly tasks": "周任务",
+        "programming": "编程",
         "other": "其他"
       }
     },
