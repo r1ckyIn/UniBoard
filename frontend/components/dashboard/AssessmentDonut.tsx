@@ -26,6 +26,10 @@ const TYPE_COLORS: Record<string, string> = {
   Labs: "#d97757",
   Projects: "#d97757",
   Reports: "#9b9b94",
+  "Weekly Tasks": "#8b7ec8",
+  Programming: "#5ba3a3",
+  Tasks: "#b08968",
+  Attendance: "#d4a843",
 };
 const DEFAULT_TYPE_COLOR = "#9b9b94";
 
@@ -184,12 +188,17 @@ export default function AssessmentDonut({
       svg.appendChild(node);
     }
 
-    for (const seg of segments) {
+    // Compute label positions, then resolve overlaps before drawing
+    const MIN_LABEL_GAP = 28;
+    interface LabelInfo {
+      seg: SegmentData;
+      sx: number; sy: number; ex: number; ey: number; tx: number;
+      isRight: boolean; isHighlighted: boolean;
+    }
+    const labels: LabelInfo[] = segments.map((seg) => {
       const mid = seg.midAngle;
       const isRight = Math.cos(mid) >= 0;
       const isHighlighted = highlightType === seg.weight.name;
-
-      // Offset leader line origin to track popped-out segment
       const popX = isHighlighted ? Math.cos(mid) * HIGHLIGHT_POP : 0;
       const popY = isHighlighted ? Math.sin(mid) * HIGHLIGHT_POP : 0;
       const sx = CX + popX + LEADER_START_R * Math.cos(mid);
@@ -197,54 +206,62 @@ export default function AssessmentDonut({
       const ex = CX + popX + LEADER_ELBOW_R * Math.cos(mid);
       const ey = CY + popY + LEADER_ELBOW_R * Math.sin(mid);
       const tx = isRight ? ex + TAIL_LEN : ex - TAIL_LEN;
+      return { seg, sx, sy, ex, ey, tx, isRight, isHighlighted };
+    });
 
+    // Resolve overlaps separately for left and right labels
+    for (const side of [true, false]) {
+      const group = labels.filter((l) => l.isRight === side).sort((a, b) => a.ey - b.ey);
+      for (let i = 1; i < group.length; i++) {
+        const gap = group[i].ey - group[i - 1].ey;
+        if (gap < MIN_LABEL_GAP) {
+          group[i].ey = group[i - 1].ey + MIN_LABEL_GAP;
+          group[i].tx = side ? group[i].ex + TAIL_LEN : group[i].ex - TAIL_LEN;
+        }
+      }
+    }
+
+    // Draw leader lines and labels at resolved positions
+    for (const l of labels) {
       svg.appendChild(
-        rc.line(sx, sy, ex, ey, {
-          stroke: seg.color,
-          strokeWidth: 1,
-          roughness: 1.2,
+        rc.line(l.sx, l.sy, l.ex, l.ey, {
+          stroke: l.seg.color, strokeWidth: 1, roughness: 1.2,
         })
       );
       svg.appendChild(
-        rc.line(ex, ey, tx, ey, {
-          stroke: seg.color,
-          strokeWidth: 1,
-          roughness: 1.2,
+        rc.line(l.ex, l.ey, l.tx, l.ey, {
+          stroke: l.seg.color, strokeWidth: 1, roughness: 1.2,
         })
       );
-
       svg.appendChild(
-        rc.circle(sx, sy, 4, {
-          fill: seg.color,
-          fillStyle: "solid",
-          stroke: seg.color,
-          strokeWidth: 0.5,
-          roughness: 1,
+        rc.circle(l.sx, l.sy, 4, {
+          fill: l.seg.color, fillStyle: "solid", stroke: l.seg.color,
+          strokeWidth: 0.5, roughness: 1,
         })
       );
 
-      const anchor = isRight ? "start" : "end";
-      const labelX = isRight ? tx + 5 : tx - 5;
+      const anchor = l.isRight ? "start" : "end";
+      const labelX = l.isRight ? l.tx + 5 : l.tx - 5;
 
       const pctText = document.createElementNS(NS, "text");
       pctText.setAttribute("x", String(labelX));
-      pctText.setAttribute("y", String(ey - 1));
+      pctText.setAttribute("y", String(l.ey - 1));
       pctText.setAttribute("text-anchor", anchor);
       pctText.setAttribute("font-family", "'Source Serif 4', Georgia, serif");
       pctText.setAttribute("font-size", "15");
       pctText.setAttribute("font-weight", "700");
-      pctText.setAttribute("fill", seg.color);
-      pctText.textContent = `${seg.percentage}%`;
+      pctText.setAttribute("fill", l.seg.color);
+      pctText.textContent = `${l.seg.percentage}%`;
       svg.appendChild(pctText);
 
       const nameText = document.createElementNS(NS, "text");
       nameText.setAttribute("x", String(labelX));
-      nameText.setAttribute("y", String(ey + 15));
+      nameText.setAttribute("y", String(l.ey + 15));
       nameText.setAttribute("text-anchor", anchor);
       nameText.setAttribute("font-family", "'Inter', sans-serif");
       nameText.setAttribute("font-size", "12");
       nameText.setAttribute("fill", "#6b6b65");
-      nameText.textContent = seg.weight.name;
+      nameText.textContent = l.seg.weight.name;
       svg.appendChild(nameText);
     }
   }, [segments, highlightType]);
