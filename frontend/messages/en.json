@@ -496,5 +496,120 @@
     "emptyStateDesc": "Check back tomorrow for your daily academic digest.",
     "errorState": "Failed to load digest",
     "retry": "Retry"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your tokens, preferences, and account",
+    "nav": {
+      "title": "SETTINGS",
+      "tokens": "API Tokens",
+      "gpa": "GPA Target",
+      "notifications": "Notifications",
+      "courses": "Course Linking",
+      "profile": "Profile",
+      "danger": "Danger Zone"
+    },
+    "tokens": {
+      "title": "API Tokens",
+      "desc": "Connect your university platforms to sync course data",
+      "lastSynced": "Last synced: {time}",
+      "statusActive": "Active",
+      "statusInvalid": "Invalid",
+      "statusNotConfigured": "Not Configured",
+      "update": "Update",
+      "syncNow": "Sync Now",
+      "syncing": "Syncing...",
+      "canvasPlaceholder": "Paste new Canvas token...",
+      "edPlaceholder": "Paste new Ed token...",
+      "canvasName": "Canvas LMS",
+      "edName": "Ed Discussion"
+    },
+    "gpa": {
+      "title": "GPA Target",
+      "desc": "Set your WAM target to track progress on the Predict page",
+      "currentTarget": "Current Target",
+      "saveTarget": "Save Target",
+      "saved": "Saved!",
+      "scale": "Scale: USYD 7-point (HD >= 85, D >= 75, CR >= 65, P >= 50)"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "desc": "Configure how and when you receive alerts",
+      "deadlineReminders": "Deadline Reminders",
+      "reminder72h": "72 hours before",
+      "reminder24h": "24 hours before",
+      "reminder3h": "3 hours before",
+      "gpaRiskAlert": "GPA Risk Alert",
+      "gpaRiskDesc": "Alert when grade trajectory deviates from target",
+      "digestFrequency": "Digest Frequency",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "emailNotifications": "Email Notifications",
+      "emailDesc": "Receive notifications via email"
+    },
+    "courses": {
+      "title": "Course Linking",
+      "desc": "Your synced courses and data sources",
+      "thCourse": "Course",
+      "thSemester": "Semester",
+      "thSources": "Sources",
+      "thStatus": "Status",
+      "autoLinked": "Auto-linked",
+      "manualNote": "Manual linking for unmatched courses coming soon."
+    },
+    "profile": {
+      "title": "Profile",
+      "desc": "Your account information",
+      "displayName": "Display Name",
+      "email": "Email",
+      "emailHint": "Email cannot be changed",
+      "password": "Password",
+      "passwordHint": "Password change coming soon",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "saveChanges": "Save Changes",
+      "saved": "Saved!",
+      "accountCreated": "Account created: {date}"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "disconnect": {
+        "title": "Disconnect all tokens",
+        "desc": "Remove all Canvas and Ed tokens. You can reconnect anytime.",
+        "button": "Disconnect",
+        "confirmTitle": "Disconnect All Tokens?",
+        "confirmDesc": "This will remove your Canvas and Ed API tokens. You can reconnect anytime from this settings page.",
+        "confirmButton": "Yes, Disconnect",
+        "cancel": "Cancel"
+      },
+      "delete": {
+        "title": "Delete account",
+        "desc": "Permanently delete your account and all associated data. This cannot be undone.",
+        "button": "Delete Account",
+        "confirmTitle": "Delete Your Account?",
+        "confirmDesc": "This action is permanent. Type DELETE below to confirm.",
+        "confirmPlaceholder": "Type DELETE to confirm",
+        "confirmButton": "Permanently Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "rightPanel": {
+      "syncStatus": "Sync Status",
+      "quickActions": "Quick Actions",
+      "about": "About",
+      "forcSync": "Force Full Sync",
+      "exportData": "Export My Data",
+      "helpSupport": "Help & Support",
+      "sendFeedback": "Send Feedback",
+      "version": "Version",
+      "memberSince": "Member since",
+      "dataStored": "Data stored",
+      "courses": "Courses",
+      "wam": "WAM",
+      "band": "Band",
+      "canvasSync": "Canvas LMS",
+      "edSync": "Ed Discussion",
+      "outlineSync": "Unit Outlines"
+    }
   }
 }

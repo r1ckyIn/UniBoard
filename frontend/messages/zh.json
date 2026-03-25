@@ -496,5 +496,120 @@
     "emptyStateDesc": "明天再来查看您的每日学术摘要。",
     "errorState": "加载摘要失败",
     "retry": "重试"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "管理你的令牌、偏好设置和账户",
+    "nav": {
+      "title": "设置",
+      "tokens": "API 令牌",
+      "gpa": "GPA 目标",
+      "notifications": "通知",
+      "courses": "课程关联",
+      "profile": "个人资料",
+      "danger": "危险区域"
+    },
+    "tokens": {
+      "title": "API 令牌",
+      "desc": "连接你的大学平台以同步课程数据",
+      "lastSynced": "上次同步：{time}",
+      "statusActive": "已激活",
+      "statusInvalid": "无效",
+      "statusNotConfigured": "未配置",
+      "update": "更新",
+      "syncNow": "立即同步",
+      "syncing": "同步中...",
+      "canvasPlaceholder": "粘贴新的 Canvas 令牌...",
+      "edPlaceholder": "粘贴新的 Ed 令牌...",
+      "canvasName": "Canvas LMS",
+      "edName": "Ed Discussion"
+    },
+    "gpa": {
+      "title": "GPA 目标",
+      "desc": "设置你的 WAM 目标以在预测页面追踪进度",
+      "currentTarget": "当前目标",
+      "saveTarget": "保存目标",
+      "saved": "已保存！",
+      "scale": "评分标准：USYD 7 分制（HD >= 85，D >= 75，CR >= 65，P >= 50）"
+    },
+    "notifications": {
+      "title": "通知",
+      "desc": "配置你接收提醒的方式和时间",
+      "deadlineReminders": "截止日期提醒",
+      "reminder72h": "72 小时前",
+      "reminder24h": "24 小时前",
+      "reminder3h": "3 小时前",
+      "gpaRiskAlert": "GPA 风险警报",
+      "gpaRiskDesc": "当成绩轨迹偏离目标时发出警报",
+      "digestFrequency": "摘要频率",
+      "daily": "每天",
+      "weekly": "每周",
+      "emailNotifications": "邮件通知",
+      "emailDesc": "通过邮件接收通知"
+    },
+    "courses": {
+      "title": "课程关联",
+      "desc": "你已同步的课程和数据来源",
+      "thCourse": "课程",
+      "thSemester": "学期",
+      "thSources": "来源",
+      "thStatus": "状态",
+      "autoLinked": "自动关联",
+      "manualNote": "未匹配课程的手动关联功能即将推出。"
+    },
+    "profile": {
+      "title": "个人资料",
+      "desc": "你的账户信息",
+      "displayName": "显示名称",
+      "email": "邮箱",
+      "emailHint": "邮箱不可更改",
+      "password": "密码",
+      "passwordHint": "密码修改功能即将推出",
+      "currentPassword": "当前密码",
+      "newPassword": "新密码",
+      "saveChanges": "保存更改",
+      "saved": "已保存！",
+      "accountCreated": "账户创建时间：{date}"
+    },
+    "danger": {
+      "title": "危险区域",
+      "disconnect": {
+        "title": "断开所有令牌",
+        "desc": "移除所有 Canvas 和 Ed 令牌。你可以随时重新连接。",
+        "button": "断开连接",
+        "confirmTitle": "断开所有令牌？",
+        "confirmDesc": "这将移除你的 Canvas 和 Ed API 令牌。你可以随时从设置页面重新连接。",
+        "confirmButton": "是的，断开连接",
+        "cancel": "取消"
+      },
+      "delete": {
+        "title": "删除账户",
+        "desc": "永久删除你的账户和所有相关数据。此操作不可撤销。",
+        "button": "删除账户",
+        "confirmTitle": "删除你的账户？",
+        "confirmDesc": "此操作不可撤销。请在下方输入 DELETE 以确认。",
+        "confirmPlaceholder": "输入 DELETE 确认",
+        "confirmButton": "永久删除",
+        "cancel": "取消"
+      }
+    },
+    "rightPanel": {
+      "syncStatus": "同步状态",
+      "quickActions": "快捷操作",
+      "about": "关于",
+      "forcSync": "强制完整同步",
+      "exportData": "导出我的数据",
+      "helpSupport": "帮助与支持",
+      "sendFeedback": "发送反馈",
+      "version": "版本",
+      "memberSince": "加入时间",
+      "dataStored": "数据存储",
+      "courses": "课程",
+      "wam": "WAM",
+      "band": "等级",
+      "canvasSync": "Canvas LMS",
+      "edSync": "Ed Discussion",
+      "outlineSync": "Unit Outlines"
+    }
   }
 }
