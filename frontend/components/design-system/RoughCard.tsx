@@ -96,7 +96,7 @@ export default function RoughCard({
       ref={containerRef}
       data-testid="rough-card-outer"
       className={cn(
-        "relative overflow-visible",
+        "relative overflow-visible p-[10px]",
         "transition-shadow duration-[0.28s] ease-[cubic-bezier(.4,0,.2,1)]",
         !disableHover && "hover:shadow-card-hover hover:-translate-y-px",
         className
@@ -108,7 +108,7 @@ export default function RoughCard({
       />
       <div
         className={cn(
-          "relative bg-card-bg shadow-card overflow-hidden",
+          "relative bg-card-bg shadow-card overflow-hidden rounded-[6px]",
           padding
         )}
       >
