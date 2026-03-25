@@ -31,7 +31,7 @@ const SECTION_IDS = [
   "sec-danger",
 ] as const;
 
-// Section meta for placeholder cards
+// Section meta for rendering cards
 const SECTION_META = [
   { id: "sec-tokens", titleKey: "tokens.title", descKey: "tokens.desc", animDelay: 1 as const },
   { id: "sec-gpa", titleKey: "gpa.title", descKey: "gpa.desc", animDelay: 2 as const },
