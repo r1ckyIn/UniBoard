@@ -12,8 +12,8 @@ const MOCK_COURSES = [
   "COMP2017",
   "COMP3221",
   "STAT2011",
-  "INFO2222",
-  "MATH1005",
+  "EDGU1003",
+  "MATH2021",
 ];
 
 export default function SuccessStep() {
