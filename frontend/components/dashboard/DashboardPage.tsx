@@ -14,6 +14,7 @@ import { useNotifications, useAlerts } from "@/hooks/use-notifications";
 import { useCurrentUser } from "@/hooks/use-user";
 import { useAuthStore } from "@/lib/auth/store";
 import { getGradeBand } from "@/lib/utils/grade-band";
+import { mapNotificationToActivity } from "@/lib/notifications/map-to-activity";
 
 // Components
 import HeroSection from "@/components/dashboard/HeroSection";
@@ -179,35 +180,8 @@ export default function DashboardPage() {
   // Activities: derive from notifications
   const recentActivities = useMemo(() => {
     const notifs = notifications.data?.data ?? [];
-    return notifs.slice(0, 5).map((n) => {
-      // Map notification type to activity type
-      let activityType: "grade" | "discussion" | "deadline" | "endorsed" =
-        "deadline";
-      if (n.type === "grade_published") activityType = "grade";
-      else if (n.type === "discussion_reply") activityType = "discussion";
-      else if (n.type === "endorsed_answer") activityType = "endorsed";
-
-      // Compute relative time
-      const created = new Date(n.created_at);
-      const diffMs = Date.now() - created.getTime();
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const timeStr =
-        diffHours < 1
-          ? t("time.justNow")
-          : diffHours < 24
-            ? t("time.hoursAgo", { count: String(diffHours) })
-            : t("time.daysAgo", { count: String(Math.floor(diffHours / 24)) });
-
-      return {
-        id: n.id,
-        type: activityType,
-        text: n.body,
-        strongText: n.title.split(":")[0].split(" ").slice(-2).join(" "),
-        time: timeStr,
-        externalUrl: n.action_url,
-      };
-    });
-  }, [notifications.data]);
+    return notifs.slice(0, 5).map((n) => mapNotificationToActivity(n, t));
+  }, [notifications.data, t]);
 
   // Profile card data
   const profileData = useMemo(() => {

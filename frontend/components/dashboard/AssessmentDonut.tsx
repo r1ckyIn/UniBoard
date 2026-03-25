@@ -57,6 +57,12 @@ interface SegmentData {
   group_name: string;
 }
 
+interface LabelInfo {
+  seg: SegmentData;
+  sx: number; sy: number; ex: number; ey: number; tx: number;
+  isRight: boolean; isHighlighted: boolean;
+}
+
 // SVG donut geometry constants (from prototype)
 const SVG_W = 360;
 const SVG_H = 300;
@@ -190,11 +196,6 @@ export default function AssessmentDonut({
 
     // Compute label positions, then resolve overlaps before drawing
     const MIN_LABEL_GAP = 28;
-    interface LabelInfo {
-      seg: SegmentData;
-      sx: number; sy: number; ex: number; ey: number; tx: number;
-      isRight: boolean; isHighlighted: boolean;
-    }
     const labels: LabelInfo[] = segments.map((seg) => {
       const mid = seg.midAngle;
       const isRight = Math.cos(mid) >= 0;
