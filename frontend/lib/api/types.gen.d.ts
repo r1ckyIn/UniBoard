@@ -517,6 +517,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/timetable/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List timetable sessions, optionally filtered by teaching week */
+        get: operations["getTimetableSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/timetable/weeks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all semester weeks with teaching week mapping */
+        get: operations["getSemesterWeeks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -595,7 +629,7 @@ export interface components {
             max_score: number;
             /** @enum {string} */
             status: "graded" | "upcoming" | "submitted";
-            /** Assessment type group (e.g. Assignments, Quizzes, Exams, Labs, Projects, Reports) */
+            /** @description Assessment type group (e.g. Assignments, Quizzes, Exams, Labs, Projects, Reports) */
             group_name: string;
             /** Format: date-time */
             due_date?: string;
@@ -866,6 +900,30 @@ export interface components {
             due_date?: string;
             length?: string;
             ai_policy?: string;
+        };
+        TimetableSession: {
+            id: string;
+            course_code: string;
+            course_name: string;
+            type: string;
+            section: string;
+            /** @description 0=Mon, 1=Tue, ..., 6=Sun */
+            day: number;
+            /** @description Decimal hour, e.g. 9, 14.5 */
+            start_hour: number;
+            end_hour: number;
+            location: string;
+            /** @description Teaching weeks this session runs */
+            weeks: number[];
+        };
+        SemesterWeek: {
+            /** @description 1-14 slider position */
+            position: number;
+            /** @description 0=break, 1-13=teaching week */
+            teaching_week: number;
+            label: string;
+            /** Format: date */
+            monday_date: string;
         };
     };
     responses: {
@@ -1852,6 +1910,58 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    getTimetableSessions: {
+        parameters: {
+            query?: {
+                /** @description Teaching week number (1-13) to filter sessions */
+                week?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Timetable sessions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TimetableSession"][];
+                        meta: components["schemas"]["ResponseMeta"];
+                    };
+                };
+            };
+            400: components["responses"]["ValidationError"];
+            401: components["responses"]["AuthError"];
+        };
+    };
+    getSemesterWeeks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Semester week structure */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SemesterWeek"][];
+                        meta: components["schemas"]["ResponseMeta"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthError"];
         };
     };
 }
