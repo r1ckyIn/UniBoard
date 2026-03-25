@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 12-settings-page
 source: [12-01-SUMMARY.md, 12-02-SUMMARY.md, 12-03-SUMMARY.md]
 started: 2026-03-26T10:30:00Z
@@ -77,9 +77,12 @@ skipped: 0
   reason: "User reported: 左侧边栏现在是悬浮在中间，需要和原型一致，顶住上面"
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "SettingsNav uses sticky top-[calc(56px+20px)] but scroll container is <main> (overflow-y:auto), not viewport. The 56px header is outside <main>, so 76px offset pushes nav too far down."
+  artifacts:
+    - path: "frontend/components/settings/SettingsNav.tsx"
+      issue: "sticky top-[calc(56px+20px)] should be top-0 since scroll container is <main>"
+  missing:
+    - "Change top-[calc(56px+20px)] to top-0 in SettingsNav.tsx"
   debug_session: ""
 
 - truth: "GPA target saved in settings persists and syncs to predict page"
@@ -87,9 +90,15 @@ skipped: 0
   reason: "User reported: 点击保存后没有同步到预测界面，反而还被预测页面的85重置了设置里设定的100"
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Mock API is stateless — PATCH /users/me merges but GET always returns original mockUser. Predict page reads target_wam from separate fixture (gpa.ts), not user query."
+  artifacts:
+    - path: "frontend/app/api/v1/users/me/route.ts"
+      issue: "PATCH returns merged object but GET returns original immutable mockUser"
+    - path: "frontend/lib/fixtures/gpa.ts"
+      issue: "target_wam: 85.0 is separate from user.gpa_target"
+  missing:
+    - "Make mock API stateful with module-level mutable variable for user data"
+    - "Have predict page read gpa_target from user query or sync GPA report fixture"
   debug_session: ""
 
 - truth: "GPA risk alert and email notification description text is left-aligned"
@@ -97,9 +106,12 @@ skipped: 0
   reason: "User reported: gpa风险警报和邮件通知下面的灰色描述应该向左对齐"
   severity: cosmetic
   test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Description paragraphs have ml-[52px] left margin but toggle is on the RIGHT side (flex justify-between), causing pointless 52px indent."
+  artifacts:
+    - path: "frontend/components/settings/NotificationsSection.tsx"
+      issue: "ml-[52px] on lines 103 and 147 misaligns description text"
+  missing:
+    - "Remove ml-[52px] from both description paragraphs"
   debug_session: ""
 
 - truth: "Account creation date displays without line-breaking within the date"
@@ -107,9 +119,12 @@ skipped: 0
   reason: "User reported: 格式展示不美观，12月的1和2都分开了"
   severity: cosmetic
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Date span lacks whitespace-nowrap. Chinese locale date-fns output can break between characters when squeezed by flex justify-between layout."
+  artifacts:
+    - path: "frontend/components/settings/ProfileSection.tsx"
+      issue: "Date span on line 103-107 needs whitespace-nowrap"
+  missing:
+    - "Add whitespace-nowrap to the date span element"
   debug_session: ""
 
 - truth: "Danger zone confirmation dialogs appear centered on screen"
@@ -117,7 +132,10 @@ skipped: 0
   reason: "User reported: 危险区域的弹窗的表现需要在屏幕中间"
   severity: major
   test: 8
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Tailwind Preflight resets margin:0 on all elements, overriding native dialog's margin:auto centering. showModal() relies on UA stylesheet margin:auto."
+  artifacts:
+    - path: "frontend/components/settings/DangerZoneSection.tsx"
+      issue: "dialog elements lack m-auto to restore centering after Preflight reset"
+  missing:
+    - "Add m-auto to both dialog elements' className"
   debug_session: ""
