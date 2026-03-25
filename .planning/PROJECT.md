@@ -65,7 +65,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [x] Predict (slider-based What-if GPA simulator) — Validated in Phase 09: Predict Page
 - [ ] Digest (daily intelligence digest)
 - [ ] Timetable (weekly schedule view)
-- [ ] Settings (token management, notifications, GPA target, profile)
+- [x] Settings (token management, notifications, GPA target, profile) — Validated in Phase 12: Settings Page
 
 **Design System:**
 - [x] Anthropic-inspired aesthetic: warm colors, paper texture, Rough.js hand-drawn borders — Validated in Phase 01: Design System Foundation
