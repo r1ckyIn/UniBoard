@@ -597,7 +597,7 @@
       "syncStatus": "同步状态",
       "quickActions": "快捷操作",
       "about": "关于",
-      "forcSync": "强制完整同步",
+      "forceSync": "强制完整同步",
       "exportData": "导出我的数据",
       "helpSupport": "帮助与支持",
       "sendFeedback": "发送反馈",

@@ -10,7 +10,7 @@ import RoughCard from "@/components/design-system/RoughCard";
 const ACTIONS = [
   {
     key: "sync",
-    titleKey: "rightPanel.forcSync" as const,
+    titleKey: "rightPanel.forceSync" as const,
     icon: RefreshCw,
     iconBg: "rgba(217,119,87,.11)",
     iconColor: "#d97757",

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { components } from "@/lib/api/types.gen";
 import { getGradeBand } from "@/lib/utils/grade-band";
+import { getInitials } from "@/lib/utils/initials";
 import RoughCard from "@/components/design-system/RoughCard";
 
 type User = components["schemas"]["User"];
@@ -20,11 +21,7 @@ interface SettingsAccountCardProps {
 export default function SettingsAccountCard({ user, courseCount, wam }: SettingsAccountCardProps) {
   const t = useTranslations("settings");
 
-  // Extract initials: first char of first name + first char of last name
-  const parts = user.display_name.trim().split(/\s+/);
-  const initials = parts.length >= 2
-    ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-    : user.display_name.slice(0, 2).toUpperCase();
+  const initials = getInitials(user.display_name);
 
   return (
     <RoughCard>

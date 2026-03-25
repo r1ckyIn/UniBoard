@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { Settings } from "lucide-react";
 
 import { useCurrentUser } from "@/hooks/use-user";
-import { useSyncStatus } from "@/hooks/use-sync";
 import SettingsNav from "@/components/settings/SettingsNav";
 import TokensSection from "@/components/settings/TokensSection";
 import GpaTargetSection from "@/components/settings/GpaTargetSection";
@@ -51,7 +50,6 @@ export default function SettingsPage() {
 
   // Data hooks
   const userData = useCurrentUser();
-  useSyncStatus();
 
   // ── Portal target ─────────────────────────────────────────────
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
@@ -68,11 +66,13 @@ export default function SettingsPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (isScrollingRef.current) return;
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
+        // Pick the topmost intersecting entry to avoid flicker
+        const intersecting = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (intersecting.length > 0) {
+          setActiveSection(intersecting[0].target.id);
+        }
       },
       { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
     );

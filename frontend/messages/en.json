@@ -597,7 +597,7 @@
       "syncStatus": "Sync Status",
       "quickActions": "Quick Actions",
       "about": "About",
-      "forcSync": "Force Full Sync",
+      "forceSync": "Force Full Sync",
       "exportData": "Export My Data",
       "helpSupport": "Help & Support",
       "sendFeedback": "Send Feedback",

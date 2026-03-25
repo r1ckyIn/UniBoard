@@ -59,6 +59,7 @@ export default function NotificationsSection() {
   }
 
   function setDigestFrequency(freq: "daily" | "weekly") {
+    if (prefs.digestFrequency === freq) return;
     savePrefs({ ...prefs, digestFrequency: freq });
   }
 
