@@ -14,6 +14,10 @@ import NotificationsSection from "@/components/settings/NotificationsSection";
 import CourseLinkingSection from "@/components/settings/CourseLinkingSection";
 import ProfileSection from "@/components/settings/ProfileSection";
 import DangerZoneSection from "@/components/settings/DangerZoneSection";
+import SettingsAccountCard from "@/components/settings/SettingsAccountCard";
+import SettingsSyncCard from "@/components/settings/SettingsSyncCard";
+import SettingsQuickActions from "@/components/settings/SettingsQuickActions";
+import SettingsAboutCard from "@/components/settings/SettingsAboutCard";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import RoughCard from "@/components/design-system/RoughCard";
 
@@ -40,7 +44,7 @@ const SECTION_META = [
 /**
  * SettingsPage orchestrator.
  * Manages scroll-spy navigation, portal for right panel,
- * and renders section placeholder cards that Plan 02/03 will replace.
+ * and renders all 6 section components with 4 right panel cards.
  */
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -171,53 +175,23 @@ export default function SettingsPage() {
       </div>
 
       {/* Right panel portal content */}
-      {portalTarget &&
+      {portalTarget && user &&
         createPortal(
           <>
             <AnimatedEntry delay={2}>
-              <RoughCard>
-                <div className="text-center py-[12px]">
-                  <div className="w-[56px] h-[56px] rounded-[14px] bg-gradient-to-br from-[#d97757] to-[#e8956e] mx-auto mb-[10px] flex items-center justify-center text-white font-bold text-[20px] font-serif">
-                    U
-                  </div>
-                  <div className="font-serif text-[1.1rem] font-semibold mb-[2px]">Account</div>
-                  <div className="text-[0.74rem] text-[#9b9b94]">Account details placeholder</div>
-                </div>
-              </RoughCard>
+              <SettingsAccountCard user={user} courseCount={5} wam={user.gpa_target ?? 77.5} />
             </AnimatedEntry>
 
             <AnimatedEntry delay={4}>
-              <RoughCard>
-                <div className="text-[0.82rem] font-semibold flex items-center gap-[7px] mb-[12px] text-[#2d2d2a]">
-                  <span className="text-[#d97757]">&#9679;</span>
-                  {t("rightPanel.syncStatus")}
-                </div>
-                <div className="text-[0.78rem] text-[#9b9b94] italic">
-                  Sync status placeholder
-                </div>
-              </RoughCard>
+              <SettingsSyncCard />
             </AnimatedEntry>
 
             <AnimatedEntry delay={6}>
-              <RoughCard>
-                <div className="text-[0.82rem] font-semibold mb-[12px] text-[#2d2d2a]">
-                  {t("rightPanel.quickActions")}
-                </div>
-                <div className="text-[0.78rem] text-[#9b9b94] italic">
-                  Quick actions placeholder
-                </div>
-              </RoughCard>
+              <SettingsQuickActions />
             </AnimatedEntry>
 
             <AnimatedEntry delay={8}>
-              <RoughCard>
-                <div className="text-[0.82rem] font-semibold mb-[12px] text-[#2d2d2a]">
-                  {t("rightPanel.about")}
-                </div>
-                <div className="text-[0.78rem] text-[#9b9b94] italic">
-                  About placeholder
-                </div>
-              </RoughCard>
+              <SettingsAboutCard user={user} />
             </AnimatedEntry>
           </>,
           portalTarget
