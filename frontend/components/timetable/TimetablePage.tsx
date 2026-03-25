@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { Calendar } from "lucide-react";
-import { differenceInWeeks, addDays, format } from "date-fns";
+import { addDays, format } from "date-fns";
 
 import {
   useTimetableSessions,
@@ -17,6 +17,7 @@ import { useCourses } from "@/hooks/use-courses";
 import type { WeekMode, SemesterWeek } from "@/lib/timetable/types";
 import type { DeadlineItem } from "@/components/timetable/TimetableDeadlineOverlay";
 import { getCourseColor } from "@/lib/dashboard/course-colors";
+import { classifyUrgency, MAX_UPCOMING_DEADLINES } from "@/lib/timetable/urgency";
 
 import TimetableTitleRow from "@/components/timetable/TimetableTitleRow";
 import TimetableGrid from "@/components/timetable/TimetableGrid";
@@ -24,27 +25,18 @@ import TimetableRightPanel from "@/components/timetable/TimetableRightPanel";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 
 /**
- * Compute the current week position from system date and semester weeks.
- * Falls back to position 4 if the computed position is not in the weeks array.
+ * Compute the current week position by matching today's date against
+ * each week's monday_date range. Falls back to position 4.
  */
 function computeCurrentWeek(weeks: SemesterWeek[]): number {
+  if (weeks.length === 0) return 4;
   const now = new Date();
-  // Semester 1, 2026 starts Feb 23 (Week 1 Monday)
-  const semesterStart = new Date("2026-02-23T00:00:00");
-  const weeksDiff = differenceInWeeks(now, semesterStart);
-  // Map to position 1-14, clamp
-  const pos = Math.max(1, Math.min(14, weeksDiff + 1));
-  return weeks.find((w) => w.position === pos) ? pos : 4;
-}
-
-/**
- * Classify urgency for deadline badge in the grid overlay.
- */
-function classifyDeadlineUrgency(daysRemaining: number): string {
-  if (daysRemaining <= 2) return "urgent";
-  if (daysRemaining <= 4) return "warning";
-  if (daysRemaining <= 7) return "normal";
-  return "later";
+  const sorted = [...weeks].sort((a, b) => a.position - b.position);
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const monday = new Date(sorted[i].monday_date + "T00:00:00");
+    if (now >= monday) return sorted[i].position;
+  }
+  return sorted[0].position;
 }
 
 /**
@@ -128,49 +120,45 @@ export default function TimetablePage() {
     );
   }, [allSessions, mode, isBreak, currentWeek.teaching_week]);
 
-  // ── Deadline items for grid overlay ────────────────────────────
+  // ── Deadline processing (single pass for both grid + right panel) ──
   const allDeadlines = deadlinesQuery.data?.data ?? [];
 
-  const deadlineItems: DeadlineItem[] = useMemo(() => {
-    return allDeadlines
-      .filter((dl) => dl.days_remaining !== undefined && dl.days_remaining >= 0)
-      .map((dl) => {
-        const dueDate = new Date(dl.due_date);
-        const jsDay = dueDate.getDay();
-        // Convert to 0=Mon, ..., 6=Sun
-        const day = jsDay === 0 ? 6 : jsDay - 1;
-        const hour = dueDate.getHours() + dueDate.getMinutes() / 60;
-
-        return {
-          id: dl.id,
-          title: dl.title,
-          course_code: dl.course_code,
-          course_name: dl.course_name,
-          tag: dl.title.split(" ").slice(0, 2).join(" "),
-          urgency: classifyDeadlineUrgency(dl.days_remaining ?? 0),
-          day,
-          hour: hour || 23.98, // Default to near-midnight if no time
-          time_display: format(dueDate, "EEE d/M '\u00b7' h:mm a"),
-        };
-      });
-  }, [allDeadlines]);
-
-  // ── Upcoming deadlines for right panel (first 4) ───────────────
-  const upcomingDeadlines = useMemo(() => {
-    return allDeadlines
+  const { deadlineItems, upcomingDeadlines } = useMemo(() => {
+    const active = allDeadlines
       .filter((dl) => dl.days_remaining !== undefined && dl.days_remaining >= 0)
       .sort(
         (a, b) =>
           new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-      )
-      .slice(0, 4)
-      .map((dl) => ({
+      );
+
+    const items: DeadlineItem[] = active.map((dl) => {
+      const dueDate = new Date(dl.due_date);
+      const jsDay = dueDate.getDay();
+      const day = jsDay === 0 ? 6 : jsDay - 1;
+      const hour = dueDate.getHours() + dueDate.getMinutes() / 60;
+
+      return {
         id: dl.id,
         title: dl.title,
-        course_id: dl.course_code,
-        due_date: dl.due_date,
-        days_remaining: dl.days_remaining ?? undefined,
-      }));
+        course_code: dl.course_code,
+        course_name: dl.course_name,
+        tag: dl.title.split(" ").slice(0, 2).join(" "),
+        urgency: classifyUrgency(dl.days_remaining ?? 0),
+        day,
+        hour: hour || 23,
+        time_display: format(dueDate, "EEE d/M '\u00b7' h:mm a"),
+      };
+    });
+
+    const upcoming = active.slice(0, MAX_UPCOMING_DEADLINES).map((dl) => ({
+      id: dl.id,
+      title: dl.title,
+      course_code: dl.course_code,
+      due_date: dl.due_date,
+      days_remaining: dl.days_remaining ?? undefined,
+    }));
+
+    return { deadlineItems: items, upcomingDeadlines: upcoming };
   }, [allDeadlines]);
 
   // ── Course list for legend ─────────────────────────────────────

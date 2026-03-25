@@ -75,7 +75,6 @@ export default function TimetableTitleRow({
 
       {/* Right group: nav buttons + date range + mode toggle */}
       <div className="flex items-center gap-[8px]">
-        {/* Prev button */}
         <button
           className={cn(
             "w-[30px] h-[30px] rounded-[8px] border border-[#e8e5dd] bg-[#f6f5f0] grid place-items-center cursor-pointer text-[#6b6b65] transition-all duration-150 hover:bg-[#efede6] hover:text-[#2d2d2a]",
@@ -87,12 +86,10 @@ export default function TimetableTitleRow({
           <ChevronLeft size={15} />
         </button>
 
-        {/* Week dates */}
         <span className="font-serif font-semibold text-[0.86rem] min-w-[180px] text-center text-[#2d2d2a]">
           {dateRange}
         </span>
 
-        {/* Next button */}
         <button
           className={cn(
             "w-[30px] h-[30px] rounded-[8px] border border-[#e8e5dd] bg-[#f6f5f0] grid place-items-center cursor-pointer text-[#6b6b65] transition-all duration-150 hover:bg-[#efede6] hover:text-[#2d2d2a]",
@@ -104,7 +101,6 @@ export default function TimetableTitleRow({
           <ChevronRight size={15} />
         </button>
 
-        {/* Mode toggle */}
         <div className="flex border border-[#e8e5dd] rounded-[8px] overflow-hidden">
           <button
             className={cn(

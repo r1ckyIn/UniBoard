@@ -12,7 +12,7 @@ const ClientOnlyMiniCalendar = withClientOnly(
 interface RightPanelDeadline {
   id: string;
   title: string;
-  course_id: string;
+  course_code: string;
   due_date: string;
   days_remaining?: number;
 }

@@ -58,23 +58,18 @@ export default function TimetableEvent({
       }}
       onClick={handleClick}
     >
-      {/* Time range */}
       <div className="text-[0.6rem] text-[#6b6b65] mb-[1px] opacity-80">
         {formatTime(session.start_hour)} &ndash; {formatTime(session.end_hour)}
       </div>
-      {/* Course code */}
       <div className="font-bold text-[0.72rem] text-[#2d2d2a] whitespace-nowrap overflow-hidden text-ellipsis">
         {session.course_code}
       </div>
-      {/* Course name */}
       <div className="text-[0.58rem] text-[#6b6b65] whitespace-nowrap overflow-hidden text-ellipsis">
         {session.course_name}
       </div>
-      {/* Type + section */}
       <div className="text-[0.58rem] text-[#6b6b65]">
         {session.type} {session.section}
       </div>
-      {/* Room (only if tall enough) */}
       {height > 65 && (
         <div className="text-[0.54rem] text-[#9b9b94] mt-[1px] whitespace-nowrap overflow-hidden text-ellipsis">
           {session.location}

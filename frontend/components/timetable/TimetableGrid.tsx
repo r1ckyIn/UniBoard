@@ -48,7 +48,7 @@ function hourLabel(h: number): string {
 
 /**
  * Main 7-day timetable grid.
- * Dual-density time axis: normal (8-18) at 60px/hr, compressed (19-23) at 28px/hr.
+ * Dual-density time axis: normal (8-19) at 60px/hr, compressed (19-23) at 28px/hr.
  * Renders day headers, time gutter, horizontal grid lines, event blocks, deadline
  * overlays, the current-time now line, and a break message overlay.
  */
@@ -117,6 +117,16 @@ export default function TimetableGrid({
     return map;
   }, [sessions]);
 
+  // Pre-group deadlines by day to avoid 7x filter in child components
+  const deadlinesByDay = useMemo(() => {
+    const map: Record<number, DeadlineItem[]> = {};
+    for (let d = 0; d < 7; d++) map[d] = [];
+    for (const dl of deadlines) {
+      (map[dl.day] ??= []).push(dl);
+    }
+    return map;
+  }, [deadlines]);
+
   // Build horizontal grid lines
   const gridLines = useMemo(() => {
     const lines: { top: number; isHalf: boolean; isCompressed: boolean }[] = [];
@@ -138,7 +148,6 @@ export default function TimetableGrid({
 
   return (
     <div className="bg-[#f6f5f0] rounded-[14px] shadow-[0_1px_3px_rgba(20,20,19,.04),0_4px_14px_rgba(20,20,19,.025)] overflow-hidden p-0">
-      {/* Day headers row */}
       <div className="flex border-b border-[#eae7e0] bg-[rgba(246,245,240,0.6)]">
         <div className="flex-shrink-0" style={{ width: GUTTER_WIDTH }} />
         <div className="flex-1 grid grid-cols-7">
@@ -170,18 +179,15 @@ export default function TimetableGrid({
         </div>
       </div>
 
-      {/* Body: gutter + grid */}
       <div
         ref={bodyRef}
         className="flex overflow-y-auto"
         style={{ maxHeight: "calc(100vh - var(--spacing-header-h, 56px) - 200px)" }}
       >
-        {/* Time gutter */}
         <div
           className="flex-shrink-0 relative border-r border-[#eae7e0]"
           style={{ width: GUTTER_WIDTH, height: GRID_HEIGHT }}
         >
-          {/* Normal zone labels */}
           {NORMAL_HOURS.map((h) => (
             <span
               key={`t-${h}`}
@@ -191,7 +197,6 @@ export default function TimetableGrid({
               {hourLabel(h)}
             </span>
           ))}
-          {/* Compressed zone labels */}
           {COMPRESSED_HOURS.map((h) => (
             <span
               key={`tc-${h}`}
@@ -203,9 +208,7 @@ export default function TimetableGrid({
           ))}
         </div>
 
-        {/* Grid area */}
         <div className="flex-1 relative" style={{ height: GRID_HEIGHT }}>
-          {/* Horizontal grid lines */}
           {gridLines.map((line, idx) => (
             <div
               key={`hl-${idx}`}
@@ -240,7 +243,6 @@ export default function TimetableGrid({
             }}
           />
 
-          {/* 7 day columns */}
           <div className="grid grid-cols-7 absolute inset-0 z-[4]">
             {Array.from({ length: 7 }, (_, dayIdx) => {
               const isToday = isCurrentWeekView && dayIdx === todayIndex;
@@ -255,7 +257,6 @@ export default function TimetableGrid({
                     isToday && "bg-[rgba(217,119,87,0.018)]"
                   )}
                 >
-                  {/* Event blocks */}
                   {daySessions.map((s) => (
                     <TimetableEvent
                       key={s.id}
@@ -265,9 +266,8 @@ export default function TimetableGrid({
                     />
                   ))}
 
-                  {/* Deadline overlays */}
                   <TimetableDeadlineOverlay
-                    deadlines={deadlines}
+                    deadlines={deadlinesByDay[dayIdx] ?? []}
                     dayIndex={dayIdx}
                   />
 

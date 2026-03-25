@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { timeToY } from "@/lib/timetable/time-utils";
 import { getCourseColor } from "@/lib/dashboard/course-colors";
+import { URGENCY_BADGE, type UrgencyLevel } from "@/lib/timetable/urgency";
 
 export interface DeadlineItem {
   id: string;
@@ -10,7 +11,7 @@ export interface DeadlineItem {
   course_code: string;
   course_name: string;
   tag: string;
-  urgency: string;
+  urgency: UrgencyLevel;
   day: number;
   hour: number;
   time_display: string;
@@ -20,14 +21,6 @@ interface TimetableDeadlineOverlayProps {
   deadlines: DeadlineItem[];
   dayIndex: number;
 }
-
-/** Badge color palette for each urgency level */
-const URGENCY_BADGE: Record<string, { bg: string; text: string }> = {
-  urgent: { bg: "rgba(217,119,87,.11)", text: "#d97757" },
-  warning: { bg: "rgba(176,137,104,.11)", text: "#b08968" },
-  normal: { bg: "rgba(106,155,204,.11)", text: "#6a9bcc" },
-  later: { bg: "rgba(120,140,93,.11)", text: "#788c5d" },
-};
 
 /**
  * Renders deadline indicator lines for a single day column.
@@ -55,7 +48,6 @@ export default function TimetableDeadlineOverlay({
             className="group absolute left-0 right-0 h-[14px] z-[15] cursor-pointer flex items-center"
             style={{ top: yPos }}
           >
-            {/* Dashed line */}
             <div
               className="dl-dash flex-1 h-[2px] group-hover:h-[3px] transition-[height] duration-150"
               style={{
@@ -63,7 +55,6 @@ export default function TimetableDeadlineOverlay({
               }}
             />
 
-            {/* Tag badge */}
             <span
               className="text-[0.56rem] font-bold py-[2px] px-[5px] rounded-[3px] text-white whitespace-nowrap flex-shrink-0 mx-[2px]"
               style={{ background: color }}
@@ -71,18 +62,14 @@ export default function TimetableDeadlineOverlay({
               {dl.tag}
             </span>
 
-            {/* Diamond dot */}
             <div
               className="w-[10px] h-[10px] rounded-[3px] rotate-45 flex-shrink-0 group-hover:scale-[1.2] transition-transform duration-150"
               style={{ background: color }}
             />
 
-            {/* Hover tooltip */}
             <div className="hidden group-hover:block absolute bottom-[18px] left-[4px] bg-white rounded-[10px] p-[12px_14px] shadow-[0_6px_24px_rgba(20,20,19,.12),0_2px_6px_rgba(20,20,19,.06)] z-[200] min-w-[200px] border border-[#e8e5dd]">
-              {/* Arrow triangle */}
               <div className="absolute -bottom-[6px] left-[16px] w-[10px] h-[10px] bg-white border-b border-r border-[#e8e5dd] rotate-45" />
 
-              {/* Urgency badge */}
               <span
                 className="inline-block text-[0.62rem] font-bold py-[2px] px-[8px] rounded-[4px] mb-[6px] uppercase"
                 style={{ background: badge.bg, color: badge.text }}
@@ -90,12 +77,10 @@ export default function TimetableDeadlineOverlay({
                 {dl.urgency}
               </span>
 
-              {/* Title */}
               <div className="font-serif font-semibold text-[0.82rem] text-[#2d2d2a] mb-[2px]">
                 {dl.title}
               </div>
 
-              {/* Course */}
               <div
                 className="text-[0.68rem] font-semibold mb-[4px]"
                 style={{ color }}
@@ -103,12 +88,10 @@ export default function TimetableDeadlineOverlay({
                 {dl.course_code} {dl.course_name}
               </div>
 
-              {/* Time */}
               <div className="text-[0.68rem] text-[#6b6b65] mb-[6px]">
                 {dl.time_display}
               </div>
 
-              {/* View details link */}
               <span className="text-[0.66rem] font-semibold text-[#d97757]">
                 {t("tooltipViewDetails")} &rarr;
               </span>
