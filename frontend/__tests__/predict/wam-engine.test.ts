@@ -17,7 +17,7 @@ const COMP2017_ASSESSMENTS = [
   { weight: 0.5, score: null as number | null, maxScore: 100 },
 ];
 
-const MATH1005_ASSESSMENTS = [
+const ALL_UNGRADED_ASSESSMENTS = [
   { weight: 0.1, score: null as number | null, maxScore: 100 },
   { weight: 0.2, score: null as number | null, maxScore: 100 },
   { weight: 0.7, score: null as number | null, maxScore: 100 },
@@ -113,7 +113,7 @@ describe("wam-engine", () => {
     });
 
     it("returns 0 when no assessments are graded", () => {
-      const result = computeCurrent(MATH1005_ASSESSMENTS);
+      const result = computeCurrent(ALL_UNGRADED_ASSESSMENTS);
       expect(result).toBe(0);
     });
 
@@ -166,7 +166,7 @@ describe("wam-engine", () => {
     });
 
     it("returns null for fully ungraded course with no predictions", () => {
-      const result = computeProjected(MATH1005_ASSESSMENTS, {});
+      const result = computeProjected(ALL_UNGRADED_ASSESSMENTS, {});
       expect(result).toBeNull();
     });
   });

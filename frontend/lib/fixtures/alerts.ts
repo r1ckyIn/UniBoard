@@ -9,8 +9,8 @@ export const alerts: Alert[] = [
     severity: "critical",
     course_code: "STAT2011",
     message:
-      "Current mark 62.0 is 23 points below your target of 85.0. Final exam (70% weight) requires 95+ to reach target.",
-    current_mark: 62.0,
+      "Current mark 0.0 is 85 points below your target of 85.0. Final exam (60% weight) requires exceptional performance to reach target.",
+    current_mark: 0.0,
     target_mark: 85.0,
     created_at: "2026-03-20T08:00:00Z",
     is_read: false,
@@ -32,8 +32,8 @@ export const alerts: Alert[] = [
     severity: "warning",
     course_code: "COMP3221",
     message:
-      "Current mark 71.0 is 14 points below target. Need 92+ average on remaining assessments (75% weight).",
-    current_mark: 71.0,
+      "Current mark 65.6 is 19.4 points below target. Need 87+ average on remaining assessments (90% weight).",
+    current_mark: 65.6,
     target_mark: 85.0,
     created_at: "2026-03-19T08:00:00Z",
     is_read: true,

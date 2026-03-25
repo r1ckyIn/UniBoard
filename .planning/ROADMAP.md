@@ -26,7 +26,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 9: Predict Page** — Slider-based What-if GPA simulator with real-time calculation
 - [x] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI (completed 2026-03-24)
 - [x] **Phase 11: Timetable Page** — Weekly schedule view (completed 2026-03-25)
-- [ ] **Phase 11.1: Real Data Integration & UAT Gap Closure** — Real Obsidian data, timetable fixes, RoughCard cosmetic fix
+- [x] **Phase 11.1: Real Data Integration & UAT Gap Closure** — Real Obsidian data, timetable fixes, RoughCard cosmetic fix (completed 2026-03-25)
 - [ ] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile
 
 ### M2: Backend Core
@@ -261,7 +261,7 @@ Plans:
   5. Deadline overlay filters by current week's Mon-Sun date range
   6. MiniCalendar in timetable shows deadline dots with weight-based opacity
   7. RoughCard has visible two-layer structure with hand-drawn border gap
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 11.1-01-PLAN.md — Real data replacement: all fixture files, course-colors, SuccessStep, test updates
@@ -432,7 +432,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 9. Predict Page | M1 | 3/3 | Complete | - |
 | 10. Digest Page | M1 | 3/3 | Complete | 2026-03-24 |
 | 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
-| 11.1. Real Data & UAT | M1 | 0/3 | Planning complete | - |
+| 11.1. Real Data & UAT | 3/3 | Complete    | 2026-03-25 | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |

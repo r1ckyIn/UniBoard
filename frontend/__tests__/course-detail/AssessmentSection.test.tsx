@@ -59,33 +59,33 @@ describe("AssessmentSection", () => {
 
   it("renders assessment rows with names and weights", () => {
     render(<AssessmentSection {...defaultProps} />);
-    // Check all 5 assessment names are present
-    expect(screen.getByText("Assignment 1")).toBeInTheDocument();
-    expect(screen.getByText("Assignment 2")).toBeInTheDocument();
-    expect(screen.getByText("Midterm Exam")).toBeInTheDocument();
-    expect(screen.getByText("Assignment 3")).toBeInTheDocument();
+    // Check all 5 assessment names are present (real COMP2017 data)
+    expect(screen.getByText("Weekly Tasks")).toBeInTheDocument();
+    expect(screen.getByText(/Programming P1/)).toBeInTheDocument();
+    expect(screen.getByText("Programming P2")).toBeInTheDocument();
+    expect(screen.getByText("T0 (EFT)")).toBeInTheDocument();
     expect(screen.getByText("Final Exam")).toBeInTheDocument();
 
-    // Check weight percentages are displayed
-    expect(screen.getByText("10%")).toBeInTheDocument();
-    // Two assessments share 15% weight (Assignment 2, Midterm Exam)
-    expect(screen.getAllByText("15%")).toHaveLength(2);
+    // Check weight percentages are displayed (Math.round(weight * 100))
     expect(screen.getByText("20%")).toBeInTheDocument();
-    expect(screen.getByText("40%")).toBeInTheDocument();
+    // Two assessments share 0.125 weight = Math.round(12.5) = 13%
+    expect(screen.getAllByText("13%")).toHaveLength(2);
+    expect(screen.getByText("5%")).toBeInTheDocument();
+    expect(screen.getByText("50%")).toBeInTheDocument();
   });
 
   it("shows graded badge for graded assessment items", () => {
     render(<AssessmentSection {...defaultProps} />);
-    // 3 graded items should show "graded" badge text
+    // 1 graded item (T0 EFT) should show "graded" badge text
     const gradedBadges = screen.getAllByText("assessment.gradedBadge");
-    expect(gradedBadges).toHaveLength(3);
+    expect(gradedBadges).toHaveLength(1);
   });
 
   it("shows dashed-border score input for ungraded items", () => {
     render(<AssessmentSection {...defaultProps} />);
-    // 2 ungraded items (Assignment 3, Final Exam) should have inputs
+    // 4 ungraded items (Weekly Tasks, Programming P1, Programming P2, Final Exam)
     const inputs = screen.getAllByPlaceholderText("assessment.scorePlaceholder");
-    expect(inputs).toHaveLength(2);
+    expect(inputs).toHaveLength(4);
   });
 
   it("displays weight progress bars for each assessment", () => {
@@ -103,8 +103,8 @@ describe("AssessmentSection", () => {
     );
     const inputs = screen.getAllByPlaceholderText("assessment.scorePlaceholder");
     fireEvent.change(inputs[0], { target: { value: "85" } });
-    // onPredictionChange(index, value) — index 3 is the first ungraded item
-    expect(onPredictionChange).toHaveBeenCalledWith(3, "85");
+    // onPredictionChange(index, value) — index 0 is the first ungraded item (Weekly Tasks)
+    expect(onPredictionChange).toHaveBeenCalledWith(0, "85");
   });
 
   it("displays grade summary with current average and projected final", () => {

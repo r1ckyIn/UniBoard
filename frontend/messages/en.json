@@ -70,6 +70,10 @@
         "labs": "Lab",
         "projects": "Project",
         "reports": "Report",
+        "attendance": "Attendance",
+        "tasks": "Task",
+        "weekly tasks": "Weekly",
+        "programming": "Programming",
         "other": "Other"
       }
     },

@@ -31,19 +31,19 @@ const URGENCY_COLORS: Record<
   urgent: {
     dot: "#d97757",
     bg: "rgba(217,119,87,.05)",
-    selectedBg: "rgba(217,119,87,.12)",
+    selectedBg: "rgba(217,119,87,.18)",
     softBg: "rgba(217,119,87,.11)",
   },
   soon: {
     dot: "#6a9bcc",
     bg: "rgba(106,155,204,.05)",
-    selectedBg: "rgba(106,155,204,.12)",
+    selectedBg: "rgba(106,155,204,.18)",
     softBg: "rgba(106,155,204,.11)",
   },
   later: {
     dot: "#788c5d",
     bg: "rgba(120,140,93,.05)",
-    selectedBg: "rgba(120,140,93,.12)",
+    selectedBg: "rgba(120,140,93,.18)",
     softBg: "rgba(120,140,93,.11)",
   },
 };
@@ -192,13 +192,15 @@ export default function DeadlineTimeline({
                 }}
                 className={cn(
                   "group py-3 px-4 mb-3 rounded-sm cursor-pointer",
-                  "transition-transform duration-150 ease-out",
-                  "hover:translate-x-1"
+                  "transition-all duration-150 ease-out",
+                  "hover:translate-x-1",
+                  isSelected && "translate-x-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
                 )}
                 style={{
                   backgroundColor: isSelected
                     ? colors.selectedBg
                     : colors.bg,
+                  borderLeft: isSelected ? `3px solid ${colors.dot}` : "3px solid transparent",
                 }}
               >
                 <div className="flex items-center justify-between">

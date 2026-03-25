@@ -132,8 +132,8 @@ vi.mock("@/components/course-detail/CourseDeadlinesPanel", () => ({
   default: () => <div data-testid="course-deadlines-panel">Deadlines</div>,
 }));
 
-vi.mock("@/components/course-detail/EdPostsPanel", () => ({
-  default: () => <div data-testid="ed-posts-panel">Ed Posts</div>,
+vi.mock("@/components/course-detail/CourseActivityPanel", () => ({
+  default: () => <div data-testid="course-activity-panel">Activity</div>,
 }));
 
 vi.mock("@/components/dashboard/ExternalLinkDialog", () => ({

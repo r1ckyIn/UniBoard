@@ -33,18 +33,18 @@ describe("RoughCard", () => {
       </RoughCard>
     );
 
-    // Outer wrapper: no padding, overflow visible for rough line wobble
+    // Outer wrapper: padding gap for rough border visibility, overflow visible for wobble
     const outerDiv = container.firstChild as HTMLElement;
     expect(outerDiv.className).toContain("overflow-visible");
-    expect(outerDiv.className).not.toContain("p-[");
+    expect(outerDiv.className).toContain("p-[10px]");
     expect(outerDiv.className).not.toContain("bg-card-bg");
 
-    // Inner wrapper: has card bg, shadow (no rounded corners — matches rough rectangle)
+    // Inner wrapper: has card bg, shadow, rounded corners within the gap
     const innerDiv = outerDiv.querySelector(
       ".bg-card-bg"
     ) as HTMLElement;
     expect(innerDiv).toBeInTheDocument();
-    expect(innerDiv.className).not.toContain("rounded-card");
+    expect(innerDiv.className).toContain("rounded-[6px]");
     expect(innerDiv.className).toContain("shadow-card");
   });
 

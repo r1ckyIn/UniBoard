@@ -53,7 +53,7 @@ export default function TimetableTitleRow({
       {/* Center group: slider */}
       <div className="flex flex-col items-center gap-[1px]">
         <span className="font-serif text-[0.64rem] font-semibold text-[#9b9b94] uppercase tracking-[0.04em]">
-          {t("sliderLabel")}
+          {mode === "all" ? t("sliderLabel") : weekLabel}
         </span>
         <input
           type="range"

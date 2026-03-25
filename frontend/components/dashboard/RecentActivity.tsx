@@ -12,15 +12,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 import RoughCard from "@/components/design-system/RoughCard";
 import ExternalLinkDialog from "@/components/dashboard/ExternalLinkDialog";
-
-interface ActivityItem {
-  id: string;
-  type: "grade" | "discussion" | "deadline" | "endorsed";
-  text: string; // Pre-formatted display text
-  strongText: string; // Bold portion of text
-  time: string; // Relative time string (e.g., "3h ago")
-  externalUrl?: string; // URL for external link
-}
+import type { ActivityItem } from "@/lib/notifications/map-to-activity";
 
 interface RecentActivityProps {
   activities: ActivityItem[];
