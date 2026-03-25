@@ -18,9 +18,9 @@ export const gpaReport: GpaReport = {
       name: "Systems Programming",
       credit_points: 6,
       level_weight: 2,
-      current_mark: 82.5,
-      grade_letter: "D",
-      completed_weight: 0.4,
+      current_mark: 100.0,
+      grade_letter: "HD",
+      completed_weight: 0.05,
     },
     {
       course_id: "crs_comp3221",
@@ -28,9 +28,9 @@ export const gpaReport: GpaReport = {
       name: "Distributed Systems",
       credit_points: 6,
       level_weight: 3,
-      current_mark: 71.0,
+      current_mark: 65.6,
       grade_letter: "CR",
-      completed_weight: 0.25,
+      completed_weight: 0.10,
     },
     {
       course_id: "crs_stat2011",
@@ -60,7 +60,7 @@ export const gpaReport: GpaReport = {
       level_weight: 2,
       current_mark: 100.0,
       grade_letter: "HD",
-      completed_weight: 0.04,
+      completed_weight: 0.02,
     },
   ],
   last_sync_at: "2026-03-20T08:00:00Z",
@@ -120,7 +120,7 @@ export const gpaPathDefault: GpaPath = {
     {
       course_id: "crs_comp2017",
       code: "COMP2017",
-      current_mark: 82.5,
+      current_mark: 100.0,
       minimum_remaining_avg: 87.0,
       remaining_assessments: [
         {
@@ -139,7 +139,7 @@ export const gpaPathDefault: GpaPath = {
     {
       course_id: "crs_comp3221",
       code: "COMP3221",
-      current_mark: 71.0,
+      current_mark: 65.6,
       minimum_remaining_avg: 92.0,
       remaining_assessments: [
         {
