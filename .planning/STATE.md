@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-25T03:25:18.871Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-03-25T03:32:30Z"
 progress:
   total_phases: 24
   completed_phases: 10
   total_plans: 45
-  completed_plans: 43
+  completed_plans: 44
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 11 (timetable-page) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -87,6 +87,7 @@ Plan: 2 of 3
 | Phase 10 P02 | 2min | 2 tasks | 5 files |
 | Phase 10 P03 | 4min | 2 tasks | 4 files |
 | Phase 11 P01 | 7min | 2 tasks | 13 files |
+| Phase 11 P02 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -193,6 +194,9 @@ Recent decisions affecting current work:
 - [Phase 10]: Used EnrichedCourse local type assertion for fixture fields (name, created_at) not in OpenAPI schema
 - [Phase 11]: Transitive overlap with greedy column reuse: events sharing end/start time reuse columns
 - [Phase 11]: Week param in sessions API maps to teaching_week number (1-13), not slider position (1-14)
+- [11-02]: hexToRgb helper for dynamic rgba(base, 0.13) event backgrounds matching prototype
+- [11-02]: Tailwind group/group-hover pattern for deadline tooltip visibility
+- [11-02]: i18n-aware useRouter for event click navigation to /courses/{code}
 
 ### Pending Todos
 
@@ -204,6 +208,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T03:25:18.866Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-03-25T03:32:30Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
