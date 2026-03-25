@@ -26,6 +26,7 @@ interface RightPanelCourse {
 interface TimetableRightPanelProps {
   deadlines: RightPanelDeadline[];
   courses: RightPanelCourse[];
+  deadlineDays: Array<{ date: string; totalWeight: number }>;
 }
 
 /**
@@ -35,11 +36,12 @@ interface TimetableRightPanelProps {
 export default function TimetableRightPanel({
   deadlines,
   courses,
+  deadlineDays,
 }: TimetableRightPanelProps) {
   return (
     <>
       <AnimatedEntry delay={5}>
-        <ClientOnlyMiniCalendar deadlineDays={[]} onDateClick={() => {}} />
+        <ClientOnlyMiniCalendar deadlineDays={deadlineDays} onDateClick={() => {}} />
       </AnimatedEntry>
       <AnimatedEntry delay={7}>
         <TimetableUpcomingDeadlines deadlines={deadlines} />

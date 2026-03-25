@@ -176,6 +176,21 @@ export default function TimetablePage() {
     });
   }, [deadlineItems, mode, currentWeek.monday_date, allDeadlines]);
 
+  // ── Deadline days for MiniCalendar (weight-based opacity dots) ──
+  const deadlineDays = useMemo(() => {
+    const dayMap = new Map<string, number>();
+    for (const dl of allDeadlines) {
+      if (dl.status === "completed") continue;
+      const dateKey = format(new Date(dl.due_date), "yyyy-MM-dd");
+      const current = dayMap.get(dateKey) ?? 0;
+      dayMap.set(dateKey, current + (dl.weight ?? 0));
+    }
+    return Array.from(dayMap.entries()).map(([date, totalWeight]) => ({
+      date,
+      totalWeight,
+    }));
+  }, [allDeadlines]);
+
   // ── Course list for legend ─────────────────────────────────────
   const courseList = useMemo(() => {
     const courses = coursesQuery.data?.data ?? [];
@@ -331,6 +346,7 @@ export default function TimetablePage() {
           <TimetableRightPanel
             deadlines={upcomingDeadlines}
             courses={courseList}
+            deadlineDays={deadlineDays}
           />,
           portalTarget
         )}
