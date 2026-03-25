@@ -4,11 +4,11 @@ milestone: v2.0
 milestone_name: milestone
 status: unknown
 stopped_at: Phase 11.1 context gathered
-last_updated: "2026-03-25T06:23:27.207Z"
+last_updated: "2026-03-25T06:50:31.882Z"
 progress:
   total_phases: 25
   completed_phases: 11
-  total_plans: 45
+  total_plans: 48
   completed_plans: 45
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 11.1 — real-data-integration-and-uat-gap-closure (INSERTED)
+**Current focus:** Phase 11.1 — real-data-integration-and-uat-gap-closure
 
 ## Current Position
 
-Phase: 11 (timetable-page) — COMPLETE
-Plan: 3 of 3 (all complete)
+Phase: 11.1 (real-data-integration-and-uat-gap-closure) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -89,6 +89,7 @@ Plan: 3 of 3 (all complete)
 | Phase 11 P01 | 7min | 2 tasks | 13 files |
 | Phase 11 P02 | 5min | 2 tasks | 6 files |
 | Phase 11 P03 | 4min | 2 tasks | 5 files |
+| Phase 11.1 P02 | 10min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -199,6 +200,8 @@ Recent decisions affecting current work:
 - [11-02]: Tailwind group/group-hover pattern for deadline tooltip visibility
 - [11-02]: i18n-aware useRouter for event click navigation to /courses/{code}
 - [11-03]: MiniCalendar reused from dashboard via withClientOnly, empty deadlineDays for timetable right panel
+- [11.1-02]: weekDeadlineItems filters by Mon-Sun via isWithinInterval; all deadlines in "all" mode
+- [11.1-02]: deadlineDays computed via Map accumulator, skipping completed status, passed through to MiniCalendar
 - [11-03]: computeCurrentWeek maps system date to semester position via differenceInWeeks, fallback to 4
 - [11-03]: Deadline urgency: <=2 urgent, <=4 warning, <=7 normal, >7 later
 
@@ -216,6 +219,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T06:23:27.200Z
-Stopped at: Phase 11.1 context gathered
-Resume file: .planning/phases/11.1-real-data-integration-and-uat-gap-closure/11.1-CONTEXT.md
+Last session: 2026-03-25T07:02:00Z
+Stopped at: Completed 11.1-02-PLAN.md
+Resume file: .planning/phases/11.1-real-data-integration-and-uat-gap-closure/11.1-02-SUMMARY.md
