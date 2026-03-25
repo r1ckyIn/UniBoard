@@ -38,9 +38,9 @@ export const gpaReport: GpaReport = {
       name: "Probability and Estimation Theory",
       credit_points: 6,
       level_weight: 2,
-      current_mark: 62.0,
+      current_mark: 0.0,
       grade_letter: "P",
-      completed_weight: 0.3,
+      completed_weight: 0.05,
     },
     {
       course_id: "crs_edgu1003",
@@ -158,7 +158,7 @@ export const gpaPathDefault: GpaPath = {
     {
       course_id: "crs_stat2011",
       code: "STAT2011",
-      current_mark: 62.0,
+      current_mark: 0.0,
       minimum_remaining_avg: 95.0,
       remaining_assessments: [
         {

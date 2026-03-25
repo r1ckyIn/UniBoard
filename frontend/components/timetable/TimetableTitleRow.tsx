@@ -86,12 +86,6 @@ export default function TimetableTitleRow({
           <ChevronLeft size={15} />
         </button>
 
-        {mode !== "all" && (
-          <span className="font-serif font-semibold text-[0.82rem] text-[#d97757] whitespace-nowrap">
-            {weekLabel}
-          </span>
-        )}
-
         <span className="font-serif font-semibold text-[0.86rem] min-w-[180px] text-center text-[#2d2d2a]">
           {dateRange}
         </span>

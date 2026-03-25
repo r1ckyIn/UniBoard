@@ -87,33 +87,31 @@ export default function EdPostsPanel({
                       `https://edstem.org/au/courses/${edCourseId}/discussion/${d.ed_thread_id}`
                     )
                   }
-                  className="flex flex-col gap-[3px] px-[10px] py-[8px] rounded-[8px] hover:bg-[var(--card-bg-hover)] cursor-pointer w-full text-left transition-colors"
+                  className="flex flex-col gap-[4px] px-[10px] py-[10px] rounded-[8px] hover:bg-[var(--card-bg-hover)] cursor-pointer w-full text-left transition-colors"
                 >
-                  {/* Row 1: Title */}
-                  <span className="text-[0.78rem] font-semibold text-[var(--text-1)] truncate">
+                  {/* Row 1: Title (truncate to 1 line) */}
+                  <span className="text-[0.78rem] font-semibold text-[var(--text-1)] line-clamp-1">
                     {d.title}
                   </span>
 
-                  {/* Row 2: Author + Badges + Time */}
-                  <div className="flex items-center gap-[6px]">
-                    <span className="text-[0.66rem] text-[var(--text-3)]">
-                      {d.author}
-                    </span>
-                    {(d.is_endorsed || d.is_staff_post) && (
-                      <span className="text-[0.5rem] text-[var(--text-3)]">&middot;</span>
-                    )}
-                    {d.is_endorsed && (
-                      <span className="text-[0.64rem] font-bold bg-[rgba(120,140,93,.11)] text-[#788c5d] rounded-[4px] px-[6px] py-[1px]">
-                        {t("edPosts.endorsed")}
+                  {/* Row 2: Badges left, time right */}
+                  <div className="flex items-center justify-between gap-[6px]">
+                    <div className="flex items-center gap-[5px] min-w-0">
+                      <span className="text-[0.64rem] text-[var(--text-3)] shrink-0">
+                        {d.author}
                       </span>
-                    )}
-                    {d.is_staff_post && (
-                      <span className="text-[0.64rem] font-bold bg-[rgba(106,155,204,.11)] text-[#6a9bcc] rounded-[4px] px-[6px] py-[1px]">
-                        {t("edPosts.staffPost")}
-                      </span>
-                    )}
-                    <span className="flex-1" />
-                    <span className="text-[0.64rem] text-[var(--text-3)]">
+                      {d.is_endorsed && (
+                        <span className="text-[0.6rem] font-bold bg-[rgba(120,140,93,.11)] text-[#788c5d] rounded-[4px] px-[5px] py-[1px] shrink-0">
+                          {t("edPosts.endorsed")}
+                        </span>
+                      )}
+                      {d.is_staff_post && (
+                        <span className="text-[0.6rem] font-bold bg-[rgba(106,155,204,.11)] text-[#6a9bcc] rounded-[4px] px-[5px] py-[1px] shrink-0">
+                          {t("edPosts.staffPost")}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[0.62rem] text-[var(--text-3)] shrink-0 whitespace-nowrap">
                       {formatTime(d.created_at)}
                     </span>
                   </div>

@@ -163,7 +163,7 @@ export default function TimetablePage() {
 
   // ── Per-week deadline filtering for grid overlay ─────────────────
   const weekDeadlineItems = useMemo(() => {
-    if (mode === "all") return deadlineItems;
+    if (mode === "all") return [];
     const monday = startOfDay(new Date(currentWeek.monday_date + "T00:00:00"));
     const sunday = addDays(monday, 6);
     sunday.setHours(23, 59, 59, 999);
