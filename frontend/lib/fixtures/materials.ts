@@ -13,12 +13,12 @@ export const materialsByCourse: Record<string, Material[]> = {
         {
           title: "Lecture Slides: C Basics",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/48201/files/101",
+          url: "https://canvas.sydney.edu.au/courses/69855/files/101",
         },
         {
           title: "Lab 1: Hello World",
           type: "assignment",
-          url: "https://canvas.sydney.edu.au/courses/48201/assignments/1",
+          url: "https://canvas.sydney.edu.au/courses/69855/assignments/1",
         },
       ],
     },
@@ -31,17 +31,17 @@ export const materialsByCourse: Record<string, Material[]> = {
         {
           title: "Lecture Slides: Pointers & Malloc",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/48201/files/102",
+          url: "https://canvas.sydney.edu.au/courses/69855/files/102",
         },
         {
           title: "Lab 2: Memory Allocation",
           type: "assignment",
-          url: "https://canvas.sydney.edu.au/courses/48201/assignments/2",
+          url: "https://canvas.sydney.edu.au/courses/69855/assignments/2",
         },
         {
           title: "Valgrind Tutorial",
           type: "page",
-          url: "https://canvas.sydney.edu.au/courses/48201/pages/valgrind",
+          url: "https://canvas.sydney.edu.au/courses/69855/pages/valgrind",
         },
       ],
     },
@@ -51,7 +51,7 @@ export const materialsByCourse: Record<string, Material[]> = {
       source: "ed",
       source_type: "lesson",
       slide_count: 42,
-      url: "https://edstem.org/au/courses/14501/lessons/1001",
+      url: "https://edstem.org/au/courses/31567/lessons/1001",
     },
     {
       id: "mat_comp2017_ed2",
@@ -59,7 +59,7 @@ export const materialsByCourse: Record<string, Material[]> = {
       source: "ed",
       source_type: "lesson",
       slide_count: 38,
-      url: "https://edstem.org/au/courses/14501/lessons/1002",
+      url: "https://edstem.org/au/courses/31567/lessons/1002",
     },
   ],
   crs_comp3221: [
@@ -72,7 +72,7 @@ export const materialsByCourse: Record<string, Material[]> = {
         {
           title: "Lecture: Why Distributed?",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/48305/files/201",
+          url: "https://canvas.sydney.edu.au/courses/69874/files/201",
         },
       ],
     },
@@ -85,12 +85,12 @@ export const materialsByCourse: Record<string, Material[]> = {
         {
           title: "Lecture: RPC & gRPC",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/48305/files/202",
+          url: "https://canvas.sydney.edu.au/courses/69874/files/202",
         },
         {
           title: "Lab 2: Building an RPC Server",
           type: "assignment",
-          url: "https://canvas.sydney.edu.au/courses/48305/assignments/3",
+          url: "https://canvas.sydney.edu.au/courses/69874/assignments/3",
         },
       ],
     },
@@ -100,7 +100,7 @@ export const materialsByCourse: Record<string, Material[]> = {
       source: "ed",
       source_type: "lesson",
       slide_count: 35,
-      url: "https://edstem.org/au/courses/14602/lessons/2001",
+      url: "https://edstem.org/au/courses/30772/lessons/2001",
     },
   ],
   crs_stat2011: [
@@ -113,12 +113,12 @@ export const materialsByCourse: Record<string, Material[]> = {
         {
           title: "Lecture: Sample Spaces & Events",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/49101/files/301",
+          url: "https://canvas.sydney.edu.au/courses/72506/files/301",
         },
         {
           title: "Tutorial 1 Worksheet",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/49101/files/302",
+          url: "https://canvas.sydney.edu.au/courses/72506/files/302",
         },
       ],
     },
@@ -131,7 +131,7 @@ export const materialsByCourse: Record<string, Material[]> = {
         {
           title: "Lecture: Bayes Theorem",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/49101/files/303",
+          url: "https://canvas.sydney.edu.au/courses/72506/files/303",
         },
       ],
     },
@@ -141,7 +141,7 @@ export const materialsByCourse: Record<string, Material[]> = {
       source: "ed",
       source_type: "lesson",
       slide_count: 28,
-      url: "https://edstem.org/au/courses/14780/lessons/3001",
+      url: "https://edstem.org/au/courses/32627/lessons/3001",
     },
     {
       id: "mat_stat2011_ed2",
@@ -149,89 +149,81 @@ export const materialsByCourse: Record<string, Material[]> = {
       source: "ed",
       source_type: "lesson",
       slide_count: 31,
-      url: "https://edstem.org/au/courses/14780/lessons/3002",
+      url: "https://edstem.org/au/courses/32627/lessons/3002",
     },
   ],
-  crs_info2222: [
+  crs_edgu1003: [
     {
-      id: "mat_info2222_w1",
-      title: "Week 1 - Introduction to Usability",
+      id: "mat_edgu1003_w1",
+      title: "Week 1 - Introduction to Nutrition Science",
       source: "canvas",
       source_type: "module",
       items: [
         {
-          title: "Lecture: Usability Principles",
+          title: "Lecture: Nutrition Fundamentals",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/48450/files/401",
+          url: "https://canvas.sydney.edu.au/courses/69981/files/401",
         },
         {
-          title: "Reading: Nielsen's Heuristics",
+          title: "Reading: Dietary Guidelines",
           type: "page",
-          url: "https://canvas.sydney.edu.au/courses/48450/pages/nielsen",
+          url: "https://canvas.sydney.edu.au/courses/69981/pages/dietary-guidelines",
         },
       ],
     },
     {
-      id: "mat_info2222_w2",
-      title: "Week 2 - User Research Methods",
+      id: "mat_edgu1003_w2",
+      title: "Week 2 - Macronutrients and Energy Balance",
       source: "canvas",
       source_type: "module",
       items: [
         {
-          title: "Lecture: Interviews & Surveys",
+          title: "Lecture: Carbohydrates, Proteins & Fats",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/48450/files/402",
+          url: "https://canvas.sydney.edu.au/courses/69981/files/402",
         },
       ],
-    },
-    {
-      id: "mat_info2222_ed1",
-      title: "Week 1 - UX Design Thinking",
-      source: "ed",
-      source_type: "lesson",
-      slide_count: 45,
-      url: "https://edstem.org/au/courses/14830/lessons/4001",
     },
   ],
-  crs_math1005: [
+  crs_math2021: [
     {
-      id: "mat_math1005_w1",
-      title: "Week 1 - Descriptive Statistics",
+      id: "mat_math2021_w1",
+      title: "Week 1 - Vector Functions and Curves",
       source: "canvas",
       source_type: "module",
       items: [
         {
-          title: "Lecture: Measures of Central Tendency",
+          title: "Lecture: Parametric Curves & Arc Length",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/47800/files/501",
+          url: "https://canvas.sydney.edu.au/courses/70641/files/501",
         },
         {
-          title: "R Tutorial: Getting Started",
-          type: "page",
-          url: "https://canvas.sydney.edu.au/courses/47800/pages/r-intro",
+          title: "Tutorial 1 Worksheet",
+          type: "file",
+          url: "https://canvas.sydney.edu.au/courses/70641/files/502",
         },
       ],
     },
     {
-      id: "mat_math1005_w2",
-      title: "Week 2 - Data Visualization",
+      id: "mat_math2021_w2",
+      title: "Week 2 - Line Integrals and Green's Theorem",
       source: "canvas",
       source_type: "module",
       items: [
         {
-          title: "Lecture: Histograms & Boxplots",
+          title: "Lecture: Line Integrals",
           type: "file",
-          url: "https://canvas.sydney.edu.au/courses/47800/files/502",
+          url: "https://canvas.sydney.edu.au/courses/70641/files/503",
         },
       ],
     },
     {
-      id: "mat_math1005_ed1",
-      title: "Week 1 - R Programming Basics",
+      id: "mat_math2021_ed1",
+      title: "Week 1 - Vector Calculus Foundations",
       source: "ed",
       source_type: "lesson",
       slide_count: 33,
-      url: "https://edstem.org/au/courses/14200/lessons/5001",
+      url: "https://edstem.org/au/courses/30569/lessons/5001",
     },
   ],
 };

@@ -53,7 +53,7 @@ export default function TimetableTitleRow({
       {/* Center group: slider */}
       <div className="flex flex-col items-center gap-[1px]">
         <span className="font-serif text-[0.64rem] font-semibold text-[#9b9b94] uppercase tracking-[0.04em]">
-          {t("sliderLabel")}
+          {mode === "all" ? t("sliderLabel") : weekLabel}
         </span>
         <input
           type="range"
@@ -85,6 +85,12 @@ export default function TimetableTitleRow({
         >
           <ChevronLeft size={15} />
         </button>
+
+        {mode !== "all" && (
+          <span className="font-serif font-semibold text-[0.82rem] text-[#d97757] whitespace-nowrap">
+            {weekLabel}
+          </span>
+        )}
 
         <span className="font-serif font-semibold text-[0.86rem] min-w-[180px] text-center text-[#2d2d2a]">
           {dateRange}

@@ -10,7 +10,7 @@ export const searchResults: SearchResult[] = [
     course_code: "COMP2017",
     snippet:
       "Dynamic memory allocation using malloc/calloc/realloc. Pointer arithmetic and common pitfalls...",
-    url: "https://canvas.sydney.edu.au/courses/48201/modules/items/601",
+    url: "https://canvas.sydney.edu.au/courses/69855/modules/items/601",
     relevance: 0.95,
   },
   {
@@ -20,7 +20,7 @@ export const searchResults: SearchResult[] = [
     course_code: "COMP2017",
     snippet:
       "Staff answer: When you increment a pointer by 1, it moves by sizeof(type) bytes, not 1 byte...",
-    url: "https://edstem.org/au/courses/14501/discussion/98001",
+    url: "https://edstem.org/au/courses/31567/discussion/98001",
     relevance: 0.92,
   },
   {
@@ -30,7 +30,7 @@ export const searchResults: SearchResult[] = [
     course_code: "COMP3221",
     snippet:
       "Paxos, Raft, and practical consensus in distributed systems. CAP theorem implications...",
-    url: "https://canvas.sydney.edu.au/courses/48305/modules/items/710",
+    url: "https://canvas.sydney.edu.au/courses/69874/modules/items/710",
     relevance: 0.88,
   },
   {
@@ -40,17 +40,17 @@ export const searchResults: SearchResult[] = [
     course_code: "STAT2011",
     snippet:
       "The CLT states that sample means approach a normal distribution regardless of population shape...",
-    url: "https://edstem.org/au/courses/14780/discussion/98500",
+    url: "https://edstem.org/au/courses/32627/discussion/98500",
     relevance: 0.85,
   },
   {
     type: "material",
-    title: "Advanced Prototyping with Figma",
+    title: "Macronutrient Analysis and Dietary Assessment",
     source: "canvas",
-    course_code: "INFO2222",
+    course_code: "EDGU1003",
     snippet:
-      "Interactive prototyping techniques, user flow diagrams, and usability testing methodology...",
-    url: "https://canvas.sydney.edu.au/courses/48450/modules/items/820",
+      "Understanding macronutrient balance, daily intake calculations, and evidence-based dietary recommendations...",
+    url: "https://canvas.sydney.edu.au/courses/69981/modules/items/820",
     relevance: 0.82,
   },
   {
@@ -60,7 +60,7 @@ export const searchResults: SearchResult[] = [
     course_code: "COMP2017",
     snippet:
       "Use valgrind to detect memory leaks. Common patterns include forgetting to free in error paths...",
-    url: "https://edstem.org/au/courses/14501/discussion/98200",
+    url: "https://edstem.org/au/courses/31567/discussion/98200",
     relevance: 0.78,
   },
 ];

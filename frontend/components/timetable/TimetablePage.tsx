@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { Calendar } from "lucide-react";
-import { addDays, format } from "date-fns";
+import { addDays, format, isWithinInterval, startOfDay } from "date-fns";
 
 import {
   useTimetableSessions,
@@ -161,6 +161,21 @@ export default function TimetablePage() {
     return { deadlineItems: items, upcomingDeadlines: upcoming };
   }, [allDeadlines]);
 
+  // ── Per-week deadline filtering for grid overlay ─────────────────
+  const weekDeadlineItems = useMemo(() => {
+    if (mode === "all") return deadlineItems;
+    const monday = startOfDay(new Date(currentWeek.monday_date + "T00:00:00"));
+    const sunday = addDays(monday, 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    return deadlineItems.filter((dl) => {
+      const original = allDeadlines.find((d) => d.id === dl.id);
+      if (!original) return false;
+      const dueDate = new Date(original.due_date);
+      return isWithinInterval(dueDate, { start: monday, end: sunday });
+    });
+  }, [deadlineItems, mode, currentWeek.monday_date, allDeadlines]);
+
   // ── Course list for legend ─────────────────────────────────────
   const courseList = useMemo(() => {
     const courses = coursesQuery.data?.data ?? [];
@@ -302,7 +317,7 @@ export default function TimetablePage() {
         <AnimatedEntry delay={2}>
           <TimetableGrid
             sessions={filteredSessions}
-            deadlines={deadlineItems}
+            deadlines={weekDeadlineItems}
             weekPosition={weekPosition}
             mode={mode}
             currentWeek={currentWeek}

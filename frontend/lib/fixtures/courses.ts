@@ -90,7 +90,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "upcoming",
         group_name: "Weekly Tasks",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "Programming P1 — BMP Animation",
@@ -141,7 +141,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "upcoming",
         group_name: "Quizzes",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "Assignment 1 — Routing Protocol",
@@ -183,7 +183,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "upcoming",
         group_name: "Labs",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "Tutorial Attendance",
@@ -192,7 +192,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "upcoming",
         group_name: "Attendance",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "EFT",
@@ -201,7 +201,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "graded",
         group_name: "Tasks",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "Quiz 1",
@@ -252,7 +252,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "graded",
         group_name: "Tasks",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "Quiz 1",
@@ -303,7 +303,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "upcoming",
         group_name: "Attendance",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "EFT",
@@ -312,7 +312,7 @@ export const courseDetails: Record<string, CourseDetail> = {
         max_score: 100,
         status: "graded",
         group_name: "Tasks",
-        due_date: null,
+        due_date: undefined,
       },
       {
         name: "Assignment 1",

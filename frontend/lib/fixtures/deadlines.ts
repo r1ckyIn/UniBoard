@@ -10,7 +10,7 @@ export const deadlines: Deadline[] = [
     due_date: "2026-03-22T23:59:00+11:00",
     source: "canvas_assignment",
     weight: 0.02,
-    status: "graded",
+    status: "completed",
     days_remaining: -3,
     course_code: "COMP2017",
     course_name: "Systems Programming",
