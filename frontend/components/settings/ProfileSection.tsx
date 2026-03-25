@@ -6,6 +6,7 @@ import { User } from "lucide-react";
 import { format } from "date-fns";
 import type { components } from "@/lib/api/types.gen";
 import { useUpdateProfile } from "@/hooks/use-user";
+import { useDateFnsLocale } from "@/lib/utils/date-fns-locale";
 
 type UserType = components["schemas"]["User"];
 
@@ -20,6 +21,7 @@ interface ProfileSectionProps {
 export default function ProfileSection({ user }: ProfileSectionProps) {
   const t = useTranslations("settings");
   const updateProfile = useUpdateProfile();
+  const dateFnsLocale = useDateFnsLocale();
   const [displayName, setDisplayName] = useState(user.display_name);
 
   const handleSave = () => {
@@ -100,7 +102,7 @@ export default function ProfileSection({ user }: ProfileSectionProps) {
           </button>
           <span className="text-[0.72rem] text-[#9b9b94]">
             {t("profile.accountCreated", {
-              date: format(new Date(user.created_at), "d MMM yyyy"),
+              date: format(new Date(user.created_at), "d MMM yyyy", { locale: dateFnsLocale }),
             })}
           </span>
         </div>

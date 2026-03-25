@@ -10,6 +10,7 @@ vi.mock("next-intl", () => ({
     () =>
     (key: string, params?: Record<string, unknown>) =>
       params ? `${JSON.stringify(params)}${key}` : key,
+  useLocale: () => "en",
 }));
 
 // Mock useUpdateProfile

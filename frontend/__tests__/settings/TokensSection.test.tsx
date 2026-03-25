@@ -7,6 +7,7 @@ vi.mock("next-intl", () => ({
     () =>
     (key: string, params?: Record<string, unknown>) =>
       params ? `${key}:${JSON.stringify(params)}` : key,
+  useLocale: () => "en",
 }));
 
 // Mock use-user hooks

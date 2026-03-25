@@ -85,7 +85,10 @@ export default function GpaTargetSection({ user }: GpaTargetSectionProps) {
           max={100}
           step={0.5}
           value={gpaValue}
-          onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
+          onChange={(e) => {
+            const parsed = parseFloat(e.target.value);
+            if (!Number.isNaN(parsed)) handleChange(parsed);
+          }}
           className="w-[60px] py-[7px] px-[10px] font-serif text-[1rem] font-bold text-center border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,.11)]"
         />
         <button

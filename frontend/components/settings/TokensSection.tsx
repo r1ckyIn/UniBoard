@@ -6,6 +6,7 @@ import { Eye, EyeOff, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { useConfigureToken } from "@/hooks/use-user";
+import { useDateFnsLocale } from "@/lib/utils/date-fns-locale";
 import { useSyncTrigger } from "@/hooks/use-sync";
 import { validateCanvasToken, validateEdToken } from "@/lib/validations/token";
 import { PLATFORM_CONFIG } from "@/components/setup/platform-config";
@@ -28,6 +29,7 @@ export default function TokensSection({ user }: TokensSectionProps) {
   const t = useTranslations("settings");
   const configureToken = useConfigureToken();
   const syncTrigger = useSyncTrigger();
+  const dateFnsLocale = useDateFnsLocale();
 
   // Per-platform local state
   const [canvasToken, setCanvasToken] = useState("");
@@ -129,7 +131,7 @@ export default function TokensSection({ user }: TokensSectionProps) {
             {tokenInfo.last_verified_at && (
               <div className="text-[0.72rem] text-[#9b9b94] mb-[10px]">
                 {t("tokens.lastSynced", {
-                  time: formatDistanceToNow(new Date(tokenInfo.last_verified_at)),
+                  time: formatDistanceToNow(new Date(tokenInfo.last_verified_at), { locale: dateFnsLocale }),
                 })}
               </div>
             )}
