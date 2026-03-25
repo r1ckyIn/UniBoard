@@ -27,7 +27,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI (completed 2026-03-24)
 - [x] **Phase 11: Timetable Page** — Weekly schedule view (completed 2026-03-25)
 - [x] **Phase 11.1: Real Data Integration & UAT Gap Closure** — Real Obsidian data, timetable fixes, RoughCard cosmetic fix (completed 2026-03-25)
-- [ ] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile
+- [x] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile (completed 2026-03-25)
 
 ### M2: Backend Core
 
@@ -438,7 +438,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 10. Digest Page | M1 | 3/3 | Complete | 2026-03-24 |
 | 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
 | 11.1. Real Data & UAT | 3/3 | Complete    | 2026-03-25 | - |
-| 12. Settings Page | 2/3 | In Progress|  | - |
+| 12. Settings Page | 3/3 | Complete   | 2026-03-25 | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |
 | 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
