@@ -26,6 +26,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [ ] **Phase 9: Predict Page** — Slider-based What-if GPA simulator with real-time calculation
 - [x] **Phase 10: Digest Page** — Daily/weekly intelligence digest with relevance scoring UI (completed 2026-03-24)
 - [x] **Phase 11: Timetable Page** — Weekly schedule view (completed 2026-03-25)
+- [ ] **Phase 11.1: Real Data Integration & UAT Gap Closure** — Real Obsidian data, timetable fixes, RoughCard cosmetic fix
 - [ ] **Phase 12: Settings Page** — Token management, notifications, GPA target, profile
 
 ### M2: Backend Core
@@ -100,8 +101,8 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Install deps (motion, react-hook-form, zod, sonner), validation schemas, auth guard, auth doodles, language switcher, i18n messages, auth layout
 - [x] 03-02-PLAN.md — BrandPanel, LoginForm, RegisterForm, PasswordStrengthMeter, AuthFormCard (switching animation), SuccessOverlay, AuthPage orchestrator, page.tsx
-- [ ] 03-03-PLAN.md — UAT gap closure: scrollbar shift fix, validation mode (onSubmit), language switch form state preservation
-- [ ] 03-04-PLAN.md — UAT gap closure: RoughCard smooth border transitions, disableHover prop, 3D book-opening entrance animation
+- [x] 03-03-PLAN.md — ABANDONED (UAT gaps resolved in prior phases; remaining items consolidated into Phase 11.1)
+- [x] 03-04-PLAN.md — ABANDONED (UAT gaps resolved in prior phases; remaining items consolidated into Phase 11.1)
 
 ### Phase 4: Setup Page
 **Goal**: New users can complete API token onboarding in 3 guided steps
@@ -118,8 +119,8 @@ Plans:
 - [ ] 04-01-PLAN.md — i18n setup namespace, SetupGuard, token validation, auth layout restructure, route entry
 - [ ] 04-02-PLAN.md — StepIndicator, WelcomeStep, TutorialStep, GuideCard display components
 - [ ] 04-03-PLAN.md — TokenInput, TokenStep, SuccessStep, SetupPage orchestrator, route wiring
-- [ ] 04-04-PLAN.md — UAT gap closure: fix Canvas token regex, clear button, tutorial i18n, SuccessStep routing & hydration
-- [ ] 04-05-PLAN.md — UAT gap closure: RoughCard two-layer structure, setup step URL persistence
+- [x] 04-04-PLAN.md — ABANDONED (UAT gaps resolved in prior phases; remaining items consolidated into Phase 11.1)
+- [x] 04-05-PLAN.md — ABANDONED (UAT gaps resolved in prior phases; remaining items consolidated into Phase 11.1)
 
 ### Phase 5: Dashboard Page
 **Goal**: Users see their complete academic overview at a glance
@@ -143,8 +144,8 @@ Plans:
 - [x] 05-06-PLAN.md — UAT gap closure: grade band calculation, encouragement i18n, skeleton shimmer, right sidebar fixes
 - [x] 05-07-PLAN.md — UAT gap closure: AssessmentDonut full rewrite (smooth SVG donut matching prototype)
 - [x] 05-08-PLAN.md — UAT gap closure: profile card faculty, hover effects, avatar delay, dialog centering, hero stagger, bottom row height
-- [ ] 05-09-PLAN.md — UAT gap closure: AssessmentDonut type-based colors, legend, pop-out highlight, remove animation
-- [ ] 05-10-PLAN.md — UAT gap closure: hero date localization, Target column alignment, sticky sidebar fix
+- [x] 05-09-PLAN.md — ABANDONED (UAT gaps resolved in prior phases; remaining items consolidated into Phase 11.1)
+- [x] 05-10-PLAN.md — ABANDONED (UAT gaps resolved in prior phases; remaining items consolidated into Phase 11.1)
 
 ### Phase 6: Courses Page
 **Goal**: Users can browse all enrolled courses with grade summaries
@@ -246,6 +247,26 @@ Plans:
 - [ ] 11-01-PLAN.md — Types, fixture data (19 sessions from ICS), OpenAPI schema, Route Handler mocks, TanStack Query hooks, time-utils, overlap algorithm, i18n messages
 - [ ] 11-02-PLAN.md — TimetableTitleRow (slider, nav, mode toggle), TimetableGrid (7-day dual-density), TimetableEvent, TimetableNowLine, TimetableDeadlineOverlay, TimetableBreakMessage
 - [ ] 11-03-PLAN.md — TimetableUpcomingDeadlines, TimetableCourseLegend, TimetableRightPanel, TimetablePage orchestrator, route page.tsx
+
+### Phase 11.1: Real Data Integration & UAT Gap Closure (INSERTED)
+
+**Goal:** Replace mock fixture data with real courses/deadlines from Obsidian, close remaining timetable UAT gaps, and fix RoughCard two-layer cosmetic issue
+**Requirements**: DATA-01, DATA-02, UAT-11.1-01, UAT-11.1-02, UAT-11.1-03, UAT-11.1-04
+**Depends on:** Phase 11
+**Success Criteria** (what must be TRUE):
+  1. All fixture files reference exactly 5 real courses: COMP2017, COMP3221, STAT2011, EDGU1003, MATH2021
+  2. Zero references to old mock courses (INFO2222, MATH1005) remain in frontend source
+  3. Deadline fixture contains real deadline data from Obsidian Dashboard.md
+  4. Timetable week label shows "Week N" between nav controls
+  5. Deadline overlay filters by current week's Mon-Sun date range
+  6. MiniCalendar in timetable shows deadline dots with weight-based opacity
+  7. RoughCard has visible two-layer structure with hand-drawn border gap
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11.1-01-PLAN.md — Real data replacement: all fixture files, course-colors, SuccessStep, test updates
+- [ ] 11.1-02-PLAN.md — Timetable UAT fixes: week label, per-week deadline filtering, MiniCalendar data
+- [ ] 11.1-03-PLAN.md — RoughCard two-layer cosmetic fix + visual verification checkpoint
 
 ### Phase 12: Settings Page
 **Goal**: Users can manage their API tokens, notification preferences, and GPA targets
@@ -402,15 +423,16 @@ Decimal phases (if inserted) execute between their surrounding integers.
 |-------|-----------|----------------|--------|-----------|
 | 1. Design System & Foundation | M1 | 2/2 | Complete | 2026-03-20 |
 | 2. API Contracts & Mock Layer | 4/5 | In Progress|  | - |
-| 3. Auth Page | M1 | 2/4 | UAT gap closure | - |
-| 4. Setup Page | M1 | 3/5 | UAT gap closure | - |
-| 5. Dashboard Page | M1 | 9/11 | UAT gap closure | - |
-| 6. Courses Page | M1 | 0/2 | Planned | - |
+| 3. Auth Page | M1 | 4/4 | Complete (gaps → 11.1) | - |
+| 4. Setup Page | M1 | 5/5 | Complete (gaps → 11.1) | - |
+| 5. Dashboard Page | M1 | 11/11 | Complete (gaps → 11.1) | - |
+| 6. Courses Page | M1 | 2/2 | Complete | 2026-03-23 |
 | 7. Course Detail Page | M1 | 3/4 | UAT gap closure | - |
-| 8. Deadlines Page | M1 | 0/3 | Planned | - |
-| 9. Predict Page | M1 | 0/3 | Planned | - |
-| 10. Digest Page | 3/3 | Complete    | 2026-03-24 | - |
-| 11. Timetable Page | 3/3 | Complete   | 2026-03-25 | - |
+| 8. Deadlines Page | M1 | 3/3 | Complete | - |
+| 9. Predict Page | M1 | 3/3 | Complete | - |
+| 10. Digest Page | M1 | 3/3 | Complete | 2026-03-24 |
+| 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
+| 11.1. Real Data & UAT | M1 | 0/3 | Planning complete | - |
 | 12. Settings Page | M1 | 0/TBD | Not started | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |
