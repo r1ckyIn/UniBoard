@@ -277,12 +277,13 @@ Plans:
   2. Notification preferences allow toggling deadline reminders (72h/24h/3h)
   3. GPA target input saves and persists across sessions
   4. Profile section displays user email and allows password change
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 12-01-PLAN.md — i18n settings namespace, route file, SettingsNav scroll-spy, SettingsPage orchestrator skeleton
 - [ ] 12-02-PLAN.md — TokensSection (token CRUD, visibility, sync), GpaTargetSection (slider + grade band), NotificationsSection (toggle switches + localStorage)
 - [ ] 12-03-PLAN.md — CourseLinkingSection, ProfileSection, DangerZoneSection, right panel cards (Account, Sync Status, Quick Actions, About)
+- [ ] 12-04-PLAN.md — UAT gap closure: sticky nav fix, notification alignment, date nowrap, dialog centering, stateful mock user API for GPA sync
 
 ### Phase 13: Backend Infrastructure
 **Goal**: Establish the FastAPI application foundation with database, auth, and Docker environment
@@ -438,7 +439,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 10. Digest Page | M1 | 3/3 | Complete | 2026-03-24 |
 | 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
 | 11.1. Real Data & UAT | 3/3 | Complete    | 2026-03-25 | - |
-| 12. Settings Page | 3/3 | Complete    | 2026-03-25 | - |
+| 12. Settings Page | 3/4 | UAT gap closure    | 2026-03-25 | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |
 | 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
