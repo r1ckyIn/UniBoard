@@ -1,50 +1,37 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api/client";
-import type { paths } from "@/lib/api/types.gen";
-import { useAuthStore } from "@/lib/auth/store";
-
-// ── Response type aliases ───────────────────────────────────────────────────
-type LoginResponse =
-  paths["/auth/login"]["post"]["responses"]["200"]["content"]["application/json"];
-type RegisterResponse =
-  paths["/auth/register"]["post"]["responses"]["201"]["content"]["application/json"];
-type RefreshResponse =
-  paths["/auth/refresh"]["post"]["responses"]["200"]["content"]["application/json"];
-
-// ── Request body type aliases ───────────────────────────────────────────────
-type LoginBody =
-  paths["/auth/login"]["post"]["requestBody"]["content"]["application/json"];
-type RegisterBody =
-  paths["/auth/register"]["post"]["requestBody"]["content"]["application/json"];
-type RefreshBody =
-  paths["/auth/refresh"]["post"]["requestBody"]["content"]["application/json"];
-type LogoutBody =
-  paths["/auth/logout"]["post"]["requestBody"]["content"]["application/json"];
-
-// ── Mutations ───────────────────────────────────────────────────────────────
+import { createClient } from "@/lib/supabase/client";
 
 export function useLogin() {
   return useMutation({
-    mutationFn: (body: LoginBody) =>
-      api.post("auth/login", { json: body }).json<LoginResponse>(),
-    onSuccess: (data) => {
-      const { access_token, refresh_token, user } = data.data;
-      useAuthStore.getState().setAuth(
-        { access: access_token, refresh: refresh_token },
-        {
-          id: user.id,
-          email: user.email,
-          displayName: user.display_name,
-        },
-      );
+    mutationFn: async (body: { email: string; password: string }) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: body.email,
+        password: body.password,
+      });
+      if (error) throw error;
+      return data;
     },
+    // onAuthStateChange handles zustand sync -- no onSuccess needed for store
   });
 }
 
 export function useRegister() {
   return useMutation({
-    mutationFn: (body: RegisterBody) =>
-      api.post("auth/register", { json: body }).json<RegisterResponse>(),
+    mutationFn: async (body: {
+      email: string;
+      password: string;
+      display_name: string;
+    }) => {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email: body.email,
+        password: body.password,
+        options: { data: { display_name: body.display_name } },
+      });
+      if (error) throw error;
+      return data;
+    },
   });
 }
 
@@ -52,31 +39,14 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (body: LogoutBody) => {
-      await api.post("auth/logout", { json: body });
+    mutationFn: async () => {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     },
     onSuccess: () => {
-      useAuthStore.getState().clearAuth();
       queryClient.clear();
-    },
-  });
-}
-
-export function useRefreshToken() {
-  return useMutation({
-    mutationFn: (body: RefreshBody) =>
-      api.post("auth/refresh", { json: body }).json<RefreshResponse>(),
-    onSuccess: (data) => {
-      const { access_token, refresh_token } = data.data;
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser) {
-        useAuthStore
-          .getState()
-          .setAuth(
-            { access: access_token, refresh: refresh_token },
-            currentUser,
-          );
-      }
+      // onAuthStateChange handles zustand clearAuth
     },
   });
 }
