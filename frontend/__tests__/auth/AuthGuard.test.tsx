@@ -15,6 +15,15 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+// Mock Supabase client (AuthGuard calls getSession on mount)
+vi.mock("@/lib/supabase/client", () => ({
+  createClient: () => ({
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null } }),
+    },
+  }),
+}));
+
 // Track the zustand store state we want to simulate
 let mockAuthState = {
   isAuthenticated: false,

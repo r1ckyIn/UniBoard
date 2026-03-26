@@ -43,24 +43,16 @@ vi.mock("motion/react", () => ({
   AnimatePresence: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
 
-// Mock useRegister and useLogin
+// Mock useRegister (useLogin no longer imported by RegisterForm)
 const mockRegisterMutate = vi.fn();
-const mockLoginMutate = vi.fn();
 const mockRegisterMutation = {
   mutate: mockRegisterMutate,
   isPending: false,
   isError: false,
   error: null,
 };
-const mockLoginMutation = {
-  mutate: mockLoginMutate,
-  isPending: false,
-  isError: false,
-  error: null,
-};
 vi.mock("@/hooks/use-auth", () => ({
   useRegister: () => mockRegisterMutation,
-  useLogin: () => mockLoginMutation,
 }));
 
 // Mock auth store
@@ -91,9 +83,6 @@ describe("RegisterForm", () => {
     mockRegisterMutation.isPending = false;
     mockRegisterMutation.isError = false;
     mockRegisterMutation.error = null;
-    mockLoginMutation.isPending = false;
-    mockLoginMutation.isError = false;
-    mockLoginMutation.error = null;
   });
 
   it("renders all 4 form fields", () => {
@@ -173,17 +162,10 @@ describe("RegisterForm", () => {
     });
   });
 
-  it("calls register mutation then login mutation on valid submit", async () => {
+  it("calls register mutation and onRegisterSuccess on valid submit", async () => {
     // Make register mutate call onSuccess immediately
+    // (Supabase auto-confirms so signUp also signs in)
     mockRegisterMutate.mockImplementation(
-      (
-        _body: unknown,
-        opts: { onSuccess?: () => void; onError?: () => void },
-      ) => {
-        opts?.onSuccess?.();
-      },
-    );
-    mockLoginMutate.mockImplementation(
       (
         _body: unknown,
         opts: { onSuccess?: () => void; onError?: () => void },
@@ -224,13 +206,8 @@ describe("RegisterForm", () => {
       );
     });
 
-    // After register success, login is called for auto-login
-    expect(mockLoginMutate).toHaveBeenCalledWith(
-      { email: "test@uni.sydney.edu.au", password: "MyPassword1!" },
-      expect.any(Object),
-    );
-
-    // After login success, onRegisterSuccess is called
+    // After register success, onRegisterSuccess is called directly
+    // (no nested login needed -- Supabase auto-confirm signs user in)
     expect(mockOnRegisterSuccess).toHaveBeenCalled();
   });
 
