@@ -74,15 +74,15 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [ ] All animations, transitions, and interactions from HTML prototypes preserved pixel-perfect
 
 **Infrastructure:**
-- [ ] PostgreSQL with full schema (users, courses, grades, deadlines, Ed threads, materials, skills, encrypted tokens)
+- [x] Supabase PostgreSQL with full schema + RLS policies (users, courses, grades, deadlines, Ed threads, materials, skills, encrypted tokens) — Validated in Phase 13: Supabase Foundation
+- [x] Supabase Auth integration (frontend supabase-js + Python JWT validation) — Validated in Phase 13: Supabase Foundation
 - [ ] Background sync engine (grades 15min, deadlines 1h, modules daily, Unit Outline per semester)
 - [ ] Canvas adapter with rate limiting, pagination, circuit breaker
 - [ ] Ed Discussion adapter with defensive Pydantic parsing
 - [ ] Ed Lessons adapter for lesson content and assignments
 - [ ] Unit Outline HTML parser with weight-sum validation
-- [ ] Token encryption (AES-256-GCM)
-- [ ] JWT + bcrypt authentication
-- [ ] Docker Compose local development environment
+- [x] Token encryption (AES-256-GCM) — Validated in Phase 13: Supabase Foundation
+- [x] Docker Compose local development environment (Python backend only; DB via Supabase) — Validated in Phase 13: Supabase Foundation
 - [x] i18n support (English + Chinese) — Validated in Phase 01: Design System Foundation
 
 ### Out of Scope
@@ -95,7 +95,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - Course recommendations — out of GPA tracking scope
 - Mobile-first design — desktop-first, mobile later
 - Multi-university support — USYD-only
-- OAuth / AWS Cognito — using simple JWT for now, migrate post-MVP
+- AWS CDK / Lambda / API Gateway — replaced by Supabase + Railway + Vercel for MVP speed
 - Interactive AI tutoring (TUTOR-01/02) — deferred to v2
 - Personalized dashboard questionnaire — deferred to v2
 
@@ -124,18 +124,19 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 ## Constraints
 
 - **Approach**: MVP speed priority — ship working product first, optimize in M4
-- **Tech stack (backend)**: Python 3.12+, FastAPI, SQLAlchemy 2.0 async + asyncpg, PostgreSQL 16 (Docker)
-- **Tech stack (frontend)**: Next.js, Tailwind CSS, TanStack Query v5
+- **Tech stack (backend)**: Python 3.12+, FastAPI, SQLAlchemy 2.0 async + asyncpg
+- **Tech stack (frontend)**: Next.js, Tailwind CSS, TanStack Query v5, @supabase/supabase-js (auth only)
 - **Tech stack (AI)**: Anthropic Claude API (Opus 4.6 for MCP Agent features, Sonnet for digest/scoring)
 - **Tech stack (MCP)**: Python asyncio MCP server + canvas-ed-mcp tools
+- **Tech stack (platform)**: Supabase (PostgreSQL + Auth + Realtime), Railway (Python backend), Vercel (Next.js frontend)
 - **Type checking**: mypy --strict (backend)
 - **Linting**: ruff (backend)
 - **Testing**: pytest + pytest-asyncio (backend), key interaction tests (frontend, M1 only)
 - **Package management**: uv (backend), pnpm 9+ (frontend)
-- **Auth**: Simple JWT + bcrypt
-- **Token storage**: AES-256-GCM encrypted in PostgreSQL
-- **Architecture**: Dual-layer — MCP Engine (data acquisition + AI research) + Web Dashboard (user interface)
-- **API strategy**: Contract-first — M1 defines OpenAPI contracts, Mock implements them, M2 backend implements same contracts → frontend zero-change on integration
+- **Auth**: Supabase Auth (frontend supabase-js direct → Supabase; Python validates Supabase JWT)
+- **Token storage**: AES-256-GCM encrypted in Supabase PostgreSQL
+- **Architecture**: Hybrid — Supabase (DB + Auth managed layer) + Python Service (adapters, sync, MCP, AI logic layer) + Next.js (UI layer)
+- **API strategy**: Contract-first — M1 defines OpenAPI contracts, Mock implements them, M2 backend implements same contracts → frontend zero-change on integration (auth flow is the only frontend change: mock JWT → Supabase session)
 - **Read-only policy**: System never writes to external platforms
 - **Sync frequencies**: Grades 15min, deadlines 1h, modules daily, Unit Outline per semester
 - **AI quality gate**: F1 < 75% auto-fallback to rule engine
@@ -146,9 +147,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Milestone | Scope | Description |
 |-----------|-------|-------------|
 | **M1: Frontend App** | 10 HTML → Next.js | Convert all prototypes to interactive app with Mock API (contract-first), i18n (EN+CN), Rough.js preserved |
-| **M2: Backend Core** | From-scratch backend | FastAPI + SQLAlchemy, all adapters/services/sync, implement M1's API contracts |
+| **M2: Backend Core** | From-scratch backend | Supabase (DB+Auth) + FastAPI on Railway, all adapters/services/sync, implement M1's API contracts |
 | **M3: AI/MCP/Skills** | Intelligence layer | MCP Agent features (INTEL-02, FILE-03/04, Deadline AI chat), Skill system, PLAT-03 MCP Server |
-| **M4: Engineering** | Production readiness | Testing (unit/integration/E2E), AWS deployment (CDK/Docker), monitoring, security, CI/CD |
+| **M4: Engineering** | Production readiness | Testing (unit/integration/E2E), Supabase+Railway+Vercel deployment, monitoring, security, CI/CD |
 
 ## Key Decisions
 
@@ -165,10 +166,12 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Desktop-first | Personal project / startup validation stage; mobile later | — Pending |
 | MVP speed priority | Ship working product first, engineering polish in M4 | — Pending |
 | Anthropic-inspired design | Warm, restrained, academic aesthetic — differentiates from typical EdTech | ✓ Good (validated through 103 prototype iterations) |
-| Simple JWT over Cognito | Faster to implement; migrate post-MVP | — Pending |
+| Supabase hybrid architecture | Supabase handles DB+Auth+Realtime (saves ~40% M2 work), Python backend focuses on adapters/sync/MCP/AI, deploy to Railway+Vercel instead of AWS CDK | ✓ Decided |
+| Supabase Auth over JWT+bcrypt | Frontend uses supabase-js for auth flows (session refresh built-in), Python validates Supabase JWT for API requests — eliminates hand-rolled auth | ✓ Decided |
+| Frontend single API entry (no direct Supabase data queries) | All data queries go through Python API — preserves M1 hooks, unified caching/logging/error handling, avoids dual-client complexity | ✓ Decided |
 | Unit Outline from USYD HTML | Canvas may not have complete data | — Pending |
 | Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending |
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-26 — Phase 12 (Settings Page) complete, all 5 UAT gaps closed*
+*Last updated: 2026-03-26 — Phase 13 (Supabase Foundation) complete, M2 backend milestone started*
