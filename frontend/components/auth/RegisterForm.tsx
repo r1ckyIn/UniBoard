@@ -10,7 +10,7 @@ import {
   type RegisterInput,
   getPasswordStrength,
 } from "@/lib/validations/auth";
-import { useRegister, useLogin } from "@/hooks/use-auth";
+import { useRegister } from "@/hooks/use-auth";
 import PasswordStrengthMeter from "./PasswordStrengthMeter";
 
 interface RegisterFormProps {
@@ -24,7 +24,6 @@ export default function RegisterForm({
 }: RegisterFormProps) {
   const t = useTranslations();
   const registerMutation = useRegister();
-  const loginMutation = useLogin();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -50,21 +49,15 @@ export default function RegisterForm({
       },
       {
         onSuccess: () => {
-          // Auto-login after registration
-          loginMutation.mutate(
-            { email: data.email, password: data.password },
-            {
-              onSuccess: () => {
-                onRegisterSuccess();
-              },
-            },
-          );
+          // With Supabase auto-confirm, signUp also signs in the user.
+          // onAuthStateChange fires and sets zustand store.
+          onRegisterSuccess();
         },
       },
     );
   };
 
-  const isPending = registerMutation.isPending || loginMutation.isPending;
+  const isPending = registerMutation.isPending;
 
   const inputBaseClass =
     "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";

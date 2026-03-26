@@ -7,6 +7,7 @@ import {
 import { api } from "@/lib/api/client";
 import type { paths } from "@/lib/api/types.gen";
 import { useAuthStore } from "@/lib/auth/store";
+import { createClient } from "@/lib/supabase/client";
 
 // ── Response type aliases ───────────────────────────────────────────────────
 type UserResponse =
@@ -115,8 +116,10 @@ export function useDeleteAccount() {
     mutationFn: async () => {
       await api.delete("users/me");
     },
-    onSuccess: () => {
-      useAuthStore.getState().clearAuth();
+    onSuccess: async () => {
+      // Sign out from Supabase; onAuthStateChange clears zustand
+      const supabase = createClient();
+      await supabase.auth.signOut();
     },
   });
 }

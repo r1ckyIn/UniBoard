@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/auth/store";
+import { createClient } from "@/lib/supabase/client";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -19,6 +20,24 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       setHydrated(true);
     }
     return unsub;
+  }, []);
+
+  useEffect(() => {
+    // Check Supabase session on mount (handles page refresh where
+    // zustand may have stale data but Supabase cookie has valid session)
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        useAuthStore.getState().setAuth(
+          { access: session.access_token, refresh: session.refresh_token },
+          {
+            id: session.user.id,
+            email: session.user.email ?? "",
+            displayName: session.user.user_metadata?.display_name ?? "",
+          },
+        );
+      }
+    });
   }, []);
 
   useEffect(() => {

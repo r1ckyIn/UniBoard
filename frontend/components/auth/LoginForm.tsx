@@ -35,6 +35,8 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       { email: data.email, password: data.password },
       {
         onSuccess: () => {
+          // onAuthStateChange fires synchronously during signInWithPassword
+          // and updates zustand before this callback runs
           const { tokenConfigured } = useAuthStore.getState();
           router.push(tokenConfigured ? "/" : "/setup");
         },
