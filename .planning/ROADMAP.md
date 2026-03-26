@@ -439,7 +439,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 10. Digest Page | M1 | 3/3 | Complete | 2026-03-24 |
 | 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
 | 11.1. Real Data & UAT | 3/3 | Complete    | 2026-03-25 | - |
-| 12. Settings Page | 3/4 | UAT gap closure    | 2026-03-25 | - |
+| 12. Settings Page | 4/4 | Complete    | 2026-03-26 | - |
 | 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |
 | 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
