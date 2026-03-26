@@ -31,7 +31,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 
 ### M2: Backend Core
 
-- [ ] **Phase 13: Backend Infrastructure** — FastAPI app, PostgreSQL + Alembic, ORM models, JWT auth, Docker Compose
+- [ ] **Phase 13: Supabase Foundation** — Supabase project, schema migration (Supabase CLI), Auth config, RLS policies, FastAPI skeleton connecting Supabase PostgreSQL, frontend auth store adaptation
 - [ ] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser
 - [ ] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts
 - [ ] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily)
@@ -285,17 +285,25 @@ Plans:
 - [ ] 12-03-PLAN.md — CourseLinkingSection, ProfileSection, DangerZoneSection, right panel cards (Account, Sync Status, Quick Actions, About)
 - [ ] 12-04-PLAN.md — UAT gap closure: sticky nav fix, notification alignment, date nowrap, dialog centering, stateful mock user API for GPA sync
 
-### Phase 13: Backend Infrastructure
-**Goal**: Establish the FastAPI application foundation with database, auth, and Docker environment
+### Phase 13: Supabase Foundation
+**Goal**: Establish the hybrid backend foundation — Supabase (DB + Auth) + FastAPI skeleton, with frontend auth store adapted to Supabase
 **Depends on**: Phase 12 (M1 complete)
 **Requirements**: INFRA-01, INFRA-07, INFRA-08, INFRA-09
 **Success Criteria** (what must be TRUE):
-  1. FastAPI app starts and serves health check endpoint
-  2. PostgreSQL database runs in Docker with all ORM models migrated via Alembic
-  3. User can register, login, and receive JWT token via API
-  4. Token encryption (AES-256-GCM) stores and retrieves Canvas/Ed tokens securely
-  5. Docker Compose spins up PostgreSQL + backend + frontend in one command
-**Plans**: TBD
+  1. Supabase project created with PostgreSQL schema matching TRD data model (all tables via Supabase CLI migrations)
+  2. RLS policies enforce per-user data isolation on all tables
+  3. Supabase Auth configured (email+password) — user can register and login via frontend supabase-js
+  4. FastAPI app starts, connects to Supabase PostgreSQL (SQLAlchemy async), serves health check endpoint
+  5. Python middleware validates Supabase JWT on all protected routes
+  6. Token encryption (AES-256-GCM) stores and retrieves Canvas/Ed tokens in Supabase PostgreSQL
+  7. Frontend auth store adapted from mock JWT to Supabase session (login/register/token refresh)
+  8. Docker Compose runs Python backend locally (DB is remote Supabase, not local Docker PostgreSQL)
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Supabase project init, complete schema migration (all tables from SQLAlchemy models), RLS policies
+- [ ] 13-02-PLAN.md — Python backend adaptation: Supabase JWT validation, config update, Profile model, Dockerfile, Docker Compose
+- [ ] 13-03-PLAN.md — Frontend auth migration: supabase-js client, bridge pattern (onAuthStateChange to zustand), hooks rewrite, mock auth handler deletion
 
 ### Phase 14: Platform Adapters
 **Goal**: Reliable data acquisition from all external platforms with defensive parsing
@@ -440,7 +448,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 11. Timetable Page | M1 | 3/3 | Complete | 2026-03-25 |
 | 11.1. Real Data & UAT | 3/3 | Complete    | 2026-03-25 | - |
 | 12. Settings Page | 4/4 | Complete    | 2026-03-26 | - |
-| 13. Backend Infrastructure | M2 | 0/TBD | Not started | - |
+| 13. Supabase Foundation | M2 | 0/3 | Planning complete | - |
 | 14. Platform Adapters | M2 | 0/TBD | Not started | - |
 | 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
 | 16. Sync Engine | M2 | 0/TBD | Not started | - |
