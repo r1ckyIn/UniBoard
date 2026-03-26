@@ -223,6 +223,17 @@ class CanvasAdapter(LMSAdapter):
         result: dict[str, object] = response.json()
         return result
 
+    async def get_assignment_groups(self, course_id: str) -> list[dict[str, object]]:
+        """Fetch assignment groups with weight info for a course.
+
+        Canvas endpoint: GET /courses/:id/assignment_groups
+        Used as fallback when Unit Outline parsing fails (TRD SS3.4).
+        """
+        return await self._paginate(
+            f"/courses/{course_id}/assignment_groups",
+            params={"per_page": 100},
+        )
+
     async def validate_token(self) -> bool:
         """Check token validity via GET /users/self."""
         try:

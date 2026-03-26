@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import Any
 
 import httpx
@@ -11,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from src.adapters.base import LessonAdapter
 from src.adapters.resilience import CircuitBreaker, RetryConfig
-from src.schemas.common import UpstreamUnavailableError
+from src.schemas.common import TokenInvalidError, UpstreamUnavailableError
 
 logger = structlog.get_logger()
 
@@ -104,7 +105,23 @@ class EdLessonsAdapter(LessonAdapter):
                 logger.warning("ed_lessons_circuit_open")
                 raise UpstreamUnavailableError("Ed Lessons circuit breaker is open")
 
+            start = time.monotonic()
             response = await self._client.request(method, path, params=params)
+            duration = time.monotonic() - start
+
+            logger.debug(
+                "ed_lessons_request",
+                method=method,
+                path=path,
+                status=response.status_code,
+                duration_ms=round(duration * 1000),
+                attempt=attempt + 1,
+            )
+
+            # Token invalid — not retryable, raise immediately
+            if response.status_code in (401, 403):
+                self._circuit.record_failure()
+                raise TokenInvalidError("Ed Lessons")
 
             if self._retry.is_retryable(response.status_code):
                 self._circuit.record_failure()
