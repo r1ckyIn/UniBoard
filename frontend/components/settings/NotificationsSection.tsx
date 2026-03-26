@@ -100,7 +100,7 @@ export default function NotificationsSection() {
           onChange={() => togglePref("gpaRiskAlert")}
           testId="toggle-gpaRiskAlert"
         />
-        <p className="text-[0.72rem] text-[#9b9b94] mt-[4px] ml-[52px]">
+        <p className="text-[0.72rem] text-[#9b9b94] mt-[4px]">
           {t("notifications.gpaRiskDesc")}
         </p>
       </div>
@@ -144,7 +144,7 @@ export default function NotificationsSection() {
           onChange={() => togglePref("emailNotifications")}
           testId="toggle-emailNotifications"
         />
-        <p className="text-[0.72rem] text-[#9b9b94] mt-[4px] ml-[52px]">
+        <p className="text-[0.72rem] text-[#9b9b94] mt-[4px]">
           {t("notifications.emailDesc")}
         </p>
       </div>

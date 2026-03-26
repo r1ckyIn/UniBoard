@@ -30,7 +30,7 @@ export default function SettingsNav({ activeSection, onNavClick }: SettingsNavPr
 
   return (
     <nav
-      className="hidden min-[900px]:flex w-[170px] flex-shrink-0 sticky top-[calc(56px+20px)] self-start flex-col"
+      className="hidden min-[900px]:flex w-[170px] flex-shrink-0 sticky top-0 self-start flex-col"
       aria-label="Settings navigation"
     >
       <div className="font-serif text-[0.78rem] font-semibold text-[#9b9b94] uppercase tracking-[0.05em] px-[12px] mb-[10px]">

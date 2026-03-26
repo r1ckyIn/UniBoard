@@ -89,7 +89,7 @@ export default function DangerZoneSection() {
       <dialog
         ref={disconnectDialogRef}
         data-testid="disconnect-dialog"
-        className="p-[24px] max-w-[400px] rounded-[14px] bg-[#faf9f5] backdrop:bg-[rgba(0,0,0,0.3)]"
+        className="p-[24px] max-w-[400px] rounded-[14px] bg-[#faf9f5] m-auto backdrop:bg-[rgba(0,0,0,0.3)]"
       >
         <h3 className="font-serif text-[1rem] font-semibold text-[#2d2d2a] mb-[8px]">
           {t("danger.disconnect.confirmTitle")}
@@ -120,7 +120,7 @@ export default function DangerZoneSection() {
       <dialog
         ref={deleteDialogRef}
         data-testid="delete-dialog"
-        className="p-[24px] max-w-[400px] rounded-[14px] bg-[#faf9f5] backdrop:bg-[rgba(0,0,0,0.3)]"
+        className="p-[24px] max-w-[400px] rounded-[14px] bg-[#faf9f5] m-auto backdrop:bg-[rgba(0,0,0,0.3)]"
       >
         <h3 className="font-serif text-[1rem] font-semibold text-[#2d2d2a] mb-[8px]">
           {t("danger.delete.confirmTitle")}

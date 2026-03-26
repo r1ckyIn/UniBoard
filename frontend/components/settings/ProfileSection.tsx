@@ -100,7 +100,7 @@ export default function ProfileSection({ user }: ProfileSectionProps) {
           >
             {t("profile.saveChanges")}
           </button>
-          <span className="text-[0.72rem] text-[#9b9b94]">
+          <span className="text-[0.72rem] text-[#9b9b94] whitespace-nowrap">
             {t("profile.accountCreated", {
               date: format(new Date(user.created_at), "d MMM yyyy", { locale: dateFnsLocale }),
             })}
