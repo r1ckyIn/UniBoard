@@ -6,7 +6,7 @@ import {
   shouldSimulateError,
   requireAuth,
 } from "@/lib/fixtures/helpers";
-import { mockUser } from "@/lib/fixtures/users";
+import { currentUser, updateCurrentUser } from "@/lib/fixtures/mock-state";
 
 export async function GET(request: Request) {
   await mockDelay();
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const authError = requireAuth(request);
   if (authError) return authError;
 
-  return mockResponse(mockUser);
+  return mockResponse(currentUser);
 }
 
 export async function PATCH(request: Request) {
@@ -37,8 +37,7 @@ export async function PATCH(request: Request) {
     gpa_scale?: "wam" | "gpa_4" | "gpa_7";
   };
 
-  // Merge updates with mock user
-  const updatedUser = { ...mockUser, ...body };
+  const updatedUser = updateCurrentUser(body);
 
   return mockResponse(updatedUser);
 }
