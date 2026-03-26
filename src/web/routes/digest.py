@@ -1,14 +1,15 @@
 """Digest REST endpoints."""
 
+import uuid
+
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
-from src.models.user import User
 from src.schemas.common import NotFoundError, SuccessResponse
 from src.schemas.digest import DigestResponse
 from src.services.digest import DigestService
-from src.web.deps import get_current_user, get_request_meta, get_session
+from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 router = APIRouter()
 
@@ -24,11 +25,11 @@ def get_digest_service(
 @router.get("/latest")
 async def get_latest_digest(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: DigestService = Depends(get_digest_service),
 ) -> SuccessResponse[DigestResponse]:
     """Return the most recent digest for the current user."""
-    result = await svc.get_latest(current_user.id)
+    result = await svc.get_latest(current_user_id)
     if result is None:
         raise NotFoundError("Digest")
     return SuccessResponse(data=result, meta=get_request_meta(request))
@@ -38,9 +39,9 @@ async def get_latest_digest(
 async def get_digest_history(
     request: Request,
     limit: int = 7,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: DigestService = Depends(get_digest_service),
 ) -> SuccessResponse[list[DigestResponse]]:
     """Return last N digests for the current user."""
-    result = await svc.get_history(current_user.id, limit=limit)
+    result = await svc.get_history(current_user_id, limit=limit)
     return SuccessResponse(data=result, meta=get_request_meta(request))

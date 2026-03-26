@@ -6,11 +6,10 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import Notification
-from src.models.user import User
 from src.schemas.common import SuccessResponse
 from src.schemas.notification import NotificationResponse, UnreadCountResponse
 from src.services.notification import NotificationService
-from src.web.deps import get_current_user, get_request_meta, get_session
+from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 router = APIRouter()
 
@@ -42,11 +41,11 @@ async def get_notifications(
     request: Request,
     limit: int = 50,
     offset: int = 0,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: NotificationService = Depends(get_notification_service),
 ) -> SuccessResponse[list[NotificationResponse]]:
     """Return list of notifications for the current user."""
-    notifications = await svc.get_notifications(current_user.id, limit=limit, offset=offset)
+    notifications = await svc.get_notifications(current_user_id, limit=limit, offset=offset)
     data = [_serialize(n) for n in notifications]
     return SuccessResponse(data=data, meta=get_request_meta(request))
 
@@ -55,13 +54,13 @@ async def get_notifications(
 async def mark_notification_read(
     notification_id: uuid.UUID,
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: NotificationService = Depends(get_notification_service),
 ) -> SuccessResponse[NotificationResponse]:
     """Mark a notification as read."""
     from src.schemas.common import NotFoundError
 
-    notification = await svc.mark_read(current_user.id, notification_id)
+    notification = await svc.mark_read(current_user_id, notification_id)
     if notification is None:
         raise NotFoundError("Notification")
     return SuccessResponse(data=_serialize(notification), meta=get_request_meta(request))
@@ -70,11 +69,11 @@ async def mark_notification_read(
 @router.get("/unread-count")
 async def get_unread_count(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: NotificationService = Depends(get_notification_service),
 ) -> SuccessResponse[UnreadCountResponse]:
     """Return unread notification count."""
-    count = await svc.get_unread_count(current_user.id)
+    count = await svc.get_unread_count(current_user_id)
     return SuccessResponse(
         data=UnreadCountResponse(count=count),
         meta=get_request_meta(request),

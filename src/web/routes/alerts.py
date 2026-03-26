@@ -1,14 +1,15 @@
 """Risk alerts REST endpoints."""
 
+import uuid
+
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
-from src.models.user import User
 from src.schemas.common import SuccessResponse
 from src.schemas.notification import NotificationResponse
 from src.services.risk_alert import RiskAlertService
-from src.web.deps import get_current_user, get_request_meta, get_session
+from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 router = APIRouter()
 
@@ -24,11 +25,11 @@ def get_risk_alert_service(
 @router.get("")
 async def get_alerts(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: RiskAlertService = Depends(get_risk_alert_service),
 ) -> SuccessResponse[list[NotificationResponse]]:
     """Return recent GPA risk alert notifications."""
-    notifications = await svc.get_alerts(current_user.id)
+    notifications = await svc.get_alerts(current_user_id)
     data = [
         NotificationResponse(
             id=str(n.id),

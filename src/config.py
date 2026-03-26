@@ -1,8 +1,5 @@
 """Application configuration via pydantic-settings."""
 
-from typing import Self
-
-from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,10 +12,17 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Database
+    # Database (Supabase PostgreSQL via asyncpg)
     database_url: str = (
-        "postgresql+asyncpg://uniboard:devpassword@localhost:5432/uniboard_dev"
+        "postgresql+asyncpg://postgres:postgres@localhost:54322/postgres"
     )
+
+    # Supabase
+    supabase_url: str = "http://localhost:54321"
+    supabase_jwt_secret: str = (
+        "super-secret-jwt-token-with-at-least-32-characters-long"
+    )
+    supabase_service_role_key: str = ""
 
     # Platform API tokens
     canvas_api_token: str = ""
@@ -30,11 +34,6 @@ class Settings(BaseSettings):
 
     # Encryption
     encryption_key: str = ""
-
-    # Auth
-    secret_key: str = "dev-secret-change-in-production"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 7
 
     # Sync engine intervals
     sync_grades_interval_min: int = 15
@@ -66,15 +65,6 @@ class Settings(BaseSettings):
     # Debug (default True for local dev; production sets DEBUG=false explicitly)
     debug: bool = True
     log_level: str = "INFO"
-
-    @model_validator(mode="after")
-    def _check_production_secret_key(self) -> Self:
-        """Reject default secret_key when running in production mode."""
-        if not self.debug and self.secret_key == "dev-secret-change-in-production":
-            raise ValueError(
-                "SECRET_KEY must be changed from default in production (debug=False)"
-            )
-        return self
 
 
 _settings: Settings | None = None

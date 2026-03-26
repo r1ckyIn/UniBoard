@@ -1,5 +1,6 @@
 """User profile and platform token management endpoints."""
 
+import uuid
 from typing import Any
 
 import httpx
@@ -9,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
 from src.models.user import User
-from src.schemas.common import SuccessResponse, TokenInvalidError, ValidationError
+from src.schemas.common import NotFoundError, SuccessResponse, TokenInvalidError, ValidationError
 from src.schemas.user import (
     TokenConfigRequest,
     TokenConfigResponse,
@@ -17,7 +18,7 @@ from src.schemas.user import (
     UserResponse,
     UserUpdateRequest,
 )
-from src.web.deps import get_current_user, get_encryption, get_request_meta, get_session
+from src.web.deps import get_current_user_id, get_encryption, get_request_meta, get_session
 
 logger = structlog.get_logger()
 
@@ -26,35 +27,39 @@ router = APIRouter()
 VALID_PLATFORMS = ("canvas", "ed")
 
 
-def _build_user_response(user: User) -> UserResponse:
-    """Build UserResponse from User ORM model with token statuses."""
+def _build_user_response(profile: User) -> UserResponse:
+    """Build UserResponse from Profile ORM model with token statuses."""
     canvas_status: str = (
-        "active" if user.canvas_api_token_encrypted else "not_configured"
+        "active" if profile.canvas_api_token_encrypted else "not_configured"
     )
-    ed_status: str = "active" if user.ed_api_token_encrypted else "not_configured"
+    ed_status: str = "active" if profile.ed_api_token_encrypted else "not_configured"
 
     return UserResponse(
-        id=str(user.id),
-        email=user.email,
-        display_name=user.display_name,
-        gpa_target=user.gpa_target,
-        gpa_scale=user.gpa_scale,
+        id=str(profile.id),
+        email=profile.email,
+        display_name=profile.display_name,
+        gpa_target=profile.gpa_target,
+        gpa_scale=profile.gpa_scale,
         tokens={
             "canvas": TokenStatus(status=canvas_status, platform="canvas"),
             "ed": TokenStatus(status=ed_status, platform="ed"),
         },
-        created_at=user.created_at,
+        created_at=profile.created_at,
     )
 
 
 @router.get("/me")
 async def get_profile(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[UserResponse]:
     """Return the current user's profile with token statuses."""
+    profile = await session.get(User, current_user_id)
+    if profile is None:
+        raise NotFoundError("Profile")
     return SuccessResponse(
-        data=_build_user_response(current_user),
+        data=_build_user_response(profile),
         meta=get_request_meta(request),
     )
 
@@ -63,25 +68,29 @@ async def get_profile(
 async def update_profile(
     body: UserUpdateRequest,
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[UserResponse]:
     """Update user profile fields (PATCH semantics -- only non-None fields applied)."""
+    profile = await session.get(User, current_user_id)
+    if profile is None:
+        raise NotFoundError("Profile")
+
     if body.display_name is not None:
-        current_user.display_name = body.display_name
+        profile.display_name = body.display_name
 
     if body.gpa_target is not None:
-        current_user.gpa_target = body.gpa_target
+        profile.gpa_target = body.gpa_target
 
     if body.gpa_scale is not None:
         if body.gpa_scale not in ("wam", "gpa_4"):
             raise ValidationError(detail="gpa_scale must be 'wam' or 'gpa_4'")
-        current_user.gpa_scale = body.gpa_scale
+        profile.gpa_scale = body.gpa_scale
 
     await session.flush()
 
     return SuccessResponse(
-        data=_build_user_response(current_user),
+        data=_build_user_response(profile),
         meta=get_request_meta(request),
     )
 
@@ -91,7 +100,7 @@ async def configure_token(
     platform: str,
     body: TokenConfigRequest,
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[TokenConfigResponse]:
     """Validate and store an encrypted platform API token."""
@@ -99,6 +108,10 @@ async def configure_token(
         raise ValidationError(
             detail=f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
         )
+
+    profile = await session.get(User, current_user_id)
+    if profile is None:
+        raise NotFoundError("Profile")
 
     settings = get_settings()
     courses_found = 0
@@ -147,9 +160,9 @@ async def configure_token(
     encrypted_token = encryption.encrypt(body.token)
 
     if platform == "canvas":
-        current_user.canvas_api_token_encrypted = encrypted_token
+        profile.canvas_api_token_encrypted = encrypted_token
     else:
-        current_user.ed_api_token_encrypted = encrypted_token
+        profile.ed_api_token_encrypted = encrypted_token
 
     await session.flush()
 
@@ -157,7 +170,7 @@ async def configure_token(
         "token.configured",
         platform=platform,
         courses_found=courses_found,
-        user_id=str(current_user.id),
+        user_id=str(current_user_id),
     )
 
     return SuccessResponse(
@@ -174,7 +187,7 @@ async def configure_token(
 async def remove_token(
     platform: str,
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[dict[str, str]]:
     """Remove a stored platform API token."""
@@ -183,10 +196,14 @@ async def remove_token(
             detail=f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
         )
 
+    profile = await session.get(User, current_user_id)
+    if profile is None:
+        raise NotFoundError("Profile")
+
     if platform == "canvas":
-        current_user.canvas_api_token_encrypted = None
+        profile.canvas_api_token_encrypted = None
     else:
-        current_user.ed_api_token_encrypted = None
+        profile.ed_api_token_encrypted = None
 
     await session.flush()
 
