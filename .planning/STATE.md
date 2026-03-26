@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 13 context gathered
-last_updated: "2026-03-26T01:16:07.997Z"
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-03-26T03:06:09Z"
 progress:
-  total_phases: 24
+  total_phases: 25
   completed_phases: 13
-  total_plans: 52
-  completed_plans: 52
+  total_plans: 55
+  completed_plans: 53
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 12 — settings-page
+**Current focus:** Phase 13 — supabase-foundation
 
 ## Current Position
 
-Phase: 12 (settings-page) — EXECUTING
-Plan: 1 of 4
+Phase: 13 (supabase-foundation) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -94,6 +94,7 @@ Plan: 1 of 4
 | Phase 12 P01 | 4min | 2 tasks | 12 files |
 | Phase 12 P02 | 5min | 2 tasks | 7 files |
 | Phase 12 P03 | 9min | 2 tasks | 10 files |
+| Phase 13 P01 | 15min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -220,6 +221,10 @@ Recent decisions affecting current work:
 - [Phase 12-03]: Course linking data hardcoded matching prototype (future API connection)
 - [Phase 12-03]: DELETE text gate pattern for account deletion confirmation
 - [Phase 12-03]: Account card WAM uses gpa_target with 77.5 fallback
+- [Phase 13-01]: profiles table PK is auth.users(id) directly with ON DELETE CASCADE, not a separate UUID
+- [Phase 13-01]: RLS subquery join pattern for indirect tables (grades->courses->user_id) rather than denormalizing user_id
+- [Phase 13-01]: GENERATED ALWAYS AS STORED for tsvector columns matching SQLAlchemy Computed definitions
+- [Phase 13-01]: pgvector extension in extensions schema, vector(1024) for Voyage AI embeddings
 
 ### Roadmap Evolution
 
@@ -235,6 +240,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T01:16:07.991Z
-Stopped at: Phase 13 context gathered
-Resume file: .planning/phases/13-supabase-foundation/13-CONTEXT.md
+Last session: 2026-03-26T03:06:09Z
+Stopped at: Completed 13-01-PLAN.md
+Resume file: .planning/phases/13-supabase-foundation/13-02-PLAN.md

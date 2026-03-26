@@ -71,7 +71,7 @@ Requirements for full release across 4 milestones.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
+- [x] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
 - [ ] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
 - [ ] **INFRA-03**: Canvas adapter with rate limiting (sliding window), pagination, and circuit breaker
 - [ ] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
