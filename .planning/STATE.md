@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 12-03-PLAN.md
-last_updated: "2026-03-26T00:32:57.972Z"
+stopped_at: Phase 13 context gathered
+last_updated: "2026-03-26T01:16:07.997Z"
 progress:
-  total_phases: 25
+  total_phases: 24
   completed_phases: 13
   total_plans: 52
   completed_plans: 52
@@ -235,6 +235,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T11:48:30.000Z
-Stopped at: Completed 12-03-PLAN.md
-Resume file: None
+Last session: 2026-03-26T01:16:07.991Z
+Stopped at: Phase 13 context gathered
+Resume file: .planning/phases/13-supabase-foundation/13-CONTEXT.md
