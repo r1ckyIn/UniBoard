@@ -1,19 +1,20 @@
 services:
-  postgres:
-    image: pgvector/pgvector:pg16
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5432:5432"
+      - "8000:8000"
     environment:
-      POSTGRES_DB: uniboard_dev
-      POSTGRES_USER: uniboard
-      POSTGRES_PASSWORD: devpassword
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@host.docker.internal:54322/postgres
+      SUPABASE_URL: http://host.docker.internal:54321
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      DEBUG: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U uniboard -d uniboard_dev"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  pgdata:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    depends_on: []
