@@ -61,6 +61,9 @@ logs/
 *.key
 *.crt
 
+# Supabase local state
+supabase/.temp/
+
 # Obsidian
 .obsidian/
 .hypothesis/

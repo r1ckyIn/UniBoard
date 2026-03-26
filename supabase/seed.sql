@@ -1,0 +1,21 @@
+-- UniBoard Development Seed Data
+-- =============================================================================
+--
+-- This file is executed after migrations during `supabase db reset`.
+--
+-- IMPORTANT: Seed data requires a registered auth.users entry because:
+--   1. All tables use user_id REFERENCES auth.users(id)
+--   2. RLS policies enforce per-user data isolation
+--   3. The on_auth_user_created trigger auto-creates profiles rows
+--
+-- To seed development data:
+--   1. Start local Supabase: supabase start
+--   2. Register a test user via the Auth API or Supabase Studio (localhost:54323)
+--   3. Use the user's UUID to INSERT test courses, grades, deadlines, etc.
+--
+-- Example (replace <USER_UUID> with the actual user id):
+--
+--   INSERT INTO courses (user_id, name, code, semester, credit_points)
+--   VALUES ('<USER_UUID>', 'Data Structures and Algorithms', 'COMP2123', '2025S1', 6);
+--
+-- =============================================================================
