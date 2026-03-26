@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.common import NotFoundError, RateLimitedError, SuccessResponse
 from src.schemas.sync import SyncSourceStatus, SyncStatusResponse, SyncTriggerResponse
 from src.web.deps import get_current_user_id, get_request_meta, get_session
@@ -24,7 +24,7 @@ async def trigger_sync(
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[SyncTriggerResponse]:
     """Trigger a manual sync for the current user (throttled to 1 per 5 minutes)."""
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 
@@ -61,7 +61,7 @@ async def get_sync_status(
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[SyncStatusResponse]:
     """Return per-source sync status for the current user."""
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 

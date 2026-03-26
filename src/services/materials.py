@@ -170,9 +170,9 @@ class CourseMaterialService:
         settings = get_settings()
 
         # Check daily AI limit
-        from src.models.user import User
+        from src.models.user import Profile
 
-        user = await self._session.get(User, user_id)
+        user = await self._session.get(Profile, user_id)
         if user is None:
             return _rule_based_description(item_names)
 

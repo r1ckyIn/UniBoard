@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.common import NotFoundError, SuccessResponse, TokenInvalidError, ValidationError
 from src.schemas.user import (
     TokenConfigRequest,
@@ -27,7 +27,7 @@ router = APIRouter()
 VALID_PLATFORMS = ("canvas", "ed")
 
 
-def _build_user_response(profile: User) -> UserResponse:
+def _build_user_response(profile: Profile) -> UserResponse:
     """Build UserResponse from Profile ORM model with token statuses."""
     canvas_status: str = (
         "active" if profile.canvas_api_token_encrypted else "not_configured"
@@ -36,7 +36,6 @@ def _build_user_response(profile: User) -> UserResponse:
 
     return UserResponse(
         id=str(profile.id),
-        email=profile.email,
         display_name=profile.display_name,
         gpa_target=profile.gpa_target,
         gpa_scale=profile.gpa_scale,
@@ -55,7 +54,7 @@ async def get_profile(
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[UserResponse]:
     """Return the current user's profile with token statuses."""
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
     return SuccessResponse(
@@ -72,7 +71,7 @@ async def update_profile(
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[UserResponse]:
     """Update user profile fields (PATCH semantics -- only non-None fields applied)."""
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 
@@ -109,7 +108,7 @@ async def configure_token(
             detail=f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
         )
 
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 
@@ -196,7 +195,7 @@ async def remove_token(
             detail=f"Invalid platform '{platform}'. Must be 'canvas' or 'ed'.",
         )
 
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 

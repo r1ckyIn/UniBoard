@@ -15,7 +15,7 @@ from src.models.deadline import UnifiedDeadline
 from src.models.digest import Digest
 from src.models.discussion import DiscussionThread
 from src.models.grade import Grade
-from src.models.user import User
+from src.models.user import Profile
 from src.prompts.digest import DIGEST_SUMMARY_SYSTEM_PROMPT
 from src.schemas.digest import DigestItemResponse, DigestResponse
 
@@ -49,15 +49,15 @@ class DigestService:
 
         # AI enhancement if API key set and items exist
         if self._anthropic_api_key and items:
-            user = await self._session.get(User, user_id)
-            if user is not None:
+            profile = await self._session.get(Profile, user_id)
+            if profile is not None:
                 from src.config import get_settings
 
                 settings = get_settings()
-                if user.ai_calls_today < settings.ai_daily_limit_per_user:
+                if profile.ai_calls_today < settings.ai_daily_limit_per_user:
                     try:
                         items, ai_summary = await self._enhance_with_ai(items)
-                        user.ai_calls_today += 1
+                        profile.ai_calls_today += 1
                         await self._session.flush()
                     except Exception:
                         logger.warning(

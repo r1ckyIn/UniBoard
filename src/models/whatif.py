@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from src.models.user import User
+    from src.models.user import Profile
 
 
 class WhatIfScenario(UUIDMixin, TimestampMixin, Base):
@@ -20,11 +20,11 @@ class WhatIfScenario(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "whatif_scenarios"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
     name: Mapped[str] = mapped_column(String(255))
     scores_json: Mapped[dict[str, Any]] = mapped_column(JSONB)
     result_wam: Mapped[float] = mapped_column(Float)
     result_gpa: Mapped[float] = mapped_column(Float)
 
     # Relationships
-    user: Mapped[User] = relationship(back_populates="whatif_scenarios")
+    profile: Mapped[Profile] = relationship(back_populates="whatif_scenarios")

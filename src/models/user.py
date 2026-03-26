@@ -1,14 +1,16 @@
-"""User ORM model with encrypted token fields."""
+"""Profile ORM model linked to Supabase auth.users."""
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Float, String, Text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models.base import Base, TimestampMixin, UUIDMixin
+from src.models.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from src.models.course import Course
@@ -18,13 +20,21 @@ if TYPE_CHECKING:
     from src.models.whatif import WhatIfScenario
 
 
-class User(UUIDMixin, TimestampMixin, Base):
-    """User account with encrypted API tokens."""
+class Profile(TimestampMixin, Base):
+    """User profile linked to Supabase auth.users(id).
 
-    __tablename__ = "users"
+    Supabase Auth manages email and password.  This table stores
+    application-specific profile data, encrypted API tokens, and
+    sync status fields.
+    """
 
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    hashed_password: Mapped[str] = mapped_column(String(255))
+    __tablename__ = "profiles"
+
+    # PK matches auth.users(id) -- set by Supabase trigger, not auto-generated
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True
+    )
+
     display_name: Mapped[str] = mapped_column(String(100), default="")
     university_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     canvas_api_token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -33,7 +43,7 @@ class User(UUIDMixin, TimestampMixin, Base):
     gpa_scale: Mapped[str] = mapped_column(String(10), default="wam")
     last_sync_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
-    # Sync status columns (added in migration 003)
+    # Sync status columns
     canvas_sync_status: Mapped[str] = mapped_column(
         String(20), default="pending", server_default="pending"
     )
@@ -54,22 +64,22 @@ class User(UUIDMixin, TimestampMixin, Base):
 
     # Relationships
     courses: Mapped[list[Course]] = relationship(
-        back_populates="user",
+        back_populates="profile",
         cascade="all, delete-orphan",
     )
     push_records: Mapped[list[PushRecord]] = relationship(
-        back_populates="user",
+        back_populates="profile",
         cascade="all, delete-orphan",
     )
     whatif_scenarios: Mapped[list[WhatIfScenario]] = relationship(
-        back_populates="user",
+        back_populates="profile",
         cascade="all, delete-orphan",
     )
     notifications: Mapped[list[Notification]] = relationship(
-        back_populates="user",
+        back_populates="profile",
         cascade="all, delete-orphan",
     )
     digests: Mapped[list[Digest]] = relationship(
-        back_populates="user",
+        back_populates="profile",
         cascade="all, delete-orphan",
     )

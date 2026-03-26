@@ -13,7 +13,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from src.models.user import User
+    from src.models.user import Profile
 
 
 class Digest(UUIDMixin, TimestampMixin, Base):
@@ -24,7 +24,7 @@ class Digest(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("user_id", "digest_date", name="uq_digests_user_date"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
     digest_date: Mapped[datetime] = mapped_column()
     content_json: Mapped[dict[str, Any]] = mapped_column(JSON)
     ai_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -33,4 +33,4 @@ class Digest(UUIDMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    user: Mapped[User] = relationship(back_populates="digests")
+    profile: Mapped[Profile] = relationship(back_populates="digests")

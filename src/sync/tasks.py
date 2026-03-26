@@ -22,7 +22,7 @@ from src.models.course import Course
 from src.models.grade import Grade
 from src.models.lesson import Lesson
 from src.models.module import Module, ModuleItem
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.common import TokenInvalidError
 from src.security.encryption import get_encryption
 from src.services.deadline import DeadlineService
@@ -49,7 +49,7 @@ def _get_sync_session_factory() -> async_sessionmaker[AsyncSession]:
 
 
 async def _sync_user_grades(
-    user: User,
+    user: Profile,
     canvas_token: str,
     session: AsyncSession,
 ) -> None:
@@ -140,7 +140,7 @@ async def sync_all_grades() -> None:
 
     async with session_factory() as session:
         result = await session.execute(
-            select(User).where(User.canvas_api_token_encrypted.isnot(None))
+            select(Profile).where(Profile.canvas_api_token_encrypted.isnot(None))
         )
         users = list(result.scalars().all())
 
@@ -156,7 +156,7 @@ async def sync_all_grades() -> None:
                 token = encryption.decrypt(str(user.canvas_api_token_encrypted))
                 async with session_factory() as session:
                     # Re-attach user to this session
-                    user_in_session = await session.get(User, user.id)
+                    user_in_session = await session.get(Profile, user.id)
                     if user_in_session is None:
                         break
                     await _sync_user_grades(user_in_session, token, session)
@@ -177,7 +177,7 @@ async def sync_all_grades() -> None:
                         user_id=str(user.id),
                     )
                     async with session_factory() as session:
-                        user_in_session = await session.get(User, user.id)
+                        user_in_session = await session.get(Profile, user.id)
                         if user_in_session is not None:
                             user_in_session.canvas_sync_status = "failed"
                             await session.commit()
@@ -189,7 +189,7 @@ async def sync_all_deadlines() -> None:
 
     async with session_factory() as session:
         result = await session.execute(
-            select(User).where(User.canvas_api_token_encrypted.isnot(None))
+            select(Profile).where(Profile.canvas_api_token_encrypted.isnot(None))
         )
         users = list(result.scalars().all())
 
@@ -205,7 +205,7 @@ async def sync_all_deadlines() -> None:
                 token = encryption.decrypt(str(user.canvas_api_token_encrypted))
 
                 async with session_factory() as session:
-                    user_in_session = await session.get(User, user.id)
+                    user_in_session = await session.get(Profile, user.id)
                     if user_in_session is None:
                         break
 
@@ -277,10 +277,10 @@ async def sync_all_modules() -> None:
 
     async with session_factory() as session:
         result = await session.execute(
-            select(User).where(
+            select(Profile).where(
                 or_(
-                    User.canvas_api_token_encrypted.isnot(None),
-                    User.ed_api_token_encrypted.isnot(None),
+                    Profile.canvas_api_token_encrypted.isnot(None),
+                    Profile.ed_api_token_encrypted.isnot(None),
                 )
             )
         )
@@ -296,7 +296,7 @@ async def sync_all_modules() -> None:
         for attempt in range(_MAX_RETRIES):
             try:
                 async with session_factory() as session:
-                    user_in_session = await session.get(User, user.id)
+                    user_in_session = await session.get(Profile, user.id)
                     if user_in_session is None:
                         break
 
@@ -341,7 +341,7 @@ async def sync_all_modules() -> None:
 
 
 async def _sync_canvas_modules(
-    user: User,
+    user: Profile,
     token: str,
     courses: list[Course],
     session: AsyncSession,
@@ -422,7 +422,7 @@ async def check_deadline_reminders() -> None:
     session_factory = _get_sync_session_factory()
 
     async with session_factory() as session:
-        result = await session.execute(select(User))
+        result = await session.execute(select(Profile))
         users = list(result.scalars().all())
 
     if not users:
@@ -491,7 +491,7 @@ async def generate_daily_digests() -> None:
     settings = get_settings()
 
     async with session_factory() as session:
-        result = await session.execute(select(User))
+        result = await session.execute(select(Profile))
         users = list(result.scalars().all())
 
     if not users:
@@ -517,7 +517,7 @@ async def generate_daily_digests() -> None:
 
 
 async def _sync_ed_lessons(
-    user: User,
+    user: Profile,
     ed_token: str,
     courses: list[Course],
     session: AsyncSession,

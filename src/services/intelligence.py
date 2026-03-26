@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import get_settings
 from src.models.course import Course
 from src.models.discussion import DiscussionThread
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.intelligence import AIHighValuePostResponse, HighValuePostResponse
 
 logger = structlog.get_logger()
@@ -91,8 +91,8 @@ class EdIntelligenceService:
 
         # Enforce AI daily limit (consistent with QAService pattern)
         settings = get_settings()
-        user = await self._session.get(User, user_id)
-        calls_used = user.ai_calls_today if user else 0
+        profile = await self._session.get(Profile, user_id)
+        calls_used = profile.ai_calls_today if profile else 0
         calls_remaining = max(0, settings.ai_daily_limit_per_user - calls_used)
         threads_to_eval = unscored[:calls_remaining] if calls_remaining > 0 else []
 

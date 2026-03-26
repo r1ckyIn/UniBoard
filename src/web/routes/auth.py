@@ -10,9 +10,9 @@ import structlog
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.common import NotFoundError, SuccessResponse
-from src.schemas.user import UserResponse, TokenStatus
+from src.schemas.user import TokenStatus, UserResponse
 from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 logger = structlog.get_logger()
@@ -30,7 +30,7 @@ async def get_me(
 
     Validates the Supabase JWT and fetches the corresponding profile from DB.
     """
-    profile = await session.get(User, current_user_id)
+    profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 
@@ -41,7 +41,6 @@ async def get_me(
 
     data = UserResponse(
         id=str(profile.id),
-        email=profile.email,
         display_name=profile.display_name,
         gpa_target=profile.gpa_target,
         gpa_scale=profile.gpa_scale,

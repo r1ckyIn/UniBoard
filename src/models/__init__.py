@@ -12,7 +12,7 @@ from src.models.module import Module, ModuleItem
 from src.models.notification import Notification
 from src.models.push_record import PushRecord
 from src.models.unit_outline import UnitOutline
-from src.models.user import User
+from src.models.user import Profile
 from src.models.whatif import WhatIfScenario
 
 __all__ = [
@@ -26,10 +26,10 @@ __all__ = [
     "Module",
     "ModuleItem",
     "Notification",
+    "Profile",
     "PushRecord",
     "Slide",
     "UnifiedDeadline",
     "UnitOutline",
-    "User",
     "WhatIfScenario",
 ]

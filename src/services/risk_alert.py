@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import Notification
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.digest import RiskAlertResponse
 from src.services.ai_engine import AIEngine
 from src.services.gpa import GPAService
@@ -38,14 +38,14 @@ class RiskAlertService:
         When risk detected, invokes Claude Opus 4.6 for deep analysis.
         Falls back to rule-based recommendation on AI failure.
         """
-        user = await self._session.get(User, user_id)
-        if user is None or user.gpa_target is None:
+        profile = await self._session.get(Profile, user_id)
+        if profile is None or profile.gpa_target is None:
             return None
 
         gpa_svc = GPAService(self._session)
         summary = await gpa_svc.get_summary(user_id)
 
-        target_wam = user.gpa_target
+        target_wam = profile.gpa_target
         current_wam = summary.cumulative_wam
         gap = target_wam - current_wam
 

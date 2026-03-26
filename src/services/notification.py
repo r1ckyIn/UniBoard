@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import Notification
 from src.models.push_record import PushRecord
-from src.models.user import User
+from src.models.user import Profile
 
 logger = structlog.get_logger()
 
@@ -81,15 +81,22 @@ class NotificationService:
         await self._session.flush()
 
         # Email delivery (fire-and-forget, never raise)
+        # Email is stored in auth.users (Supabase), not in profiles table
         if "email" in channels:
             try:
-                user = await self._session.get(User, user_id)
-                if user and user.email:
+                from sqlalchemy import text
+
+                row = await self._session.execute(
+                    text("SELECT email FROM auth.users WHERE id = :uid"),
+                    {"uid": user_id},
+                )
+                auth_user = row.first()
+                if auth_user is not None and auth_user.email:
                     from src.email.ses import SESEmailSender
 
                     sender = SESEmailSender()
                     await sender.send_html_email(
-                        to_email=user.email,
+                        to_email=auth_user.email,
                         subject=title,
                         html_body=body,
                     )

@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from src.models.user import User
+    from src.models.user import Profile
 
 
 class Notification(UUIDMixin, TimestampMixin, Base):
@@ -23,7 +23,7 @@ class Notification(UUIDMixin, TimestampMixin, Base):
         Index("ix_notifications_user_unread", "user_id", "is_read"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
     type: Mapped[str] = mapped_column(String(30))  # deadline_reminder, gpa_risk, digest, system
     severity: Mapped[str] = mapped_column(String(20))  # critical, warning, info
     title: Mapped[str] = mapped_column(String(255))
@@ -33,4 +33,4 @@ class Notification(UUIDMixin, TimestampMixin, Base):
     metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
-    user: Mapped[User] = relationship(back_populates="notifications")
+    profile: Mapped[Profile] = relationship(back_populates="notifications")

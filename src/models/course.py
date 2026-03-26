@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from src.models.lesson import Lesson
     from src.models.module import Module
     from src.models.unit_outline import UnitOutline
-    from src.models.user import User
+    from src.models.user import Profile
 
 
 class Course(UUIDMixin, TimestampMixin, Base):
@@ -29,7 +29,7 @@ class Course(UUIDMixin, TimestampMixin, Base):
         Index("ix_courses_canvas_id", "user_id", "canvas_course_id"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
     canvas_course_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     ed_course_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     name: Mapped[str] = mapped_column(String(255))
@@ -42,7 +42,7 @@ class Course(UUIDMixin, TimestampMixin, Base):
     unit_outline_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Relationships
-    user: Mapped[User] = relationship(back_populates="courses")
+    profile: Mapped[Profile] = relationship(back_populates="courses")
     grades: Mapped[list[Grade]] = relationship(
         back_populates="course",
         cascade="all, delete-orphan",

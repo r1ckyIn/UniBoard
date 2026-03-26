@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from src.models.user import User
+    from src.models.user import Profile
 
 
 class PushRecord(UUIDMixin, TimestampMixin, Base):
@@ -23,7 +23,7 @@ class PushRecord(UUIDMixin, TimestampMixin, Base):
         Index("ix_push_records_user_hash", "user_id", "content_hash", unique=True),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
     content_hash: Mapped[str] = mapped_column(String(64))
     source_type: Mapped[str] = mapped_column(String(30))
     source_id: Mapped[str] = mapped_column(String(100))
@@ -31,4 +31,4 @@ class PushRecord(UUIDMixin, TimestampMixin, Base):
     channel: Mapped[str] = mapped_column(String(20))
 
     # Relationships
-    user: Mapped[User] = relationship(back_populates="push_records")
+    profile: Mapped[Profile] = relationship(back_populates="push_records")

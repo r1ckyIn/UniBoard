@@ -14,7 +14,7 @@ from sqlalchemy.orm import selectinload
 from src.config import get_settings
 from src.models.course import Course
 from src.models.module import Module
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.ai import QAResponse, UnitReviewResponse
 from src.schemas.common import RateLimitedError
 from src.services.ai_engine import AIEngine
@@ -38,13 +38,13 @@ class QAService:
         self._ai_engine = ai_engine
         self._voyage_api_key = voyage_api_key
 
-    async def _check_and_increment_limit(self, user_id: uuid.UUID) -> User:
+    async def _check_and_increment_limit(self, user_id: uuid.UUID) -> Profile:
         """Check AI daily limit and atomically increment counter. Raises RateLimitedError.
 
         Uses SELECT ... FOR UPDATE to prevent TOCTOU race conditions.
         """
         settings = get_settings()
-        stmt = select(User).where(User.id == user_id).with_for_update()
+        stmt = select(Profile).where(Profile.id == user_id).with_for_update()
         result = await self._session.execute(stmt)
         user = result.scalar_one_or_none()
         if user is None:

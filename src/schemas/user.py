@@ -21,7 +21,6 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    email: str
     display_name: str
     gpa_target: float | None
     gpa_scale: str
