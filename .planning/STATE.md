@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-03-26T03:30:54.144Z"
+stopped_at: Phase 14 context gathered
+last_updated: "2026-03-26T09:26:57.127Z"
 progress:
   total_phases: 25
   completed_phases: 14
@@ -246,6 +246,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T03:25:51.218Z
-Stopped at: Completed 13-02-PLAN.md
-Resume file: None
+Last session: 2026-03-26T09:26:57.120Z
+Stopped at: Phase 14 context gathered
+Resume file: .planning/phases/14-platform-adapters/14-CONTEXT.md
