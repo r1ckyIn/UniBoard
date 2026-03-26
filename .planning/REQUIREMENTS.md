@@ -73,10 +73,10 @@ Requirements for full release across 4 milestones.
 
 - [x] **INFRA-01**: PostgreSQL database with schema for users, courses, grades, deadlines, Ed threads, course materials, skills, and encrypted tokens
 - [ ] **INFRA-02**: Background sync engine: grades every 15 min, deadlines hourly, modules daily, Unit Outline per semester
-- [ ] **INFRA-03**: Canvas adapter with rate limiting (sliding window), pagination, and circuit breaker
-- [ ] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
-- [ ] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
-- [ ] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
+- [x] **INFRA-03**: Canvas adapter with rate limiting (sliding window), pagination, and circuit breaker
+- [x] **INFRA-04**: Ed Discussion adapter with defensive Pydantic parsing, graceful degradation when API changes
+- [x] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
+- [x] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
 - [x] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
 - [x] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
 - [x] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
