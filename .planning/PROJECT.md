@@ -77,10 +77,10 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [x] Supabase PostgreSQL with full schema + RLS policies (users, courses, grades, deadlines, Ed threads, materials, skills, encrypted tokens) — Validated in Phase 13: Supabase Foundation
 - [x] Supabase Auth integration (frontend supabase-js + Python JWT validation) — Validated in Phase 13: Supabase Foundation
 - [ ] Background sync engine (grades 15min, deadlines 1h, modules daily, Unit Outline per semester)
-- [ ] Canvas adapter with rate limiting, pagination, circuit breaker
-- [ ] Ed Discussion adapter with defensive Pydantic parsing
-- [ ] Ed Lessons adapter for lesson content and assignments
-- [ ] Unit Outline HTML parser with weight-sum validation
+- [x] Canvas adapter with rate limiting, pagination, circuit breaker — Validated in Phase 14: Platform Adapters
+- [x] Ed Discussion adapter with defensive Pydantic parsing — Validated in Phase 14: Platform Adapters
+- [x] Ed Lessons adapter for lesson content and assignments — Validated in Phase 14: Platform Adapters
+- [x] Unit Outline HTML parser with weight-sum validation — Validated in Phase 14: Platform Adapters
 - [x] Token encryption (AES-256-GCM) — Validated in Phase 13: Supabase Foundation
 - [x] Docker Compose local development environment (Python backend only; DB via Supabase) — Validated in Phase 13: Supabase Foundation
 - [x] i18n support (English + Chinese) — Validated in Phase 01: Design System Foundation
@@ -174,4 +174,4 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-26 — Phase 13 (Supabase Foundation) complete, M2 backend milestone started*
+*Last updated: 2026-03-26 — Phase 14 (Platform Adapters) complete — all adapters hardened + 93 unit tests*
