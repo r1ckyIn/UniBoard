@@ -78,7 +78,7 @@ Requirements for full release across 4 milestones.
 - [ ] **INFRA-05**: Ed Lessons adapter for lesson content and assignment extraction
 - [ ] **INFRA-06**: Unit Outline HTML parser with weight-sum validation and Canvas assignment_groups fallback
 - [ ] **INFRA-07**: Token encryption (AES-256-GCM) with key stored in environment variable
-- [ ] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
+- [x] **INFRA-08**: Simple JWT + bcrypt authentication (not Cognito for MVP)
 - [ ] **INFRA-09**: Docker Compose for local PostgreSQL + backend + frontend development environment
 - [x] **INFRA-10**: i18n support (English + Chinese) with next-intl
 - [x] **INFRA-11**: OpenAPI contract spec shared between frontend mock (Route Handlers) and backend (FastAPI)
