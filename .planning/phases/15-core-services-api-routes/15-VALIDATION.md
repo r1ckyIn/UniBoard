@@ -2,7 +2,7 @@
 phase: 15
 slug: core-services-api-routes
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-27
 ---
@@ -36,18 +36,16 @@ created: 2026-03-27
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 15-01-01 | 01 | 1 | GPA-01 | unit | `python -m pytest tests/unit/test_gpa_service.py -x` | ✅ | ⬜ pending |
-| 15-01-02 | 01 | 1 | GPA-02 | unit | `python -m pytest tests/unit/test_gpa_service.py::test_whatif_simulate -x` | ✅ | ⬜ pending |
-| 15-01-03 | 01 | 1 | GPA-03 | unit | `python -m pytest tests/unit/test_gpa_service.py::test_target_path_uniform_achievable -x` | ✅ | ⬜ pending |
-| 15-01-04 | 01 | 1 | GPA-04 | integration | `python -m pytest tests/integration/test_gpa_routes.py -x` | ✅ (partial) | ⬜ pending |
-| 15-01-05 | 01 | 1 | GPA-05 | unit | `python -m pytest tests/unit/test_gpa_service.py::test_single_course_wam -x` | ✅ | ⬜ pending |
-| 15-02-01 | 02 | 1 | DL-01 | unit | `python -m pytest tests/unit/test_deadline_service.py -x` | ✅ | ⬜ pending |
-| 15-03-01 | 03 | 2 | INTEL-01 | integration | `python -m pytest tests/integration/ -k intelligence -x` | ❌ W0 | ⬜ pending |
-| 15-03-02 | 03 | 2 | INTEL-05 | unit | `python -m pytest tests/unit/test_deadline_service.py::TestComputeDedupKey -x` | ✅ | ⬜ pending |
-| 15-04-01 | 04 | 2 | FILE-01 | integration | `python -m pytest tests/integration/ -k materials -x` | ❌ W0 | ⬜ pending |
-| 15-04-02 | 04 | 2 | FILE-02 | integration | `python -m pytest tests/integration/test_search.py -x` | ✅ | ⬜ pending |
+| Task ID | Plan | Task# | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
+|---------|------|-------|------|-------------|-----------|-------------------|-------------|--------|
+| 15-01-T1 | 01 | 1 | 1 | GPA-01..05 | unit | `python -c "from src.schemas.gpa import GpaReportResponse; from src.schemas.course import CourseDeadlineResponse; print('OK')"` | N/A (schema import) | ⬜ pending |
+| 15-01-T2 | 01 | 2 | 1 | GPA-01..03 | unit | `python -m pytest tests/unit/test_gpa_service.py -x -q --timeout=30` | ✅ | ⬜ pending |
+| 15-01-T3 | 01 | 3 | 1 | GPA-04, GPA-05 | unit | `python -c "from src.web.routes.courses import router; print([r.path for r in router.routes])"` | N/A (route check) | ⬜ pending |
+| 15-02-T1 | 02 | 1 | 1 | DL-01, INTEL-01, FILE-01, FILE-02 | unit | `python -c "from src.schemas.deadline import ContractDeadlineResponse; from src.schemas.materials import MaterialResponse; from src.schemas.intelligence import DiscussionResponse; print('OK')"` | N/A (schema import) | ⬜ pending |
+| 15-02-T2 | 02 | 2 | 1 | DL-01 | unit | `python -m pytest tests/unit/test_deadline_service.py -x -q --timeout=30` | ✅ | ⬜ pending |
+| 15-02-T3 | 02 | 3 | 1 | FILE-01, FILE-02, INTEL-01 | unit | `python -m pytest tests/unit/test_materials_service.py tests/unit/test_intelligence_service.py -x -q --timeout=30` | ✅ | ⬜ pending |
+| 15-03-T1 | 03 | 1 | 2 | ALL | unit | `python -c "from tests.fixtures.seed_phase15 import seed_full_phase15_data; print('OK')"` | ❌ W0 | ⬜ pending |
+| 15-03-T2 | 03 | 2 | 2 | ALL | integration | `python -m pytest tests/integration/test_contract_alignment.py tests/integration/test_courses_routes.py tests/integration/test_deadline_routes.py -x -q --timeout=120` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -56,8 +54,9 @@ created: 2026-03-27
 ## Wave 0 Requirements
 
 - [ ] `tests/integration/test_contract_alignment.py` — validates every endpoint response matches types.gen.d.ts shapes
-- [ ] `tests/integration/test_intelligence_routes.py` — stubs for INTEL-01
-- [ ] `tests/integration/test_materials_routes.py` — stubs for FILE-01
+- [ ] `tests/integration/test_courses_routes.py` — covers GET /courses, /courses/{id}, /courses/{id}/grades, /courses/{id}/deadlines
+- [ ] `tests/integration/test_deadline_routes.py` — covers GET /deadlines/upcoming
+- [ ] `tests/fixtures/seed_phase15.py` — factory functions for test data seeding
 
 *Existing infrastructure (pytest, conftest, fixtures) covers most phase requirements.*
 
@@ -73,11 +72,11 @@ created: 2026-03-27
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
 - [ ] No watch-mode flags
 - [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
