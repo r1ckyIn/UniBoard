@@ -24,60 +24,52 @@ def get_deadline_service(session: AsyncSession = Depends(get_session)) -> Deadli
     return DeadlineService(session)
 
 
-def _compute_status(deadline: DeadlineResponse) -> str:
-    """Derive contract status from legacy deadline fields.
+def _compute_status_and_days(
+    deadline: DeadlineResponse,
+    now: datetime,
+) -> tuple[str, int]:
+    """Derive contract status and days_remaining from a single date parse.
 
-    Logic: completed > submitted > overdue > upcoming.
+    Status priority: completed > submitted > overdue > upcoming.
     """
-    # Parse due_date for comparison
     try:
         due_dt = datetime.fromisoformat(deadline.due_date.replace("Z", "+00:00"))
     except ValueError:
-        return "upcoming"
+        return "upcoming", 0
 
-    now = datetime.now(UTC)
     due_aware = due_dt.replace(tzinfo=UTC) if due_dt.tzinfo is None else due_dt
+    days_remaining = (due_aware - now).days
 
     is_past = deadline.urgency == "past_due" or due_aware < now
 
     if is_past:
-        # Check if the deadline has a status indicating submission/completion
         if hasattr(deadline, "status") and deadline.status == "submitted":
-            return "submitted"
-        # Check if is_confirmed indicates grading is complete
-        if hasattr(deadline, "is_confirmed") and deadline.is_confirmed and is_past:
-            return "completed"
-        return "overdue"
+            return "submitted", days_remaining
+        if hasattr(deadline, "is_confirmed") and deadline.is_confirmed:
+            return "completed", days_remaining
+        return "overdue", days_remaining
 
     if hasattr(deadline, "status") and deadline.status == "submitted":
-        return "submitted"
+        return "submitted", days_remaining
 
-    return "upcoming"
-
-
-def _compute_days_remaining(due_date_str: str) -> int:
-    """Compute days remaining from due_date ISO string."""
-    try:
-        due_dt = datetime.fromisoformat(due_date_str.replace("Z", "+00:00"))
-    except ValueError:
-        return 0
-
-    now = datetime.now(UTC)
-    due_aware = due_dt.replace(tzinfo=UTC) if due_dt.tzinfo is None else due_dt
-    delta = due_aware - now
-    return delta.days
+    return "upcoming", days_remaining
 
 
-def _to_contract_deadline(d: DeadlineResponse) -> ContractDeadlineResponse:
+def _to_contract_deadline(
+    d: DeadlineResponse, now: datetime | None = None,
+) -> ContractDeadlineResponse:
     """Convert legacy DeadlineResponse to contract-aligned ContractDeadlineResponse."""
+    if now is None:
+        now = datetime.now(UTC)
+    status, days_remaining = _compute_status_and_days(d, now)
     return ContractDeadlineResponse(
         id=d.id,
         title=d.title,
         due_date=d.due_date,
         source=d.source,
         weight=d.weight,
-        status=_compute_status(d),
-        days_remaining=_compute_days_remaining(d.due_date),
+        status=status,
+        days_remaining=days_remaining,
         course_code=d.course_code,
         course_name=d.course_name,
         is_confirmed=d.is_confirmed,
@@ -108,8 +100,9 @@ async def list_deadlines(
         sort=sort,
         order=order,
     )
+    now_utc = datetime.now(UTC)
     return SuccessResponse(
-        data=[_to_contract_deadline(d) for d in result],
+        data=[_to_contract_deadline(d, now_utc) for d in result],
         meta=get_request_meta(request),
     )
 
@@ -129,8 +122,9 @@ async def get_upcoming_deadlines(
         to_date=now + timedelta(days=7),
         include_past=False,
     )
+    now_utc = datetime.now(UTC)
     return SuccessResponse(
-        data=[_to_contract_deadline(d) for d in result],
+        data=[_to_contract_deadline(d, now_utc) for d in result],
         meta=get_request_meta(request),
     )
 

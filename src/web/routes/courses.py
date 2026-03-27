@@ -27,6 +27,19 @@ from src.web.deps import get_current_user_id, get_request_meta, get_session
 router = APIRouter()
 
 
+def _grade_letter(mark: float) -> str:
+    """Derive USYD grade letter from a percentage mark."""
+    if mark >= 85:
+        return "HD"
+    if mark >= 75:
+        return "D"
+    if mark >= 65:
+        return "CR"
+    if mark >= 50:
+        return "P"
+    return "F"
+
+
 async def _get_course_or_404(
     session: AsyncSession,
     course_id: uuid.UUID,
@@ -76,17 +89,7 @@ async def list_courses(
                     if g.max_score > 0 and g.score is not None
                 )
                 current_mark = round(weighted_sum / total_graded_weight, 2)
-                # Compute grade letter from mark
-                if current_mark >= 85:
-                    grade_letter = "HD"
-                elif current_mark >= 75:
-                    grade_letter = "D"
-                elif current_mark >= 65:
-                    grade_letter = "CR"
-                elif current_mark >= 50:
-                    grade_letter = "P"
-                else:
-                    grade_letter = "F"
+                grade_letter = _grade_letter(current_mark)
 
             total_weight = sum(g.weight for g in c.grades)
             if total_weight > 0:
@@ -152,16 +155,7 @@ async def get_course_detail(
             if g.max_score > 0 and g.score is not None
         )
         current_mark = round(weighted_sum / total_graded_weight, 2)
-        if current_mark >= 85:
-            grade_letter = "HD"
-        elif current_mark >= 75:
-            grade_letter = "D"
-        elif current_mark >= 65:
-            grade_letter = "CR"
-        elif current_mark >= 50:
-            grade_letter = "P"
-        else:
-            grade_letter = "F"
+        grade_letter = _grade_letter(current_mark)
 
     if total_weight > 0:
         completed_weight = round(total_graded_weight / total_weight, 4)
@@ -219,7 +213,6 @@ async def list_grades(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
 ) -> SuccessResponse[list[GradeResponse]]:
     """List grades for a course."""
-    # Verify course ownership
     await _get_course_or_404(session, course_id, current_user_id)
 
     stmt = (
@@ -232,7 +225,6 @@ async def list_grades(
 
     items: list[GradeResponse] = []
     for g in grades:
-        # Only include graded assessments
         if g.score is None:
             continue
         items.append(
@@ -259,7 +251,6 @@ async def list_course_deadlines(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
 ) -> SuccessResponse[list[CourseDeadlineResponse]]:
     """List deadlines for a course."""
-    # Verify course ownership
     course = await _get_course_or_404(session, course_id, current_user_id)
 
     stmt = (
@@ -315,7 +306,6 @@ async def get_course_outline(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
 ) -> SuccessResponse[CourseOutlineResponse]:
     """Return course outline from unit outline data."""
-    # Verify course ownership
     course = await _get_course_or_404(session, course_id, current_user_id)
 
     stmt = (

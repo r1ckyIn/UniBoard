@@ -1,6 +1,5 @@
 """GPA/WAM REST endpoints matching OpenAPI contract."""
 
-import re
 import uuid
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
@@ -27,18 +26,10 @@ from src.schemas.gpa import (
     WhatIfScenarioResponse,
     WhatIfScoreRequest,
 )
-from src.services.gpa import GPAService
+from src.services.gpa import GPAService, _TWO_PLACES, _parse_level_weight
 from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 router = APIRouter()
-
-_TWO_PLACES = Decimal("0.01")
-
-
-def _parse_level_weight(course_code: str) -> int:
-    """Extract course level from code. E.g., COMP2017 -> 2, MATH1005 -> 1."""
-    match = re.search(r"[A-Z]{4}(\d)", course_code)
-    return int(match.group(1)) if match else 1
 
 
 def get_gpa_service(session: AsyncSession = Depends(get_session)) -> GPAService:
@@ -117,12 +108,11 @@ async def predict_gpa(
     svc: GPAService = Depends(get_gpa_service),
 ) -> SuccessResponse[GpaPredictionResponse]:
     """Predict GPA with what-if scores matching frontend GpaPrediction type."""
-    # Load courses with grades
+    # Load courses with grades (single DB call)
     courses = await svc._load_user_courses(current_user_id)
-
-    # Get current WAM from service
-    legacy = await svc.get_summary(current_user_id)
-    current_wam = legacy.cumulative_wam
+    current_wam = float(svc._calculate_cumulative_wam(
+        [(svc._calculate_course_wam(c.grades)[0], c.credit_points) for c in courses]
+    ))
 
     # Build course_id -> assumption mapping
     assumptions_by_course: dict[str, list[WhatIfScoreRequest]] = {}
@@ -164,9 +154,7 @@ async def predict_gpa(
             original_wam, _ = svc._calculate_course_wam(course.grades)
 
             # Only add to per_course if this course had assumptions applied
-            applied = [
-                ws for ws in body.what_if_scores if ws.course_id == course_id_str
-            ]
+            applied = assumptions_by_course.get(course_id_str, [])
 
             per_course.append(
                 GpaPredictionCourseResponse(
@@ -202,10 +190,9 @@ async def calculate_path(
     """Calculate target path matching frontend GpaPath type."""
     courses = await svc._load_user_courses(current_user_id)
     target = Decimal(str(body.target_wam))
-
-    # Get current WAM
-    legacy = await svc.get_summary(current_user_id)
-    current_wam = legacy.cumulative_wam
+    current_wam = float(svc._calculate_cumulative_wam(
+        [(svc._calculate_course_wam(c.grades)[0], c.credit_points) for c in courses]
+    ))
 
     # Group ungraded assessments by course
     course_ungraded: dict[str, list] = {}
