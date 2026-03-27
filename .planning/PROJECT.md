@@ -27,14 +27,14 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 **Deadlines:**
 - [ ] Unified deadline view (Canvas + Ed Lessons + Ed Discussion, SHA-256 deduplicated)
-- [ ] Tiered deadline reminders at 72h, 24h, and 3h before due date
-- [ ] GPA risk alert when grade trajectory deviates from target
+- [x] Tiered deadline reminders at 72h, 24h, and 3h before due date — Validated in Phase 17: Notifications & Digest
+- [x] GPA risk alert when grade trajectory deviates from target — Validated in Phase 17: Notifications & Digest
 - [ ] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context (placeholder for future AiStudyMate integration)
 
 **Intelligence:**
 - [ ] Ed Discussion high-value post filtering (endorsed + staff-answered, rule-based)
 - [ ] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details, deadline changes) — MCP Agent
-- [ ] Daily academic digest (rule-based aggregation + Claude API urgency scoring)
+- [x] Daily academic digest (rule-based aggregation + Claude API urgency scoring) — Validated in Phase 17: Notifications & Digest
 - [ ] Deduplication across all data sources (SHA-256)
 
 **Files & Materials:**
@@ -47,7 +47,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - [ ] 3-step onboarding (register → get tokens → paste tokens)
 - [ ] Zero-install web access (browser-only)
 - [ ] MCP server for Claude Desktop users (PLAT-03)
-- [ ] Token expiration warnings and re-authentication guidance
+- [x] Token expiration warnings and re-authentication guidance — Validated in Phase 17: Notifications & Digest
 
 **Skill System (MCP Agent):**
 - [ ] Auto-generate prompt template skill after first successful API exploration
@@ -76,7 +76,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 **Infrastructure:**
 - [x] Supabase PostgreSQL with full schema + RLS policies (users, courses, grades, deadlines, Ed threads, materials, skills, encrypted tokens) — Validated in Phase 13: Supabase Foundation
 - [x] Supabase Auth integration (frontend supabase-js + Python JWT validation) — Validated in Phase 13: Supabase Foundation
-- [ ] Background sync engine (grades 15min, deadlines 1h, modules daily, Unit Outline per semester)
+- [x] Background sync engine (grades 15min, deadlines 1h, modules daily, Unit Outline per semester) — Validated in Phase 16: Sync Engine + Phase 17: Notifications & Digest
 - [x] Canvas adapter with rate limiting, pagination, circuit breaker — Validated in Phase 14: Platform Adapters
 - [x] Ed Discussion adapter with defensive Pydantic parsing — Validated in Phase 14: Platform Adapters
 - [x] Ed Lessons adapter for lesson content and assignments — Validated in Phase 14: Platform Adapters
@@ -174,4 +174,4 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-27 — Phase 15 (Core Services & API Routes) complete — all GPA/Deadline/Materials/Intelligence/Search routes aligned with M1 OpenAPI contract + 22 integration tests*
+*Last updated: 2026-03-27 — Phase 17 (Notifications & Digest) complete — M2 Backend Core milestone done. Tiered deadline reminders, GPA risk alerts, daily digest, token health checks all implemented with 191 unit tests passing.*
