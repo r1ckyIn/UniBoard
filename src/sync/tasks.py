@@ -413,7 +413,6 @@ async def sync_all_modules() -> None:
                         select(Course).where(Course.user_id == user.id)
                     )
                     courses = list(courses_result.scalars().all())
-                    records_updated = len(courses)
 
                     # --- Canvas modules ---
                     if user.canvas_api_token_encrypted:
@@ -763,7 +762,6 @@ async def sync_all_outlines() -> None:
         logger.info("sync_outlines_skip", reason="no courses with outline URLs")
         return
 
-    # Group courses by user for sync_history recording
     user_results: dict[uuid.UUID, tuple[int, str, str | None]] = {}
 
     for course in courses:
