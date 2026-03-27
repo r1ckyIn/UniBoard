@@ -34,7 +34,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 13: Supabase Foundation** — Supabase project, schema migration (Supabase CLI), Auth config, RLS policies, FastAPI skeleton connecting Supabase PostgreSQL, frontend auth store adaptation (completed 2026-03-26)
 - [x] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser (completed 2026-03-26)
 - [x] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts (completed 2026-03-27)
-- [ ] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily)
+- [x] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily) (completed 2026-03-27)
 - [ ] **Phase 17: Notifications & Digest** — Tiered deadline reminders, rule-based daily digest, token expiration warnings
 
 ### M3: AI/MCP/Skills
@@ -349,7 +349,11 @@ Plans:
   3. Module sync runs daily and updates course materials
   4. Unit Outline sync runs per-semester and parses assessment weights
   5. Sync status is trackable (last run time, success/failure, records updated)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [x] 16-01-PLAN.md — sync_history table + model, wire Ed sources into deadline sync, add outline sync task
+- [x] 16-02-PLAN.md — Fix integration tests (User->Profile), unit tests for Ed wiring + outline + sync_history
 
 ### Phase 17: Notifications & Digest
 **Goal**: Users receive timely deadline reminders and daily academic digests
@@ -360,7 +364,11 @@ Plans:
   2. GPA risk alert fires when grade trajectory deviates from target threshold
   3. Daily digest aggregates new deadlines, grades, announcements, and high-value Ed posts
   4. Token expiration warnings display when Canvas/Ed tokens are near expiry with re-auth guidance
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Fix risk_alert.py bug, wire GPA risk into post-grade-sync, implement check_token_health task + engine registration
+- [ ] 17-02-PLAN.md — Fix broken tests (User->Profile), add unit tests for deadline reminders (DL-02) and token health (PLAT-04)
 
 ### Phase 18: AI Enhancement
 **Goal**: AI-powered thread evaluation and digest scoring with quality gate
@@ -461,8 +469,8 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
-| 16. Sync Engine | M2 | 0/TBD | Not started | - |
-| 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
+| 16. Sync Engine | M2 | 2/2 | Complete    | 2026-03-27 |
+| 17. Notifications & Digest | M2 | 0/2 | Planned | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |

@@ -1,14 +1,25 @@
-"""Sync trigger and status REST endpoints."""
+"""Sync trigger, status, and history REST endpoints."""
 
+import asyncio
 import uuid
+from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Request
+from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.user import Profile
 from src.schemas.common import NotFoundError, RateLimitedError, SuccessResponse
-from src.schemas.sync import SyncSourceStatus, SyncStatusResponse, SyncTriggerResponse
+from src.schemas.sync import (
+    SyncHistoryEntry,
+    SyncHistoryResponse,
+    SyncSourceStatus,
+    SyncStatusResponse,
+    SyncTriggerResponse,
+)
 from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 # Manual sync cooldown period
@@ -17,9 +28,23 @@ _SYNC_COOLDOWN = timedelta(minutes=5)
 router = APIRouter()
 
 
+_ValidScope = Literal["all", "grades", "deadlines", "modules", "outline"]
+
+# Module-level set to hold strong references to background sync tasks,
+# preventing garbage collection mid-execution.
+_background_tasks: set[asyncio.Task[None]] = set()
+
+
+class SyncTriggerRequest(BaseModel):
+    """Optional request body for manual sync trigger."""
+
+    scope: _ValidScope = "all"
+
+
 @router.post("/trigger")
 async def trigger_sync(
     request: Request,
+    body: SyncTriggerRequest | None = None,
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[SyncTriggerResponse]:
@@ -43,13 +68,78 @@ async def trigger_sync(
     profile.last_manual_sync_at = now
     await session.flush()
 
+    scope = body.scope if body else "all"
     next_allowed_at = now + _SYNC_COOLDOWN
+
+    # Dispatch actual sync task in background based on scope
+    from src.sync.tasks import (
+        sync_all_deadlines,
+        sync_all_grades,
+        sync_all_modules,
+        sync_all_outlines,
+    )
+
+    _SCOPE_DISPATCH: dict[str, Callable[[], Coroutine[Any, Any, None]]] = {
+        "grades": sync_all_grades,
+        "deadlines": sync_all_deadlines,
+        "modules": sync_all_modules,
+        "outline": sync_all_outlines,
+    }
+
+    def _launch(coro_fn: Callable[[], Coroutine[Any, Any, None]]) -> None:
+        task = asyncio.create_task(coro_fn())
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+
+    if scope == "all":
+        for fn in _SCOPE_DISPATCH.values():
+            _launch(fn)
+    elif scope in _SCOPE_DISPATCH:
+        _launch(_SCOPE_DISPATCH[scope])
 
     return SuccessResponse(
         data=SyncTriggerResponse(
-            message="Sync triggered successfully",
+            message=f"Sync triggered successfully (scope={scope})",
             next_allowed_at=next_allowed_at.isoformat(),
         ),
+        meta=get_request_meta(request),
+    )
+
+
+@router.get("/history")
+async def get_sync_history(
+    request: Request,
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+    domain: str | None = None,
+    limit: int = 20,
+) -> SuccessResponse[SyncHistoryResponse]:
+    """Return sync history entries for the current user."""
+    from src.models.sync_history import SyncHistory
+
+    stmt = select(SyncHistory).where(SyncHistory.user_id == current_user_id)
+    if domain:
+        stmt = stmt.where(SyncHistory.domain == domain)
+    stmt = stmt.order_by(SyncHistory.started_at.desc()).limit(limit)
+
+    result = await session.execute(stmt)
+    entries = result.scalars().all()
+
+    history_entries = [
+        SyncHistoryEntry(
+            id=str(e.id),
+            domain=e.domain,
+            status=e.status,
+            records_updated=e.records_updated,
+            error_message=e.error_message,
+            started_at=e.started_at.isoformat() if e.started_at else "",
+            completed_at=e.completed_at.isoformat() if e.completed_at else None,
+        )
+        for e in entries
+    ]
+
+    return SuccessResponse(
+        data=SyncHistoryResponse(entries=history_entries),
         meta=get_request_meta(request),
     )
 
