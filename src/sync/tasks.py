@@ -153,6 +153,10 @@ async def sync_all_grades() -> None:
         return
 
     encryption = get_encryption()
+    settings = get_settings()
+
+    # Lazy import to avoid circular dependency at module level
+    from src.services.risk_alert import RiskAlertService
 
     for user in users:
         started_at = datetime.now(UTC)
@@ -195,6 +199,26 @@ async def sync_all_grades() -> None:
                         if user_in_session is not None:
                             user_in_session.canvas_sync_status = "failed"
                             await session.commit()
+        # Post-grade-sync risk alert (DL-03)
+        # Guard: _sync_user_grades swallows TokenInvalidError internally
+        # (sets canvas_sync_status="degraded") and returns count=0,
+        # so sync_status=="success" alone is insufficient.
+        if sync_status == "success" and records_updated > 0:
+            try:
+                async with session_factory() as risk_session:
+                    risk_svc = RiskAlertService(
+                        risk_session,
+                        anthropic_api_key=settings.anthropic_api_key,
+                    )
+                    await risk_svc.check_risk_for_user(user.id)
+                    await risk_session.commit()
+            except Exception:
+                logger.warning(
+                    "risk_alert_post_sync_failed",
+                    user_id=str(user.id),
+                    exc_info=True,
+                )
+
         await _record_sync_history(
             session_factory,
             user.id,
@@ -633,6 +657,60 @@ async def generate_daily_digests() -> None:
         except Exception:
             logger.error(
                 "digest_generation_failed",
+                user_id=str(user.id),
+                exc_info=True,
+            )
+
+
+async def check_token_health() -> None:
+    """Check for expired tokens and create warning notifications (PLAT-04).
+
+    Runs alongside deadline reminders. Queries profiles with
+    canvas_token_status='expired' or ed_token_status='expired' and creates
+    in-app notifications guiding users to Settings page for re-auth.
+    """
+    from src.services.notification import NotificationService
+
+    session_factory = _get_sync_session_factory()
+
+    async with session_factory() as session:
+        result = await session.execute(
+            select(Profile).where(
+                or_(
+                    Profile.canvas_token_status == "expired",
+                    Profile.ed_token_status == "expired",
+                )
+            )
+        )
+        expired_users = list(result.scalars().all())
+
+    if not expired_users:
+        return
+
+    _TOKEN_PLATFORMS = (
+        ("canvas", "Canvas API token expired", "Your Canvas token has expired."),
+        ("ed", "Ed API token expired", "Your Ed token has expired."),
+    )
+
+    for user in expired_users:
+        try:
+            async with session_factory() as session:
+                notif_svc = NotificationService(session)
+                for platform, title, body_prefix in _TOKEN_PLATFORMS:
+                    if getattr(user, f"{platform}_token_status") == "expired":
+                        await notif_svc.create_notification(
+                            user_id=user.id,
+                            notification_type="token_expiry",
+                            severity="warning",
+                            title=title,
+                            body=f"{body_prefix} Go to Settings to reconnect.",
+                            channels=["in_app"],
+                            action_url="/settings#tokens",
+                        )
+                await session.commit()
+        except Exception:
+            logger.warning(
+                "token_health_check_failed",
                 user_id=str(user.id),
                 exc_info=True,
             )

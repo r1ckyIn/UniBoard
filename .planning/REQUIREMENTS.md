@@ -18,15 +18,15 @@ Requirements for full release across 4 milestones.
 ### Deadlines
 
 - [x] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas + Ed Lessons + Ed Discussion (SHA-256 deduplicated)
-- [ ] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
-- [ ] **DL-03**: User receives risk alert when grade trajectory deviates from target GPA threshold
+- [x] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
+- [x] **DL-03**: User receives risk alert when grade trajectory deviates from target GPA threshold
 - [ ] **DL-04**: User can ask AI about assignment details in Deadline page chat — MCP Agent researches across Canvas announcements, modules, Ed threads, and Ed Lessons to provide contextual answers with cited sources (AiStudyMate integration placeholder)
 
 ### Intelligence
 
 - [x] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
 - [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes (MCP Agent)
-- [ ] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
+- [x] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
 - [ ] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking (pre-collected data + Claude API)
 - [x] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
 
@@ -42,7 +42,7 @@ Requirements for full release across 4 milestones.
 - [x] **PLAT-01**: User can complete registration and API token connection in 3 steps with visual guides
 - [x] **PLAT-02**: User can access the full dashboard via web browser without installing anything
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
-- [ ] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
+- [x] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
 
 ### Skill System (MCP Agent)
 

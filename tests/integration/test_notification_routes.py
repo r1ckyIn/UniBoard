@@ -3,27 +3,34 @@
 import uuid
 
 import httpx
+import jwt as pyjwt
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User
-from src.security.auth import create_access_token
-from src.security.password import hash_password
+from src.models.user import Profile
 
 
-async def _create_authed_user(session: AsyncSession) -> tuple[User, dict[str, str]]:
-    """Create user and return (user, auth_headers)."""
-    user = User(
-        email=f"notif-route-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+def _create_test_jwt(user_id: str) -> str:
+    """Create a Supabase-compatible JWT for testing."""
+    return pyjwt.encode(
+        {"sub": user_id, "role": "authenticated"},
+        "super-secret-jwt-token-with-at-least-32-characters-long",
+        algorithm="HS256",
+    )
+
+
+async def _create_test_profile(session: AsyncSession) -> tuple[Profile, dict[str, str]]:
+    """Create profile and return (profile, auth_headers)."""
+    profile = Profile(
+        id=uuid.uuid4(),
         display_name="Route Tester",
     )
-    session.add(user)
+    session.add(profile)
     await session.flush()
 
-    token = create_access_token(user_id=str(user.id))
+    token = _create_test_jwt(str(profile.id))
     headers = {"Authorization": f"Bearer {token}"}
-    return user, headers
+    return profile, headers
 
 
 @pytest.mark.asyncio

@@ -92,7 +92,7 @@ class RiskAlertService:
 
         # Increment AI calls counter if AI was actually called
         if ai_was_called:
-            user.ai_calls_today += 1
+            profile.ai_calls_today += 1
             await self._session.flush()
 
         # Create notification via NotificationService
