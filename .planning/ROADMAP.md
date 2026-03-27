@@ -367,7 +367,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Fix risk_alert.py bug, wire GPA risk into post-grade-sync, implement check_token_health task + engine registration
+- [x] 17-01-PLAN.md — Fix risk_alert.py bug, wire GPA risk into post-grade-sync, implement check_token_health task + engine registration
 - [ ] 17-02-PLAN.md — Fix broken tests (User->Profile), add unit tests for deadline reminders (DL-02) and token health (PLAT-04)
 
 ### Phase 18: AI Enhancement
@@ -470,7 +470,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
 | 16. Sync Engine | M2 | 2/2 | Complete    | 2026-03-27 |
-| 17. Notifications & Digest | M2 | 0/2 | Planned | - |
+| 17. Notifications & Digest | M2 | 1/2 | In Progress|  |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |

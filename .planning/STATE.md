@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-03-27T06:53:34.785Z"
+status: Ready to execute
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-03-27T10:18:01.464Z"
 progress:
   total_phases: 25
   completed_phases: 17
-  total_plans: 63
-  completed_plans: 63
+  total_plans: 65
+  completed_plans: 64
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 16 — sync-engine
+**Current focus:** Phase 17 — notifications-digest
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
+Phase: 17 (notifications-digest) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -104,6 +104,7 @@ Plan: Not started
 | Phase 15 P02 | 7min | 3 tasks | 7 files |
 | Phase 15 P03 | 9min | 2 tasks | 8 files |
 | Phase 16 P02 | 7min | 2 tasks | 2 files |
+| Phase 17 P01 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -249,6 +250,8 @@ Recent decisions affecting current work:
 - [Phase 15]: JWT test auth pattern: generate Supabase-compatible JWT directly in test fixtures (no auth endpoint dependency)
 - [Phase 15]: Naive datetimes for TIMESTAMP WITHOUT TIME ZONE columns in asyncpg (tz-aware datetimes cause DataError)
 - [Phase 16]: Patch lazy-imported adapters at source module (src.adapters.X) not consumer module for sync task testing
+- [Phase 17]: Risk alert hook only fires on sync_status=='success' to avoid false alerts on failed syncs
+- [Phase 17]: Token health check reuses reminder_check_interval_min (30 min) since token expiry is not time-critical
 
 ### Roadmap Evolution
 
@@ -264,6 +267,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T06:43:56.586Z
-Stopped at: Completed 16-02-PLAN.md
+Last session: 2026-03-27T10:18:01.456Z
+Stopped at: Completed 17-01-PLAN.md
 Resume file: None
