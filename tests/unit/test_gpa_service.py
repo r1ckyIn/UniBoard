@@ -10,9 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.course import Course
 from src.models.grade import Grade
-from src.models.user import User
+from src.models.user import Profile
 from src.schemas.gpa import TargetRequest, WhatIfCreateRequest, WhatIfScore
-from src.security.password import hash_password
 from src.services.gpa import GPAService
 
 # ---------------------------------------------------------------------------
@@ -83,21 +82,20 @@ def test_gpa_always_in_valid_set(
 # ---------------------------------------------------------------------------
 
 
-async def _create_test_user(session: AsyncSession) -> User:
-    """Create a test user and return it."""
-    user = User(
-        email=f"gpa-test-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+async def _create_test_profile(session: AsyncSession) -> Profile:
+    """Create a test Profile (no auth.users dependency in unit tests)."""
+    profile = Profile(
+        id=uuid.uuid4(),
         display_name="GPA Tester",
     )
-    session.add(user)
+    session.add(profile)
     await session.flush()
-    return user
+    return profile
 
 
 async def _create_course_with_grades(
     session: AsyncSession,
-    user: User,
+    user: Profile,
     *,
     code: str = "COMP2017",
     name: str = "Systems Programming",
@@ -140,7 +138,7 @@ async def _create_course_with_grades(
 @pytest.mark.asyncio
 async def test_single_course_wam(session: AsyncSession) -> None:
     """One course with two graded assessments calculates correct WAM."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,
@@ -162,7 +160,7 @@ async def test_single_course_wam(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_multi_course_cumulative_wam(session: AsyncSession) -> None:
     """Two courses with different credit points weighted correctly."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     # Course A: 6cp, WAM=80
     await _create_course_with_grades(
         session,
@@ -211,7 +209,7 @@ async def test_grade_band_boundaries(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_ungraded_assessment_excluded(session: AsyncSession) -> None:
     """Assessments with score=None are excluded from WAM calculation."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,
@@ -235,7 +233,7 @@ async def test_ungraded_assessment_excluded(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_pct_assessed_calculation(session: AsyncSession) -> None:
     """Verify pct_assessed reflects graded weight / total weight."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,
@@ -257,7 +255,7 @@ async def test_pct_assessed_calculation(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_whatif_simulate(session: AsyncSession) -> None:
     """Create a what-if scenario with hypothetical scores and verify recalculation."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     course = await _create_course_with_grades(
         session,
         user,
@@ -287,7 +285,7 @@ async def test_whatif_simulate(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_whatif_persistence(session: AsyncSession) -> None:
     """What-if scenarios are persisted and can be retrieved."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     course = await _create_course_with_grades(
         session,
         user,
@@ -316,7 +314,7 @@ async def test_whatif_persistence(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_target_path_uniform_achievable(session: AsyncSession) -> None:
     """Target path uniform mode returns achievable scores <= 100."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,
@@ -341,7 +339,7 @@ async def test_target_path_uniform_achievable(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_target_path_unreachable(session: AsyncSession) -> None:
     """Target too high returns is_achievable=False with max_achievable_wam."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,
@@ -364,7 +362,7 @@ async def test_target_path_unreachable(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_trend_multiple_semesters(session: AsyncSession) -> None:
     """Trend returns chronologically ordered semester data."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,
@@ -417,7 +415,7 @@ async def test_trend_multiple_semesters(session: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_empty_grades_returns_zero(session: AsyncSession) -> None:
     """No graded assessments returns WAM=0.00, GPA=0."""
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     await _create_course_with_grades(
         session,
         user,

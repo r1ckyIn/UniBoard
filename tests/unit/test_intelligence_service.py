@@ -8,24 +8,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.course import Course
 from src.models.discussion import DiscussionThread
-from src.models.user import User
-from src.security.password import hash_password
+from src.models.user import Profile
 from src.services.intelligence import EdIntelligenceService
 
 
 @pytest_asyncio.fixture(loop_scope="session")
 async def _seed_intelligence_data(session: AsyncSession) -> dict[str, object]:
-    """Seed a user, course, and discussion threads for intelligence tests."""
-    user = User(
-        email=f"intel-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+    """Seed a profile, course, and discussion threads for intelligence tests."""
+    profile = Profile(
+        id=uuid.uuid4(),
         display_name="Intel Test",
     )
-    session.add(user)
+    session.add(profile)
     await session.flush()
 
     course = Course(
-        user_id=user.id,
+        user_id=profile.id,
         name="Algorithms",
         code="COMP2017",
         semester="2026S1",
@@ -82,7 +80,7 @@ async def _seed_intelligence_data(session: AsyncSession) -> dict[str, object]:
     await session.flush()
 
     return {
-        "user_id": user.id,
+        "user_id": profile.id,
         "course_id": course.id,
         "endorsed_id": endorsed.id,
         "staff_id": staff.id,
