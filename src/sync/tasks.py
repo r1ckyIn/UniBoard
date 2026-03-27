@@ -153,6 +153,7 @@ async def sync_all_grades() -> None:
         return
 
     encryption = get_encryption()
+    settings = get_settings()
 
     for user in users:
         started_at = datetime.now(UTC)
@@ -196,14 +197,18 @@ async def sync_all_grades() -> None:
                             user_in_session.canvas_sync_status = "failed"
                             await session.commit()
         # Post-grade-sync risk alert (DL-03)
-        if sync_status == "success":
+        # Only fire when sync truly succeeded — _sync_user_grades swallows
+        # TokenInvalidError internally (sets canvas_sync_status="degraded"),
+        # so sync_status alone is insufficient.
+        grades_actually_synced = isinstance(records_updated, int) and records_updated > 0
+        if sync_status == "success" and grades_actually_synced:
             try:
                 from src.services.risk_alert import RiskAlertService
 
-                settings = get_settings()
                 async with session_factory() as risk_session:
                     risk_svc = RiskAlertService(
-                        risk_session, anthropic_api_key=settings.anthropic_api_key
+                        risk_session,
+                        anthropic_api_key=settings.anthropic_api_key,
                     )
                     await risk_svc.check_risk_for_user(user.id)
                     await risk_session.commit()
