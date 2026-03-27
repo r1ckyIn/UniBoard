@@ -38,6 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Import tasks here to avoid circular imports when sync is disabled
     from src.sync.tasks import (
         check_deadline_reminders,
+        check_token_health,
         generate_daily_digests,
         sync_all_deadlines,
         sync_all_grades,
@@ -106,6 +107,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         max_instances=1,
     )
 
+    # Token health check (runs alongside reminders, same interval)
+    scheduler.add_job(
+        check_token_health,
+        IntervalTrigger(minutes=settings.reminder_check_interval_min),
+        id="check_token_health",
+        replace_existing=True,
+        max_instances=1,
+    )
+
     scheduler.start()
     logger.info(
         "sync_engine_started",
@@ -115,6 +125,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         outline_cron_months=settings.sync_outline_cron_months,
         reminder_check_interval_min=settings.reminder_check_interval_min,
         digest_cron_hour_aest=settings.digest_cron_hour_aest,
+        token_health_interval_min=settings.reminder_check_interval_min,
     )
 
     # Trigger initial full sync for all users

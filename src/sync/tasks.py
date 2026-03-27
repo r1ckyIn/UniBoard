@@ -657,6 +657,70 @@ async def generate_daily_digests() -> None:
             )
 
 
+async def check_token_health() -> None:
+    """Check for expired tokens and create warning notifications (PLAT-04).
+
+    Runs alongside deadline reminders. Queries profiles with
+    canvas_token_status='expired' or ed_token_status='expired' and creates
+    in-app notifications guiding users to Settings page for re-auth.
+    """
+    from src.services.notification import NotificationService
+
+    session_factory = _get_sync_session_factory()
+
+    async with session_factory() as session:
+        result = await session.execute(
+            select(Profile).where(
+                or_(
+                    Profile.canvas_token_status == "expired",
+                    Profile.ed_token_status == "expired",
+                )
+            )
+        )
+        expired_users = list(result.scalars().all())
+
+    if not expired_users:
+        return
+
+    for user in expired_users:
+        try:
+            async with session_factory() as session:
+                notif_svc = NotificationService(session)
+                if user.canvas_token_status == "expired":
+                    await notif_svc.create_notification(
+                        user_id=user.id,
+                        notification_type="token_expiry",
+                        severity="warning",
+                        title="Canvas API token expired",
+                        body=(
+                            "Your Canvas token has expired. "
+                            "Go to Settings to reconnect."
+                        ),
+                        channels=["in_app"],
+                        action_url="/settings#tokens",
+                    )
+                if user.ed_token_status == "expired":
+                    await notif_svc.create_notification(
+                        user_id=user.id,
+                        notification_type="token_expiry",
+                        severity="warning",
+                        title="Ed API token expired",
+                        body=(
+                            "Your Ed token has expired. "
+                            "Go to Settings to reconnect."
+                        ),
+                        channels=["in_app"],
+                        action_url="/settings#tokens",
+                    )
+                await session.commit()
+        except Exception:
+            logger.warning(
+                "token_health_check_failed",
+                user_id=str(user.id),
+                exc_info=True,
+            )
+
+
 async def _sync_ed_lessons(
     user: Profile,
     ed_token: str,
