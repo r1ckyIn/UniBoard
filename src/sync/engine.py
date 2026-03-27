@@ -42,6 +42,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         sync_all_deadlines,
         sync_all_grades,
         sync_all_modules,
+        sync_all_outlines,
     )
 
     settings = get_settings()
@@ -66,6 +67,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         sync_all_modules,
         CronTrigger(hour=settings.sync_modules_cron_hour, minute=0),
         id="sync_modules",
+        replace_existing=True,
+        max_instances=1,
+    )
+    # Unit Outline sync -- semester-initial (March 1, August 1, AEST)
+    scheduler.add_job(
+        sync_all_outlines,
+        CronTrigger(
+            month=settings.sync_outline_cron_months,
+            day=settings.sync_outline_cron_day,
+            hour=4,
+            minute=0,
+            timezone="Australia/Sydney",
+        ),
+        id="sync_outlines",
         replace_existing=True,
         max_instances=1,
     )
@@ -97,6 +112,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         grades_interval_min=settings.sync_grades_interval_min,
         deadlines_interval_min=settings.sync_deadlines_interval_min,
         modules_cron_hour=settings.sync_modules_cron_hour,
+        outline_cron_months=settings.sync_outline_cron_months,
         reminder_check_interval_min=settings.reminder_check_interval_min,
         digest_cron_hour_aest=settings.digest_cron_hour_aest,
     )
@@ -110,6 +126,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     )
     scheduler.add_job(
         sync_all_modules, id="initial_modules_sync", replace_existing=True
+    )
+    scheduler.add_job(
+        sync_all_outlines, id="initial_outlines_sync", replace_existing=True
     )
 
     try:

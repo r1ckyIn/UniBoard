@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     sync_grades_interval_min: int = 15
     sync_deadlines_interval_min: int = 60
     sync_modules_cron_hour: int = 3
+    sync_outline_cron_months: str = "3,8"
+    sync_outline_cron_day: int = 1
 
     # AI (Anthropic)
     anthropic_api_key: str = ""
