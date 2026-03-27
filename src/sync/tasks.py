@@ -195,6 +195,25 @@ async def sync_all_grades() -> None:
                         if user_in_session is not None:
                             user_in_session.canvas_sync_status = "failed"
                             await session.commit()
+        # Post-grade-sync risk alert (DL-03)
+        if sync_status == "success":
+            try:
+                from src.services.risk_alert import RiskAlertService
+
+                settings = get_settings()
+                async with session_factory() as risk_session:
+                    risk_svc = RiskAlertService(
+                        risk_session, anthropic_api_key=settings.anthropic_api_key
+                    )
+                    await risk_svc.check_risk_for_user(user.id)
+                    await risk_session.commit()
+            except Exception:
+                logger.warning(
+                    "risk_alert_post_sync_failed",
+                    user_id=str(user.id),
+                    exc_info=True,
+                )
+
         await _record_sync_history(
             session_factory,
             user.id,
