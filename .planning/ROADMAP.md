@@ -34,7 +34,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 13: Supabase Foundation** — Supabase project, schema migration (Supabase CLI), Auth config, RLS policies, FastAPI skeleton connecting Supabase PostgreSQL, frontend auth store adaptation (completed 2026-03-26)
 - [x] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser (completed 2026-03-26)
 - [x] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts (completed 2026-03-27)
-- [ ] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily)
+- [x] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily) (completed 2026-03-27)
 - [ ] **Phase 17: Notifications & Digest** — Tiered deadline reminders, rule-based daily digest, token expiration warnings
 
 ### M3: AI/MCP/Skills
@@ -353,7 +353,7 @@ Plans:
 
 Plans:
 - [x] 16-01-PLAN.md — sync_history table + model, wire Ed sources into deadline sync, add outline sync task
-- [ ] 16-02-PLAN.md — Fix integration tests (User->Profile), unit tests for Ed wiring + outline + sync_history
+- [x] 16-02-PLAN.md — Fix integration tests (User->Profile), unit tests for Ed wiring + outline + sync_history
 
 ### Phase 17: Notifications & Digest
 **Goal**: Users receive timely deadline reminders and daily academic digests
@@ -465,7 +465,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
-| 16. Sync Engine | M2 | 1/2 | In Progress|  |
+| 16. Sync Engine | M2 | 2/2 | Complete   | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
