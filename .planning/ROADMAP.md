@@ -32,7 +32,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 ### M2: Backend Core
 
 - [x] **Phase 13: Supabase Foundation** — Supabase project, schema migration (Supabase CLI), Auth config, RLS policies, FastAPI skeleton connecting Supabase PostgreSQL, frontend auth store adaptation (completed 2026-03-26)
-- [ ] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser
+- [x] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser (completed 2026-03-26)
 - [ ] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts
 - [ ] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily)
 - [ ] **Phase 17: Notifications & Digest** — Tiered deadline reminders, rule-based daily digest, token expiration warnings
@@ -315,7 +315,12 @@ Plans:
   3. Ed Lessons adapter extracts lesson content and assignments
   4. Unit Outline parser extracts assessment weights from USYD HTML with weight-sum validation
   5. All adapters implement circuit breaker pattern for external API failures
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Harden adapters (Canvas get_assignment_groups, Ed 401/403 TokenInvalidError) + resilience unit tests
+- [ ] 14-02-PLAN.md — Canvas & Ed Discussion adapter unit tests with MockTransport
+- [ ] 14-03-PLAN.md — Ed Lessons adapter, Ed Document parser, UnitOutlineParser unit tests + HTML snapshot fixture
 
 ### Phase 15: Core Services & API Routes
 **Goal**: Business logic layer and REST API implementing the OpenAPI contracts defined in M1
@@ -449,7 +454,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 11.1. Real Data & UAT | 3/3 | Complete    | 2026-03-25 | - |
 | 12. Settings Page | 4/4 | Complete    | 2026-03-26 | - |
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
-| 14. Platform Adapters | M2 | 0/TBD | Not started | - |
+| 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
 | 16. Sync Engine | M2 | 0/TBD | Not started | - |
 | 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
