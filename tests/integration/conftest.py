@@ -2,45 +2,40 @@
 
 Provides fixtures that seed full test data and create authenticated HTTP clients,
 building on top of the shared conftest.py fixtures (test_engine, session, test_client).
+
+Auth: Creates a Supabase-compatible JWT directly (no register/login endpoint needed).
 """
 
+import time
 import uuid
-from collections.abc import AsyncGenerator
 from typing import Any
 
 import httpx
+import jwt
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import get_settings
 from src.database import get_session
 from src.models.user import Profile
 from tests.fixtures.seed_phase15 import seed_full_phase15_data
 
 
-def _unique_email() -> str:
-    """Generate a unique test email for registration."""
-    return f"phase15-{uuid.uuid4().hex[:8]}@test.com"
+def _create_test_jwt(user_id: str) -> str:
+    """Create a valid Supabase-compatible JWT for test authentication.
 
-
-async def _register_and_login(
-    client: httpx.AsyncClient,
-) -> tuple[str, str]:
-    """Register a user, login, return (user_id, access_token)."""
-    email = _unique_email()
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"email": email, "password": "testpass123", "display_name": "Phase15 Tester"},
-    )
-    assert reg.status_code == 201
-    user_id: str = reg.json()["data"]["user_id"]
-
-    login = await client.post(
-        "/api/v1/auth/login",
-        data={"username": email, "password": "testpass123"},
-    )
-    assert login.status_code == 200
-    token: str = login.json()["data"]["access_token"]
-    return user_id, token
+    Uses the default dev JWT secret from config.
+    """
+    settings = get_settings()
+    payload = {
+        "sub": user_id,
+        "aud": "authenticated",
+        "role": "authenticated",
+        "iss": "supabase-test",
+        "iat": int(time.time()),
+        "exp": int(time.time()) + 3600,  # 1 hour expiry
+    }
+    return jwt.encode(payload, settings.supabase_jwt_secret, algorithm="HS256")
 
 
 async def _get_test_session(client: httpx.AsyncClient) -> AsyncSession:
@@ -57,23 +52,33 @@ async def phase15_seed_data(
 ) -> dict[str, Any]:
     """Seed full Phase 15 test data: course, grades, deadlines, discussions, modules, outline.
 
+    Creates a Profile directly in DB and generates a JWT for auth.
+
     Returns a dict with keys:
     - user_id: str
     - token: str (JWT access token)
     - course, grades, deadlines, discussions, modules, outline (ORM objects)
     """
-    user_id, token = await _register_and_login(test_client)
     test_session = await _get_test_session(test_client)
 
-    # Set GPA target on profile for GPA report test
-    profile = await test_session.get(Profile, uuid.UUID(user_id))
-    if profile:
-        profile.gpa_target = 80.0
-        await test_session.flush()
+    # Create profile directly in DB (bypassing Supabase auth)
+    user_id = uuid.uuid4()
+    profile = Profile(
+        id=user_id,
+        display_name="Phase15 Tester",
+        gpa_target=80.0,
+        gpa_scale="wam",
+    )
+    test_session.add(profile)
+    await test_session.flush()
 
-    data = await seed_full_phase15_data(test_session, uuid.UUID(user_id))
+    # Generate JWT matching this user
+    token = _create_test_jwt(str(user_id))
+
+    # Seed all test data
+    data = await seed_full_phase15_data(test_session, user_id)
     return {
-        "user_id": user_id,
+        "user_id": str(user_id),
         "token": token,
         **data,
     }

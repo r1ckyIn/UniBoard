@@ -7,7 +7,7 @@ courses, grades, deadlines, discussions, modules, and unit outlines.
 
 import hashlib
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -56,7 +56,7 @@ async def seed_test_grades(
     - Quiz 1: score=70, max=100, weight=0.2, group=Quizzes (graded)
     - Midterm: score=None, max=100, weight=0.5, group=Exams (ungraded)
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     grade_data = [
         {
             "assessment_name": "Assignment 1",
@@ -110,7 +110,7 @@ async def seed_test_deadlines(
     - "Final Project" due in 10 days (future)
     - "Quiz 2" due 2 days ago (past/overdue)
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     deadline_data = [
         {
             "title": "Assignment 2",
@@ -171,7 +171,7 @@ async def seed_test_discussions(
     - 1 staff post (not endorsed)
     - 2 community posts (neither endorsed nor staff)
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     thread_data = [
         {
             "ed_thread_id": "ed-thread-001",
@@ -330,7 +330,7 @@ async def seed_test_outline(
             "Design and implement concurrent programs",
             "Analyze system-level performance",
         ],
-        fetched_at=datetime.now(UTC),
+        fetched_at=datetime.now(timezone.utc).replace(tzinfo=None),
         semester="2026-S1",
     )
     session.add(outline)

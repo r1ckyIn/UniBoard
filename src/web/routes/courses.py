@@ -270,7 +270,8 @@ async def list_course_deadlines(
     result = await session.execute(stmt)
     deadlines = result.scalars().all()
 
-    now = datetime.now(UTC)
+    # Use naive datetime to match TIMESTAMP WITHOUT TIME ZONE column
+    now = datetime.utcnow()  # noqa: DTZ003
 
     # Pre-load grades for this course to check completed status
     grade_stmt = select(Grade).where(Grade.course_id == course_id)
