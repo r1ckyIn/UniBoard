@@ -208,8 +208,8 @@ class EdIntelligenceService:
                     is_staff_post=thread.is_staff_post,
                 )
                 thread.gpa_relevance_score = evaluation.gpa_relevance
-                if user:
-                    user.ai_calls_today += 1
+                if profile:
+                    profile.ai_calls_today += 1
 
                 if evaluation.gpa_relevance > 0.3:
                     scored_posts.append(

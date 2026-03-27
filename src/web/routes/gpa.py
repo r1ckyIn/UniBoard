@@ -124,7 +124,7 @@ async def predict_gpa(
     current_wam = legacy.cumulative_wam
 
     # Build course_id -> assumption mapping
-    assumptions_by_course: dict[str, list[PredictRequest]] = {}
+    assumptions_by_course: dict[str, list[WhatIfScoreRequest]] = {}
     score_lookup: dict[tuple[str, str], float] = {}
     for wis in body.what_if_scores:
         assumptions_by_course.setdefault(wis.course_id, [])
