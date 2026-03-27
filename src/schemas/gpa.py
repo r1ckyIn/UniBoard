@@ -2,6 +2,10 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# ---------------------------------------------------------------------------
+# Legacy schemas (used by existing unit tests -- remove in Phase 22)
+# ---------------------------------------------------------------------------
+
 
 class AssessmentDetail(BaseModel):
     """Single assessment within a course."""
@@ -130,3 +134,101 @@ class TrendResponse(BaseModel):
     """Per-semester WAM/GPA trend data."""
 
     semesters: list[SemesterTrend]
+
+
+# ---------------------------------------------------------------------------
+# Contract-aligned schemas (match types.gen.d.ts)
+# ---------------------------------------------------------------------------
+
+
+class GpaCourseSummaryResponse(BaseModel):
+    """Per-course summary matching frontend GpaCourseSummary type."""
+
+    course_id: str
+    code: str
+    name: str
+    credit_points: int
+    level_weight: int  # derived from course code: COMP2017 -> 2
+    current_mark: float | None
+    grade_letter: str | None
+    completed_weight: float  # 0-1 scale
+
+
+class GpaReportResponse(BaseModel):
+    """Cumulative GPA report matching frontend GpaReport type."""
+
+    scale: str = "wam"
+    current_wam: float
+    current_gpa_4: float
+    target_wam: float | None = None
+    gap: float | None = None
+    courses: list[GpaCourseSummaryResponse]
+    last_sync_at: str  # ISO 8601
+
+
+class WhatIfScoreRequest(BaseModel):
+    """A single what-if score matching frontend WhatIfScore type."""
+
+    course_id: str
+    assessment_name: str
+    assumed_score: float = Field(ge=0, le=100)
+
+
+class PredictRequest(BaseModel):
+    """Request body for POST /gpa/predict."""
+
+    what_if_scores: list[WhatIfScoreRequest]
+    scale: str = "wam"
+
+
+class GpaPredictionCourseResponse(BaseModel):
+    """Per-course prediction detail matching frontend GpaPredictionCourse."""
+
+    course_id: str
+    code: str
+    current_mark: float
+    predicted_mark: float
+    applied_assumptions: list[WhatIfScoreRequest]
+
+
+class GpaPredictionResponse(BaseModel):
+    """Prediction result matching frontend GpaPrediction type."""
+
+    current_wam: float
+    predicted_wam: float
+    delta: float
+    per_course: list[GpaPredictionCourseResponse]
+
+
+class GpaPathAssessmentResponse(BaseModel):
+    """Single remaining assessment in a path course."""
+
+    name: str
+    weight: float
+    minimum_score: float
+
+
+class GpaPathCourseResponse(BaseModel):
+    """Per-course path detail matching frontend GpaPathCourse."""
+
+    course_id: str
+    code: str
+    current_mark: float
+    minimum_remaining_avg: float
+    remaining_assessments: list[GpaPathAssessmentResponse]
+    difficulty: str  # "easy" | "moderate" | "hard" | "impossible"
+
+
+class GpaPathResponse(BaseModel):
+    """Path calculation result matching frontend GpaPath type."""
+
+    target_wam: float
+    current_wam: float
+    is_achievable: bool
+    per_course: list[GpaPathCourseResponse]
+
+
+class GpaPathRequest(BaseModel):
+    """Request body for POST /gpa/path."""
+
+    target_wam: float = Field(ge=0, le=100)
