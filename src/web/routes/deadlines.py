@@ -38,8 +38,20 @@ def _compute_status(deadline: DeadlineResponse) -> str:
     now = datetime.now(UTC)
     due_aware = due_dt.replace(tzinfo=UTC) if due_dt.tzinfo is None else due_dt
 
-    if deadline.urgency == "past_due" or due_aware < now:
+    is_past = deadline.urgency == "past_due" or due_aware < now
+
+    if is_past:
+        # Check if the deadline has a status indicating submission/completion
+        if hasattr(deadline, "status") and deadline.status == "submitted":
+            return "submitted"
+        # Check if is_confirmed indicates grading is complete
+        if hasattr(deadline, "is_confirmed") and deadline.is_confirmed and is_past:
+            return "completed"
         return "overdue"
+
+    if hasattr(deadline, "status") and deadline.status == "submitted":
+        return "submitted"
+
     return "upcoming"
 
 

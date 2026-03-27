@@ -25,6 +25,7 @@ from src.schemas.gpa import (
     PredictRequest,
     TrendResponse,
     WhatIfScenarioResponse,
+    WhatIfScoreRequest,
 )
 from src.services.gpa import GPAService
 from src.web.deps import get_current_user_id, get_request_meta, get_session
