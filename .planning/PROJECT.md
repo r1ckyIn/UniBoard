@@ -2,88 +2,82 @@
 
 ## What This Is
 
-UniBoard is a GPA maximization dashboard for University of Sydney students. It aggregates data from Canvas LMS, Ed Discussion, Ed Lessons, and Unit Outline pages into a single interface that shows students exactly what matters for their grades — real-time GPA tracking, unified deadlines, high-value discussion highlights, and AI-powered course material research. The system features an MCP Agent architecture where Claude (Opus 4.6) autonomously researches across platforms using MCP tools to answer student questions with full context.
+UniBoard is a GPA maximization dashboard for University of Sydney students. It aggregates data from Canvas LMS, Ed Discussion, Ed Lessons, and Unit Outline pages into a single interface that shows students exactly what matters for their grades — real-time GPA tracking, unified deadlines, high-value discussion highlights, and AI-powered course material research. The frontend (10 pages, Rough.js design system) and Python backend (adapters, services, sync engine, notifications) are complete. The system features an MCP Agent architecture where Claude autonomously researches across platforms using MCP tools to answer student questions with full context.
 
 ## Core Value
 
 **Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place, eliminating the need to switch between platforms.**
 
+## Current State
+
+**Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
+**Codebase:** ~168K LOC (TypeScript + Python + SQL), 707 files
+**Tests:** 149 backend tests (121 unit + 28 integration)
+**Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
+
 ## Requirements
 
 ### Validated
 
-- [x] API contracts (OpenAPI 3.1 spec with 32 endpoints) — Validated in Phase 02: API Contracts & Mock Layer
-- [x] Mock API layer (30 Route Handlers with realistic fixture data) — Validated in Phase 02: API Contracts & Mock Layer
-- [x] TanStack Query hooks for all 12 data domains — Validated in Phase 02: API Contracts & Mock Layer
+**M1 — Frontend App (Phases 1-12, 11.1):**
+- ✓ API contracts (OpenAPI 3.1 spec with 32 endpoints) — v2.0-m1 Phase 02
+- ✓ Mock API layer (30 Route Handlers with realistic fixture data) — v2.0-m1 Phase 02
+- ✓ TanStack Query hooks for all 12 data domains — v2.0-m1 Phase 02
+- ✓ Auth page (login + register) — v2.0-m1 Phase 03
+- ✓ Setup page (3-step API token onboarding) — v2.0-m1 Phase 04
+- ✓ Dashboard (hero welcome, stats row, course grades, deadline timeline, assessment weights) — v2.0-m1 Phase 05
+- ✓ Courses page (card grid + grade overview) — v2.0-m1 Phase 06
+- ✓ Course Detail page (assessment breakdown, materials, Ed posts) — v2.0-m1 Phase 07
+- ✓ Deadlines page (calendar + filterable timeline + AI chat placeholder) — v2.0-m1 Phase 08
+- ✓ Predict page (slider-based What-if GPA simulator) — v2.0-m1 Phase 09
+- ✓ Digest page (daily intelligence digest with course grouping) — v2.0-m1 Phase 10
+- ✓ Timetable page (weekly schedule view with dual-density grid) — v2.0-m1 Phase 11
+- ✓ Settings page (token management, notifications, GPA target, profile) — v2.0-m1 Phase 12
+- ✓ Anthropic-inspired design system (warm colors, paper texture, Rough.js, Source Serif 4 + Inter) — v2.0-m1 Phase 01
+- ✓ i18n support (English + Chinese) — v2.0-m1 Phase 01
+- ✓ Real course data integration (5 USYD courses from Obsidian) — v2.0-m1 Phase 11.1
+
+**M2 — Backend Core (Phases 13-17):**
+- ✓ Supabase PostgreSQL with 15-table schema + 60 RLS policies — v2.0-m2 Phase 13
+- ✓ Supabase Auth (frontend supabase-js + Python JWT validation) — v2.0-m2 Phase 13
+- ✓ Token encryption (AES-256-GCM) — v2.0-m2 Phase 13
+- ✓ Docker Compose local development — v2.0-m2 Phase 13
+- ✓ Canvas adapter with rate limiting, pagination, circuit breaker — v2.0-m2 Phase 14
+- ✓ Ed Discussion adapter with defensive Pydantic parsing — v2.0-m2 Phase 14
+- ✓ Ed Lessons adapter for lesson content and assignments — v2.0-m2 Phase 14
+- ✓ Unit Outline HTML parser with weight-sum validation — v2.0-m2 Phase 14
+- ✓ GPA/WAM calculation with What-if simulation and target path planner — v2.0-m2 Phase 15
+- ✓ Deadline aggregation with SHA-256 deduplication (Canvas + Ed Lessons + Ed Discussion) — v2.0-m2 Phase 15
+- ✓ Ed Discussion filtered by endorsed/staff-answered — v2.0-m2 Phase 15
+- ✓ Course materials unified view + keyword search — v2.0-m2 Phase 15
+- ✓ 13 REST API endpoints matching M1 OpenAPI contracts — v2.0-m2 Phase 15
+- ✓ Background sync engine (grades 15min, deadlines 1h, modules daily, outline per-semester) — v2.0-m2 Phase 16
+- ✓ Tiered deadline reminders (72h/24h/3h) — v2.0-m2 Phase 17
+- ✓ GPA risk alert on trajectory deviation — v2.0-m2 Phase 17
+- ✓ Daily academic digest (rule-based) — v2.0-m2 Phase 17
+- ✓ Token expiration warnings — v2.0-m2 Phase 17
+- ✓ Deduplication across data sources (SHA-256) — v2.0-m2 Phase 15
 
 ### Active
 
-**GPA Core:**
-- [ ] Real-time GPA/WAM tracking from Canvas grades (data delay < 15 min)
-- [ ] What-if GPA simulator (adjust future scores, see GPA impact)
-- [ ] Target GPA path planner (reverse-calculate required scores)
-- [ ] Assessment weight visualization from Unit Outline HTML parsing
-- [ ] Per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage assessed
-
-**Deadlines:**
-- [ ] Unified deadline view (Canvas + Ed Lessons + Ed Discussion, SHA-256 deduplicated)
-- [x] Tiered deadline reminders at 72h, 24h, and 3h before due date — Validated in Phase 17: Notifications & Digest
-- [x] GPA risk alert when grade trajectory deviates from target — Validated in Phase 17: Notifications & Digest
-- [ ] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context (placeholder for future AiStudyMate integration)
-
-**Intelligence:**
-- [ ] Ed Discussion high-value post filtering (endorsed + staff-answered, rule-based)
-- [ ] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details, deadline changes) — MCP Agent
-- [x] Daily academic digest (rule-based aggregation + Claude API urgency scoring) — Validated in Phase 17: Notifications & Digest
-- [ ] Deduplication across all data sources (SHA-256)
-
-**Files & Materials:**
-- [ ] Course folders with AI-generated descriptions (Canvas Modules + Ed Lessons unified)
-- [ ] Keyword search across all course materials
+**M3 — AI/MCP/Skills:**
+- [ ] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details) — MCP Agent
+- [ ] AI-enhanced digest with urgency scoring and GPA relevance ranking — Claude API
+- [ ] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context
 - [ ] AI Q&A on course materials with cited sources — MCP Agent cross-platform research
 - [ ] AI unit review summaries (key concepts, common mistakes, exam scope) — MCP Agent
-
-**Platform & Onboarding:**
-- [ ] 3-step onboarding (register → get tokens → paste tokens)
-- [ ] Zero-install web access (browser-only)
 - [ ] MCP server for Claude Desktop users (PLAT-03)
-- [x] Token expiration warnings and re-authentication guidance — Validated in Phase 17: Notifications & Digest
+- [ ] Auto-generate prompt template skills after first successful API exploration
+- [ ] Per-course skill differentiation (~50 skills)
+- [ ] Assignment ROI analysis (high-weight/low-difficulty identification)
 
-**Skill System (MCP Agent):**
-- [ ] Auto-generate prompt template skill after first successful API exploration
-- [ ] Subsequent executions load generated skill instead of re-exploring
-- [ ] Per-course skill differentiation (different material organization patterns)
-- [ ] ~50 skills across data collection, data processing, AI analysis, user actions
-
-**Frontend Pages (10 pages from HTML prototypes):**
-- [x] Auth page (login + register) — Validated in Phase 03: Auth Page
-- [x] Setup page (3-step API token onboarding) — Validated in Phase 04: Setup Page
-- [x] Dashboard (hero welcome, stats row, course grades, deadline timeline, assessment weights) — Validated in Phase 05: Dashboard Page
-- [x] Courses (card grid + grade overview) — Validated in Phase 06: Courses Page
-- [x] Course Detail (assessment breakdown, materials, Ed posts) — Validated in Phase 07: Course Detail Page
-- [x] Deadlines (calendar + filterable timeline + AI chat) — Validated in Phase 08: Deadlines Page
-- [x] Predict (slider-based What-if GPA simulator) — Validated in Phase 09: Predict Page
-- [ ] Digest (daily intelligence digest)
-- [ ] Timetable (weekly schedule view)
-- [x] Settings (token management, notifications, GPA target, profile) — Validated in Phase 12: Settings Page
-
-**Design System:**
-- [x] Anthropic-inspired aesthetic: warm colors, paper texture, Rough.js hand-drawn borders — Validated in Phase 01: Design System Foundation
-- [x] Fonts: Source Serif 4 (headings) + Inter (body) — Validated in Phase 01: Design System Foundation
-- [x] Rough Notation animated text annotations — Validated in Phase 01: Design System Foundation
-- [ ] All animations, transitions, and interactions from HTML prototypes preserved pixel-perfect
-
-**Infrastructure:**
-- [x] Supabase PostgreSQL with full schema + RLS policies (users, courses, grades, deadlines, Ed threads, materials, skills, encrypted tokens) — Validated in Phase 13: Supabase Foundation
-- [x] Supabase Auth integration (frontend supabase-js + Python JWT validation) — Validated in Phase 13: Supabase Foundation
-- [x] Background sync engine (grades 15min, deadlines 1h, modules daily, Unit Outline per semester) — Validated in Phase 16: Sync Engine + Phase 17: Notifications & Digest
-- [x] Canvas adapter with rate limiting, pagination, circuit breaker — Validated in Phase 14: Platform Adapters
-- [x] Ed Discussion adapter with defensive Pydantic parsing — Validated in Phase 14: Platform Adapters
-- [x] Ed Lessons adapter for lesson content and assignments — Validated in Phase 14: Platform Adapters
-- [x] Unit Outline HTML parser with weight-sum validation — Validated in Phase 14: Platform Adapters
-- [x] Token encryption (AES-256-GCM) — Validated in Phase 13: Supabase Foundation
-- [x] Docker Compose local development environment (Python backend only; DB via Supabase) — Validated in Phase 13: Supabase Foundation
-- [x] i18n support (English + Chinese) — Validated in Phase 01: Design System Foundation
+**M4 — Engineering:**
+- [ ] Unit test suite with 80%+ coverage (pytest + Vitest)
+- [ ] Integration tests for all API endpoints against real database
+- [ ] E2E smoke tests for critical user flows
+- [ ] Production deployment (Supabase + Railway + Vercel)
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Monitoring, alerting, security hardening
 
 ### Out of Scope
 
@@ -144,34 +138,34 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ## Milestone Structure
 
-| Milestone | Scope | Description |
-|-----------|-------|-------------|
-| **M1: Frontend App** | 10 HTML → Next.js | Convert all prototypes to interactive app with Mock API (contract-first), i18n (EN+CN), Rough.js preserved |
-| **M2: Backend Core** | From-scratch backend | Supabase (DB+Auth) + FastAPI on Railway, all adapters/services/sync, implement M1's API contracts |
-| **M3: AI/MCP/Skills** | Intelligence layer | MCP Agent features (INTEL-02, FILE-03/04, Deadline AI chat), Skill system, PLAT-03 MCP Server |
-| **M4: Engineering** | Production readiness | Testing (unit/integration/E2E), Supabase+Railway+Vercel deployment, monitoring, security, CI/CD |
+| Milestone | Scope | Status |
+|-----------|-------|--------|
+| **M1: Frontend App** | 10 HTML → Next.js (Phases 1-12, 11.1) | ✅ Shipped |
+| **M2: Backend Core** | Supabase + FastAPI + Adapters + Sync (Phases 13-17) | ✅ Shipped 2026-03-27 |
+| **M3: AI/MCP/Skills** | Intelligence layer (Phases 18-21) | 📋 Next |
+| **M4: Engineering** | Production readiness (Phases 22-24) | 📋 Planned |
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Full rebuild (delete src/ + frontend/) | v1.0 had structural issues; fresh start with prototype-first approach | — Pending |
-| 4-milestone structure | Frontend-first validates UX, backend implements proven contracts, AI/MCP is complex enough for own milestone, engineering last | — Pending |
-| Contract-first Mock API | M1 defines OpenAPI contracts that M2 implements — frontend zero-change on backend integration | ✓ Good (OpenAPI spec + 30 route handlers + 12 hooks) |
-| MCP Agent for AI features | Cross-platform research requires intelligent agent, not simple API+prompt — scattered data across Canvas/Ed/Lessons needs autonomous research | — Pending |
-| Digest via pre-collect + Claude API | Digest doesn't need real-time MCP research; scheduled sync + Claude scoring is sufficient and cheaper | — Pending |
-| Rough.js fully preserved | Design aesthetics are a core differentiator — optimize performance later if needed | — Pending |
-| Timetable page added | Prototype exists (timetable.html), moved from out-of-scope to active | — Pending |
-| Deadline AI chat (new) | Placeholder for AiStudyMate integration (EXT-01); currently serves as MCP Agent Q&A | — Pending |
+| Full rebuild (delete src/ + frontend/) | v1.0 had structural issues; fresh start with prototype-first approach | ✓ Good — clean architecture, no legacy debt |
+| 4-milestone structure | Frontend-first validates UX, backend implements proven contracts, AI/MCP is complex enough for own milestone, engineering last | ✓ Good — M1+M2 delivered in 11 days |
+| Contract-first Mock API | M1 defines OpenAPI contracts that M2 implements — frontend zero-change on backend integration | ✓ Good — 13 endpoints matched contracts, zero frontend changes needed |
+| Supabase hybrid architecture | Supabase handles DB+Auth+Realtime (saves ~40% M2 work), Python backend focuses on adapters/sync/MCP/AI, deploy to Railway+Vercel instead of AWS CDK | ✓ Good — M2 completed in 2 days with 15 tables + 60 RLS policies |
+| Supabase Auth over JWT+bcrypt | Frontend uses supabase-js for auth flows (session refresh built-in), Python validates Supabase JWT for API requests — eliminates hand-rolled auth | ✓ Good — bridge pattern preserved all 26 M1 hooks unchanged |
+| Frontend single API entry (no direct Supabase data queries) | All data queries go through Python API — preserves M1 hooks, unified caching/logging/error handling, avoids dual-client complexity | ✓ Good — clean separation confirmed |
+| MCP Agent for AI features | Cross-platform research requires intelligent agent, not simple API+prompt — scattered data across Canvas/Ed/Lessons needs autonomous research | — Pending (M3) |
+| Digest via pre-collect + Claude API | Digest doesn't need real-time MCP research; scheduled sync + Claude scoring is sufficient and cheaper | ⚠️ Revisit — rule-based digest shipped in M2, AI scoring in M3 |
+| Rough.js fully preserved | Design aesthetics are a core differentiator — optimize performance later if needed | ✓ Good — 10 pages with consistent Rough.js aesthetic |
+| Timetable page added | Prototype exists (timetable.html), moved from out-of-scope to active | ✓ Good — dual-density grid with overlap algorithm |
+| Deadline AI chat (new) | Placeholder for AiStudyMate integration (EXT-01); currently serves as MCP Agent Q&A | — Pending (M3) |
 | Desktop-first | Personal project / startup validation stage; mobile later | — Pending |
-| MVP speed priority | Ship working product first, engineering polish in M4 | — Pending |
-| Anthropic-inspired design | Warm, restrained, academic aesthetic — differentiates from typical EdTech | ✓ Good (validated through 103 prototype iterations) |
-| Supabase hybrid architecture | Supabase handles DB+Auth+Realtime (saves ~40% M2 work), Python backend focuses on adapters/sync/MCP/AI, deploy to Railway+Vercel instead of AWS CDK | ✓ Decided |
-| Supabase Auth over JWT+bcrypt | Frontend uses supabase-js for auth flows (session refresh built-in), Python validates Supabase JWT for API requests — eliminates hand-rolled auth | ✓ Decided |
-| Frontend single API entry (no direct Supabase data queries) | All data queries go through Python API — preserves M1 hooks, unified caching/logging/error handling, avoids dual-client complexity | ✓ Decided |
-| Unit Outline from USYD HTML | Canvas may not have complete data | — Pending |
-| Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending |
-| i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
+| MVP speed priority | Ship working product first, engineering polish in M4 | ✓ Good — M1+M2 in 11 days |
+| Anthropic-inspired design | Warm, restrained, academic aesthetic — differentiates from typical EdTech | ✓ Good (validated through 103 prototype iterations + 10 pages) |
+| Unit Outline from USYD HTML | Canvas may not have complete data | ✓ Good — CSS + positional fallback parser with weight-sum validation |
+| Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending (M3) |
+| i18n English + Chinese | Target Chinese international student community at USYD | ✓ Good — all 10 pages fully bilingual |
 
 ---
-*Last updated: 2026-03-27 — Phase 17 (Notifications & Digest) complete — M2 Backend Core milestone done. Tiered deadline reminders, GPA risk alerts, daily digest, token health checks all implemented with 191 unit tests passing.*
+*Last updated: 2026-03-27 after v2.0-m2 milestone — M2 Backend Core shipped. 5 phases, 13 plans, 149 tests. Next: M3 AI/MCP/Skills.*

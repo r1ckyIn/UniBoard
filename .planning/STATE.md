@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 17-02-PLAN.md
-last_updated: "2026-03-27T10:35:21.177Z"
+milestone_name: UniBoard
+status: M2 complete — ready for M3
+stopped_at: M2 Backend Core milestone archived
+last_updated: "2026-03-27T22:30:00Z"
 progress:
   total_phases: 25
   completed_phases: 18
@@ -16,15 +16,22 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-20)
+See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 17 — notifications-digest
+**Current focus:** M3 AI/MCP/Skills — planning next milestone
 
 ## Current Position
 
-Phase: 18
+Phase: 18 (not started)
 Plan: Not started
+Milestone: M2 complete, M3 next
+
+## Milestones Completed
+
+- **v2.0-m2 Backend Core** — Shipped 2026-03-27 (Phases 13-17, 13 plans, 149 tests)
+  - See: .planning/MILESTONES.md
+  - Archive: .planning/milestones/v2.0-m2-ROADMAP.md
 
 ## Performance Metrics
 
@@ -261,14 +268,15 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- Fix 3 broken integration test imports (User→Profile migration)
+- M3 milestone planning via /gsd:new-milestone or /gsd:discuss-phase 18
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
-Last session: 2026-03-27T10:29:15.011Z
-Stopped at: Completed 17-02-PLAN.md
+Last session: 2026-03-27T22:30:00Z
+Stopped at: M2 milestone completion
 Resume file: None
