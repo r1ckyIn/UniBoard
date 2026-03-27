@@ -1,5 +1,6 @@
 """Sync trigger, status, and history REST endpoints."""
 
+import asyncio
 import uuid
 from datetime import datetime, timedelta
 
@@ -60,6 +61,26 @@ async def trigger_sync(
 
     scope = body.scope if body else "all"
     next_allowed_at = now + _SYNC_COOLDOWN
+
+    # Dispatch actual sync task in background based on scope
+    from src.sync.tasks import (
+        sync_all_deadlines,
+        sync_all_grades,
+        sync_all_modules,
+        sync_all_outlines,
+    )
+
+    _SCOPE_DISPATCH: dict[str, object] = {
+        "grades": sync_all_grades,
+        "deadlines": sync_all_deadlines,
+        "modules": sync_all_modules,
+        "outline": sync_all_outlines,
+    }
+    if scope == "all":
+        for fn in _SCOPE_DISPATCH.values():
+            asyncio.create_task(fn())  # type: ignore[arg-type]
+    elif scope in _SCOPE_DISPATCH:
+        asyncio.create_task(_SCOPE_DISPATCH[scope]())  # type: ignore[arg-type]
 
     return SuccessResponse(
         data=SyncTriggerResponse(
