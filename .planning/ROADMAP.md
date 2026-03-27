@@ -349,7 +349,11 @@ Plans:
   3. Module sync runs daily and updates course materials
   4. Unit Outline sync runs per-semester and parses assessment weights
   5. Sync status is trackable (last run time, success/failure, records updated)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 16-01-PLAN.md — sync_history table + model, wire Ed sources into deadline sync, add outline sync task
+- [ ] 16-02-PLAN.md — Fix integration tests (User->Profile), unit tests for Ed wiring + outline + sync_history
 
 ### Phase 17: Notifications & Digest
 **Goal**: Users receive timely deadline reminders and daily academic digests
@@ -461,7 +465,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
-| 16. Sync Engine | M2 | 0/TBD | Not started | - |
+| 16. Sync Engine | M2 | 0/2 | Planned | - |
 | 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
