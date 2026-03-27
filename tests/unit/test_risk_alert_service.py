@@ -8,28 +8,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.course import Course
 from src.models.grade import Grade
-from src.models.user import User
-from src.security.password import hash_password
+from src.models.user import Profile
 
 
-async def _create_user_with_grades(
+async def _create_profile_with_grades(
     session: AsyncSession,
     *,
     gpa_target: float = 80.0,
     course_wam: float = 70.0,
-) -> User:
-    """Create user with gpa_target and a single course with known WAM."""
-    user = User(
-        email=f"risk-test-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+) -> Profile:
+    """Create profile with gpa_target and a single course with known WAM."""
+    profile = Profile(
+        id=uuid.uuid4(),
         display_name="Risk Tester",
         gpa_target=gpa_target,
     )
-    session.add(user)
+    session.add(profile)
     await session.flush()
 
     course = Course(
-        user_id=user.id,
+        user_id=profile.id,
         name="Systems Programming",
         code="COMP2017",
         semester="2026S1",
@@ -49,7 +47,7 @@ async def _create_user_with_grades(
     session.add(grade)
     await session.flush()
 
-    return user
+    return profile
 
 
 # ---------------------------------------------------------------------------
@@ -63,7 +61,7 @@ async def test_risk_detected_when_gap_above_threshold(session: AsyncSession) -> 
     from src.services.risk_alert import RiskAlertService
 
     # WAM=70, target=80 => gap=10 (>=5)
-    user = await _create_user_with_grades(session, gpa_target=80.0, course_wam=70.0)
+    user = await _create_profile_with_grades(session, gpa_target=80.0, course_wam=70.0)
 
     # Use empty API key so AI call is skipped, forcing fallback
     svc = RiskAlertService(session, anthropic_api_key="")
@@ -80,7 +78,7 @@ async def test_no_risk_when_within_threshold(session: AsyncSession) -> None:
     from src.services.risk_alert import RiskAlertService
 
     # WAM=78, target=80 => gap=2 (<5)
-    user = await _create_user_with_grades(session, gpa_target=80.0, course_wam=78.0)
+    user = await _create_profile_with_grades(session, gpa_target=80.0, course_wam=78.0)
 
     svc = RiskAlertService(session, anthropic_api_key="")
     result = await svc.check_risk_for_user(user.id)
@@ -98,7 +96,7 @@ async def test_risk_alert_invokes_ai_for_deep_analysis(session: AsyncSession) ->
     """When risk detected and API key set, invokes Claude Opus 4.6 for analysis."""
     from src.services.risk_alert import RiskAlertService
 
-    user = await _create_user_with_grades(session, gpa_target=85.0, course_wam=70.0)
+    user = await _create_profile_with_grades(session, gpa_target=85.0, course_wam=70.0)
 
     # Mock AIEngine.analyze_gpa_risk
     mock_ai_engine = AsyncMock()
@@ -120,7 +118,7 @@ async def test_risk_alert_falls_back_on_ai_failure(session: AsyncSession) -> Non
     """When AI call fails, recommendation uses rule-based fallback string."""
     from src.services.risk_alert import RiskAlertService
 
-    user = await _create_user_with_grades(session, gpa_target=85.0, course_wam=70.0)
+    user = await _create_profile_with_grades(session, gpa_target=85.0, course_wam=70.0)
 
     # Mock AIEngine that raises
     mock_ai_engine = AsyncMock()

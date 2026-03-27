@@ -10,25 +10,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.course import Course
 from src.models.deadline import UnifiedDeadline
 from src.models.grade import Grade
-from src.models.user import User
-from src.security.password import hash_password
+from src.models.user import Profile
 
 
-async def _create_user_with_data(
-    session: AsyncSession,
-) -> User:
-    """Create user with course, recent grade, and upcoming deadline."""
-    user = User(
-        email=f"digest-test-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+async def _create_profile_with_data(session: AsyncSession) -> Profile:
+    """Create profile with course, recent grade, and upcoming deadline."""
+    profile = Profile(
+        id=uuid.uuid4(),
         display_name="Digest Tester",
         gpa_target=80.0,
     )
-    session.add(user)
+    session.add(profile)
     await session.flush()
 
     course = Course(
-        user_id=user.id,
+        user_id=profile.id,
         name="Systems Programming",
         code="COMP2017",
         semester="2026S1",
@@ -63,7 +59,7 @@ async def _create_user_with_data(
     session.add(deadline)
     await session.flush()
 
-    return user
+    return profile
 
 
 # ---------------------------------------------------------------------------
@@ -76,7 +72,7 @@ async def test_generate_rule_based_digest(session: AsyncSession) -> None:
     """DigestService generates digest with grades and deadlines from last 24h."""
     from src.services.digest import DigestService
 
-    user = await _create_user_with_data(session)
+    user = await _create_profile_with_data(session)
 
     svc = DigestService(session, anthropic_api_key="")
     result = await svc.generate_digest(user.id)
@@ -97,7 +93,7 @@ async def test_enhance_with_ai(session: AsyncSession) -> None:
     """AI enhancement adds urgency_score (1-5) and ai_summary to digest."""
     from src.services.digest import DigestService
 
-    user = await _create_user_with_data(session)
+    user = await _create_profile_with_data(session)
 
     # Mock AIEngine for urgency scoring
     mock_ai_engine = AsyncMock()

@@ -5,26 +5,23 @@ import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User
-from src.security.password import hash_password
+from src.models.user import Profile
 
 
-async def _create_test_user(
+async def _create_test_profile(
     session: AsyncSession,
     *,
-    email: str | None = None,
     gpa_target: float | None = None,
-) -> User:
-    """Create a test user and return it."""
-    user = User(
-        email=email or f"notif-test-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+) -> Profile:
+    """Create a test Profile (no auth.users dependency in unit tests)."""
+    profile = Profile(
+        id=uuid.uuid4(),
         display_name="Notif Tester",
         gpa_target=gpa_target,
     )
-    session.add(user)
+    session.add(profile)
     await session.flush()
-    return user
+    return profile
 
 
 # ---------------------------------------------------------------------------
@@ -37,7 +34,7 @@ async def test_create_notification_returns_notification(session: AsyncSession) -
     """Creating a notification returns a Notification with correct fields."""
     from src.services.notification import NotificationService
 
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     svc = NotificationService(session)
 
     result = await svc.create_notification(
@@ -62,7 +59,7 @@ async def test_create_notification_duplicate_returns_none(session: AsyncSession)
     """Duplicate notification (same user + type + title) returns None via PushRecord dedup."""
     from src.services.notification import NotificationService
 
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     svc = NotificationService(session)
 
     first = await svc.create_notification(
@@ -94,7 +91,7 @@ async def test_get_notifications_filtered_and_ordered(session: AsyncSession) -> 
     """Notifications for a user are returned ordered by created_at desc."""
     from src.services.notification import NotificationService
 
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     svc = NotificationService(session)
 
     # Create multiple notifications with different titles (unique hashes)
@@ -116,7 +113,7 @@ async def test_mark_read_sets_is_read(session: AsyncSession) -> None:
     """mark_read sets is_read=True on the notification."""
     from src.services.notification import NotificationService
 
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     svc = NotificationService(session)
 
     notif = await svc.create_notification(
@@ -144,7 +141,7 @@ async def test_get_unread_count(session: AsyncSession) -> None:
     """Unread count reflects only unread notifications for the user."""
     from src.services.notification import NotificationService
 
-    user = await _create_test_user(session)
+    user = await _create_test_profile(session)
     svc = NotificationService(session)
 
     # Create 3 notifications
