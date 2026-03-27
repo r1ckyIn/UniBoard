@@ -3,6 +3,44 @@
 from pydantic import BaseModel, ConfigDict
 
 
+# --- Contract-aligned schemas (types.gen.d.ts) ---
+
+
+class MaterialItemResponse(BaseModel):
+    """Single item within a material folder matching types.gen.d.ts MaterialItem."""
+
+    title: str
+    type: str
+    url: str
+
+
+class MaterialResponse(BaseModel):
+    """Flat material entry matching types.gen.d.ts Material schema."""
+
+    id: str
+    title: str
+    source: str  # "canvas" | "ed"
+    source_type: str  # "module" | "lesson"
+    items: list[MaterialItemResponse] | None = None
+    slide_count: int | None = None
+    url: str | None = None
+
+
+class ContractSearchResultResponse(BaseModel):
+    """Search result matching types.gen.d.ts SearchResult schema."""
+
+    type: str  # "material" | "discussion"
+    title: str
+    source: str
+    course_code: str
+    snippet: str
+    url: str
+    relevance: float
+
+
+# --- Legacy schemas (used by existing service layer and tests) ---
+
+
 class FolderItem(BaseModel):
     """Individual item within a folder (module item or lesson)."""
 
