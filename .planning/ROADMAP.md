@@ -364,7 +364,11 @@ Plans:
   2. GPA risk alert fires when grade trajectory deviates from target threshold
   3. Daily digest aggregates new deadlines, grades, announcements, and high-value Ed posts
   4. Token expiration warnings display when Canvas/Ed tokens are near expiry with re-auth guidance
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Fix risk_alert.py bug, wire GPA risk into post-grade-sync, implement check_token_health task + engine registration
+- [ ] 17-02-PLAN.md — Fix broken tests (User->Profile), add unit tests for deadline reminders (DL-02) and token health (PLAT-04)
 
 ### Phase 18: AI Enhancement
 **Goal**: AI-powered thread evaluation and digest scoring with quality gate
@@ -466,7 +470,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
 | 16. Sync Engine | M2 | 2/2 | Complete    | 2026-03-27 |
-| 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
+| 17. Notifications & Digest | M2 | 0/2 | Planned | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
