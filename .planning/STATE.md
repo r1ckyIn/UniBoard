@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-03-27T03:36:33.210Z"
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-03-27T03:38:34.584Z"
 progress:
   total_phases: 25
   completed_phases: 15
   total_plans: 61
-  completed_plans: 59
+  completed_plans: 60
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 15 (core-services-api-routes) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -101,6 +101,7 @@ Plan: 2 of 3
 | Phase 14 P02 | 3min | 2 tasks | 2 files |
 | Phase 14 P03 | 3min | 2 tasks | 4 files |
 | Phase 15 P01 | 6min | 3 tasks | 6 files |
+| Phase 15 P02 | 7min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -241,6 +242,8 @@ Recent decisions affecting current work:
 - [Phase 14]: UnitOutlineParser tests use _extract_learning_outcomes and _extract_description public HTML APIs rather than soup internals
 - [Phase 15]: Route adapter pattern converts legacy GPAService output to contract-aligned shapes in route handlers
 - [Phase 15]: CourseDeadlineResponse in course.py (not deadline.py) for Plan 01 self-containment
+- [Phase 15]: Route-level adapter pattern: legacy service returns converted to contract shape in route handlers, keeping service layer unchanged
+- [Phase 15]: Status/days_remaining computed at route level from due_date, not stored in DB
 
 ### Roadmap Evolution
 
@@ -256,6 +259,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T03:36:33.204Z
-Stopped at: Completed 15-01-PLAN.md
+Last session: 2026-03-27T03:38:34.578Z
+Stopped at: Completed 15-02-PLAN.md
 Resume file: None
