@@ -35,7 +35,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser (completed 2026-03-26)
 - [x] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts (completed 2026-03-27)
 - [x] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily) (completed 2026-03-27)
-- [ ] **Phase 17: Notifications & Digest** — Tiered deadline reminders, rule-based daily digest, token expiration warnings
+- [x] **Phase 17: Notifications & Digest** — Tiered deadline reminders, rule-based daily digest, token expiration warnings (completed 2026-03-27)
 
 ### M3: AI/MCP/Skills
 
@@ -368,7 +368,7 @@ Plans:
 
 Plans:
 - [x] 17-01-PLAN.md — Fix risk_alert.py bug, wire GPA risk into post-grade-sync, implement check_token_health task + engine registration
-- [ ] 17-02-PLAN.md — Fix broken tests (User->Profile), add unit tests for deadline reminders (DL-02) and token health (PLAT-04)
+- [x] 17-02-PLAN.md — Fix broken tests (User->Profile), add unit tests for deadline reminders (DL-02) and token health (PLAT-04)
 
 ### Phase 18: AI Enhancement
 **Goal**: AI-powered thread evaluation and digest scoring with quality gate
@@ -470,7 +470,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
 | 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
 | 16. Sync Engine | M2 | 2/2 | Complete    | 2026-03-27 |
-| 17. Notifications & Digest | M2 | 1/2 | In Progress|  |
+| 17. Notifications & Digest | M2 | 2/2 | Complete   | 2026-03-27 |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
