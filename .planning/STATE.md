@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 15 context gathered
-last_updated: "2026-03-27T02:47:38.507Z"
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-03-27T03:36:33.210Z"
 progress:
   total_phases: 25
   completed_phases: 15
-  total_plans: 58
-  completed_plans: 58
+  total_plans: 61
+  completed_plans: 59
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 14 — platform-adapters
+**Current focus:** Phase 15 — core-services-api-routes
 
 ## Current Position
 
-Phase: 14 (platform-adapters) — EXECUTING
-Plan: 3 of 3
+Phase: 15 (core-services-api-routes) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -100,6 +100,7 @@ Plan: 3 of 3
 | Phase 14 P01 | 3min | 2 tasks | 4 files |
 | Phase 14 P02 | 3min | 2 tasks | 2 files |
 | Phase 14 P03 | 3min | 2 tasks | 4 files |
+| Phase 15 P01 | 6min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -238,6 +239,8 @@ Recent decisions affecting current work:
 - [Phase 14]: Circuit breaker test for Ed Discussion uses _request directly since get_threads gracefully degrades
 - [Phase 14]: Circuit breaker OPEN test targets _request directly since get_lessons catches UpstreamUnavailableError
 - [Phase 14]: UnitOutlineParser tests use _extract_learning_outcomes and _extract_description public HTML APIs rather than soup internals
+- [Phase 15]: Route adapter pattern converts legacy GPAService output to contract-aligned shapes in route handlers
+- [Phase 15]: CourseDeadlineResponse in course.py (not deadline.py) for Plan 01 self-containment
 
 ### Roadmap Evolution
 
@@ -253,6 +256,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T02:47:38.499Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-core-services-api-routes/15-CONTEXT.md
+Last session: 2026-03-27T03:36:33.204Z
+Stopped at: Completed 15-01-PLAN.md
+Resume file: None
