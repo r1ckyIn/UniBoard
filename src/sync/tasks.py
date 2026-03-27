@@ -1,4 +1,4 @@
-"""Sync task functions for grades, deadlines, and modules."""
+"""Sync task functions for grades, deadlines, modules, and outlines."""
 
 from __future__ import annotations
 
@@ -53,11 +53,12 @@ async def _sync_user_grades(
     user: Profile,
     canvas_token: str,
     session: AsyncSession,
-) -> None:
-    """Sync grades for a single user from Canvas."""
+) -> int:
+    """Sync grades for a single user from Canvas. Returns count of records upserted."""
     from src.adapters.canvas import CanvasAdapter
 
     adapter = CanvasAdapter(canvas_token)
+    count = 0
     try:
         courses = await adapter.get_courses()
 
@@ -120,6 +121,7 @@ async def _sync_user_grades(
                     },
                 )
                 await session.execute(insert_stmt)
+                count += 1
 
         user.canvas_sync_status = "success"
         user.canvas_last_synced_at = datetime.now(UTC)
@@ -133,6 +135,7 @@ async def _sync_user_grades(
         logger.warning("sync_token_expired", user_id=str(user.id), platform="canvas")
     finally:
         await adapter.close()
+    return count
 
 
 async def sync_all_grades() -> None:
@@ -155,6 +158,7 @@ async def sync_all_grades() -> None:
         started_at = datetime.now(UTC)
         sync_status = "success"
         sync_error: str | None = None
+        records_updated = 0
         for attempt in range(_MAX_RETRIES):
             try:
                 token = encryption.decrypt(str(user.canvas_api_token_encrypted))
@@ -163,7 +167,9 @@ async def sync_all_grades() -> None:
                     user_in_session = await session.get(Profile, user.id)
                     if user_in_session is None:
                         break
-                    await _sync_user_grades(user_in_session, token, session)
+                    records_updated = await _sync_user_grades(
+                        user_in_session, token, session
+                    )
                 break  # Success
             except TokenInvalidError:
                 sync_status = "failed"
@@ -194,6 +200,7 @@ async def sync_all_grades() -> None:
             user.id,
             "grades",
             sync_status,
+            records_updated=records_updated,
             error_message=sync_error,
             started_at=started_at,
         )
@@ -219,6 +226,7 @@ async def sync_all_deadlines() -> None:
         started_at = datetime.now(UTC)
         sync_status = "success"
         sync_error: str | None = None
+        records_updated = 0
         for attempt in range(_MAX_RETRIES):
             try:
                 token = encryption.decrypt(str(user.canvas_api_token_encrypted))
@@ -314,7 +322,10 @@ async def sync_all_deadlines() -> None:
                                         for t in threads
                                         if t.get("content")
                                     ]
-                                except (TokenInvalidError, Exception):
+                                except TokenInvalidError:
+                                    user_in_session.ed_token_status = "expired"
+                                    user_in_session.ed_sync_status = "degraded"
+                                except Exception:
                                     logger.warning(
                                         "sync_ed_disc_deadline_error",
                                         course=course.code,
@@ -322,7 +333,7 @@ async def sync_all_deadlines() -> None:
                                 finally:
                                     await ed_disc_adapter.close()
 
-                            await svc.aggregate_and_dedup(
+                            records_updated += await svc.aggregate_and_dedup(
                                 course,
                                 canvas_assignments=assignments,
                                 ed_lessons_data=ed_lessons_data,
@@ -359,6 +370,7 @@ async def sync_all_deadlines() -> None:
             user.id,
             "deadlines",
             sync_status,
+            records_updated=records_updated,
             error_message=sync_error,
             started_at=started_at,
         )
@@ -389,6 +401,7 @@ async def sync_all_modules() -> None:
         started_at = datetime.now(UTC)
         sync_status = "success"
         sync_error: str | None = None
+        records_updated = 0
         for attempt in range(_MAX_RETRIES):
             try:
                 async with session_factory() as session:
@@ -400,6 +413,7 @@ async def sync_all_modules() -> None:
                         select(Course).where(Course.user_id == user.id)
                     )
                     courses = list(courses_result.scalars().all())
+                    records_updated = len(courses)
 
                     # --- Canvas modules ---
                     if user.canvas_api_token_encrypted:
@@ -443,6 +457,7 @@ async def sync_all_modules() -> None:
             user.id,
             "modules",
             sync_status,
+            records_updated=records_updated,
             error_message=sync_error,
             started_at=started_at,
         )
@@ -748,7 +763,14 @@ async def sync_all_outlines() -> None:
         logger.info("sync_outlines_skip", reason="no courses with outline URLs")
         return
 
+    # Group courses by user for sync_history recording
+    user_results: dict[uuid.UUID, tuple[int, str, str | None]] = {}
+
     for course in courses:
+        user_id = course.user_id
+        if user_id not in user_results:
+            user_results[user_id] = (0, "success", None)
+
         for attempt in range(_MAX_RETRIES):
             try:
                 parse_result = await parser.fetch_and_parse(
@@ -795,6 +817,8 @@ async def sync_all_outlines() -> None:
                     await session.execute(insert_stmt)
                     await session.commit()
 
+                count, status, err = user_results[user_id]
+                user_results[user_id] = (count + 1, status, err)
                 logger.info("sync_outline_success", course=course.code)
                 break  # Success
             except Exception:
@@ -806,8 +830,25 @@ async def sync_all_outlines() -> None:
                     )
                     await asyncio.sleep(2**attempt)
                 else:
+                    count, _, _ = user_results[user_id]
+                    user_results[user_id] = (
+                        count,
+                        "failed",
+                        f"Failed to sync {course.code}",
+                    )
                     logger.error(
                         "sync_outline_failed",
                         course=course.code,
                         exc_info=True,
                     )
+
+    # Record sync history per user
+    for uid, (count, status, err) in user_results.items():
+        await _record_sync_history(
+            session_factory,
+            uid,
+            "outlines",
+            status,
+            records_updated=count,
+            error_message=err,
+        )

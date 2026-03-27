@@ -2,7 +2,9 @@
 
 import asyncio
 import uuid
+from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
@@ -26,10 +28,17 @@ _SYNC_COOLDOWN = timedelta(minutes=5)
 router = APIRouter()
 
 
+_ValidScope = Literal["all", "grades", "deadlines", "modules", "outline"]
+
+# Module-level set to hold strong references to background sync tasks,
+# preventing garbage collection mid-execution.
+_background_tasks: set[asyncio.Task[None]] = set()
+
+
 class SyncTriggerRequest(BaseModel):
     """Optional request body for manual sync trigger."""
 
-    scope: str = "all"  # "all" | "grades" | "deadlines" | "modules" | "outline"
+    scope: _ValidScope = "all"
 
 
 @router.post("/trigger")
@@ -70,17 +79,23 @@ async def trigger_sync(
         sync_all_outlines,
     )
 
-    _SCOPE_DISPATCH: dict[str, object] = {
+    _SCOPE_DISPATCH: dict[str, Callable[[], Coroutine[Any, Any, None]]] = {
         "grades": sync_all_grades,
         "deadlines": sync_all_deadlines,
         "modules": sync_all_modules,
         "outline": sync_all_outlines,
     }
+
+    def _launch(coro_fn: Callable[[], Coroutine[Any, Any, None]]) -> None:
+        task = asyncio.create_task(coro_fn())
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+
     if scope == "all":
         for fn in _SCOPE_DISPATCH.values():
-            asyncio.create_task(fn())  # type: ignore[arg-type]
+            _launch(fn)
     elif scope in _SCOPE_DISPATCH:
-        asyncio.create_task(_SCOPE_DISPATCH[scope]())  # type: ignore[arg-type]
+        _launch(_SCOPE_DISPATCH[scope])
 
     return SuccessResponse(
         data=SyncTriggerResponse(
