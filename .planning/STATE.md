@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 15-02-PLAN.md
+stopped_at: Completed 15-03-PLAN.md (Phase 15 complete)
 last_updated: "2026-03-27T03:38:34.584Z"
 progress:
   total_phases: 25
   completed_phases: 15
   total_plans: 61
-  completed_plans: 60
+  completed_plans: 61
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 15 (core-services-api-routes) — EXECUTING
-Plan: 3 of 3
+Phase: 15 (core-services-api-routes) — COMPLETE
+Plan: 3 of 3 (all plans complete)
 
 ## Performance Metrics
 
@@ -102,6 +102,7 @@ Plan: 3 of 3
 | Phase 14 P03 | 3min | 2 tasks | 4 files |
 | Phase 15 P01 | 6min | 3 tasks | 6 files |
 | Phase 15 P02 | 7min | 3 tasks | 7 files |
+| Phase 15 P03 | 9min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -244,6 +245,8 @@ Recent decisions affecting current work:
 - [Phase 15]: CourseDeadlineResponse in course.py (not deadline.py) for Plan 01 self-containment
 - [Phase 15]: Route-level adapter pattern: legacy service returns converted to contract shape in route handlers, keeping service layer unchanged
 - [Phase 15]: Status/days_remaining computed at route level from due_date, not stored in DB
+- [Phase 15]: JWT test auth pattern: generate Supabase-compatible JWT directly in test fixtures (no auth endpoint dependency)
+- [Phase 15]: Naive datetimes for TIMESTAMP WITHOUT TIME ZONE columns in asyncpg (tz-aware datetimes cause DataError)
 
 ### Roadmap Evolution
 
@@ -259,6 +262,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T03:38:34.578Z
-Stopped at: Completed 15-02-PLAN.md
+Last session: 2026-03-27T03:49:12Z
+Stopped at: Completed 15-03-PLAN.md (Phase 15 complete)
 Resume file: None
