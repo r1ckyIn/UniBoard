@@ -22,6 +22,7 @@ from src.models.course import Course
 from src.models.grade import Grade
 from src.models.lesson import Lesson
 from src.models.module import Module, ModuleItem
+from src.models.unit_outline import UnitOutline
 from src.models.user import Profile
 from src.schemas.common import TokenInvalidError
 from src.security.encryption import get_encryption
@@ -151,6 +152,9 @@ async def sync_all_grades() -> None:
     encryption = get_encryption()
 
     for user in users:
+        started_at = datetime.now(UTC)
+        sync_status = "success"
+        sync_error: str | None = None
         for attempt in range(_MAX_RETRIES):
             try:
                 token = encryption.decrypt(str(user.canvas_api_token_encrypted))
@@ -162,16 +166,20 @@ async def sync_all_grades() -> None:
                     await _sync_user_grades(user_in_session, token, session)
                 break  # Success
             except TokenInvalidError:
+                sync_status = "failed"
+                sync_error = "Token expired"
                 break  # Don't retry on auth errors
-            except Exception:
+            except Exception as exc:
                 if attempt < _MAX_RETRIES - 1:
                     logger.warning(
                         "sync_grades_retry",
                         user_id=str(user.id),
                         attempt=attempt + 1,
                     )
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                 else:
+                    sync_status = "failed"
+                    sync_error = str(exc)[:500]
                     logger.error(
                         "sync_grades_failed",
                         user_id=str(user.id),
@@ -181,6 +189,14 @@ async def sync_all_grades() -> None:
                         if user_in_session is not None:
                             user_in_session.canvas_sync_status = "failed"
                             await session.commit()
+        await _record_sync_history(
+            session_factory,
+            user.id,
+            "grades",
+            sync_status,
+            error_message=sync_error,
+            started_at=started_at,
+        )
 
 
 async def sync_all_deadlines() -> None:
@@ -200,6 +216,9 @@ async def sync_all_deadlines() -> None:
     encryption = get_encryption()
 
     for user in users:
+        started_at = datetime.now(UTC)
+        sync_status = "success"
+        sync_error: str | None = None
         for attempt in range(_MAX_RETRIES):
             try:
                 token = encryption.decrypt(str(user.canvas_api_token_encrypted))
@@ -241,11 +260,73 @@ async def sync_all_deadlines() -> None:
                                 )
                                 continue
 
+                            # Ed Lessons deadlines
+                            ed_lessons_data: list[dict[str, object]] = []
+                            if user_in_session.ed_api_token_encrypted:
+                                from src.adapters.ed_lessons import EdLessonsAdapter
+
+                                ed_token = encryption.decrypt(
+                                    str(user_in_session.ed_api_token_encrypted)
+                                )
+                                ed_lessons_adapter = EdLessonsAdapter(ed_token)
+                                try:
+                                    if course.ed_course_id:
+                                        lessons, _ = await ed_lessons_adapter.get_lessons(
+                                            course.ed_course_id
+                                        )
+                                        ed_lessons_data = [
+                                            lesson_item
+                                            for lesson_item in lessons
+                                            if lesson_item.get("due_at")
+                                        ]
+                                except TokenInvalidError:
+                                    user_in_session.ed_token_status = "expired"
+                                    user_in_session.ed_sync_status = "degraded"
+                                except Exception:
+                                    logger.warning(
+                                        "sync_ed_lessons_deadline_error",
+                                        course=course.code,
+                                    )
+                                finally:
+                                    await ed_lessons_adapter.close()
+
+                            # Ed Discussion deadline mentions
+                            ed_discussion_texts: list[tuple[str, str]] = []
+                            if (
+                                user_in_session.ed_api_token_encrypted
+                                and course.ed_course_id
+                            ):
+                                from src.adapters.ed_discussion import EdDiscussionAdapter
+
+                                ed_disc_token = encryption.decrypt(
+                                    str(user_in_session.ed_api_token_encrypted)
+                                )
+                                ed_disc_adapter = EdDiscussionAdapter(ed_disc_token)
+                                try:
+                                    threads = await ed_disc_adapter.get_threads(
+                                        course.ed_course_id
+                                    )
+                                    ed_discussion_texts = [
+                                        (
+                                            str(t.get("content", "")),
+                                            str(t.get("id", "")),
+                                        )
+                                        for t in threads
+                                        if t.get("content")
+                                    ]
+                                except (TokenInvalidError, Exception):
+                                    logger.warning(
+                                        "sync_ed_disc_deadline_error",
+                                        course=course.code,
+                                    )
+                                finally:
+                                    await ed_disc_adapter.close()
+
                             await svc.aggregate_and_dedup(
                                 course,
                                 canvas_assignments=assignments,
-                                ed_lessons_data=[],
-                                ed_discussion_texts=[],
+                                ed_lessons_data=ed_lessons_data,
+                                ed_discussion_texts=ed_discussion_texts,
                             )
 
                         await session.commit()
@@ -254,21 +335,33 @@ async def sync_all_deadlines() -> None:
 
                 break  # Success
             except TokenInvalidError:
+                sync_status = "failed"
+                sync_error = "Token expired"
                 break  # Don't retry on auth errors
-            except Exception:
+            except Exception as exc:
                 if attempt < _MAX_RETRIES - 1:
                     logger.warning(
                         "sync_deadlines_retry",
                         user_id=str(user.id),
                         attempt=attempt + 1,
                     )
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                 else:
+                    sync_status = "failed"
+                    sync_error = str(exc)[:500]
                     logger.error(
                         "sync_deadlines_failed",
                         user_id=str(user.id),
                         exc_info=True,
                     )
+        await _record_sync_history(
+            session_factory,
+            user.id,
+            "deadlines",
+            sync_status,
+            error_message=sync_error,
+            started_at=started_at,
+        )
 
 
 async def sync_all_modules() -> None:
@@ -293,6 +386,9 @@ async def sync_all_modules() -> None:
     encryption = get_encryption()
 
     for user in users:
+        started_at = datetime.now(UTC)
+        sync_status = "success"
+        sync_error: str | None = None
         for attempt in range(_MAX_RETRIES):
             try:
                 async with session_factory() as session:
@@ -323,21 +419,33 @@ async def sync_all_modules() -> None:
 
                 break  # Success
             except TokenInvalidError:
+                sync_status = "failed"
+                sync_error = "Token expired"
                 break  # Don't retry on auth errors
-            except Exception:
+            except Exception as exc:
                 if attempt < _MAX_RETRIES - 1:
                     logger.warning(
                         "sync_modules_retry",
                         user_id=str(user.id),
                         attempt=attempt + 1,
                     )
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                 else:
+                    sync_status = "failed"
+                    sync_error = str(exc)[:500]
                     logger.error(
                         "sync_modules_failed",
                         user_id=str(user.id),
                         exc_info=True,
                     )
+        await _record_sync_history(
+            session_factory,
+            user.id,
+            "modules",
+            sync_status,
+            error_message=sync_error,
+            started_at=started_at,
+        )
 
 
 async def _sync_canvas_modules(
@@ -594,3 +702,112 @@ async def _sync_ed_lessons(
         user.ed_token_status = "expired"
         user.ed_sync_status = "degraded"
         logger.warning("sync_ed_token_expired", user_id=str(user.id))
+
+
+async def _record_sync_history(
+    session_factory: async_sessionmaker[AsyncSession],
+    user_id: uuid.UUID,
+    domain: str,
+    status: str,
+    records_updated: int = 0,
+    error_message: str | None = None,
+    started_at: datetime | None = None,
+) -> None:
+    """Insert a sync_history record for audit trail."""
+    from src.models.sync_history import SyncHistory
+
+    now = datetime.now(UTC)
+    async with session_factory() as session:
+        entry = SyncHistory(
+            user_id=user_id,
+            domain=domain,
+            status=status,
+            records_updated=records_updated,
+            error_message=error_message,
+            started_at=started_at or now,
+            completed_at=now,
+        )
+        session.add(entry)
+        await session.commit()
+
+
+async def sync_all_outlines() -> None:
+    """Sync Unit Outlines for all courses with unit_outline_url."""
+    from src.parsers.usyd_outline import UnitOutlineParser
+
+    session_factory = _get_sync_session_factory()
+    parser = UnitOutlineParser()
+
+    async with session_factory() as session:
+        result = await session.execute(
+            select(Course).where(Course.unit_outline_url.isnot(None))
+        )
+        courses = list(result.scalars().all())
+
+    if not courses:
+        logger.info("sync_outlines_skip", reason="no courses with outline URLs")
+        return
+
+    for course in courses:
+        for attempt in range(_MAX_RETRIES):
+            try:
+                parse_result = await parser.fetch_and_parse(
+                    str(course.unit_outline_url)
+                )
+
+                async with session_factory() as session:
+                    # Determine semester string from current date
+                    now = datetime.now(UTC)
+                    semester = f"S{'1' if now.month <= 6 else '2'}_{now.year}"
+
+                    values = {
+                        "id": uuid.uuid4(),
+                        "course_id": course.id,
+                        "outline_url": str(course.unit_outline_url),
+                        "assessments": [
+                            {
+                                "name": a.name,
+                                "weight": a.weight,
+                                "description": a.description,
+                                "due_date": a.due_date,
+                                "length": a.length,
+                                "ai_policy": a.ai_policy,
+                            }
+                            for a in parse_result.assessments
+                        ],
+                        "learning_outcomes": parse_result.learning_outcomes,
+                        "raw_html": parse_result.raw_html,
+                        "fetched_at": datetime.now(UTC).replace(tzinfo=None),
+                        "semester": semester,
+                    }
+
+                    insert_stmt = pg_insert(UnitOutline).values(**values)
+                    insert_stmt = insert_stmt.on_conflict_do_update(
+                        constraint="uq_unit_outlines_course_semester",
+                        set_={
+                            "assessments": values["assessments"],
+                            "learning_outcomes": values["learning_outcomes"],
+                            "raw_html": values["raw_html"],
+                            "fetched_at": values["fetched_at"],
+                            "outline_url": values["outline_url"],
+                        },
+                    )
+                    await session.execute(insert_stmt)
+                    await session.commit()
+
+                logger.info("sync_outline_success", course=course.code)
+                break  # Success
+            except Exception:
+                if attempt < _MAX_RETRIES - 1:
+                    logger.warning(
+                        "sync_outline_retry",
+                        course=course.code,
+                        attempt=attempt + 1,
+                    )
+                    await asyncio.sleep(2**attempt)
+                else:
+                    logger.error(
+                        "sync_outline_failed",
+                        course=course.code,
+                        exc_info=True,
+                    )

@@ -24,3 +24,21 @@ class SyncTriggerResponse(BaseModel):
 
     message: str
     next_allowed_at: str  # ISO 8601 timestamp
+
+
+class SyncHistoryEntry(BaseModel):
+    """Single sync history audit record."""
+
+    id: str
+    domain: str
+    status: str
+    records_updated: int
+    error_message: str | None
+    started_at: str
+    completed_at: str | None
+
+
+class SyncHistoryResponse(BaseModel):
+    """Paginated sync history for a user."""
+
+    entries: list[SyncHistoryEntry]
