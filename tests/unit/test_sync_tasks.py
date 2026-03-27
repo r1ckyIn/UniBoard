@@ -454,7 +454,7 @@ class TestRecordSyncHistory:
         mock_get_enc.return_value = enc
 
         with patch(
-            "src.sync.tasks._sync_user_grades", new_callable=AsyncMock
+            "src.sync.tasks._sync_user_grades", new_callable=AsyncMock, return_value=1
         ):
             await sync_all_grades()
 

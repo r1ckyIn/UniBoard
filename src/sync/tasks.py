@@ -155,6 +155,9 @@ async def sync_all_grades() -> None:
     encryption = get_encryption()
     settings = get_settings()
 
+    # Lazy import to avoid circular dependency at module level
+    from src.services.risk_alert import RiskAlertService
+
     for user in users:
         started_at = datetime.now(UTC)
         sync_status = "success"
@@ -197,14 +200,11 @@ async def sync_all_grades() -> None:
                             user_in_session.canvas_sync_status = "failed"
                             await session.commit()
         # Post-grade-sync risk alert (DL-03)
-        # Only fire when sync truly succeeded — _sync_user_grades swallows
-        # TokenInvalidError internally (sets canvas_sync_status="degraded"),
-        # so sync_status alone is insufficient.
-        grades_actually_synced = isinstance(records_updated, int) and records_updated > 0
-        if sync_status == "success" and grades_actually_synced:
+        # Guard: _sync_user_grades swallows TokenInvalidError internally
+        # (sets canvas_sync_status="degraded") and returns count=0,
+        # so sync_status=="success" alone is insufficient.
+        if sync_status == "success" and records_updated > 0:
             try:
-                from src.services.risk_alert import RiskAlertService
-
                 async with session_factory() as risk_session:
                     risk_svc = RiskAlertService(
                         risk_session,
@@ -687,36 +687,26 @@ async def check_token_health() -> None:
     if not expired_users:
         return
 
+    _TOKEN_PLATFORMS = (
+        ("canvas", "Canvas API token expired", "Your Canvas token has expired."),
+        ("ed", "Ed API token expired", "Your Ed token has expired."),
+    )
+
     for user in expired_users:
         try:
             async with session_factory() as session:
                 notif_svc = NotificationService(session)
-                if user.canvas_token_status == "expired":
-                    await notif_svc.create_notification(
-                        user_id=user.id,
-                        notification_type="token_expiry",
-                        severity="warning",
-                        title="Canvas API token expired",
-                        body=(
-                            "Your Canvas token has expired. "
-                            "Go to Settings to reconnect."
-                        ),
-                        channels=["in_app"],
-                        action_url="/settings#tokens",
-                    )
-                if user.ed_token_status == "expired":
-                    await notif_svc.create_notification(
-                        user_id=user.id,
-                        notification_type="token_expiry",
-                        severity="warning",
-                        title="Ed API token expired",
-                        body=(
-                            "Your Ed token has expired. "
-                            "Go to Settings to reconnect."
-                        ),
-                        channels=["in_app"],
-                        action_url="/settings#tokens",
-                    )
+                for platform, title, body_prefix in _TOKEN_PLATFORMS:
+                    if getattr(user, f"{platform}_token_status") == "expired":
+                        await notif_svc.create_notification(
+                            user_id=user.id,
+                            notification_type="token_expiry",
+                            severity="warning",
+                            title=title,
+                            body=f"{body_prefix} Go to Settings to reconnect.",
+                            channels=["in_app"],
+                            action_url="/settings#tokens",
+                        )
                 await session.commit()
         except Exception:
             logger.warning(
