@@ -460,7 +460,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 12. Settings Page | 4/4 | Complete    | 2026-03-26 | - |
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
-| 15. Core Services & API Routes | 3/3 | Complete   | 2026-03-27 | - |
+| 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
 | 16. Sync Engine | M2 | 0/TBD | Not started | - |
 | 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
