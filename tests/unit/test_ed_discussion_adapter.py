@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import time
 from collections.abc import Callable
 from typing import Any
 
@@ -12,6 +12,7 @@ import pytest
 from src.adapters.ed_discussion import EdDiscussionAdapter
 from src.adapters.resilience import CircuitBreaker, CircuitState, RetryConfig
 from src.schemas.common import TokenInvalidError, UpstreamUnavailableError
+from tests.unit.conftest import json_response
 
 BASE_URL = "https://edstem.org/api"
 
@@ -53,19 +54,12 @@ def _make_adapter(
 
 
 def _json_response(
-    data: Any,
+    data: object,
     status_code: int = 200,
     headers: dict[str, str] | None = None,
 ) -> httpx.Response:
-    """Build an httpx.Response with JSON body."""
-    hdrs = dict(OK_HEADERS)
-    if headers:
-        hdrs.update(headers)
-    return httpx.Response(
-        status_code,
-        content=json.dumps(data).encode(),
-        headers=hdrs,
-    )
+    """Build a JSON response with Ed Discussion headers."""
+    return json_response(data, status_code, headers, base_headers=OK_HEADERS)
 
 
 # --- get_threads tests ---
@@ -302,8 +296,6 @@ class TestEdDiscussionErrors:
         # Force circuit to OPEN state
         adapter._circuit.state = CircuitState.OPEN
         adapter._circuit.failure_count = 10
-        import time
-
         adapter._circuit.last_failure_time = time.monotonic()
         try:
             with pytest.raises(UpstreamUnavailableError):
@@ -320,8 +312,6 @@ class TestEdDiscussionErrors:
         adapter = _make_adapter(handler)
         adapter._circuit.state = CircuitState.OPEN
         adapter._circuit.failure_count = 10
-        import time
-
         adapter._circuit.last_failure_time = time.monotonic()
         try:
             result = await adapter.get_threads("123")

@@ -118,7 +118,6 @@ class EdLessonsAdapter(LessonAdapter):
                 attempt=attempt + 1,
             )
 
-            # Token invalid — not retryable, raise immediately
             if response.status_code in (401, 403):
                 self._circuit.record_failure()
                 raise TokenInvalidError("Ed Lessons")

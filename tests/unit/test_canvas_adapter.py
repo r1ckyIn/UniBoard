@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
+import time
 from collections.abc import Callable
-from typing import Any
 
 import httpx
 import pytest
@@ -17,6 +16,7 @@ from src.schemas.common import (
     UpstreamAPIError,
     UpstreamUnavailableError,
 )
+from tests.unit.conftest import json_response
 
 BASE_URL = "https://canvas.sydney.edu.au/api/v1"
 
@@ -44,19 +44,12 @@ def _make_adapter(
 
 
 def _json_response(
-    data: Any,
+    data: object,
     status_code: int = 200,
     headers: dict[str, str] | None = None,
 ) -> httpx.Response:
-    """Build an httpx.Response with JSON body."""
-    hdrs = dict(OK_HEADERS)
-    if headers:
-        hdrs.update(headers)
-    return httpx.Response(
-        status_code,
-        content=json.dumps(data).encode(),
-        headers=hdrs,
-    )
+    """Build a JSON response with Canvas rate-limit headers."""
+    return json_response(data, status_code, headers, base_headers=OK_HEADERS)
 
 
 # --- Success path tests ---
@@ -357,8 +350,6 @@ class TestCanvasAdapterErrors:
         adapter._circuit.state = CircuitState.OPEN
         adapter._circuit.failure_count = 10
         # Set last_failure_time to recent so recovery hasn't elapsed
-        import time
-
         adapter._circuit.last_failure_time = time.monotonic()
         try:
             with pytest.raises(UpstreamUnavailableError):
