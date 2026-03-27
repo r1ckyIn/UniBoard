@@ -332,7 +332,12 @@ Plans:
   3. Target GPA path planner calculates minimum required scores per assessment
   4. Deadline aggregation merges Canvas + Ed Lessons + Ed Discussion with SHA-256 deduplication
   5. All REST API responses match the OpenAPI spec from M1 (zero frontend changes needed)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — GPA + Course contract alignment (schemas, route paths, new /courses router)
+- [ ] 15-02-PLAN.md — Deadline, Materials, Intelligence, Search contract alignment (schemas, routes, /upcoming endpoint)
+- [ ] 15-03-PLAN.md — Integration tests validating all endpoints match OpenAPI contract shapes
 
 ### Phase 16: Sync Engine
 **Goal**: Automated background data synchronization keeps all data fresh
@@ -455,7 +460,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 12. Settings Page | 4/4 | Complete    | 2026-03-26 | - |
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
-| 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
+| 15. Core Services & API Routes | M2 | 0/3 | Planned | - |
 | 16. Sync Engine | M2 | 0/TBD | Not started | - |
 | 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |
