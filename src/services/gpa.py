@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import uuid
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -27,6 +28,12 @@ from src.schemas.gpa import (
     WhatIfScenarioResponse,
     WhatIfScore,
 )
+
+def _parse_level_weight(course_code: str) -> int:
+    """Extract course level from code. E.g., COMP2017 -> 2, MATH1005 -> 1."""
+    match = re.search(r"[A-Z]{4}(\d)", course_code)
+    return int(match.group(1)) if match else 1
+
 
 # USYD grade band thresholds: (min_mark, band_name, gpa_point)
 GRADE_BANDS: list[tuple[Decimal, str, int]] = [

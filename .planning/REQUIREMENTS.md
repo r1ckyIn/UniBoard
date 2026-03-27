@@ -9,31 +9,31 @@ Requirements for full release across 4 milestones.
 
 ### GPA Core
 
-- [ ] **GPA-01**: User can view real-time GPA/WAM for current semester, calculated from Canvas grades (data delay < 15 min)
-- [ ] **GPA-02**: User can perform What-if simulation by inputting hypothetical future assessment scores and seeing updated GPA in real-time
-- [ ] **GPA-03**: User can set a target GPA and see the minimum scores needed per remaining assessment to reach it
-- [ ] **GPA-04**: User can view assessment weight breakdown per course, parsed from Unit Outline HTML with visual donut chart
-- [ ] **GPA-05**: User can see per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage of course assessed
+- [x] **GPA-01**: User can view real-time GPA/WAM for current semester, calculated from Canvas grades (data delay < 15 min)
+- [x] **GPA-02**: User can perform What-if simulation by inputting hypothetical future assessment scores and seeing updated GPA in real-time
+- [x] **GPA-03**: User can set a target GPA and see the minimum scores needed per remaining assessment to reach it
+- [x] **GPA-04**: User can view assessment weight breakdown per course, parsed from Unit Outline HTML with visual donut chart
+- [x] **GPA-05**: User can see per-course WAM with grade band indicator (HD/D/CR/P/F) and percentage of course assessed
 
 ### Deadlines
 
-- [ ] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas + Ed Lessons + Ed Discussion (SHA-256 deduplicated)
+- [x] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas + Ed Lessons + Ed Discussion (SHA-256 deduplicated)
 - [ ] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
 - [ ] **DL-03**: User receives risk alert when grade trajectory deviates from target GPA threshold
 - [ ] **DL-04**: User can ask AI about assignment details in Deadline page chat — MCP Agent researches across Canvas announcements, modules, Ed threads, and Ed Lessons to provide contextual answers with cited sources (AiStudyMate integration placeholder)
 
 ### Intelligence
 
-- [ ] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
+- [x] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
 - [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes (MCP Agent)
 - [ ] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
 - [ ] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking (pre-collected data + Claude API)
-- [ ] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
+- [x] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
 
 ### Files & Materials
 
-- [ ] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions (Canvas Modules + Ed Lessons unified)
-- [ ] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
+- [x] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions (Canvas Modules + Ed Lessons unified)
+- [x] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
 - [ ] **FILE-03**: User can ask AI questions about synced course materials and receive answers with cited sources — MCP Agent cross-platform research
 - [ ] **FILE-04**: User can select a course unit and view AI-generated structured review summary (key concepts, common mistakes, exam scope) — MCP Agent
 

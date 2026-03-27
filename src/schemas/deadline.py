@@ -3,6 +3,30 @@
 from pydantic import BaseModel, ConfigDict
 
 
+# --- Contract-aligned schemas (types.gen.d.ts) ---
+
+
+class ContractDeadlineResponse(BaseModel):
+    """Full deadline matching types.gen.d.ts Deadline schema.
+
+    Includes course_code, course_name, is_confirmed (extends CourseDeadline).
+    """
+
+    id: str
+    title: str
+    due_date: str  # ISO 8601 datetime
+    source: str
+    weight: float | None = None
+    status: str  # "upcoming" | "submitted" | "overdue" | "completed"
+    days_remaining: int
+    course_code: str
+    course_name: str
+    is_confirmed: bool
+
+
+# --- Legacy schemas (used by existing service layer and tests) ---
+
+
 class DeadlineResponse(BaseModel):
     """Single unified deadline response."""
 

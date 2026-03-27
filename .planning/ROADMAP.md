@@ -33,7 +33,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 
 - [x] **Phase 13: Supabase Foundation** — Supabase project, schema migration (Supabase CLI), Auth config, RLS policies, FastAPI skeleton connecting Supabase PostgreSQL, frontend auth store adaptation (completed 2026-03-26)
 - [x] **Phase 14: Platform Adapters** — Canvas, Ed Discussion, Ed Lessons adapters + Unit Outline parser (completed 2026-03-26)
-- [ ] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts
+- [x] **Phase 15: Core Services & API Routes** — GPA, Deadline, Materials, Intelligence services implementing M1 contracts (completed 2026-03-27)
 - [ ] **Phase 16: Sync Engine** — APScheduler background sync (grades 15min, deadlines 1h, modules daily)
 - [ ] **Phase 17: Notifications & Digest** — Tiered deadline reminders, rule-based daily digest, token expiration warnings
 
@@ -332,7 +332,12 @@ Plans:
   3. Target GPA path planner calculates minimum required scores per assessment
   4. Deadline aggregation merges Canvas + Ed Lessons + Ed Discussion with SHA-256 deduplication
   5. All REST API responses match the OpenAPI spec from M1 (zero frontend changes needed)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — GPA + Course contract alignment (schemas, route paths, new /courses router)
+- [ ] 15-02-PLAN.md — Deadline, Materials, Intelligence, Search contract alignment (schemas, routes, /upcoming endpoint)
+- [ ] 15-03-PLAN.md — Integration tests validating all endpoints match OpenAPI contract shapes
 
 ### Phase 16: Sync Engine
 **Goal**: Automated background data synchronization keeps all data fresh
@@ -455,7 +460,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 12. Settings Page | 4/4 | Complete    | 2026-03-26 | - |
 | 13. Supabase Foundation | 3/3 | Complete    | 2026-03-26 | - |
 | 14. Platform Adapters | 3/3 | Complete    | 2026-03-26 | - |
-| 15. Core Services & API Routes | M2 | 0/TBD | Not started | - |
+| 15. Core Services & API Routes | 3/3 | Complete    | 2026-03-27 | - |
 | 16. Sync Engine | M2 | 0/TBD | Not started | - |
 | 17. Notifications & Digest | M2 | 0/TBD | Not started | - |
 | 18. AI Enhancement | M3 | 0/TBD | Not started | - |

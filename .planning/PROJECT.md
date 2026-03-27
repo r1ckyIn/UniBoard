@@ -174,4 +174,4 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | i18n English + Chinese | Target Chinese international student community at USYD | — Pending |
 
 ---
-*Last updated: 2026-03-26 — Phase 14 (Platform Adapters) complete — all adapters hardened + 93 unit tests*
+*Last updated: 2026-03-27 — Phase 15 (Core Services & API Routes) complete — all GPA/Deadline/Materials/Intelligence/Search routes aligned with M1 OpenAPI contract + 22 integration tests*

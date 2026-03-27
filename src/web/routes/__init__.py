@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from src.web.routes.ai import router as ai_router
 from src.web.routes.alerts import router as alerts_router
 from src.web.routes.auth import router as auth_router
+from src.web.routes.courses import router as courses_router
 from src.web.routes.deadlines import router as deadlines_router
 from src.web.routes.digest import router as digest_router
 from src.web.routes.gpa import router as gpa_router
@@ -19,6 +20,7 @@ api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(users_router, prefix="/users", tags=["users"])
 api_router.include_router(gpa_router, prefix="/gpa", tags=["gpa"])
+api_router.include_router(courses_router, prefix="/courses", tags=["courses"])
 api_router.include_router(deadlines_router, prefix="/deadlines", tags=["deadlines"])
 api_router.include_router(materials_router, prefix="", tags=["materials"])
 api_router.include_router(sync_router, prefix="/sync", tags=["sync"])

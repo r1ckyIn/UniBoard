@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
 import structlog
 from sqlalchemy import or_, select
@@ -12,9 +13,50 @@ from src.config import get_settings
 from src.models.course import Course
 from src.models.discussion import DiscussionThread
 from src.models.user import Profile
-from src.schemas.intelligence import AIHighValuePostResponse, HighValuePostResponse
+from src.schemas.intelligence import (
+    AIHighValuePostResponse,
+    DiscussionResponse,
+    HighValuePostResponse,
+)
 
 logger = structlog.get_logger()
+
+
+def _derive_relevance_category(thread: DiscussionThread) -> str:
+    """Derive relevance category from ORM thread attributes."""
+    if thread.is_endorsed:
+        return "endorsed"
+    if thread.is_staff_post:
+        return "staff"
+    return "community"
+
+
+def _derive_gpa_relevance_score(thread: DiscussionThread) -> float:
+    """Derive GPA relevance score from ORM thread, using stored score if available."""
+    if thread.gpa_relevance_score > 0.0:
+        return thread.gpa_relevance_score
+    if thread.is_endorsed:
+        return 0.5
+    if thread.is_staff_post:
+        return 0.3
+    return 0.0
+
+
+def _thread_to_discussion_response(thread: DiscussionThread) -> DiscussionResponse:
+    """Convert DiscussionThread ORM object to contract DiscussionResponse."""
+    return DiscussionResponse(
+        id=str(thread.id),
+        ed_thread_id=thread.ed_thread_id,
+        title=thread.title,
+        author=thread.author,
+        category=thread.category,
+        is_endorsed=thread.is_endorsed,
+        is_staff_post=thread.is_staff_post,
+        gpa_relevance_score=_derive_gpa_relevance_score(thread),
+        relevance_category=_derive_relevance_category(thread),
+        summary=(thread.content or "")[:200],
+        created_at=thread.created_at.isoformat() if isinstance(thread.created_at, datetime) else str(thread.created_at),
+    )
 
 
 class EdIntelligenceService:
@@ -22,6 +64,66 @@ class EdIntelligenceService:
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def get_discussions(
+        self,
+        user_id: uuid.UUID,
+        course_id: uuid.UUID,
+        *,
+        filter_mode: str = "high_value",
+        cursor: str | None = None,
+        limit: int = 21,
+    ) -> list[DiscussionResponse]:
+        """Get discussion threads with filter modes and cursor pagination.
+
+        Filter modes:
+        - high_value: endorsed OR staff posts (default)
+        - endorsed: only endorsed posts
+        - staff: only staff posts
+        - all: all discussion threads
+        """
+        stmt = (
+            select(DiscussionThread)
+            .join(Course, DiscussionThread.course_id == Course.id)
+            .where(
+                Course.user_id == user_id,
+                Course.id == course_id,
+            )
+        )
+
+        # Apply filter
+        match filter_mode:
+            case "endorsed":
+                stmt = stmt.where(DiscussionThread.is_endorsed.is_(True))
+            case "staff":
+                stmt = stmt.where(DiscussionThread.is_staff_post.is_(True))
+            case "all":
+                pass  # No filter
+            case _:  # "high_value" (default)
+                stmt = stmt.where(
+                    or_(
+                        DiscussionThread.is_endorsed.is_(True),
+                        DiscussionThread.is_staff_post.is_(True),
+                    )
+                )
+
+        # Sort by created_at DESC for cursor pagination
+        stmt = stmt.order_by(DiscussionThread.created_at.desc())
+
+        # Apply cursor (created_at < cursor_value)
+        if cursor:
+            try:
+                cursor_dt = datetime.fromisoformat(cursor.replace("Z", "+00:00"))
+                stmt = stmt.where(DiscussionThread.created_at < cursor_dt)
+            except ValueError:
+                pass  # Invalid cursor, skip filtering
+
+        stmt = stmt.limit(limit)
+
+        result = await self._session.execute(stmt)
+        threads = result.scalars().all()
+
+        return [_thread_to_discussion_response(t) for t in threads]
 
     async def get_high_value_posts(
         self,
@@ -106,8 +208,8 @@ class EdIntelligenceService:
                     is_staff_post=thread.is_staff_post,
                 )
                 thread.gpa_relevance_score = evaluation.gpa_relevance
-                if user:
-                    user.ai_calls_today += 1
+                if profile:
+                    profile.ai_calls_today += 1
 
                 if evaluation.gpa_relevance > 0.3:
                     scored_posts.append(

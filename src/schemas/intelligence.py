@@ -3,6 +3,30 @@
 from pydantic import BaseModel, ConfigDict
 
 
+# --- Contract-aligned schema (types.gen.d.ts) ---
+
+
+class DiscussionResponse(BaseModel):
+    """Discussion thread matching types.gen.d.ts Discussion schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    ed_thread_id: str
+    title: str
+    author: str
+    category: str
+    is_endorsed: bool
+    is_staff_post: bool
+    gpa_relevance_score: float
+    relevance_category: str
+    summary: str
+    created_at: str
+
+
+# --- Legacy schemas (used by existing service layer and tests) ---
+
+
 class HighValuePostResponse(BaseModel):
     """High-value Ed Discussion post (endorsed or staff-answered)."""
 
