@@ -66,7 +66,11 @@ def _thread_to_discussion_response(thread: DiscussionThread) -> DiscussionRespon
         gpa_relevance_score=_derive_gpa_relevance_score(thread),
         relevance_category=_derive_relevance_category(thread),
         summary=(thread.content or "")[:200],
-        created_at=thread.created_at.isoformat() if isinstance(thread.created_at, datetime) else str(thread.created_at),
+        created_at=(
+            thread.created_at.isoformat()
+            if isinstance(thread.created_at, datetime)
+            else str(thread.created_at)
+        ),
     )
 
 
