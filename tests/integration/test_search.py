@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.course import Course
 from src.models.lesson import Lesson
 from src.models.module import Module, ModuleItem
-from src.models.user import User
+from src.models.user import Profile as User
 from src.security.password import hash_password
 from src.services.materials import CourseMaterialService
 
