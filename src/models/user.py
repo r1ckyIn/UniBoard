@@ -61,6 +61,9 @@ class Profile(TimestampMixin, Base):
     last_manual_sync_at: Mapped[datetime | None] = mapped_column(nullable=True)
     ai_calls_today: Mapped[int] = mapped_column(default=0, server_default="0")
     ai_calls_reset_date: Mapped[datetime | None] = mapped_column(nullable=True)
+    language_preference: Mapped[str] = mapped_column(
+        String(5), default="en", server_default="en"
+    )
 
     # Relationships
     courses: Mapped[list[Course]] = relationship(

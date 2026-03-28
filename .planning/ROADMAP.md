@@ -46,7 +46,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 ### 🚧 M3: AI/MCP/Skills (Next)
 
 - [x] **Phase 18: AI Enhancement** — AI thread evaluation, AI digest scoring, quality gate with F1 monitoring (completed 2026-03-28)
-- [ ] **Phase 19: MCP Agent & Streaming** — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A, language preference setting
+- [x] **Phase 19: MCP Agent & Streaming** (1/4 plans) — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A, language preference setting (completed 2026-03-28)
 - [ ] **Phase 20: Skill System** — Auto-generated prompt templates, per-course differentiation, ~50 skills
 - [ ] **Phase 21: MCP Server & ROI Analysis** — PLAT-03 MCP server for Claude Desktop, Assignment ROI analysis
 
@@ -78,7 +78,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   3. AI unit review generates structured summaries (key concepts, common mistakes, exam scope)
   4. All AI responses stream via SSE with visible progress indicators
   5. Settings page allows user to select language (en/zh), preference persisted in Profile and used by digest/AI responses
-**Plans**: TBD
+**Plans**: 4 total (1 complete, 3 remaining)
 
 ### Phase 20: Skill System
 **Goal**: MCP Agent auto-generates and reuses prompt templates for efficient repeated operations
@@ -146,7 +146,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
-| 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
+| 19. MCP Agent & Streaming | M3 | 3/4 | Complete    | 2026-03-28 |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |

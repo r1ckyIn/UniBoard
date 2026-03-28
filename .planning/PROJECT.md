@@ -11,9 +11,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 ## Current State
 
 **Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
-**In Progress:** M3 AI/MCP/Skills — Phase 18 (AI Enhancement) complete 2026-03-28
-**Codebase:** ~168K LOC (TypeScript + Python + SQL), 707 files
-**Tests:** 149 backend tests (121 unit + 28 integration) + 25 AI-specific unit tests
+**In Progress:** M3 AI/MCP/Skills — Phase 19 (MCP Agent & Streaming) complete 2026-03-28
+**Codebase:** ~170K LOC (TypeScript + Python + SQL), 730+ files
+**Tests:** 168 backend tests (140 unit + 28 integration) + frontend streaming components
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
 
 ## Requirements
@@ -64,9 +64,12 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 **M3 — AI/MCP/Skills:**
 - [x] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details) — Phase 18
 - [x] AI-enhanced digest with urgency scoring and GPA relevance ranking — Phase 18
-- [ ] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context
-- [ ] AI Q&A on course materials with cited sources — MCP Agent cross-platform research
-- [ ] AI unit review summaries (key concepts, common mistakes, exam scope) — MCP Agent
+- [x] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context — Phase 19
+- [x] AI Q&A on course materials with cited sources — MCP Agent cross-platform research — Phase 19
+- [x] AI unit review summaries (key concepts, common mistakes, exam scope) — Phase 19
+- [x] SSE streaming for all AI responses (token-by-token with thinking indicators) — Phase 19
+- [x] Language preference setting (en/zh) with locale auto-switch — Phase 19
+- [x] AI batch translation of course content into Chinese — Phase 19
 - [ ] MCP server for Claude Desktop users (PLAT-03)
 - [ ] Auto-generate prompt template skills after first successful API exploration
 - [ ] Per-course skill differentiation (~50 skills)

@@ -12,6 +12,7 @@ import GpaTargetSection from "@/components/settings/GpaTargetSection";
 import NotificationsSection from "@/components/settings/NotificationsSection";
 import CourseLinkingSection from "@/components/settings/CourseLinkingSection";
 import ProfileSection from "@/components/settings/ProfileSection";
+import LanguageSection from "@/components/settings/LanguageSection";
 import DangerZoneSection from "@/components/settings/DangerZoneSection";
 import SettingsAccountCard from "@/components/settings/SettingsAccountCard";
 import SettingsSyncCard from "@/components/settings/SettingsSyncCard";
@@ -25,6 +26,7 @@ const SECTION_IDS = [
   "sec-tokens",
   "sec-gpa",
   "sec-notifications",
+  "sec-language",
   "sec-courses",
   "sec-profile",
   "sec-danger",
@@ -35,9 +37,10 @@ const SECTION_META = [
   { id: "sec-tokens", titleKey: "tokens.title", descKey: "tokens.desc", animDelay: 1 as const },
   { id: "sec-gpa", titleKey: "gpa.title", descKey: "gpa.desc", animDelay: 2 as const },
   { id: "sec-notifications", titleKey: "notifications.title", descKey: "notifications.desc", animDelay: 3 as const },
-  { id: "sec-courses", titleKey: "courses.title", descKey: "courses.desc", animDelay: 4 as const },
-  { id: "sec-profile", titleKey: "profile.title", descKey: "profile.desc", animDelay: 5 as const },
-  { id: "sec-danger", titleKey: "danger.title", descKey: "danger.disconnect.desc", animDelay: 6 as const },
+  { id: "sec-language", titleKey: "language.title", descKey: "language.desc", animDelay: 4 as const },
+  { id: "sec-courses", titleKey: "courses.title", descKey: "courses.desc", animDelay: 5 as const },
+  { id: "sec-profile", titleKey: "profile.title", descKey: "profile.desc", animDelay: 6 as const },
+  { id: "sec-danger", titleKey: "danger.title", descKey: "danger.disconnect.desc", animDelay: 7 as const },
 ] as const;
 
 /**
@@ -128,6 +131,14 @@ export default function SettingsPage() {
             <h2 className="font-serif text-[1.05rem] font-semibold text-[#2d2d2a] mb-[6px]">{t("notifications.title")}</h2>
             <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">{t("notifications.desc")}</p>
             <NotificationsSection />
+          </>
+        );
+      case "sec-language":
+        return (
+          <>
+            <h2 className="font-serif text-[1.05rem] font-semibold text-[#2d2d2a] mb-[6px]">{t("language.title")}</h2>
+            <p className="text-[0.82rem] text-[#6b6b65] mb-[16px]">{t("language.desc")}</p>
+            <LanguageSection />
           </>
         );
       case "sec-courses":

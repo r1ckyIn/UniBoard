@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import AsyncGenerator, Awaitable, Callable
 
 import structlog
 from anthropic import AsyncAnthropic
 
-from src.prompts.qa import QA_SYSTEM_PROMPT
-from src.prompts.review import REVIEW_SYSTEM_PROMPT
+from src.prompts.qa import QA_SYSTEM_PROMPT, get_qa_prompt
+from src.prompts.review import REVIEW_SYSTEM_PROMPT, get_review_prompt
 from src.prompts.risk_analysis import GPA_RISK_ANALYSIS_SYSTEM_PROMPT
 from src.prompts.thread_eval import THREAD_EVAL_SYSTEM_PROMPT
 from src.schemas.ai import QAResponse, ThreadEvaluation, UnitReviewResponse
@@ -18,6 +19,59 @@ logger = structlog.get_logger()
 
 # Regex pattern for inline citations: [Canvas: ...] or [Ed: ...]
 _CITATION_PATTERN = re.compile(r"\[(?:Canvas|Ed): [^\]]+\]")
+
+# Tool definitions for adapter-backed cross-platform research (MCP fallback)
+AGENT_TOOLS: list[dict[str, object]] = [
+    {
+        "name": "search_canvas_modules",
+        "description": (
+            "Search Canvas course modules and announcements for relevant content"
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search query for Canvas content",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_ed_threads",
+        "description": (
+            "Search Ed Discussion threads for assignment clarifications, "
+            "endorsed answers, or staff posts"
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search query for Ed Discussion",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "get_ed_lesson_content",
+        "description": (
+            "Get content from a specific Ed Lessons lesson or assignment"
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "lesson_id": {
+                    "type": "integer",
+                    "description": "Ed Lesson ID",
+                },
+            },
+            "required": ["lesson_id"],
+        },
+    },
+]
 
 
 class AIEngine:
@@ -189,3 +243,116 @@ class AIEngine:
 
         recommendation: str = response.content[0].text  # type: ignore[union-attr]
         return recommendation
+
+    async def stream_question(
+        self,
+        question: str,
+        context_text: str,
+        history: list[dict[str, str]] | None = None,
+        language: str = "en",
+        model: str = "claude-sonnet-4-20250514",
+    ) -> AsyncGenerator[str, None]:
+        """Stream answer tokens. Yields text deltas."""
+        messages: list[dict[str, object]] = []
+        if history:
+            messages.extend(history)  # type: ignore[arg-type]
+        messages.append({
+            "role": "user",
+            "content": (
+                f"Course materials:\n{context_text}\n\n"
+                f"Student question: {question}"
+            ),
+        })
+
+        async with self._client.messages.stream(
+            model=model,
+            max_tokens=1000,
+            system=get_qa_prompt(language),
+            messages=messages,  # type: ignore[arg-type]
+        ) as stream:
+            async for event in stream:
+                if event.type == "text":
+                    yield event.text
+
+    async def agent_stream(
+        self,
+        question: str,
+        context_text: str,
+        tools: list[dict[str, object]],
+        tool_executor: Callable[[str, dict[str, object]], Awaitable[str]],
+        language: str = "en",
+        model: str = "claude-sonnet-4-20250514",
+    ) -> AsyncGenerator[str, None]:
+        """Agentic streaming loop with tool_use support.
+
+        When Claude calls a tool (stop_reason="tool_use"), executes it via
+        tool_executor, sends result back, and resumes streaming.
+        """
+        messages: list[dict[str, object]] = [
+            {
+                "role": "user",
+                "content": f"Context:\n{context_text}\n\nQuestion: {question}",
+            }
+        ]
+
+        max_iterations = 5  # Safety limit on tool call loops
+        for _ in range(max_iterations):
+            async with self._client.messages.stream(
+                model=model,
+                max_tokens=1000,
+                system=get_qa_prompt(language),
+                messages=messages,  # type: ignore[arg-type]
+                tools=tools,  # type: ignore[arg-type]
+            ) as stream:
+                async for event in stream:
+                    if event.type == "text":
+                        yield event.text
+
+                final_message = await stream.get_final_message()
+
+                if final_message.stop_reason == "tool_use":
+                    # Append assistant message with tool_use blocks
+                    messages.append({
+                        "role": "assistant",
+                        "content": final_message.content,  # type: ignore[dict-item]
+                    })
+
+                    # Execute each tool call
+                    tool_results: list[dict[str, object]] = []
+                    for block in final_message.content:
+                        if block.type == "tool_use":
+                            result = await tool_executor(block.name, block.input)  # type: ignore[arg-type]
+                            tool_results.append({
+                                "type": "tool_result",
+                                "tool_use_id": block.id,
+                                "content": result,
+                            })
+
+                    messages.append({"role": "user", "content": tool_results})  # type: ignore[dict-item]
+                    continue
+                else:
+                    # stop_reason is "end_turn" -- done
+                    break
+
+    async def stream_review(
+        self,
+        materials_text: str,
+        course_name: str,
+        language: str = "en",
+        model: str = "claude-opus-4-6",
+    ) -> AsyncGenerator[str, None]:
+        """Stream review as markdown text. Yields text deltas."""
+        messages: list[dict[str, object]] = [{
+            "role": "user",
+            "content": f"Course: {course_name}\n\nMaterials:\n{materials_text}",
+        }]
+
+        async with self._client.messages.stream(
+            model=model,
+            max_tokens=1500,
+            system=get_review_prompt(language),
+            messages=messages,  # type: ignore[arg-type]
+        ) as stream:
+            async for event in stream:
+                if event.type == "text":
+                    yield event.text

@@ -233,7 +233,16 @@
       "title": "询问关于本课程的问题",
       "placeholder": "问任何关于 {courseCode} 的问题...",
       "disclaimer": "AI 回答仅供学习参考",
-      "comingSoon": "即将上线"
+      "comingSoon": "即将上线",
+      "contextNote": "课程资料已自动包含在上下文中",
+      "searching": "正在搜索课程资料...",
+      "analyzing": "正在分析..."
+    },
+    "unitReview": {
+      "title": "AI 单元复习",
+      "generate": "生成复习摘要",
+      "generating": "生成中...",
+      "analyzing": "正在分析课程资料..."
     },
     "quickLinks": {
       "title": "快捷链接",
@@ -276,6 +285,8 @@
     "aiContextNote": "材料已自动包含在上下文中",
     "aiPlaceholder": "关于此截止日期提问...",
     "aiComingSoon": "即将推出",
+    "aiSearching": "正在搜索课程资料...",
+    "aiAnalyzing": "正在分析...",
     "aiDisclaimer": "AI回答仅供学习参考",
     "daysRemaining": "{count} 天",
     "dayRemaining": "1 天",
@@ -514,6 +525,7 @@
       "gpa": "GPA 目标",
       "notifications": "通知",
       "courses": "课程关联",
+      "language": "语言",
       "profile": "个人资料",
       "danger": "危险区域"
     },
@@ -554,6 +566,12 @@
       "weekly": "每周",
       "emailNotifications": "邮件通知",
       "emailDesc": "通过邮件接收通知"
+    },
+    "language": {
+      "title": "语言",
+      "desc": "选择应用和 AI 回复的首选语言",
+      "description": "选择你的首选语言。这将影响界面和 AI 生成的内容。",
+      "saving": "正在保存偏好..."
     },
     "courses": {
       "title": "课程关联",

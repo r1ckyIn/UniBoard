@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: Ready to plan
-stopped_at: Completed 18-03-PLAN.md
-last_updated: "2026-03-28T03:06:04.814Z"
+stopped_at: Completed 19-04-PLAN.md
+last_updated: "2026-03-28T07:37:27.912Z"
 progress:
   total_phases: 7
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 7
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 18 — ai-enhancement
+**Current focus:** Phase 19 — mcp-agent-streaming
 
 ## Current Position
 
-Phase: 19
+Phase: 20
 Plan: Not started
 Milestone: M2 complete, M3 in progress
 
@@ -115,6 +115,8 @@ Milestone: M2 complete, M3 in progress
 | Phase 17 P02 | 8min | 2 tasks | 8 files |
 | Phase 18 P02 | 6min | 2 tasks | 12 files |
 | Phase 18 P03 | 4min | 2 tasks | 10 files |
+| Phase 19 P02 | 3min | 2 tasks | 4 files |
+| Phase 19 P04 | 5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -269,6 +271,8 @@ Recent decisions affecting current work:
 - [Phase 18]: FeedbackButton toggle-off is visual only; UPSERT re-submit is safe
 - [Phase 18]: SCORE_URGENCY_MAP provides numeric fallback alongside string-based URGENCY_STYLES
 - [Phase 18]: EdPostItem created as new component (CourseDetailPage had no existing Ed posts section)
+- [Phase 19]: Translation runs after module sync (sync_all_modules) with separate session for AI calls
+- [Phase 19]: Extended OpenAPI generated types locally with language_preference rather than regenerating spec
 
 ### Roadmap Evolution
 
@@ -285,6 +289,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T03:00:36.427Z
-Stopped at: Completed 18-03-PLAN.md
+Last session: 2026-03-28T07:26:57.452Z
+Stopped at: Completed 19-04-PLAN.md
 Resume file: None
