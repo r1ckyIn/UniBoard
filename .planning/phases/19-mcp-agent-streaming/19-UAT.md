@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 19-mcp-agent-streaming
 source: [19-01-SUMMARY.md, 19-02-SUMMARY.md, 19-03-SUMMARY.md, 19-04-SUMMARY.md]
 started: 2026-03-28T12:00:00Z
-updated: 2026-03-28T12:00:00Z
+updated: 2026-03-28T10:38:00Z
 ---
 
 ## Current Test
@@ -42,9 +42,11 @@ result: pass
 
 ### 6. Unit Review Streaming
 expected: On Course Detail page, click "Generate Review". See streaming markdown output with sections: Key Concepts, Common Mistakes, Exam Scope, Study Tips.
-result: issue
+result: pass
 reported: "1. AI sections need Rough.js hand-drawn borders to match design system; 2. Long streaming content should auto-scroll page to keep latest content visible"
 severity: cosmetic
+fix: Plan 19-05 gap closure — added RoughCard borders to AI components and page-level auto-scroll to UnitReviewSection
+re-test: pass
 
 ### 7. Language Preference Setting
 expected: Go to Settings page. See a "Language Preference" section with English/中文 options. Select 中文 — URL changes to /zh/..., all UI text switches to Chinese. Refresh page — preference is retained.
@@ -53,8 +55,8 @@ result: pass
 ## Summary
 
 total: 7
-passed: 6
-issues: 1
+passed: 7
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -62,7 +64,7 @@ blocked: 0
 ## Gaps
 
 - truth: "AI chat and review sections should use Rough.js hand-drawn borders matching the project design system"
-  status: failed
+  status: resolved
   reason: "User reported: AI sections need hand-drawn borders to match design system"
   severity: cosmetic
   test: 6
@@ -70,7 +72,7 @@ blocked: 0
   missing: [Rough.js border integration on AI components]
 
 - truth: "Long streaming content should auto-scroll the page to keep latest generated content visible"
-  status: failed
+  status: resolved
   reason: "User reported: content exceeding screen edge needs page auto-scroll to align with latest content"
   severity: cosmetic
   test: 6
