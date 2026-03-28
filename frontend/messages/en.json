@@ -497,6 +497,10 @@
     "errorState": "Failed to load digest",
     "retry": "Retry"
   },
+  "feedback": {
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your tokens, preferences, and account",

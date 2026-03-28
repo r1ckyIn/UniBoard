@@ -497,6 +497,10 @@
     "errorState": "加载摘要失败",
     "retry": "重试"
   },
+  "feedback": {
+    "helpful": "有帮助",
+    "notHelpful": "没帮助"
+  },
   "settings": {
     "title": "设置",
     "subtitle": "管理你的令牌、偏好设置和账户",
