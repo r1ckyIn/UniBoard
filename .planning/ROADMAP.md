@@ -84,7 +84,7 @@ Plans:
 - [x] 19-02-PLAN.md — Language preference & translation
 - [x] 19-03-PLAN.md — Frontend streaming UI components
 - [x] 19-04-PLAN.md — Settings language section & sync integration
-- [ ] 19-05-PLAN.md — Rough.js borders & auto-scroll gap closure
+- [x] 19-05-PLAN.md — Rough.js borders & auto-scroll gap closure
 
 ### Phase 20: Skill System
 **Goal**: MCP Agent auto-generates and reuses prompt templates for efficient repeated operations
@@ -152,7 +152,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
-| 19. MCP Agent & Streaming | M3 | 4/5 | In Progress | - |
+| 19. MCP Agent & Streaming | M3 | 5/5 | Complete   | 2026-03-28 |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |
