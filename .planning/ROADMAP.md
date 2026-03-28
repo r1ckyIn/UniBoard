@@ -68,7 +68,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   3. Quality gate monitors F1 score and auto-falls back to rule engine when F1 < 75%
 **Plans**: 3 plans
 Plans:
-- [ ] 18-01-PLAN.md — Ed Discussion thread sync + post-sync AI evaluation pipeline
+- [x] 18-01-PLAN.md — Ed Discussion thread sync + post-sync AI evaluation pipeline
 - [ ] 18-02-PLAN.md — Feedback collection, quality gate F1 monitoring, digest i18n tuning
 - [ ] 18-03-PLAN.md — Frontend feedback UI + urgency score color mapping
 
@@ -148,7 +148,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 15. Core Services & API Routes | M2 | 3/3 | Complete | 2026-03-27 |
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
-| 18. AI Enhancement | M3 | 0/3 | Not started | - |
+| 18. AI Enhancement | M3 | 1/3 | In Progress|  |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
