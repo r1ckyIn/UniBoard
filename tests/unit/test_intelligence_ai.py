@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import date, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -125,3 +126,185 @@ async def test_evaluate_threads_ai_fallback_on_failure() -> None:
     assert thread.gpa_relevance_score == 0.0
     # No high-value posts returned (score 0.0 < 0.3 threshold)
     assert len(results) == 0
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_batch_limit_20_threads() -> None:
+    """evaluate_new_threads_ai processes at most 20 threads (D-07 batch limit)."""
+    from src.services.intelligence import EdIntelligenceService
+
+    # Create 30 unscored threads
+    threads = [_make_thread(gpa_relevance_score=0.0, title=f"Thread {i}") for i in range(30)]
+
+    mock_user = _make_mock_user(ai_calls_today=0)
+
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalars = MagicMock(
+        return_value=MagicMock(all=MagicMock(return_value=threads))
+    )
+    mock_session.execute = AsyncMock(return_value=mock_result)
+    mock_session.get = AsyncMock(return_value=mock_user)
+    mock_session.flush = AsyncMock()
+
+    mock_ai = AsyncMock()
+    mock_ai.evaluate_thread = AsyncMock(
+        return_value=ThreadEvaluation(
+            gpa_relevance=0.8,
+            category="exam_info",
+            summary="Relevant",
+            urgency="important",
+            key_facts=["Fact"],
+        )
+    )
+
+    settings = _make_mock_settings()
+    settings.ai_daily_limit_per_user = 100  # Daily limit >> batch limit
+
+    svc = EdIntelligenceService(mock_session)
+    with patch("src.services.intelligence.get_settings", return_value=settings):
+        await svc.evaluate_new_threads_ai(
+            user_id=uuid.uuid4(),
+            course_id=uuid.uuid4(),
+            ai_engine=mock_ai,
+        )
+
+    # Only first 20 should be evaluated (batch limit)
+    assert mock_ai.evaluate_thread.call_count == 20
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_daily_counter_reset_stale_date() -> None:
+    """Daily counter resets when ai_calls_reset_date is before today."""
+    from src.services.intelligence import EdIntelligenceService
+
+    threads = [_make_thread(gpa_relevance_score=0.0)]
+
+    mock_user = _make_mock_user(ai_calls_today=50)
+    # Set reset date to yesterday
+    mock_user.ai_calls_reset_date = datetime(2026, 3, 27)
+
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalars = MagicMock(
+        return_value=MagicMock(all=MagicMock(return_value=threads))
+    )
+    mock_session.execute = AsyncMock(return_value=mock_result)
+    mock_session.get = AsyncMock(return_value=mock_user)
+    mock_session.flush = AsyncMock()
+
+    mock_ai = AsyncMock()
+    mock_ai.evaluate_thread = AsyncMock(
+        return_value=ThreadEvaluation(
+            gpa_relevance=0.7,
+            category="general",
+            summary="Thread",
+            urgency="informational",
+            key_facts=[],
+        )
+    )
+
+    settings = _make_mock_settings()
+    svc = EdIntelligenceService(mock_session)
+    with patch("src.services.intelligence.get_settings", return_value=settings):
+        await svc.evaluate_new_threads_ai(
+            user_id=uuid.uuid4(),
+            course_id=uuid.uuid4(),
+            ai_engine=mock_ai,
+        )
+
+    # Counter should have been reset to 0 + 1 new call
+    assert mock_user.ai_calls_today == 1
+    # evaluate_thread should have been called (counter was reset so quota available)
+    mock_ai.evaluate_thread.assert_called_once()
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_daily_counter_no_reset_today() -> None:
+    """Daily counter does NOT reset when ai_calls_reset_date is today."""
+    from src.services.intelligence import EdIntelligenceService
+
+    threads = [_make_thread(gpa_relevance_score=0.0)]
+
+    mock_user = _make_mock_user(ai_calls_today=5)
+    # Set reset date to today
+    mock_user.ai_calls_reset_date = datetime.combine(date.today(), datetime.min.time())
+
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalars = MagicMock(
+        return_value=MagicMock(all=MagicMock(return_value=threads))
+    )
+    mock_session.execute = AsyncMock(return_value=mock_result)
+    mock_session.get = AsyncMock(return_value=mock_user)
+    mock_session.flush = AsyncMock()
+
+    mock_ai = AsyncMock()
+    mock_ai.evaluate_thread = AsyncMock(
+        return_value=ThreadEvaluation(
+            gpa_relevance=0.6,
+            category="general",
+            summary="Thread",
+            urgency="informational",
+            key_facts=[],
+        )
+    )
+
+    settings = _make_mock_settings()
+    svc = EdIntelligenceService(mock_session)
+    with patch("src.services.intelligence.get_settings", return_value=settings):
+        await svc.evaluate_new_threads_ai(
+            user_id=uuid.uuid4(),
+            course_id=uuid.uuid4(),
+            ai_engine=mock_ai,
+        )
+
+    # Counter should NOT have been reset -- should be 5 + 1 = 6
+    assert mock_user.ai_calls_today == 6
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_batch_limit_vs_daily_limit() -> None:
+    """Daily limit takes precedence when remaining quota < batch limit (20)."""
+    from src.services.intelligence import EdIntelligenceService
+
+    # Create 30 unscored threads
+    threads = [_make_thread(gpa_relevance_score=0.0, title=f"Thread {i}") for i in range(30)]
+
+    mock_user = _make_mock_user(ai_calls_today=92)
+    # Set reset date to today so counter is NOT reset
+    mock_user.ai_calls_reset_date = datetime.combine(date.today(), datetime.min.time())
+
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalars = MagicMock(
+        return_value=MagicMock(all=MagicMock(return_value=threads))
+    )
+    mock_session.execute = AsyncMock(return_value=mock_result)
+    mock_session.get = AsyncMock(return_value=mock_user)
+    mock_session.flush = AsyncMock()
+
+    mock_ai = AsyncMock()
+    mock_ai.evaluate_thread = AsyncMock(
+        return_value=ThreadEvaluation(
+            gpa_relevance=0.5,
+            category="general",
+            summary="Thread",
+            urgency="informational",
+            key_facts=[],
+        )
+    )
+
+    settings = _make_mock_settings()
+    settings.ai_daily_limit_per_user = 100  # 100 - 92 = 8 remaining < 20 batch limit
+
+    svc = EdIntelligenceService(mock_session)
+    with patch("src.services.intelligence.get_settings", return_value=settings):
+        await svc.evaluate_new_threads_ai(
+            user_id=uuid.uuid4(),
+            course_id=uuid.uuid4(),
+            ai_engine=mock_ai,
+        )
+
+    # Only 8 should be evaluated (daily limit remaining < batch limit)
+    assert mock_ai.evaluate_thread.call_count == 8
