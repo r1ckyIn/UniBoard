@@ -10,10 +10,17 @@ import { useAuthStore } from "@/lib/auth/store";
 import { createClient } from "@/lib/supabase/client";
 
 // ── Response type aliases ───────────────────────────────────────────────────
-type UserResponse =
+// Extended User type to include language_preference (backend sends it, not yet in OpenAPI spec)
+type UserResponseRaw =
   paths["/users/me"]["get"]["responses"]["200"]["content"]["application/json"];
-type UpdateUserResponse =
+type UserResponse = Omit<UserResponseRaw, "data"> & {
+  data: UserResponseRaw["data"] & { language_preference?: string };
+};
+type UpdateUserResponseRaw =
   paths["/users/me"]["patch"]["responses"]["200"]["content"]["application/json"];
+type UpdateUserResponse = Omit<UpdateUserResponseRaw, "data"> & {
+  data: UpdateUserResponseRaw["data"] & { language_preference?: string };
+};
 type ConfigureTokenResponse =
   paths["/users/me/tokens/{platform}"]["put"]["responses"]["200"]["content"]["application/json"];
 type VerifyTokenResponse =
@@ -24,6 +31,11 @@ type ExportDataResponse =
 // ── Request body type aliases ───────────────────────────────────────────────
 type UpdateUserBody =
   paths["/users/me"]["patch"]["requestBody"]["content"]["application/json"];
+
+// Extended body to include language_preference (backend accepts it, not yet in OpenAPI spec)
+type ExtendedUpdateUserBody = UpdateUserBody & {
+  language_preference?: string;
+};
 type ConfigureTokenBody =
   paths["/users/me/tokens/{platform}"]["put"]["requestBody"]["content"]["application/json"];
 
@@ -52,7 +64,7 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: UpdateUserBody) =>
+    mutationFn: (body: ExtendedUpdateUserBody) =>
       api
         .patch("users/me", { json: body })
         .json<UpdateUserResponse>(),

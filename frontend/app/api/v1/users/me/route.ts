@@ -35,6 +35,7 @@ export async function PATCH(request: Request) {
     display_name?: string;
     gpa_target?: number;
     gpa_scale?: "wam" | "gpa_4" | "gpa_7";
+    language_preference?: string;
   };
 
   const updatedUser = updateCurrentUser(body);

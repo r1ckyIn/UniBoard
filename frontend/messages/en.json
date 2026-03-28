@@ -514,6 +514,7 @@
       "gpa": "GPA Target",
       "notifications": "Notifications",
       "courses": "Course Linking",
+      "language": "Language",
       "profile": "Profile",
       "danger": "Danger Zone"
     },
@@ -554,6 +555,12 @@
       "weekly": "Weekly",
       "emailNotifications": "Email Notifications",
       "emailDesc": "Receive notifications via email"
+    },
+    "language": {
+      "title": "Language",
+      "desc": "Choose your preferred language for the app and AI responses",
+      "description": "Select your preferred language. This affects the interface and AI-generated content.",
+      "saving": "Saving preference..."
     },
     "courses": {
       "title": "Course Linking",

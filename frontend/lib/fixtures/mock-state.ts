@@ -1,7 +1,8 @@
 import { mockUser } from "./users";
 import type { components } from "@/lib/api/types.gen";
 
-type User = components["schemas"]["User"];
+// Extended User type to include language_preference (not yet in OpenAPI spec)
+type User = components["schemas"]["User"] & { language_preference?: string };
 
 // Mutable mock state that persists across route handler calls
 // within the same dev server session

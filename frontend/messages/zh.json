@@ -514,6 +514,7 @@
       "gpa": "GPA 目标",
       "notifications": "通知",
       "courses": "课程关联",
+      "language": "语言",
       "profile": "个人资料",
       "danger": "危险区域"
     },
@@ -554,6 +555,12 @@
       "weekly": "每周",
       "emailNotifications": "邮件通知",
       "emailDesc": "通过邮件接收通知"
+    },
+    "language": {
+      "title": "语言",
+      "desc": "选择应用和 AI 回复的首选语言",
+      "description": "选择你的首选语言。这将影响界面和 AI 生成的内容。",
+      "saving": "正在保存偏好..."
     },
     "courses": {
       "title": "课程关联",

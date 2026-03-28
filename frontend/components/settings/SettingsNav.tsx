@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Key, Target, Bell, Link2, User, AlertTriangle, type LucideIcon } from "lucide-react";
+import { Key, Target, Bell, Globe, Link2, User, AlertTriangle, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 interface SectionItem {
@@ -15,6 +15,7 @@ const SECTION_ITEMS: SectionItem[] = [
   { id: "sec-tokens", icon: Key, labelKey: "nav.tokens" },
   { id: "sec-gpa", icon: Target, labelKey: "nav.gpa" },
   { id: "sec-notifications", icon: Bell, labelKey: "nav.notifications" },
+  { id: "sec-language", icon: Globe, labelKey: "nav.language" },
   { id: "sec-courses", icon: Link2, labelKey: "nav.courses" },
   { id: "sec-profile", icon: User, labelKey: "nav.profile" },
   { id: "sec-danger", icon: AlertTriangle, labelKey: "nav.danger", isDanger: true },
