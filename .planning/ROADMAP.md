@@ -144,7 +144,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 15. Core Services & API Routes | M2 | 3/3 | Complete | 2026-03-27 |
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
-| 18. AI Enhancement | M3 | 3/3 | Complete   | 2026-03-28 |
+| 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
