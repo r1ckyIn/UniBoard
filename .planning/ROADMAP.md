@@ -66,7 +66,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   1. AI extracts high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details)
   2. AI-enhanced digest scores entries by urgency and GPA relevance
   3. Quality gate monitors F1 score and auto-falls back to rule engine when F1 < 75%
-**Plans**: 3 total (2 complete, 1 remaining)
+**Plans**: 3 total (3 complete)
 
 ### Phase 19: MCP Agent & Streaming
 **Goal**: Claude Agent can research across platforms and stream answers to users; users can set language preference
@@ -78,7 +78,12 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   3. AI unit review generates structured summaries (key concepts, common mistakes, exam scope)
   4. All AI responses stream via SSE with visible progress indicators
   5. Settings page allows user to select language (en/zh), preference persisted in Profile and used by digest/AI responses
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 19-01-PLAN.md — Backend streaming foundation (migration, models, schemas, prompts, streaming AIEngine, SSE routes)
+- [ ] 19-02-PLAN.md — Translation service and sync integration
+- [ ] 19-03-PLAN.md — Frontend streaming UI (SSE hook, DeadlineAiChat, AiCourseChat, UnitReview)
+- [ ] 19-04-PLAN.md — SET-LANG frontend (LanguageSection in Settings, locale auto-switch)
 
 ### Phase 20: Skill System
 **Goal**: MCP Agent auto-generates and reuses prompt templates for efficient repeated operations
@@ -146,7 +151,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
-| 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
+| 19. MCP Agent & Streaming | M3 | 0/4 | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |
