@@ -13,6 +13,7 @@ interface CourseSectionCardProps {
     summary: string;
     summary_zh?: string;
     urgency: string;
+    urgency_score?: number;
     source_thread_id?: string;
     source_url?: string;
     created_at?: string;
@@ -77,6 +78,8 @@ export default function CourseSectionCard({
                 summary={hl.summary}
                 summaryZh={hl.summary_zh}
                 urgency={hl.urgency}
+                urgencyScore={hl.urgency_score}
+                threadId={hl.source_thread_id}
                 sourceThreadId={hl.source_thread_id}
                 sourceUrl={hl.source_url}
                 createdAt={hl.created_at}

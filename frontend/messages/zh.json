@@ -479,7 +479,11 @@
     "urgency": {
       "critical": "紧急",
       "important": "重要",
-      "informational": "一般"
+      "informational": "一般",
+      "urgent": "紧急",
+      "normal": "一般",
+      "low": "低",
+      "minimal": "低"
     },
     "summary": {
       "title": "今日概况",

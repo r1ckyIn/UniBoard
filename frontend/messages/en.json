@@ -479,7 +479,11 @@
     "urgency": {
       "critical": "critical",
       "important": "important",
-      "informational": "informational"
+      "informational": "informational",
+      "urgent": "urgent",
+      "normal": "normal",
+      "low": "low",
+      "minimal": "low"
     },
     "summary": {
       "title": "Today's Summary",

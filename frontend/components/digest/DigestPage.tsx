@@ -25,7 +25,7 @@ import DigestSummaryCard from "@/components/digest/DigestSummaryCard";
 import DigestHistoryCard from "@/components/digest/DigestHistoryCard";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 
-// Enriched fields (name, created_at) from fixture — M2 backend will add to schema
+// Enriched fields (name, created_at, urgency_score) from fixture / backend
 type EnrichedCourse = {
   code: string;
   name?: string;
@@ -34,6 +34,7 @@ type EnrichedCourse = {
     summary: string;
     summary_zh?: string;
     urgency: string;
+    urgency_score?: number;
     source_thread_id?: string;
     source_url?: string;
     created_at?: string;
