@@ -11,8 +11,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 ## Current State
 
 **Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
+**In Progress:** M3 AI/MCP/Skills — Phase 18 (AI Enhancement) complete 2026-03-28
 **Codebase:** ~168K LOC (TypeScript + Python + SQL), 707 files
-**Tests:** 149 backend tests (121 unit + 28 integration)
+**Tests:** 149 backend tests (121 unit + 28 integration) + 25 AI-specific unit tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
 
 ## Requirements
@@ -61,8 +62,8 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 ### Active
 
 **M3 — AI/MCP/Skills:**
-- [ ] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details) — MCP Agent
-- [ ] AI-enhanced digest with urgency scoring and GPA relevance ranking — Claude API
+- [x] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details) — Phase 18
+- [x] AI-enhanced digest with urgency scoring and GPA relevance ranking — Phase 18
 - [ ] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context
 - [ ] AI Q&A on course materials with cited sources — MCP Agent cross-platform research
 - [ ] AI unit review summaries (key concepts, common mistakes, exam scope) — MCP Agent
