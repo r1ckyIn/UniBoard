@@ -10,14 +10,18 @@ import {
   HIGHLIGHT_CONFIG,
   COLOR_CLASSES,
   URGENCY_STYLES,
+  SCORE_URGENCY_MAP,
   SOURCE_MAP,
 } from "@/lib/digest/types";
+import FeedbackButton from "@/components/shared/FeedbackButton";
 
 interface HighlightItemProps {
   type: string;
   summary: string;
   summaryZh?: string;
   urgency: string;
+  urgencyScore?: number;
+  threadId?: string;
   sourceThreadId?: string;
   sourceUrl?: string;
   createdAt?: string;
@@ -34,6 +38,8 @@ export default function HighlightItem({
   summary,
   summaryZh,
   urgency,
+  urgencyScore,
+  threadId,
   sourceThreadId,
   sourceUrl,
   createdAt,
@@ -47,15 +53,18 @@ export default function HighlightItem({
   const config = HIGHLIGHT_CONFIG[type] ?? HIGHLIGHT_CONFIG.new_grade;
   const colorCls = COLOR_CLASSES[config.color] ?? COLOR_CLASSES.green;
   const IconComponent = config.icon;
-  const urgencyStyle =
-    URGENCY_STYLES[urgency] ?? URGENCY_STYLES.informational;
+
+  // Use numeric score-based mapping (D-12) when available, else fall back to string-based
+  const scoreStyle =
+    urgencyScore != null ? SCORE_URGENCY_MAP[urgencyScore] : undefined;
+  const urgencyStyle = scoreStyle ?? URGENCY_STYLES[urgency] ?? URGENCY_STYLES.informational;
+  const urgencyLabel = scoreStyle
+    ? t(`urgency.${scoreStyle.label}`)
+    : t(`urgency.${urgency}`);
   const source = SOURCE_MAP[type] ?? "Canvas";
 
   // Pick localized summary
   const displaySummary = locale === "zh" && summaryZh ? summaryZh : summary;
-
-  // Determine external URL for the link
-  const externalUrl = sourceUrl ?? undefined;
 
   // Link label based on source platform
   const linkLabel = source === "Canvas" ? t("viewNotification") : t("viewThread");
@@ -98,12 +107,12 @@ export default function HighlightItem({
                 })}
               </span>
             )}
-            {externalUrl && (
+            {sourceUrl && (
               <>
                 {createdAt && <span>&middot;</span>}
                 <button
                   type="button"
-                  onClick={() => setOpenUrl(externalUrl)}
+                  onClick={() => setOpenUrl(sourceUrl)}
                   className={cn(
                     "font-semibold cursor-pointer bg-transparent border-none p-0 text-[0.7rem]",
                     colorCls.text,
@@ -116,15 +125,18 @@ export default function HighlightItem({
           </div>
         </div>
 
-        {/* Urgency badge */}
-        <span
-          className={cn(
-            "text-[0.6rem] font-bold py-[2px] px-[7px] rounded-[4px] flex-shrink-0 mt-[2px]",
-            urgencyStyle.bg,
-            urgencyStyle.text,
-          )}
-        >
-          {t(`urgency.${urgency}`)}
+        {/* Urgency badge + feedback */}
+        <span className="flex items-center gap-[4px] flex-shrink-0 mt-[2px]">
+          <span
+            className={cn(
+              "text-[0.6rem] font-bold py-[2px] px-[7px] rounded-[4px]",
+              urgencyStyle.bg,
+              urgencyStyle.text,
+            )}
+          >
+            {urgencyLabel}
+          </span>
+          {threadId && <FeedbackButton threadId={threadId} size="sm" />}
         </span>
       </div>
 

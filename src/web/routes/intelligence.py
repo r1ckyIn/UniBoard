@@ -1,4 +1,8 @@
-"""Ed Discussion intelligence REST endpoints."""
+"""Ed Discussion intelligence REST endpoints.
+
+AI evaluation is handled by background sync tasks (not inline).
+This route reads pre-computed scores only.
+"""
 
 import uuid
 from base64 import b64decode, b64encode
@@ -14,7 +18,6 @@ from src.schemas.intelligence import (
     DiscussionResponse,
     HighValuePostResponse,
 )
-from src.services.ai_engine import AIEngine
 from src.services.intelligence import EdIntelligenceService
 from src.web.deps import get_current_user_id, get_request_meta, get_session
 
@@ -26,14 +29,6 @@ def get_intelligence_service(
 ) -> EdIntelligenceService:
     """FastAPI dependency: create EdIntelligenceService with current session."""
     return EdIntelligenceService(session)
-
-
-def _build_ai_engine() -> AIEngine | None:
-    """Build AIEngine from settings, or None if no API key configured."""
-    settings = get_settings()
-    if not settings.anthropic_api_key:
-        return None
-    return AIEngine(api_key=settings.anthropic_api_key)
 
 
 def _derive_relevance_category(thread: HighValuePostResponse) -> str:
@@ -135,19 +130,19 @@ async def get_ai_high_value_posts(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: EdIntelligenceService = Depends(get_intelligence_service),
 ) -> SuccessResponse[list[AIHighValuePostResponse]]:
-    """Return AI-scored high-value Ed Discussion posts for a course.
+    """Return pre-computed AI-scored high-value Ed Discussion posts.
 
-    Evaluates unscored threads via AI, then returns all posts above threshold.
-    Falls back to rule-based filtering if no API key configured.
+    Reads scores computed by background sync tasks. No inline AI evaluation.
+    Falls back to rule-based filtering if no API key configured and no
+    pre-computed scores exist.
     """
-    ai_engine = _build_ai_engine()
+    settings = get_settings()
 
-    if ai_engine is not None:
-        # Score new threads and return AI-enhanced results
-        await svc.evaluate_new_threads_ai(current_user_id, course_id, ai_engine)
-        results = await svc.get_ai_high_value_posts(current_user_id, course_id)
-    else:
-        # Fallback: convert rule-based posts to AI format with defaults
+    # Read pre-computed AI scores (populated by sync_ed_discussions post-sync hook)
+    results = await svc.get_ai_high_value_posts(current_user_id, course_id)
+
+    # Fallback: if no AI key configured and no results, use rule-based
+    if not results and not settings.anthropic_api_key:
         rule_posts = await svc.get_high_value_posts(current_user_id, course_id)
         results = [
             AIHighValuePostResponse(

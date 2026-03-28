@@ -479,7 +479,11 @@
     "urgency": {
       "critical": "紧急",
       "important": "重要",
-      "informational": "一般"
+      "informational": "一般",
+      "urgent": "紧急",
+      "normal": "一般",
+      "low": "低",
+      "minimal": "低"
     },
     "summary": {
       "title": "今日概况",
@@ -496,6 +500,10 @@
     "emptyStateDesc": "明天再来查看您的每日学术摘要。",
     "errorState": "加载摘要失败",
     "retry": "重试"
+  },
+  "feedback": {
+    "helpful": "有帮助",
+    "notHelpful": "没帮助"
   },
   "settings": {
     "title": "设置",

@@ -25,9 +25,9 @@ Requirements for full release across 4 milestones.
 ### Intelligence
 
 - [x] **INTEL-01**: User can view Ed Discussion posts filtered by endorsed and staff-answered status (rule-based extraction)
-- [ ] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes (MCP Agent)
+- [x] **INTEL-02**: User can view AI-extracted high-value information from Ed Discussion: exam scope hints, assignment clarifications, rubric details, deadline changes (MCP Agent)
 - [x] **INTEL-03**: User receives daily academic digest aggregating new deadlines, grades, announcements, and high-value Ed posts (rule-based)
-- [ ] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking (pre-collected data + Claude API)
+- [x] **INTEL-04**: User receives AI-enhanced digest with urgency scoring and GPA relevance ranking (pre-collected data + Claude API)
 - [x] **INTEL-05**: Deduplication across all data sources ensures no repeated information in digests or views
 
 ### Files & Materials
@@ -43,6 +43,10 @@ Requirements for full release across 4 milestones.
 - [x] **PLAT-02**: User can access the full dashboard via web browser without installing anything
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
 - [x] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
+
+### Settings Enhancement
+
+- [ ] **SET-LANG**: User can select preferred language (en/zh) in Settings page, preference persisted in Profile and applied to digest summaries and AI responses
 
 ### Skill System (MCP Agent)
 
@@ -162,6 +166,7 @@ Which milestones/phases cover which requirements. Updated during roadmap creatio
 | PLAT-02 | M1 | Phase 3 | ✅ Complete |
 | PLAT-03 | M3 | Phase 21 | Pending |
 | PLAT-04 | M2 | Phase 17 | ✅ Complete |
+| SET-LANG | M3 | Phase 19 | Pending |
 | SKILL-01 | M3 | Phase 20 | Pending |
 | SKILL-02 | M3 | Phase 20 | Pending |
 | SKILL-03 | M3 | Phase 20 | Pending |

@@ -45,8 +45,8 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 
 ### 🚧 M3: AI/MCP/Skills (Next)
 
-- [ ] **Phase 18: AI Enhancement** — AI thread evaluation, AI digest scoring, quality gate with F1 monitoring
-- [ ] **Phase 19: MCP Agent & Streaming** — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A
+- [x] **Phase 18: AI Enhancement** — AI thread evaluation, AI digest scoring, quality gate with F1 monitoring (completed 2026-03-28)
+- [ ] **Phase 19: MCP Agent & Streaming** — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A, language preference setting
 - [ ] **Phase 20: Skill System** — Auto-generated prompt templates, per-course differentiation, ~50 skills
 - [ ] **Phase 21: MCP Server & ROI Analysis** — PLAT-03 MCP server for Claude Desktop, Assignment ROI analysis
 
@@ -66,17 +66,18 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   1. AI extracts high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details)
   2. AI-enhanced digest scores entries by urgency and GPA relevance
   3. Quality gate monitors F1 score and auto-falls back to rule engine when F1 < 75%
-**Plans**: TBD
+**Plans**: 3 total (2 complete, 1 remaining)
 
 ### Phase 19: MCP Agent & Streaming
-**Goal**: Claude Agent can research across platforms and stream answers to users
+**Goal**: Claude Agent can research across platforms and stream answers to users; users can set language preference
 **Depends on**: Phase 18
-**Requirements**: DL-04, FILE-03, FILE-04
+**Requirements**: DL-04, FILE-03, FILE-04, SET-LANG
 **Success Criteria** (what must be TRUE):
   1. Deadline AI chat answers assignment questions with cross-platform context and cited sources
   2. Course material Q&A returns AI answers with source citations from synced materials
   3. AI unit review generates structured summaries (key concepts, common mistakes, exam scope)
   4. All AI responses stream via SSE with visible progress indicators
+  5. Settings page allows user to select language (en/zh), preference persisted in Profile and used by digest/AI responses
 **Plans**: TBD
 
 ### Phase 20: Skill System
@@ -144,7 +145,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 15. Core Services & API Routes | M2 | 3/3 | Complete | 2026-03-27 |
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
-| 18. AI Enhancement | M3 | 0/TBD | Not started | - |
+| 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
 | 19. MCP Agent & Streaming | M3 | 0/TBD | Not started | - |
 | 20. Skill System | M3 | 0/TBD | Not started | - |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |

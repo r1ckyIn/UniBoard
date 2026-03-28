@@ -479,7 +479,11 @@
     "urgency": {
       "critical": "critical",
       "important": "important",
-      "informational": "informational"
+      "informational": "informational",
+      "urgent": "urgent",
+      "normal": "normal",
+      "low": "low",
+      "minimal": "low"
     },
     "summary": {
       "title": "Today's Summary",
@@ -496,6 +500,10 @@
     "emptyStateDesc": "Check back tomorrow for your daily academic digest.",
     "errorState": "Failed to load digest",
     "retry": "Retry"
+  },
+  "feedback": {
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful"
   },
   "settings": {
     "title": "Settings",

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 import structlog
 from sqlalchemy import or_, select
@@ -20,6 +20,17 @@ from src.schemas.intelligence import (
 )
 
 logger = structlog.get_logger()
+
+# D-07: Max threads evaluated per sync cycle (per user)
+_BATCH_LIMIT = 20
+
+
+def _maybe_reset_daily_counter(profile: Profile) -> None:
+    """Reset AI call counter if reset_date is stale (before today)."""
+    today = date.today()
+    if profile.ai_calls_reset_date is None or profile.ai_calls_reset_date.date() < today:
+        profile.ai_calls_today = 0
+        profile.ai_calls_reset_date = datetime.combine(today, datetime.min.time())
 
 
 def _derive_relevance_category(thread: DiscussionThread) -> str:
@@ -55,7 +66,11 @@ def _thread_to_discussion_response(thread: DiscussionThread) -> DiscussionRespon
         gpa_relevance_score=_derive_gpa_relevance_score(thread),
         relevance_category=_derive_relevance_category(thread),
         summary=(thread.content or "")[:200],
-        created_at=thread.created_at.isoformat() if isinstance(thread.created_at, datetime) else str(thread.created_at),
+        created_at=(
+            thread.created_at.isoformat()
+            if isinstance(thread.created_at, datetime)
+            else str(thread.created_at)
+        ),
     )
 
 
@@ -194,9 +209,11 @@ class EdIntelligenceService:
         # Enforce AI daily limit (consistent with QAService pattern)
         settings = get_settings()
         profile = await self._session.get(Profile, user_id)
+        if profile:
+            _maybe_reset_daily_counter(profile)
         calls_used = profile.ai_calls_today if profile else 0
         calls_remaining = max(0, settings.ai_daily_limit_per_user - calls_used)
-        threads_to_eval = unscored[:calls_remaining] if calls_remaining > 0 else []
+        threads_to_eval = unscored[:min(calls_remaining, _BATCH_LIMIT)]
 
         for thread in threads_to_eval:
             try:

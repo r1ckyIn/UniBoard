@@ -82,11 +82,43 @@ export const COLOR_CLASSES: Record<string, { bg: string; text: string }> = {
   red: { bg: "bg-[rgba(204,68,85,0.11)]", text: "text-[#cc4455]" },
 };
 
-// ── Urgency badge styles ─────────────────────────────────────────
+// ── Urgency badge styles (string-based, legacy) ─────────────────
 export const URGENCY_STYLES: Record<string, { bg: string; text: string }> = {
   critical: { bg: "bg-[rgba(204,68,85,0.11)]", text: "text-[#cc4455]" },
   important: { bg: "bg-[rgba(217,119,87,0.11)]", text: "text-[#d97757]" },
   informational: { bg: "bg-[rgba(120,140,93,0.11)]", text: "text-[#788c5d]" },
+};
+
+// ── Score-based urgency mapping (D-12: 1-5 numeric score) ───────
+export const SCORE_URGENCY_MAP: Record<
+  number,
+  { label: string; bg: string; text: string }
+> = {
+  5: {
+    label: "critical",
+    bg: "bg-[rgba(204,68,85,0.11)]",
+    text: "text-[#cc4455]",
+  },
+  4: {
+    label: "urgent",
+    bg: "bg-[rgba(217,119,87,0.11)]",
+    text: "text-[#d97757]",
+  },
+  3: {
+    label: "normal",
+    bg: "bg-[rgba(106,155,204,0.11)]",
+    text: "text-[#6a9bcc]",
+  },
+  2: {
+    label: "low",
+    bg: "bg-[rgba(155,155,148,0.11)]",
+    text: "text-[#9b9b94]",
+  },
+  1: {
+    label: "minimal",
+    bg: "bg-[rgba(155,155,148,0.11)]",
+    text: "text-[#9b9b94]",
+  },
 };
 
 // ── Source platform mapping ──────────────────────────────────────
