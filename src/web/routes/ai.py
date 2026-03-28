@@ -3,19 +3,20 @@
 import json
 import logging
 import uuid
+from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
 from src.config import get_settings
-
-logger = logging.getLogger(__name__)
 from src.schemas.ai import QARequest, QAResponse, StreamingQARequest, UnitReviewResponse
 from src.schemas.common import SuccessResponse
 from src.services.ai_engine import AIEngine
 from src.services.qa import QAService
 from src.web.deps import get_current_user_id, get_request_meta, get_session
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -29,6 +30,23 @@ def _build_qa_service(session: AsyncSession) -> QAService:
         ai_engine=engine,
         voyage_api_key=settings.voyage_api_key,
     )
+
+
+async def _sse_wrap(
+    stream: AsyncGenerator[str, None],
+    initial_phase: str,
+) -> AsyncGenerator[dict[str, str], None]:
+    """Wrap an async token stream into SSE event dicts with error handling."""
+    yield {"event": "status", "data": json.dumps({"phase": initial_phase})}
+
+    try:
+        async for token in stream:
+            yield {"event": "token", "data": json.dumps({"text": token})}
+
+        yield {"event": "done", "data": json.dumps({"status": "complete"})}
+    except Exception as exc:
+        logger.exception("SSE stream error: %s", exc)
+        yield {"event": "error", "data": json.dumps({"message": "AI request failed"})}
 
 
 @router.post("/courses/{course_id}/qa")
@@ -74,27 +92,15 @@ async def course_qa_stream(
 ) -> EventSourceResponse:
     """Stream AI Q&A response via SSE."""
     svc = _build_qa_service(session)
-
-    async def event_generator():  # type: ignore[no-untyped-def]
-        yield {"event": "status", "data": json.dumps({"phase": "searching"})}
-
-        try:
-            async for token in svc.stream_answer_question(
-                user_id=current_user_id,
-                course_id=course_id,
-                question=body.question,
-                history=body.history,
-                search_more=body.search_more,
-                language=body.language,
-            ):
-                yield {"event": "token", "data": json.dumps({"text": token})}
-
-            yield {"event": "done", "data": json.dumps({"status": "complete"})}
-        except Exception as exc:
-            logger.exception("SSE stream error: %s", exc)
-            yield {"event": "error", "data": json.dumps({"message": "AI request failed"})}
-
-    return EventSourceResponse(event_generator(), ping=15)
+    stream = svc.stream_answer_question(
+        user_id=current_user_id,
+        course_id=course_id,
+        question=body.question,
+        history=body.history,
+        search_more=body.search_more,
+        language=body.language,
+    )
+    return EventSourceResponse(_sse_wrap(stream, "searching"), ping=15)
 
 
 @router.get("/courses/{course_id}/review/stream")
@@ -106,21 +112,9 @@ async def course_review_stream(
 ) -> EventSourceResponse:
     """Stream AI unit review as SSE markdown tokens."""
     svc = _build_qa_service(session)
-
-    async def event_generator():  # type: ignore[no-untyped-def]
-        yield {"event": "status", "data": json.dumps({"phase": "analyzing"})}
-
-        try:
-            async for token in svc.stream_review(
-                user_id=current_user_id,
-                course_id=course_id,
-                language=lang,
-            ):
-                yield {"event": "token", "data": json.dumps({"text": token})}
-
-            yield {"event": "done", "data": json.dumps({"status": "complete"})}
-        except Exception as exc:
-            logger.exception("SSE stream error: %s", exc)
-            yield {"event": "error", "data": json.dumps({"message": "AI request failed"})}
-
-    return EventSourceResponse(event_generator(), ping=15)
+    stream = svc.stream_review(
+        user_id=current_user_id,
+        course_id=course_id,
+        language=lang,
+    )
+    return EventSourceResponse(_sse_wrap(stream, "analyzing"), ping=15)

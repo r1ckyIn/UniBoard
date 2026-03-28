@@ -9,6 +9,42 @@ export interface SSEEvent {
   data: Record<string, unknown>;
 }
 
+/** Parse a ReadableStream of SSE bytes into typed events. */
+async function* parseSseStream(
+  response: Response,
+): AsyncGenerator<SSEEvent> {
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let currentEvent = "token";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop()!;
+
+      for (const line of lines) {
+        if (line.startsWith("event: ")) {
+          currentEvent = line.slice(7).trim();
+        } else if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.slice(6)) as Record<string, unknown>;
+            yield { event: currentEvent as SSEEvent["event"], data };
+          } catch {
+            // Skip malformed JSON lines
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 /**
  * Stream AI response from SSE endpoint via POST.
  * Yields parsed SSE events. Supports AbortSignal for cleanup.
@@ -33,36 +69,7 @@ export async function* streamAiResponse(
     throw new Error(`SSE error: ${response.status}`);
   }
 
-  const reader = response.body!.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let currentEvent = "token";
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop()!; // Keep incomplete line in buffer
-
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          currentEvent = line.slice(7).trim();
-        } else if (line.startsWith("data: ")) {
-          try {
-            const data = JSON.parse(line.slice(6)) as Record<string, unknown>;
-            yield { event: currentEvent as SSEEvent["event"], data };
-          } catch {
-            // Skip malformed JSON lines
-          }
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
+  yield* parseSseStream(response);
 }
 
 /**
@@ -86,34 +93,5 @@ export async function* streamAiGet(
     throw new Error(`SSE error: ${response.status}`);
   }
 
-  const reader = response.body!.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let currentEvent = "token";
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop()!;
-
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          currentEvent = line.slice(7).trim();
-        } else if (line.startsWith("data: ")) {
-          try {
-            const data = JSON.parse(line.slice(6)) as Record<string, unknown>;
-            yield { event: currentEvent as SSEEvent["event"], data };
-          } catch {
-            // Skip malformed JSON
-          }
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
+  yield* parseSseStream(response);
 }

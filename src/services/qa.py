@@ -26,7 +26,7 @@ logger = structlog.get_logger()
 _ENCODER = tiktoken.get_encoding("cl100k_base")
 
 # Below this token count, MCP agent fallback is automatically triggered
-MCP_FALLBACK_TOKEN_THRESHOLD = 500
+MCP_FALLBACK_TOKEN_THRESHOLD = get_settings().mcp_fallback_token_threshold
 
 
 class QAService:
