@@ -40,6 +40,7 @@ class Course(UUIDMixin, TimestampMixin, Base):
         JSON, nullable=True
     )
     unit_outline_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    name_zh: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Relationships
     profile: Mapped[Profile] = relationship(back_populates="courses")
