@@ -44,6 +44,10 @@ Requirements for full release across 4 milestones.
 - [ ] **PLAT-03**: Technical users can access UniBoard data via MCP server through Claude Desktop
 - [x] **PLAT-04**: System displays token expiration warnings and guides re-authentication when Canvas/Ed tokens expire
 
+### Settings Enhancement
+
+- [ ] **SET-LANG**: User can select preferred language (en/zh) in Settings page, preference persisted in Profile and applied to digest summaries and AI responses
+
 ### Skill System (MCP Agent)
 
 - [ ] **SKILL-01**: After first successful API exploration for an operation, system auto-generates a prompt template skill capturing the optimal steps
@@ -162,6 +166,7 @@ Which milestones/phases cover which requirements. Updated during roadmap creatio
 | PLAT-02 | M1 | Phase 3 | ✅ Complete |
 | PLAT-03 | M3 | Phase 21 | Pending |
 | PLAT-04 | M2 | Phase 17 | ✅ Complete |
+| SET-LANG | M3 | Phase 19 | Pending |
 | SKILL-01 | M3 | Phase 20 | Pending |
 | SKILL-02 | M3 | Phase 20 | Pending |
 | SKILL-03 | M3 | Phase 20 | Pending |
