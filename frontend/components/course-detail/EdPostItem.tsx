@@ -39,13 +39,11 @@ export default function EdPostItem({
   const t = useTranslations("courseDetail");
   const [openUrl, setOpenUrl] = useState<string | null>(null);
 
-  // Build Ed thread URL if we have the course and thread IDs
   const threadUrl =
     edCourseId && edThreadId
       ? `https://edstem.org/au/courses/${edCourseId}/discussion/${edThreadId}`
       : undefined;
 
-  // Determine relevance-based background intensity
   const hasHighRelevance =
     gpaRelevanceScore != null && gpaRelevanceScore >= 0.7;
 
@@ -93,8 +91,7 @@ export default function EdPostItem({
         </div>
         <div className="text-[0.74rem] text-[#5c5c57] leading-[1.4] line-clamp-2 pl-[19px]">
           {summary}
-          {/* Feedback button for AI-scored posts */}
-          {id && <FeedbackButton threadId={id} size="sm" />}
+          <FeedbackButton threadId={id} size="sm" />
         </div>
       </div>
 

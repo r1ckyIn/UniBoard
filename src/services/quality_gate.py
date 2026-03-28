@@ -28,7 +28,7 @@ class QualityGateService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def calculate_f1(self) -> tuple[float, float, float]:
+    async def calculate_f1(self, total: int | None = None) -> tuple[float, float, float]:
         """Calculate precision, recall, and F1 from user feedback.
 
         Returns (precision, recall, f1). Returns (0.0, 0.0, 0.0) when
@@ -40,10 +40,10 @@ class QualityGateService:
         - FN: thumbs_up on thread with gpa_relevance < 0.4 (AI wrong: missed high-value thread)
         - TN: thumbs_down on thread with gpa_relevance < 0.4 (AI correct: low-value)
         """
-        # Check total feedback count
-        count_stmt = select(func.count()).select_from(AIFeedback)
-        count_result = await self._session.execute(count_stmt)
-        total = count_result.scalar_one()
+        if total is None:
+            count_stmt = select(func.count()).select_from(AIFeedback)
+            count_result = await self._session.execute(count_stmt)
+            total = count_result.scalar_one()
 
         if total < FEEDBACK_THRESHOLD:
             return 0.0, 0.0, 0.0
@@ -89,21 +89,21 @@ class QualityGateService:
 
         return precision, recall, f1
 
-    async def check_and_update_fallback(self) -> None:
+    async def check_and_update_fallback(self, total: int | None = None) -> None:
         """Evaluate F1 and create a new AIQualityMetrics snapshot.
 
         Only creates a metrics row when total feedback >= FEEDBACK_THRESHOLD.
         Sets is_fallback_active=True when F1 < 0.75 (D-03).
         """
-        # Get count first to decide whether to proceed
-        count_stmt = select(func.count()).select_from(AIFeedback)
-        count_result = await self._session.execute(count_stmt)
-        total = count_result.scalar_one()
+        if total is None:
+            count_stmt = select(func.count()).select_from(AIFeedback)
+            count_result = await self._session.execute(count_stmt)
+            total = count_result.scalar_one()
 
         if total < FEEDBACK_THRESHOLD:
             return
 
-        precision, recall, f1 = await self.calculate_f1()
+        precision, recall, f1 = await self.calculate_f1(total=total)
         is_fallback = f1 < F1_THRESHOLD
 
         metrics = AIQualityMetrics(

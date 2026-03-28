@@ -66,9 +66,6 @@ export default function HighlightItem({
   // Pick localized summary
   const displaySummary = locale === "zh" && summaryZh ? summaryZh : summary;
 
-  // Determine external URL for the link
-  const externalUrl = sourceUrl ?? undefined;
-
   // Link label based on source platform
   const linkLabel = source === "Canvas" ? t("viewNotification") : t("viewThread");
 
@@ -110,12 +107,12 @@ export default function HighlightItem({
                 })}
               </span>
             )}
-            {externalUrl && (
+            {sourceUrl && (
               <>
                 {createdAt && <span>&middot;</span>}
                 <button
                   type="button"
-                  onClick={() => setOpenUrl(externalUrl)}
+                  onClick={() => setOpenUrl(sourceUrl)}
                   className={cn(
                     "font-semibold cursor-pointer bg-transparent border-none p-0 text-[0.7rem]",
                     colorCls.text,

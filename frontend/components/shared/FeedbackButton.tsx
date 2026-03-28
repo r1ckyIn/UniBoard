@@ -26,7 +26,6 @@ export default function FeedbackButton({
   const handleFeedback = (type: "thumbs_up" | "thumbs_down") => {
     if (isPending) return;
     const newType = currentFeedback === type ? null : type;
-    // Toggle off visually (API uses UPSERT so re-submitting is safe)
     if (newType === null) {
       setCurrentFeedback(null);
       return;

@@ -117,9 +117,9 @@ async def test_fallback_activates_below_threshold() -> None:
     mock_rows_result = MagicMock()
     mock_rows_result.all = MagicMock(return_value=rows)
 
-    # check_and_update_fallback flow: count -> calculate_f1(count -> rows)
+    # check_and_update_fallback flow: count -> calculate_f1(total forwarded, rows)
     mock_session.execute = AsyncMock(
-        side_effect=[mock_count_result, mock_count_result, mock_rows_result]
+        side_effect=[mock_count_result, mock_rows_result]
     )
 
     await svc.check_and_update_fallback()
@@ -157,9 +157,9 @@ async def test_fallback_deactivates_above_threshold() -> None:
     mock_rows_result = MagicMock()
     mock_rows_result.all = MagicMock(return_value=rows)
 
-    # check_and_update_fallback flow: count -> calculate_f1(count -> rows)
+    # check_and_update_fallback flow: count -> calculate_f1(total forwarded, rows)
     mock_session.execute = AsyncMock(
-        side_effect=[mock_count_result, mock_count_result, mock_rows_result]
+        side_effect=[mock_count_result, mock_rows_result]
     )
 
     await svc.check_and_update_fallback()

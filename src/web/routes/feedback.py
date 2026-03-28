@@ -51,14 +51,14 @@ async def submit_feedback(
     result = await session.execute(stmt)
     row = result.one()
 
-    # Check total feedback count and trigger quality gate if threshold met
+    # Trigger quality gate recalculation every 10th submission above threshold
     count_stmt = select(func.count()).select_from(AIFeedback)
     count_result = await session.execute(count_stmt)
     total = count_result.scalar_one()
 
-    if total >= FEEDBACK_THRESHOLD:
+    if total >= FEEDBACK_THRESHOLD and total % 10 == 0:
         gate = QualityGateService(session)
-        await gate.check_and_update_fallback()
+        await gate.check_and_update_fallback(total=total)
 
     await session.flush()
 
