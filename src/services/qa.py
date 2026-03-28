@@ -234,7 +234,7 @@ class QAService:
 
         MCP fallback triggers when:
         (a) DB context token count < MCP_FALLBACK_TOKEN_THRESHOLD
-        (b) search_more=True (user clicked "搜索更多")
+        (b) search_more=True (user clicked "Search More")
         """
         await self._check_and_increment_limit(user_id)
 

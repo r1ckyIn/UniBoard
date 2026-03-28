@@ -1,6 +1,7 @@
 """AI-powered course Q&A and review REST endpoints."""
 
 import json
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, Request
@@ -8,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
 from src.config import get_settings
+
+logger = logging.getLogger(__name__)
 from src.schemas.ai import QARequest, QAResponse, StreamingQARequest, UnitReviewResponse
 from src.schemas.common import SuccessResponse
 from src.services.ai_engine import AIEngine
@@ -88,7 +91,8 @@ async def course_qa_stream(
 
             yield {"event": "done", "data": json.dumps({"status": "complete"})}
         except Exception as exc:
-            yield {"event": "error", "data": json.dumps({"message": str(exc)})}
+            logger.exception("SSE stream error: %s", exc)
+            yield {"event": "error", "data": json.dumps({"message": "AI request failed"})}
 
     return EventSourceResponse(event_generator(), ping=15)
 
@@ -116,6 +120,7 @@ async def course_review_stream(
 
             yield {"event": "done", "data": json.dumps({"status": "complete"})}
         except Exception as exc:
-            yield {"event": "error", "data": json.dumps({"message": str(exc)})}
+            logger.exception("SSE stream error: %s", exc)
+            yield {"event": "error", "data": json.dumps({"message": "AI request failed"})}
 
     return EventSourceResponse(event_generator(), ping=15)

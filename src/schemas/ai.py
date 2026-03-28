@@ -57,7 +57,7 @@ class StreamingQARequest(BaseModel):
 
     question: str = Field(min_length=3, max_length=1000)
     history: list[dict[str, str]] = Field(default_factory=list)
-    search_more: bool = False  # User-triggered MCP fallback via "搜索更多"
+    search_more: bool = False  # User-triggered MCP fallback via "Search More" button
     language: str = "en"  # "en" or "zh"
 
 
