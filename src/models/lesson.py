@@ -34,6 +34,7 @@ class Lesson(UUIDMixin, TimestampMixin, Base):
     slide_count: Mapped[int] = mapped_column(default=0)
     due_at: Mapped[datetime | None] = mapped_column(nullable=True)
     text_content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    title_zh: Mapped[str | None] = mapped_column(String(255), nullable=True)
     search_vector: Mapped[Any | None] = mapped_column(  # noqa: ANN401
         TSVECTOR,
         Computed(

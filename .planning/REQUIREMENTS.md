@@ -20,7 +20,7 @@ Requirements for full release across 4 milestones.
 - [x] **DL-01**: User can view all upcoming deadlines in a unified timeline, aggregated from Canvas + Ed Lessons + Ed Discussion (SHA-256 deduplicated)
 - [x] **DL-02**: User receives tiered deadline reminders at 72h, 24h, and 3h before due date
 - [x] **DL-03**: User receives risk alert when grade trajectory deviates from target GPA threshold
-- [ ] **DL-04**: User can ask AI about assignment details in Deadline page chat — MCP Agent researches across Canvas announcements, modules, Ed threads, and Ed Lessons to provide contextual answers with cited sources (AiStudyMate integration placeholder)
+- [x] **DL-04**: User can ask AI about assignment details in Deadline page chat — MCP Agent researches across Canvas announcements, modules, Ed threads, and Ed Lessons to provide contextual answers with cited sources (AiStudyMate integration placeholder)
 
 ### Intelligence
 
@@ -34,8 +34,8 @@ Requirements for full release across 4 milestones.
 
 - [x] **FILE-01**: User can view all course folders with AI-generated one-sentence descriptions (Canvas Modules + Ed Lessons unified)
 - [x] **FILE-02**: User can search across all course materials by keyword, returning matching file names, locations, and content snippets
-- [ ] **FILE-03**: User can ask AI questions about synced course materials and receive answers with cited sources — MCP Agent cross-platform research
-- [ ] **FILE-04**: User can select a course unit and view AI-generated structured review summary (key concepts, common mistakes, exam scope) — MCP Agent
+- [x] **FILE-03**: User can ask AI questions about synced course materials and receive answers with cited sources — MCP Agent cross-platform research
+- [x] **FILE-04**: User can select a course unit and view AI-generated structured review summary (key concepts, common mistakes, exam scope) — MCP Agent
 
 ### Platform & Onboarding
 

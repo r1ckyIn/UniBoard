@@ -33,6 +33,7 @@ class UnifiedDeadline(UUIDMixin, TimestampMixin, Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     dedup_key: Mapped[str] = mapped_column(String(64))
     is_confirmed: Mapped[bool] = mapped_column(default=True)
+    title_zh: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Relationships
     course: Mapped[Course] = relationship(back_populates="unified_deadlines")

@@ -1,12 +1,14 @@
 """AI-powered course Q&A and review REST endpoints."""
 
+import json
 import uuid
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from sse_starlette.sse import EventSourceResponse
 
 from src.config import get_settings
-from src.schemas.ai import QARequest, QAResponse, UnitReviewResponse
+from src.schemas.ai import QARequest, QAResponse, StreamingQARequest, UnitReviewResponse
 from src.schemas.common import SuccessResponse
 from src.services.ai_engine import AIEngine
 from src.services.qa import QAService
@@ -58,3 +60,62 @@ async def course_review(
         course_id=course_id,
     )
     return SuccessResponse(data=result, meta=get_request_meta(request))
+
+
+@router.post("/courses/{course_id}/qa/stream")
+async def course_qa_stream(
+    course_id: uuid.UUID,
+    body: StreamingQARequest,
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> EventSourceResponse:
+    """Stream AI Q&A response via SSE."""
+    svc = _build_qa_service(session)
+
+    async def event_generator():  # type: ignore[no-untyped-def]
+        yield {"event": "status", "data": json.dumps({"phase": "searching"})}
+
+        try:
+            async for token in svc.stream_answer_question(
+                user_id=current_user_id,
+                course_id=course_id,
+                question=body.question,
+                history=body.history,
+                search_more=body.search_more,
+                language=body.language,
+            ):
+                yield {"event": "token", "data": json.dumps({"text": token})}
+
+            yield {"event": "done", "data": json.dumps({"status": "complete"})}
+        except Exception as exc:
+            yield {"event": "error", "data": json.dumps({"message": str(exc)})}
+
+    return EventSourceResponse(event_generator(), ping=15)
+
+
+@router.get("/courses/{course_id}/review/stream")
+async def course_review_stream(
+    course_id: uuid.UUID,
+    lang: str = "en",
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+) -> EventSourceResponse:
+    """Stream AI unit review as SSE markdown tokens."""
+    svc = _build_qa_service(session)
+
+    async def event_generator():  # type: ignore[no-untyped-def]
+        yield {"event": "status", "data": json.dumps({"phase": "analyzing"})}
+
+        try:
+            async for token in svc.stream_review(
+                user_id=current_user_id,
+                course_id=course_id,
+                language=lang,
+            ):
+                yield {"event": "token", "data": json.dumps({"text": token})}
+
+            yield {"event": "done", "data": json.dumps({"status": "complete"})}
+        except Exception as exc:
+            yield {"event": "error", "data": json.dumps({"message": str(exc)})}
+
+    return EventSourceResponse(event_generator(), ping=15)

@@ -28,6 +28,7 @@ class Module(UUIDMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255))
     position: Mapped[int] = mapped_column()
     ai_description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    name_zh: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Relationships
     course: Mapped[Course] = relationship(back_populates="modules")
@@ -50,6 +51,7 @@ class ModuleItem(UUIDMixin, TimestampMixin, Base):
     type: Mapped[str] = mapped_column(String(50))
     content_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    title_zh: Mapped[str | None] = mapped_column(String(255), nullable=True)
     search_vector: Mapped[Any | None] = mapped_column(  # noqa: ANN401
         TSVECTOR,
         Computed(

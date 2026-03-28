@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import AsyncGenerator
 from datetime import datetime
 
 import structlog
@@ -23,6 +24,9 @@ logger = structlog.get_logger()
 
 # tiktoken encoder for token counting (cl100k_base works for Claude models)
 _ENCODER = tiktoken.get_encoding("cl100k_base")
+
+# Below this token count, MCP agent fallback is automatically triggered
+MCP_FALLBACK_TOKEN_THRESHOLD = 500
 
 
 class QAService:
@@ -216,6 +220,78 @@ class QAService:
         result.generated_at = datetime.utcnow().isoformat()
 
         return result
+
+    async def stream_answer_question(
+        self,
+        user_id: uuid.UUID,
+        course_id: uuid.UUID,
+        question: str,
+        history: list[dict[str, str]] | None = None,
+        search_more: bool = False,
+        language: str = "en",
+    ) -> AsyncGenerator[str, None]:
+        """Stream Q&A answer. Uses direct context or MCP fallback.
+
+        MCP fallback triggers when:
+        (a) DB context token count < MCP_FALLBACK_TOKEN_THRESHOLD
+        (b) search_more=True (user clicked "搜索更多")
+        """
+        await self._check_and_increment_limit(user_id)
+
+        course, materials_text = await self._load_course_materials(course_id)
+        total_tokens = len(_ENCODER.encode(materials_text))
+
+        use_agent = search_more or total_tokens < MCP_FALLBACK_TOKEN_THRESHOLD
+
+        if use_agent:
+            # MCP agent fallback: use tool_use loop with adapter-backed tools
+            from src.services.ai_engine import AGENT_TOOLS
+
+            async def _execute_tool(
+                name: str,
+                input_data: dict[str, object],
+            ) -> str:
+                """Execute adapter-backed tool calls."""
+                # Placeholder -- full adapter integration in Phase 20
+                return (
+                    f"[Tool {name} called with {input_data}. "
+                    f"No live adapter connected yet.]"
+                )
+
+            async for token in self._ai_engine.agent_stream(
+                question=question,
+                context_text=materials_text,
+                tools=AGENT_TOOLS,
+                tool_executor=_execute_tool,
+                language=language,
+            ):
+                yield token
+        else:
+            # Direct context streaming
+            async for token in self._ai_engine.stream_question(
+                question=question,
+                context_text=materials_text,
+                history=history,
+                language=language,
+            ):
+                yield token
+
+    async def stream_review(
+        self,
+        user_id: uuid.UUID,
+        course_id: uuid.UUID,
+        language: str = "en",
+    ) -> AsyncGenerator[str, None]:
+        """Stream an AI unit review as markdown."""
+        await self._check_and_increment_limit(user_id)
+        course, materials_text = await self._load_course_materials(course_id)
+
+        async for token in self._ai_engine.stream_review(
+            materials_text=materials_text,
+            course_name=course.name,
+            language=language,
+        ):
+            yield token
 
     async def embed_course_materials(self, course_id: uuid.UUID) -> int:
         """Chunk and embed all course text content for RAG retrieval.
