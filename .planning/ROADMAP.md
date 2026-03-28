@@ -78,7 +78,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   3. AI unit review generates structured summaries (key concepts, common mistakes, exam scope)
   4. All AI responses stream via SSE with visible progress indicators
   5. Settings page allows user to select language (en/zh), preference persisted in Profile and used by digest/AI responses
-**Plans**: TBD
+**Plans**: 4 total (1 complete, 3 remaining)
 
 ### Phase 20: Skill System
 **Goal**: MCP Agent auto-generates and reuses prompt templates for efficient repeated operations

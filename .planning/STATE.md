@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 18-03-PLAN.md
-last_updated: "2026-03-28T03:06:04.814Z"
+status: Executing Phase 19
+stopped_at: Completed 19-03-PLAN.md
+last_updated: "2026-03-28T07:27:00.000Z"
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 3
+  total_plans: 4
   completed_plans: 3
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 18 — ai-enhancement
+**Current focus:** Phase 19 — mcp-agent-streaming
 
 ## Current Position
 
-Phase: 19
-Plan: Not started
+Phase: 19 (mcp-agent-streaming) — EXECUTING
+Plan: 3 of 4 complete
 Milestone: M2 complete, M3 in progress
 
 ## Milestones Completed
@@ -115,6 +115,7 @@ Milestone: M2 complete, M3 in progress
 | Phase 17 P02 | 8min | 2 tasks | 8 files |
 | Phase 18 P02 | 6min | 2 tasks | 12 files |
 | Phase 18 P03 | 4min | 2 tasks | 10 files |
+| Phase 19 P03 | 6min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -269,6 +270,10 @@ Recent decisions affecting current work:
 - [Phase 18]: FeedbackButton toggle-off is visual only; UPSERT re-submit is safe
 - [Phase 18]: SCORE_URGENCY_MAP provides numeric fallback alongside string-based URGENCY_STYLES
 - [Phase 18]: EdPostItem created as new component (CourseDetailPage had no existing Ed posts section)
+- [Phase 19-03]: fetch+ReadableStream over EventSource for SSE (POST body support needed for Q&A)
+- [Phase 19-03]: useAiStream hook uses messagesRef to avoid stale closure in sendMessage callback
+- [Phase 19-03]: DeadlineCard passes course_code as courseId since Deadline schema has no course_id field
+- [Phase 19-03]: DeadlineCard maxHeight increased from 800px to 1200px for chat content
 
 ### Roadmap Evolution
 
