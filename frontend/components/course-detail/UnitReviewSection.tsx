@@ -39,7 +39,7 @@ export default function UnitReviewSection({
   // Page-level auto-scroll during streaming
   useEffect(() => {
     if (isStreaming && bottomRef.current && typeof bottomRef.current.scrollIntoView === 'function') {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      bottomRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
     }
   }, [reviewText, isStreaming]);
 

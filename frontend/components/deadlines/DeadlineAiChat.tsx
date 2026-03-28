@@ -66,7 +66,7 @@ export default function DeadlineAiChat({
     <div className="mt-[8px]">
       <RoughCard padding="py-[12px] px-[16px]" disableHover>
         {/* Section title */}
-        <div className="font-serif text-[0.84rem] font-semibold text-[#2d2d2a] mt-[12px] mb-[8px] flex items-center gap-[6px]">
+        <div className="font-serif text-[0.84rem] font-semibold text-[#2d2d2a] mb-[8px] flex items-center gap-[6px]">
           <MessageCircle size={16} className="text-[#d97757] flex-shrink-0" />
           {t("askAbout")}
         </div>
