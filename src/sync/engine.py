@@ -44,6 +44,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         sync_all_grades,
         sync_all_modules,
         sync_all_outlines,
+        sync_ed_discussions,
     )
 
     settings = get_settings()
@@ -116,6 +117,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         max_instances=1,
     )
 
+    # Ed Discussion thread sync (same interval as deadlines)
+    scheduler.add_job(
+        sync_ed_discussions,
+        IntervalTrigger(minutes=settings.sync_deadlines_interval_min),
+        id="sync_ed_discussions",
+        replace_existing=True,
+        max_instances=1,
+    )
+
     scheduler.start()
     logger.info(
         "sync_engine_started",
@@ -126,6 +136,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         reminder_check_interval_min=settings.reminder_check_interval_min,
         digest_cron_hour_aest=settings.digest_cron_hour_aest,
         token_health_interval_min=settings.reminder_check_interval_min,
+        ed_discussions_interval_min=settings.sync_deadlines_interval_min,
     )
 
     # Trigger initial full sync for all users
@@ -140,6 +151,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     )
     scheduler.add_job(
         sync_all_outlines, id="initial_outlines_sync", replace_existing=True
+    )
+    scheduler.add_job(
+        sync_ed_discussions,
+        id="initial_ed_discussions_sync",
+        replace_existing=True,
     )
 
     try:
