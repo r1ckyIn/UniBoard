@@ -651,6 +651,7 @@ async def generate_daily_digests() -> None:
                 svc = DigestService(
                     session,
                     anthropic_api_key=settings.anthropic_api_key,
+                    language="en",
                 )
                 await svc.generate_digest(user.id)
                 await session.commit()
