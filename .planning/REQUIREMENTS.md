@@ -46,7 +46,7 @@ Requirements for full release across 4 milestones.
 
 ### Settings Enhancement
 
-- [ ] **SET-LANG**: User can select preferred language (en/zh) in Settings page, preference persisted in Profile and applied to digest summaries and AI responses
+- [x] **SET-LANG**: User can select preferred language (en/zh) in Settings page, preference persisted in Profile and applied to digest summaries and AI responses
 
 ### Skill System (MCP Agent)
 
