@@ -66,7 +66,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   1. AI extracts high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details)
   2. AI-enhanced digest scores entries by urgency and GPA relevance
   3. Quality gate monitors F1 score and auto-falls back to rule engine when F1 < 75%
-**Plans**: TBD
+**Plans**: 3 total (2 complete, 1 remaining)
 
 ### Phase 19: MCP Agent & Streaming
 **Goal**: Claude Agent can research across platforms and stream answers to users
