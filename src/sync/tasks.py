@@ -455,6 +455,9 @@ async def sync_all_modules() -> None:
 
                     await session.commit()
 
+                # Post-sync translation for non-English users
+                await _translate_user_courses(user, session_factory)
+
                 break  # Success
             except TokenInvalidError:
                 sync_status = "failed"
@@ -485,6 +488,38 @@ async def sync_all_modules() -> None:
             error_message=sync_error,
             started_at=started_at,
         )
+
+
+async def _translate_user_courses(
+    user: Profile,
+    session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """Batch translate course content for non-English users after sync."""
+    settings = get_settings()
+    if not settings.translation_enabled or not settings.anthropic_api_key:
+        return
+
+    if user.language_preference == "en":
+        return
+
+    from src.services.ai_engine import AIEngine
+    from src.services.translation import TranslationService
+
+    try:
+        engine = AIEngine(api_key=settings.anthropic_api_key)
+
+        async with session_factory() as session:
+            stmt = select(Course).where(Course.user_id == user.id)
+            result = await session.execute(stmt)
+            courses = result.scalars().all()
+
+            svc = TranslationService(session=session, ai_engine=engine)
+            for course in courses:
+                await svc.translate_course_content(course.id)
+
+            await session.commit()
+    except Exception:
+        logger.warning("translation_sync_failed", user_id=str(user.id), exc_info=True)
 
 
 async def _sync_canvas_modules(

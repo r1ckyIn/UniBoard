@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     rag_chunk_overlap: int = 50
     rag_top_k: int = 15
 
+    # MCP fallback
+    mcp_fallback_token_threshold: int = 500  # trigger agent fallback below this
+
+    # Translation
+    translation_enabled: bool = True  # enable AI batch translation during sync
+
     # AWS SES
     ses_sender_email: str = "digest@uniboard.app"
     ses_region: str = "ap-southeast-2"
