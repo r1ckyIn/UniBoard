@@ -233,7 +233,16 @@
       "title": "Ask about this course",
       "placeholder": "Ask anything about {courseCode}...",
       "disclaimer": "AI responses are for study reference only",
-      "comingSoon": "Coming Soon"
+      "comingSoon": "Coming Soon",
+      "contextNote": "Course materials auto-included in context",
+      "searching": "Searching course materials...",
+      "analyzing": "Analyzing..."
+    },
+    "unitReview": {
+      "title": "AI Unit Review",
+      "generate": "Generate Review",
+      "generating": "Generating...",
+      "analyzing": "Analyzing course materials..."
     },
     "quickLinks": {
       "title": "Quick Links",
@@ -276,6 +285,8 @@
     "aiContextNote": "Materials auto-included in context",
     "aiPlaceholder": "Ask about this deadline...",
     "aiComingSoon": "Coming Soon",
+    "aiSearching": "Searching course materials...",
+    "aiAnalyzing": "Analyzing...",
     "aiDisclaimer": "AI responses are for study reference only",
     "daysRemaining": "{count} days",
     "dayRemaining": "1 day",

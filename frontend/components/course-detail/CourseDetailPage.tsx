@@ -16,7 +16,8 @@ import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import CourseBanner from "@/components/course-detail/CourseBanner";
 import AssessmentSection from "@/components/course-detail/AssessmentSection";
 import MaterialsSection from "@/components/course-detail/MaterialsSection";
-import AiChatPlaceholder from "@/components/course-detail/AiChatPlaceholder";
+import AiCourseChat from "@/components/course-detail/AiCourseChat";
+import UnitReviewSection from "@/components/course-detail/UnitReviewSection";
 import QuickLinksPanel from "@/components/course-detail/QuickLinksPanel";
 import CourseDeadlinesPanel from "@/components/course-detail/CourseDeadlinesPanel";
 import CourseActivityPanel from "@/components/course-detail/CourseActivityPanel";
@@ -160,9 +161,14 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
         />
       </AnimatedEntry>
 
-      {/* AI Chat Placeholder */}
+      {/* AI Course Chat */}
       <AnimatedEntry delay={7}>
-        <AiChatPlaceholder courseCode={course.code} />
+        <AiCourseChat courseId={courseId} courseCode={course.code} />
+      </AnimatedEntry>
+
+      {/* Unit Review Section */}
+      <AnimatedEntry delay={8}>
+        <UnitReviewSection courseId={courseId} courseName={course.name} />
       </AnimatedEntry>
 
       {/* Right Panel Content (via portal) */}
