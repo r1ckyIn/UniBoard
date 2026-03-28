@@ -8,6 +8,7 @@ from src.web.routes.auth import router as auth_router
 from src.web.routes.courses import router as courses_router
 from src.web.routes.deadlines import router as deadlines_router
 from src.web.routes.digest import router as digest_router
+from src.web.routes.feedback import router as feedback_router
 from src.web.routes.gpa import router as gpa_router
 from src.web.routes.health import router as health_router
 from src.web.routes.intelligence import router as intelligence_router
@@ -28,6 +29,7 @@ api_router.include_router(intelligence_router, prefix="", tags=["intelligence"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(digest_router, prefix="/digest", tags=["digest"])
 api_router.include_router(alerts_router, prefix="/alerts", tags=["alerts"])
+api_router.include_router(feedback_router, prefix="", tags=["feedback"])
 api_router.include_router(ai_router, prefix="", tags=["ai"])
 
-__all__ = ["ai_router", "api_router", "health_router"]
+__all__ = ["ai_router", "api_router", "feedback_router", "health_router"]
