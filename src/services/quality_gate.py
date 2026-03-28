@@ -36,7 +36,7 @@ class QualityGateService:
 
         Classification logic:
         - TP: thumbs_up on thread with gpa_relevance >= 0.4 (AI correct: high-value)
-        - FP: thumbs_down on thread with gpa_relevance >= 0.4 (AI wrong: flagged high but user disagrees)
+        - FP: thumbs_down on high-value thread (AI wrong: user disagrees)
         - FN: thumbs_up on thread with gpa_relevance < 0.4 (AI wrong: missed high-value thread)
         - TN: thumbs_down on thread with gpa_relevance < 0.4 (AI correct: low-value)
         """

@@ -119,3 +119,151 @@ async def test_enhance_with_ai(session: AsyncSession) -> None:
     assert result is not None
     assert result.ai_summary is not None
     assert "Assignment" in result.ai_summary
+
+
+# ---------------------------------------------------------------------------
+# Test 8: i18n prompt selection -- Chinese
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_digest_ai_uses_zh_prompt() -> None:
+    """DigestService uses DIGEST_SUMMARY_SYSTEM_PROMPT_ZH when language='zh'."""
+    from src.schemas.digest import DigestItemResponse
+    from src.services.digest import DigestService
+
+    mock_session = AsyncMock()
+
+    items = [
+        DigestItemResponse(
+            type="deadline",
+            title="Quiz 3",
+            detail="Due in 18h",
+            course_code="COMP3221",
+            urgency_score=None,
+            timestamp="2026-03-28T12:00:00",
+        ),
+    ]
+
+    mock_ai_engine = AsyncMock()
+    mock_ai_engine.score_urgency = AsyncMock(return_value=[])
+
+    mock_summary_response = MagicMock()
+    mock_summary_response.content = [MagicMock(text="Review lecture 8.")]
+    mock_client = AsyncMock()
+    mock_client.messages.create = AsyncMock(return_value=mock_summary_response)
+
+    with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        svc = DigestService(
+            mock_session,
+            anthropic_api_key="test-key",
+            ai_engine=mock_ai_engine,
+            language="zh",
+        )
+        _, _ = await svc._enhance_with_ai(items)
+
+    # Verify Chinese prompt was used (contains Chinese text)
+    call_kwargs = mock_client.messages.create.call_args
+    system_prompt = call_kwargs.kwargs.get("system", "")
+    assert "学业摘要" in system_prompt
+
+
+# ---------------------------------------------------------------------------
+# Test 9: i18n prompt selection -- English default
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_digest_ai_uses_en_prompt_default() -> None:
+    """DigestService uses English DIGEST_SUMMARY_SYSTEM_PROMPT when language='en'."""
+    from src.schemas.digest import DigestItemResponse
+    from src.services.digest import DigestService
+
+    mock_session = AsyncMock()
+
+    items = [
+        DigestItemResponse(
+            type="deadline",
+            title="Quiz 3",
+            detail="Due in 18h",
+            course_code="COMP3221",
+            urgency_score=None,
+            timestamp="2026-03-28T12:00:00",
+        ),
+    ]
+
+    mock_ai_engine = AsyncMock()
+    mock_ai_engine.score_urgency = AsyncMock(return_value=[])
+
+    mock_summary_response = MagicMock()
+    mock_summary_response.content = [MagicMock(text="Focus on quiz.")]
+    mock_client = AsyncMock()
+    mock_client.messages.create = AsyncMock(return_value=mock_summary_response)
+
+    with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        svc = DigestService(
+            mock_session,
+            anthropic_api_key="test-key",
+            ai_engine=mock_ai_engine,
+            language="en",
+        )
+        _, _ = await svc._enhance_with_ai(items)
+
+    call_kwargs = mock_client.messages.create.call_args
+    system_prompt = call_kwargs.kwargs.get("system", "")
+    assert "action-oriented study guidance" in system_prompt
+
+
+# ---------------------------------------------------------------------------
+# Test 10: Digest items sorted by urgency_score descending (D-12)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_digest_items_sorted_by_urgency() -> None:
+    """Enhanced digest items are sorted by urgency_score descending (highest first)."""
+    from src.schemas.digest import DigestItemResponse
+    from src.services.digest import DigestService
+
+    mock_session = AsyncMock()
+
+    items = [
+        DigestItemResponse(
+            type="deadline", title="A", detail="d", course_code="C1",
+            urgency_score=None, timestamp="2026-03-28T12:00:00",
+        ),
+        DigestItemResponse(
+            type="grade", title="B", detail="d", course_code="C2",
+            urgency_score=None, timestamp="2026-03-28T12:00:00",
+        ),
+        DigestItemResponse(
+            type="post", title="C", detail="d", course_code="C3",
+            urgency_score=None, timestamp="2026-03-28T12:00:00",
+        ),
+    ]
+
+    mock_ai_engine = AsyncMock()
+    mock_ai_engine.score_urgency = AsyncMock(
+        return_value=[
+            {"index": 0, "urgency_score": 2, "reason": "low"},
+            {"index": 1, "urgency_score": 5, "reason": "critical"},
+            {"index": 2, "urgency_score": 3, "reason": "moderate"},
+        ]
+    )
+
+    mock_summary_response = MagicMock()
+    mock_summary_response.content = [MagicMock(text="summary")]
+    mock_client = AsyncMock()
+    mock_client.messages.create = AsyncMock(return_value=mock_summary_response)
+
+    with patch("anthropic.AsyncAnthropic", return_value=mock_client):
+        svc = DigestService(
+            mock_session,
+            anthropic_api_key="test-key",
+            ai_engine=mock_ai_engine,
+        )
+        enhanced_items, _ = await svc._enhance_with_ai(items)
+
+    # Items should be sorted by urgency_score descending: 5, 3, 2
+    scores = [item.urgency_score for item in enhanced_items]
+    assert scores == [5, 3, 2]

@@ -16,7 +16,7 @@ from src.models.digest import Digest
 from src.models.discussion import DiscussionThread
 from src.models.grade import Grade
 from src.models.user import Profile
-from src.prompts.digest import DIGEST_SUMMARY_SYSTEM_PROMPT
+from src.prompts.digest import DIGEST_SUMMARY_SYSTEM_PROMPT, DIGEST_SUMMARY_SYSTEM_PROMPT_ZH
 from src.schemas.digest import DigestItemResponse, DigestResponse
 
 logger = structlog.get_logger()
@@ -30,10 +30,12 @@ class DigestService:
         session: AsyncSession,
         anthropic_api_key: str = "",
         ai_engine: object | None = None,
+        language: str = "en",
     ) -> None:
         self._session = session
         self._anthropic_api_key = anthropic_api_key
         self._ai_engine = ai_engine
+        self._language = language
 
     async def generate_digest(
         self,
@@ -231,10 +233,15 @@ class DigestService:
                 from anthropic import AsyncAnthropic
 
                 client = AsyncAnthropic(api_key=self._anthropic_api_key)
+                prompt = (
+                    DIGEST_SUMMARY_SYSTEM_PROMPT_ZH
+                    if self._language == "zh"
+                    else DIGEST_SUMMARY_SYSTEM_PROMPT
+                )
                 summary_response = await client.messages.create(
                     model="claude-sonnet-4-20250514",
                     max_tokens=200,
-                    system=DIGEST_SUMMARY_SYSTEM_PROMPT,
+                    system=prompt,
                     messages=[{"role": "user", "content": f"Items:\n{item_descs}"}],
                 )
                 return summary_response.content[0].text  # type: ignore[union-attr]
@@ -256,6 +263,9 @@ class DigestService:
                     )
             except (KeyError, ValueError, TypeError):
                 continue
+
+        # Sort items by urgency_score descending (D-12: highest urgency first)
+        items.sort(key=lambda item: item.urgency_score or 0, reverse=True)
 
         return items, ai_summary
 

@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
@@ -16,10 +16,15 @@ router = APIRouter()
 
 def get_digest_service(
     session: AsyncSession = Depends(get_session),
+    lang: str = Query("en", pattern="^(en|zh)$"),
 ) -> DigestService:
-    """FastAPI dependency: create DigestService with current session."""
+    """FastAPI dependency: create DigestService with current session and language."""
     settings = get_settings()
-    return DigestService(session, anthropic_api_key=settings.anthropic_api_key)
+    return DigestService(
+        session,
+        anthropic_api_key=settings.anthropic_api_key,
+        language=lang,
+    )
 
 
 @router.get("/latest")
