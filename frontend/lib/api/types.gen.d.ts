@@ -688,6 +688,7 @@ export interface components {
             days_remaining: number;
         };
         Deadline: components["schemas"]["CourseDeadline"] & {
+            course_id: string;
             course_code: string;
             course_name: string;
             is_confirmed: boolean;

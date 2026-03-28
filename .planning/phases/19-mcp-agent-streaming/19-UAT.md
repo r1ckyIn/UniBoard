@@ -1,5 +1,5 @@
 ---
-status: testing
+status: diagnosed
 phase: 19-mcp-agent-streaming
 source: [19-01-SUMMARY.md, 19-02-SUMMARY.md, 19-03-SUMMARY.md, 19-04-SUMMARY.md]
 started: 2026-03-28T12:00:00Z
@@ -30,29 +30,49 @@ result: pass
 
 ### 4. Deadline AI Chat UI
 expected: Open a Deadline card, see an AI chat input area below the materials section. Type a question, press send — see "Searching..." status then tokens streaming in real-time in chat bubbles.
-result: [pending]
+result: issue
+reported: "SSE error: 404 — course_code passed instead of course_id to API endpoint"
+severity: blocker
+fix: Added course_id to Deadline type/fixtures, fixed DeadlineCard prop, added mock SSE routes
+re-test: pass
 
 ### 5. Course Q&A Chat UI
 expected: Open Course Detail page, see functional AI chat replacing the old "Coming Soon" placeholder. Type a question, see streaming AI response with cited sources.
-result: [pending]
+result: pass
 
 ### 6. Unit Review Streaming
 expected: On Course Detail page, click "Generate Review". See streaming markdown output with sections: Key Concepts, Common Mistakes, Exam Scope, Study Tips.
-result: [pending]
+result: issue
+reported: "1. AI sections need Rough.js hand-drawn borders to match design system; 2. Long streaming content should auto-scroll page to keep latest content visible"
+severity: cosmetic
 
 ### 7. Language Preference Setting
 expected: Go to Settings page. See a "Language Preference" section with English/中文 options. Select 中文 — URL changes to /zh/..., all UI text switches to Chinese. Refresh page — preference is retained.
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 7
-passed: 3
-issues: 0
-pending: 4
+passed: 6
+issues: 1
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-[none yet]
+- truth: "AI chat and review sections should use Rough.js hand-drawn borders matching the project design system"
+  status: failed
+  reason: "User reported: AI sections need hand-drawn borders to match design system"
+  severity: cosmetic
+  test: 6
+  artifacts: [frontend/components/course-detail/AiCourseChat.tsx, frontend/components/course-detail/UnitReviewSection.tsx, frontend/components/deadlines/DeadlineAiChat.tsx, frontend/components/shared/AiChatBubble.tsx]
+  missing: [Rough.js border integration on AI components]
+
+- truth: "Long streaming content should auto-scroll the page to keep latest generated content visible"
+  status: failed
+  reason: "User reported: content exceeding screen edge needs page auto-scroll to align with latest content"
+  severity: cosmetic
+  test: 6
+  artifacts: [frontend/components/course-detail/UnitReviewSection.tsx, frontend/hooks/use-ai-stream.ts]
+  missing: [Page-level auto-scroll during streaming]

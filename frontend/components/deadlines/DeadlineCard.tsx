@@ -183,8 +183,8 @@ export default function DeadlineCard({
               );
             })}
 
-            {/* AI Chat section */}
-            <DeadlineAiChat courseId={deadline.course_code} isExpanded={isExpanded} />
+            {/* AI Chat section — only mount when expanded to avoid 16 idle hooks */}
+            {isExpanded && <DeadlineAiChat courseId={deadline.course_id} isExpanded={isExpanded} />}
           </div>
         </div>
       </div>
