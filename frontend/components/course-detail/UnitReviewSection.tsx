@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { BookOpen, Loader2 } from "lucide-react";
 import { streamAiGet } from "@/lib/api/ai-stream";
 import { useAuthStore } from "@/lib/auth/store";
+import RoughCard from "@/components/design-system/RoughCard";
 
 interface UnitReviewSectionProps {
   courseId: string;
@@ -27,12 +28,20 @@ export default function UnitReviewSection({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
     };
   }, []);
+
+  // Page-level auto-scroll during streaming
+  useEffect(() => {
+    if (isStreaming && bottomRef.current && typeof bottomRef.current.scrollIntoView === 'function') {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [reviewText, isStreaming]);
 
   const generateReview = useCallback(async () => {
     abortRef.current?.abort();
@@ -105,9 +114,11 @@ export default function UnitReviewSection({
       )}
 
       {reviewText && (
-        <div className="bg-[#f6f5f0] border border-[#eae7e0] rounded-[10px] p-[16px] text-[0.82rem] text-[#2d2d2a] leading-[1.7] whitespace-pre-wrap">
-          {reviewText}
-        </div>
+        <RoughCard padding="py-[16px] px-[20px]" disableHover>
+          <div ref={bottomRef} className="text-[0.82rem] text-[#2d2d2a] leading-[1.7] whitespace-pre-wrap">
+            {reviewText}
+          </div>
+        </RoughCard>
       )}
     </div>
   );
