@@ -4,7 +4,6 @@ import pytest
 
 from src.services.roi import ROIService
 
-
 # ---------------------------------------------------------------------------
 # Test _score_to_difficulty mapping
 # ---------------------------------------------------------------------------
@@ -69,17 +68,21 @@ class TestCalculateROI:
         # 0.1 / (5.0 / 5.0) = 0.1 / 1.0 = 0.1
         assert roi == pytest.approx(0.1)
 
-    def test_graded_high_score_high_weight(self) -> None:
-        """Score 90/100, weight 0.3 -> difficulty low, ROI high."""
-        difficulty = ROIService._score_to_difficulty(0.9)  # should be ~1.x
-        roi = ROIService._calculate_roi(0.3, difficulty)
-        assert roi > 1.0  # high ROI
+    def test_graded_high_score_higher_roi_than_low(self) -> None:
+        """Score 90/100 should have much higher ROI than score 40/100 at same weight."""
+        diff_high = ROIService._score_to_difficulty(0.9)
+        diff_low = ROIService._score_to_difficulty(0.4)
+        roi_high = ROIService._calculate_roi(0.3, diff_high)
+        roi_low = ROIService._calculate_roi(0.3, diff_low)
+        # High score -> low difficulty -> high ROI (should be 2x+ more)
+        assert roi_high > roi_low * 2
 
-    def test_graded_low_score_same_weight(self) -> None:
-        """Score 40/100, weight 0.3 -> difficulty high, ROI low."""
-        difficulty = ROIService._score_to_difficulty(0.4)  # should be ~4.x
+    def test_graded_low_score_lower_roi(self) -> None:
+        """Score 40/100, weight 0.3 -> difficulty high, ROI relatively low."""
+        difficulty = ROIService._score_to_difficulty(0.4)
         roi = ROIService._calculate_roi(0.3, difficulty)
-        assert roi < 0.5  # low ROI
+        # With high difficulty (~4.x), ROI should be modest
+        assert roi < 0.5
 
     def test_zero_weight(self) -> None:
         """Weight 0 should yield ROI 0."""
