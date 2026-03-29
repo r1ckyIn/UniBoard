@@ -57,7 +57,7 @@ Requirements for full release across 4 milestones.
 
 ### AI Tutoring (promoted from v2)
 
-- [ ] **TUTOR-03**: Assignment ROI analysis — MCP Agent identifies high-weight/low-difficulty assignments for effort optimization
+- [x] **TUTOR-03**: Assignment ROI analysis — MCP Agent identifies high-weight/low-difficulty assignments for effort optimization
 
 ### Frontend Pages
 

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: Ready to plan
-stopped_at: Completed 20-03-PLAN.md
-last_updated: "2026-03-29T04:57:10.928Z"
+stopped_at: Completed 21-03-PLAN.md
+last_updated: "2026-03-29T09:11:07.222Z"
 progress:
   total_phases: 7
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 4
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Project State
@@ -19,13 +19,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 20 — skill-system
+**Current focus:** Phase 21 — mcp-server-roi-analysis
 
 ## Current Position
 
-Phase: 21
+Phase: 22
 Plan: Not started
-Milestone: M2 complete, M3 in progress
+Milestone: M2 complete, M3 in progress (phases 18-20 done, 21 planned)
 
 ## Milestones Completed
 
@@ -120,6 +120,8 @@ Milestone: M2 complete, M3 in progress
 | Phase 20 P01 | 3min | 2 tasks | 5 files |
 | Phase 20 P02 | 5min | 2 tasks | 4 files |
 | Phase 20 P03 | 5min | 2 tasks | 3 files |
+| Phase 21 P02 | 5min | 2 tasks | 6 files |
+| Phase 21 P03 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -284,6 +286,10 @@ Recent decisions affecting current work:
 - [Phase 20]: Inline fallback function when ToolExecutor is None for backward compatibility
 - [Phase 20]: Traced executor wrapper captures tool calls without modifying ToolExecutor class
 - [Phase 20]: _build_tool_executor as standalone async helper keeps QAService decoupled from token decryption
+- [Phase 21]: Linear interpolation for score-to-difficulty mapping within 3 bands (easy/medium/hard)
+- [Phase 21]: Difficulty floored at 0.2 to prevent division-by-near-zero in ROI formula
+- [Phase 21]: AI confidence gate at 50% — below threshold falls back to default difficulty 3.0
+- [Phase 21]: RoiCard uses useQueries for parallel per-course ROI fetch (same pattern as courseDetailQueries)
 
 ### Roadmap Evolution
 
@@ -300,6 +306,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-29T04:41:19.819Z
-Stopped at: Completed 20-03-PLAN.md
+Last session: 2026-03-29T09:06:00.850Z
+Stopped at: Completed 21-03-PLAN.md
 Resume file: None

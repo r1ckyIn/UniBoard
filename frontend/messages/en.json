@@ -431,7 +431,15 @@
     "error": {
       "loadFailed": "Failed to load prediction data",
       "retry": "Retry"
-    }
+    },
+    "roi_title": "Assignment Priority",
+    "roi_empty": "Complete some assessments to see ROI analysis",
+    "roi_focus": "Focus here",
+    "roi_normal": "Normal priority",
+    "roi_low": "Low priority",
+    "roi_weight": "Weight",
+    "roi_difficulty": "Difficulty",
+    "roi_ai_badge": "AI estimated"
   },
   "timetable": {
     "title": "Timetable",
