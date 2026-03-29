@@ -431,7 +431,15 @@
     "error": {
       "loadFailed": "预测数据加载失败",
       "retry": "重试"
-    }
+    },
+    "roi_title": "作业优先级",
+    "roi_empty": "完成一些评估后即可查看 ROI 分析",
+    "roi_focus": "重点关注",
+    "roi_normal": "正常优先",
+    "roi_low": "低优先级",
+    "roi_weight": "权重",
+    "roi_difficulty": "难度",
+    "roi_ai_badge": "AI 估算"
   },
   "timetable": {
     "title": "课程表",

@@ -17,6 +17,7 @@ import WamOverviewCard from "@/components/predict/WamOverviewCard";
 import TargetWamCard from "@/components/predict/TargetWamCard";
 import RequiredScoresCard from "@/components/predict/RequiredScoresCard";
 import SemesterProgressCard from "@/components/predict/SemesterProgressCard";
+import RoiCard from "@/components/predict/RoiCard";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import SkeletonCard from "@/components/dashboard/SkeletonCard";
 
@@ -303,6 +304,15 @@ export default function PredictPage() {
             </AnimatedEntry>
             <AnimatedEntry delay={8}>
               <SemesterProgressCard courses={progressData} />
+            </AnimatedEntry>
+            <AnimatedEntry delay={9}>
+              <RoiCard
+                courses={courses.map((c) => ({
+                  course_id: c.course_id,
+                  code: c.code,
+                  color: courseColorsMap[c.code] ?? { base: "#9b9b94", soft: "rgba(155,155,148,0.11)" },
+                }))}
+              />
             </AnimatedEntry>
           </>,
           portalTarget
