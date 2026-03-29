@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -56,6 +56,85 @@ def _make_mock_course(
     course.lessons = [lesson]
 
     return course
+
+
+def _make_mock_skill() -> MagicMock:
+    """Build a mock Skill ORM object."""
+    skill = MagicMock()
+    skill.id = uuid.uuid4()
+    skill.operation_type = "qa_agent"
+    skill.system_prompt = "Test skill prompt"
+    skill.status = "active"
+    return skill
+
+
+def _make_session_mocks(
+    mock_user: MagicMock,
+    mock_course: MagicMock,
+) -> AsyncMock:
+    """Build a mock AsyncSession returning user then course from execute()."""
+    mock_session = AsyncMock()
+
+    user_result = MagicMock()
+    user_result.scalar_one_or_none = MagicMock(return_value=mock_user)
+    course_result = MagicMock()
+    course_result.scalar_one_or_none = MagicMock(return_value=mock_course)
+    mock_session.execute = AsyncMock(side_effect=[user_result, course_result])
+    mock_session.flush = AsyncMock()
+
+    return mock_session
+
+
+def _make_agent_stream_with_tool_call(
+    tool_executor_callback_name: str = "search_canvas_modules",
+    tool_executor_callback_input: dict[str, object] | None = None,
+) -> Any:
+    """Create a mock agent_stream that invokes tool_executor during streaming.
+
+    This simulates the AIEngine calling tools mid-stream.
+    """
+    if tool_executor_callback_input is None:
+        tool_executor_callback_input = {"query": "midterm"}
+
+    async def _agent_stream(
+        question: str,
+        context_text: str,
+        tools: list[dict[str, object]],
+        tool_executor: Any,
+        language: str = "en",
+        **kwargs: Any,
+    ) -> Any:
+        # Yield a token, call a tool, yield another token
+        yield "Agent "
+        await tool_executor(tool_executor_callback_name, tool_executor_callback_input)
+        yield "response"
+
+    return _agent_stream
+
+
+def _make_agent_stream_with_error(
+    tool_executor_callback_name: str = "search_canvas_modules",
+) -> Any:
+    """Create a mock agent_stream that invokes a tool then raises an error."""
+
+    async def _agent_stream(
+        question: str,
+        context_text: str,
+        tools: list[dict[str, object]],
+        tool_executor: Any,
+        language: str = "en",
+        **kwargs: Any,
+    ) -> Any:
+        yield "partial "
+        await tool_executor(tool_executor_callback_name, {"query": "test"})
+        raise RuntimeError("AI engine error")
+
+    return _agent_stream
+
+
+# ---------------------------------------------------------------------------
+# Existing tests (backward compatible -- no changes needed)
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio(loop_scope="session")
@@ -140,13 +219,7 @@ async def test_stream_answer_question_direct_context() -> None:
     # Use enough text to produce >= 500 tokens
     mock_course = _make_mock_course(text_tokens=5000)
 
-    mock_session = AsyncMock()
-    user_result = MagicMock()
-    user_result.scalar_one_or_none = MagicMock(return_value=mock_user)
-    course_result = MagicMock()
-    course_result.scalar_one_or_none = MagicMock(return_value=mock_course)
-    mock_session.execute = AsyncMock(side_effect=[user_result, course_result])
-    mock_session.flush = AsyncMock()
+    mock_session = _make_session_mocks(mock_user, mock_course)
 
     svc = QAService(session=mock_session, ai_engine=mock_ai)
     tokens: list[str] = []
@@ -176,13 +249,7 @@ async def test_stream_answer_question_mcp_fallback_low_tokens() -> None:
     # Use very little text to produce < 500 tokens
     mock_course = _make_mock_course(text_tokens=100)
 
-    mock_session = AsyncMock()
-    user_result = MagicMock()
-    user_result.scalar_one_or_none = MagicMock(return_value=mock_user)
-    course_result = MagicMock()
-    course_result.scalar_one_or_none = MagicMock(return_value=mock_course)
-    mock_session.execute = AsyncMock(side_effect=[user_result, course_result])
-    mock_session.flush = AsyncMock()
+    mock_session = _make_session_mocks(mock_user, mock_course)
 
     svc = QAService(session=mock_session, ai_engine=mock_ai)
     tokens: list[str] = []
@@ -196,3 +263,237 @@ async def test_stream_answer_question_mcp_fallback_low_tokens() -> None:
 
     assert tokens == ["Agent", " response"]
     mock_ai.agent_stream.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# New tests: ToolExecutor + SkillService integration
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_stream_answer_uses_tool_executor() -> None:
+    """When ToolExecutor is provided, agent branch uses it instead of placeholder."""
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    mock_ai.agent_stream = MagicMock(
+        side_effect=lambda **kwargs: _make_agent_stream_with_tool_call()(
+            **kwargs
+        )
+    )
+
+    mock_user = _make_mock_user(ai_calls_today=0)
+    mock_course = _make_mock_course(text_tokens=100)
+    mock_session = _make_session_mocks(mock_user, mock_course)
+
+    # Mock ToolExecutor
+    mock_tool_executor = AsyncMock()
+    mock_tool_executor.execute = AsyncMock(return_value="Canvas result: midterm info")
+
+    # Mock SkillService
+    mock_skill_service = AsyncMock()
+    mock_skill_service.get_skill = AsyncMock(return_value=None)
+    mock_skill_service.record_execution = AsyncMock()
+    mock_skill_service.maybe_generate_skill = AsyncMock(return_value=None)
+
+    svc = QAService(
+        session=mock_session,
+        ai_engine=mock_ai,
+        tool_executor=mock_tool_executor,
+        skill_service=mock_skill_service,
+    )
+
+    tokens: list[str] = []
+    async for tok in svc.stream_answer_question(
+        user_id=mock_user.id,
+        course_id=mock_course.id,
+        question="When is the midterm?",
+        language="en",
+    ):
+        tokens.append(tok)
+
+    assert tokens == ["Agent ", "response"]
+    # ToolExecutor.execute should have been called (not placeholder)
+    mock_tool_executor.execute.assert_called_once_with(
+        "search_canvas_modules", {"query": "midterm"}
+    )
+    # Trace should have been recorded as success
+    mock_skill_service.record_execution.assert_called_once()
+    call_kwargs = mock_skill_service.record_execution.call_args.kwargs
+    assert call_kwargs["success"] is True
+    assert call_kwargs["operation_type"] == "qa_agent"
+    # No existing skill, so maybe_generate_skill should be called
+    mock_skill_service.maybe_generate_skill.assert_called_once()
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_stream_answer_uses_skill_lookup() -> None:
+    """SkillService.get_skill is called with (qa_agent, course_id) before agent_stream."""
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    mock_ai.agent_stream = MagicMock(
+        return_value=_async_gen_tokens("Agent", " result")
+    )
+
+    mock_user = _make_mock_user(ai_calls_today=0)
+    mock_course = _make_mock_course(text_tokens=100)
+    mock_session = _make_session_mocks(mock_user, mock_course)
+
+    mock_skill = _make_mock_skill()
+    mock_skill_service = AsyncMock()
+    mock_skill_service.get_skill = AsyncMock(return_value=mock_skill)
+    mock_skill_service.mark_success = AsyncMock()
+    mock_skill_service.record_execution = AsyncMock()
+
+    svc = QAService(
+        session=mock_session,
+        ai_engine=mock_ai,
+        skill_service=mock_skill_service,
+    )
+
+    tokens: list[str] = []
+    async for tok in svc.stream_answer_question(
+        user_id=mock_user.id,
+        course_id=mock_course.id,
+        question="Test Q",
+        language="en",
+    ):
+        tokens.append(tok)
+
+    # Verify get_skill was called with correct args
+    mock_skill_service.get_skill.assert_called_once_with(
+        "qa_agent", mock_course.id
+    )
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_stream_answer_records_trace_on_failure() -> None:
+    """On agent_stream error, execution trace is recorded with success=False."""
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    mock_ai.agent_stream = MagicMock(
+        side_effect=lambda **kwargs: _make_agent_stream_with_error()(
+            **kwargs
+        )
+    )
+
+    mock_user = _make_mock_user(ai_calls_today=0)
+    mock_course = _make_mock_course(text_tokens=100)
+    mock_session = _make_session_mocks(mock_user, mock_course)
+
+    # Mock ToolExecutor to return a result before error
+    mock_tool_executor = AsyncMock()
+    mock_tool_executor.execute = AsyncMock(return_value="partial data")
+
+    mock_skill = _make_mock_skill()
+    mock_skill_service = AsyncMock()
+    mock_skill_service.get_skill = AsyncMock(return_value=mock_skill)
+    mock_skill_service.record_execution = AsyncMock()
+    mock_skill_service.mark_failure = AsyncMock()
+
+    svc = QAService(
+        session=mock_session,
+        ai_engine=mock_ai,
+        tool_executor=mock_tool_executor,
+        skill_service=mock_skill_service,
+    )
+
+    tokens: list[str] = []
+    with pytest.raises(RuntimeError, match="AI engine error"):
+        async for tok in svc.stream_answer_question(
+            user_id=mock_user.id,
+            course_id=mock_course.id,
+            question="Will this fail?",
+            language="en",
+        ):
+            tokens.append(tok)
+
+    # Partial tokens should have been yielded before error
+    assert "partial " in tokens
+
+    # Trace should have been recorded as failure
+    mock_skill_service.record_execution.assert_called_once()
+    call_kwargs = mock_skill_service.record_execution.call_args.kwargs
+    assert call_kwargs["success"] is False
+    assert call_kwargs["skill_id"] == mock_skill.id
+
+    # Skill should be marked as failed
+    mock_skill_service.mark_failure.assert_called_once_with(mock_skill.id)
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_stream_answer_backward_compatible() -> None:
+    """QAService works with tool_executor=None, skill_service=None (original constructor)."""
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    mock_ai.agent_stream = MagicMock(
+        return_value=_async_gen_tokens("fallback", " answer")
+    )
+
+    mock_user = _make_mock_user(ai_calls_today=0)
+    mock_course = _make_mock_course(text_tokens=100)
+    mock_session = _make_session_mocks(mock_user, mock_course)
+
+    # Original constructor signature: no tool_executor or skill_service
+    svc = QAService(session=mock_session, ai_engine=mock_ai)
+
+    tokens: list[str] = []
+    async for tok in svc.stream_answer_question(
+        user_id=mock_user.id,
+        course_id=mock_course.id,
+        question="Backward compat test",
+        language="en",
+    ):
+        tokens.append(tok)
+
+    assert tokens == ["fallback", " answer"]
+    mock_ai.agent_stream.assert_called_once()
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_stream_answer_marks_skill_success() -> None:
+    """When an existing skill is used, mark_success is called on completion."""
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    mock_ai.agent_stream = MagicMock(
+        side_effect=lambda **kwargs: _make_agent_stream_with_tool_call()(
+            **kwargs
+        )
+    )
+
+    mock_user = _make_mock_user(ai_calls_today=0)
+    mock_course = _make_mock_course(text_tokens=100)
+    mock_session = _make_session_mocks(mock_user, mock_course)
+
+    mock_skill = _make_mock_skill()
+    mock_tool_executor = AsyncMock()
+    mock_tool_executor.execute = AsyncMock(return_value="Canvas data")
+
+    mock_skill_service = AsyncMock()
+    mock_skill_service.get_skill = AsyncMock(return_value=mock_skill)
+    mock_skill_service.record_execution = AsyncMock()
+    mock_skill_service.mark_success = AsyncMock()
+
+    svc = QAService(
+        session=mock_session,
+        ai_engine=mock_ai,
+        tool_executor=mock_tool_executor,
+        skill_service=mock_skill_service,
+    )
+
+    tokens: list[str] = []
+    async for tok in svc.stream_answer_question(
+        user_id=mock_user.id,
+        course_id=mock_course.id,
+        question="Using skill",
+        language="en",
+    ):
+        tokens.append(tok)
+
+    # mark_success called with skill.id, NOT maybe_generate_skill
+    mock_skill_service.mark_success.assert_called_once_with(mock_skill.id)
+    mock_skill_service.maybe_generate_skill.assert_not_called()
