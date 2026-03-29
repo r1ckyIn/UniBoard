@@ -11,6 +11,7 @@ from src.models.lesson import Lesson, Slide
 from src.models.module import Module, ModuleItem
 from src.models.notification import Notification
 from src.models.push_record import PushRecord
+from src.models.skill import Skill, SkillExecution
 from src.models.sync_history import SyncHistory
 from src.models.unit_outline import UnitOutline
 from src.models.user import Profile
@@ -29,6 +30,8 @@ __all__ = [
     "Notification",
     "Profile",
     "PushRecord",
+    "Skill",
+    "SkillExecution",
     "Slide",
     "SyncHistory",
     "UnifiedDeadline",

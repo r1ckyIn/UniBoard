@@ -2,36 +2,29 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 20-03-PLAN.md
-last_updated: "2026-03-29T04:57:10.928Z"
+status: unknown
+stopped_at: Phase 20 context gathered
+last_updated: "2026-03-29T02:42:24.156Z"
 progress:
-  total_phases: 7
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_phases: 24
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-27)
+See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 20 — skill-system
+**Current focus:** Phase 10 — digest-page
 
 ## Current Position
 
-Phase: 21
-Plan: Not started
-Milestone: M2 complete, M3 in progress
-
-## Milestones Completed
-
-- **v2.0-m2 Backend Core** — Shipped 2026-03-27 (Phases 13-17, 13 plans, 149 tests)
-  - See: .planning/MILESTONES.md
-  - Archive: .planning/milestones/v2.0-m2-ROADMAP.md
+Phase: 10 (digest-page) — EXECUTING
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -93,33 +86,6 @@ Milestone: M2 complete, M3 in progress
 | Phase 10 P01 | 4min | 2 tasks | 8 files |
 | Phase 10 P02 | 2min | 2 tasks | 5 files |
 | Phase 10 P03 | 4min | 2 tasks | 4 files |
-| Phase 11 P01 | 7min | 2 tasks | 13 files |
-| Phase 11 P02 | 5min | 2 tasks | 6 files |
-| Phase 11 P03 | 4min | 2 tasks | 5 files |
-| Phase 11.1 P02 | 10min | 2 tasks | 8 files |
-| Phase 11.1 P01 | 13min | 2 tasks | 15 files |
-| Phase 12 P01 | 4min | 2 tasks | 12 files |
-| Phase 12 P02 | 5min | 2 tasks | 7 files |
-| Phase 12 P03 | 9min | 2 tasks | 10 files |
-| Phase 13 P01 | 15min | 2 tasks | 6 files |
-| Phase 13 P03 | 11min | 4 tasks | 14 files |
-| Phase 13 P02 | 14min | 3 tasks | 35 files |
-| Phase 14 P01 | 3min | 2 tasks | 4 files |
-| Phase 14 P02 | 3min | 2 tasks | 2 files |
-| Phase 14 P03 | 3min | 2 tasks | 4 files |
-| Phase 15 P01 | 6min | 3 tasks | 6 files |
-| Phase 15 P02 | 7min | 3 tasks | 7 files |
-| Phase 15 P03 | 9min | 2 tasks | 8 files |
-| Phase 16 P02 | 7min | 2 tasks | 2 files |
-| Phase 17 P01 | 3min | 2 tasks | 3 files |
-| Phase 17 P02 | 8min | 2 tasks | 8 files |
-| Phase 18 P02 | 6min | 2 tasks | 12 files |
-| Phase 18 P03 | 4min | 2 tasks | 10 files |
-| Phase 19 P02 | 3min | 2 tasks | 4 files |
-| Phase 19 P04 | 5min | 2 tasks | 8 files |
-| Phase 20 P01 | 3min | 2 tasks | 5 files |
-| Phase 20 P02 | 5min | 2 tasks | 4 files |
-| Phase 20 P03 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -224,82 +190,17 @@ Recent decisions affecting current work:
 - [Phase 10]: Extended DigestLatest/DigestHighlight types locally in fixture file for name and created_at fields not in OpenAPI schema
 - [Phase 10]: Used Tailwind class via cn() for HighlightItem thread link color instead of inline style string manipulation
 - [Phase 10]: Used EnrichedCourse local type assertion for fixture fields (name, created_at) not in OpenAPI schema
-- [Phase 11]: Transitive overlap with greedy column reuse: events sharing end/start time reuse columns
-- [Phase 11]: Week param in sessions API maps to teaching_week number (1-13), not slider position (1-14)
-- [11-02]: hexToRgb helper for dynamic rgba(base, 0.13) event backgrounds matching prototype
-- [11-02]: Tailwind group/group-hover pattern for deadline tooltip visibility
-- [11-02]: i18n-aware useRouter for event click navigation to /courses/{code}
-- [11-03]: MiniCalendar reused from dashboard via withClientOnly, empty deadlineDays for timetable right panel
-- [11.1-02]: weekDeadlineItems filters by Mon-Sun via isWithinInterval; all deadlines in "all" mode
-- [11.1-02]: deadlineDays computed via Map accumulator, skipping completed status, passed through to MiniCalendar
-- [11-03]: computeCurrentWeek maps system date to semester position via differenceInWeeks, fallback to 4
-- [11-03]: Deadline urgency: <=2 urgent, <=4 warning, <=7 normal, >7 later
-- [Phase 11.1]: EDGU1003 uses undefined (not null) for ed_course_id matching optional string type
-- [Phase 11.1]: Deadline status uses 'completed' not 'graded' per OpenAPI schema enum
-- [Phase 12]: Scroll-spy uses isScrollingRef guard to prevent race condition during smooth scroll (800ms timeout)
-- [Phase 12]: SettingsNav uses hidden min-[900px]:flex for responsive hide below 900px matching prototype
-- [Phase 12]: Danger Zone nav item uses permanent red icon color (#cc4455) regardless of active state
-- [Phase 12-02]: TokensSection uses per-platform individual useState over single object state
-- [Phase 12-02]: GPA slider and numeric input share single gpaValue state to prevent circular updates
-- [Phase 12-02]: NotificationsSection persists to localStorage under 'uniboard-notification-prefs' key
-- [Phase 12-03]: Native <dialog> for DangerZoneSection, consistent with Phase 05 pattern
-- [Phase 12-03]: Course linking data hardcoded matching prototype (future API connection)
-- [Phase 12-03]: DELETE text gate pattern for account deletion confirmation
-- [Phase 12-03]: Account card WAM uses gpa_target with 77.5 fallback
-- [Phase 13-01]: profiles table PK is auth.users(id) directly with ON DELETE CASCADE, not a separate UUID
-- [Phase 13-01]: RLS subquery join pattern for indirect tables (grades->courses->user_id) rather than denormalizing user_id
-- [Phase 13-01]: GENERATED ALWAYS AS STORED for tsvector columns matching SQLAlchemy Computed definitions
-- [Phase 13-01]: pgvector extension in extensions schema, vector(1024) for Voyage AI embeddings
-- [Phase 13]: Bridge pattern preserves all 26 data hooks unchanged -- only auth mutation source replaced
-- [Phase 13]: Header/useDeleteAccount logout calls supabase.auth.signOut() to invalidate session cookies
-- [Phase 13]: Profile model has no email field -- email managed by auth.users, queried via raw SQL when needed
-- [Phase 13]: All routes use get_current_user_id (UUID) instead of get_current_user (User object) -- fetch Profile from DB when needed
-- [Phase 14]: 401/403 check placed BEFORE retry check in Ed adapters for immediate TokenInvalidError propagation
-- [Phase 14]: Circuit breaker test for Ed Discussion uses _request directly since get_threads gracefully degrades
-- [Phase 14]: Circuit breaker OPEN test targets _request directly since get_lessons catches UpstreamUnavailableError
-- [Phase 14]: UnitOutlineParser tests use _extract_learning_outcomes and _extract_description public HTML APIs rather than soup internals
-- [Phase 15]: Route adapter pattern converts legacy GPAService output to contract-aligned shapes in route handlers
-- [Phase 15]: CourseDeadlineResponse in course.py (not deadline.py) for Plan 01 self-containment
-- [Phase 15]: Route-level adapter pattern: legacy service returns converted to contract shape in route handlers, keeping service layer unchanged
-- [Phase 15]: Status/days_remaining computed at route level from due_date, not stored in DB
-- [Phase 15]: JWT test auth pattern: generate Supabase-compatible JWT directly in test fixtures (no auth endpoint dependency)
-- [Phase 15]: Naive datetimes for TIMESTAMP WITHOUT TIME ZONE columns in asyncpg (tz-aware datetimes cause DataError)
-- [Phase 16]: Patch lazy-imported adapters at source module (src.adapters.X) not consumer module for sync task testing
-- [Phase 17]: Risk alert hook only fires on sync_status=='success' to avoid false alerts on failed syncs
-- [Phase 17]: Token health check reuses reminder_check_interval_min (30 min) since token expiry is not time-critical
-- [Phase 17]: Patch NotificationService at source module for lazy import testing
-- [Phase 18-02]: Quality gate count-first approach avoids redundant DB queries in check_and_update_fallback
-- [Phase 18-02]: Quality gate snapshot pattern (insert new row) for audit trail
-- [Phase 18-02]: Digest route uses lang query param with regex validation for i18n prompt selection
-- [Phase 18]: FeedbackButton toggle-off is visual only; UPSERT re-submit is safe
-- [Phase 18]: SCORE_URGENCY_MAP provides numeric fallback alongside string-based URGENCY_STYLES
-- [Phase 18]: EdPostItem created as new component (CourseDetailPage had no existing Ed posts section)
-- [Phase 19]: Translation runs after module sync (sync_all_modules) with separate session for AI calls
-- [Phase 19]: Extended OpenAPI generated types locally with language_preference rather than regenerating spec
-- [Phase 20]: Used sqlalchemy JSON (generic) matching Course.grading_weights precedent for JSONB columns
-- [Phase 20]: Composite indexes on (operation_type, course_id, status/success) for skill lookup performance
-- [Phase 20]: Lazy adapter creation in ToolExecutor — adapters only instantiated on first tool call
-- [Phase 20]: SequenceMatcher for trace similarity at 0.7 threshold — lightweight stdlib, no ML dependency
-- [Phase 20]: Lazy prompt resolution in seed_skills via marker strings to avoid circular imports
-- [Phase 20]: Inline fallback function when ToolExecutor is None for backward compatibility
-- [Phase 20]: Traced executor wrapper captures tool calls without modifying ToolExecutor class
-- [Phase 20]: _build_tool_executor as standalone async helper keeps QAService decoupled from token decryption
-
-### Roadmap Evolution
-
-- Phase 11.1 inserted after Phase 11: Real data integration and UAT gap closure (URGENT)
 
 ### Pending Todos
 
-- Fix 3 broken integration test imports (User→Profile migration)
-- M3 milestone planning via /gsd:new-milestone or /gsd:discuss-phase 18
+None yet.
 
 ### Blockers/Concerns
 
-None.
+None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T04:41:19.819Z
-Stopped at: Completed 20-03-PLAN.md
-Resume file: None
+Last session: 2026-03-29T02:42:24.151Z
+Stopped at: Phase 20 context gathered
+Resume file: .planning/phases/20-skill-system/20-CONTEXT.md

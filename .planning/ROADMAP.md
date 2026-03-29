@@ -47,7 +47,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 
 - [x] **Phase 18: AI Enhancement** — AI thread evaluation, AI digest scoring, quality gate with F1 monitoring (completed 2026-03-28)
 - [x] **Phase 19: MCP Agent & Streaming** (4/5 plans) — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A, language preference setting (completed 2026-03-28)
-- [ ] **Phase 20: Skill System** — Auto-generated prompt templates, per-course differentiation, ~50 skills
+- [x] **Phase 20: Skill System** — Auto-generated prompt templates, per-course differentiation, ~50 skills (completed 2026-03-29)
 - [ ] **Phase 21: MCP Server & ROI Analysis** — PLAT-03 MCP server for Claude Desktop, Assignment ROI analysis
 
 ### 📋 M4: Engineering (Planned)
@@ -95,7 +95,11 @@ Plans:
   2. Subsequent executions of the same operation load the generated skill instead of re-exploring
   3. Skills are per-course differentiated (different material organization patterns detected)
   4. ~50 skills exist across data collection, data processing, AI analysis, and user action categories
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [x] 20-01-PLAN.md — ORM models, schemas, Alembic migration
+- [x] 20-02-PLAN.md — ToolExecutor + SkillService
+- [x] 20-03-PLAN.md — QAService integration + wiring
 
 ### Phase 21: MCP Server & ROI Analysis
 **Goal**: Technical users can access UniBoard via Claude Desktop, and AI provides assignment ROI analysis
@@ -153,7 +157,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
 | 19. MCP Agent & Streaming | M3 | 5/5 | Complete   | 2026-03-28 |
-| 20. Skill System | M3 | 0/TBD | Not started | - |
+| 20. Skill System | M3 | 3/3 | Complete    | 2026-03-29 |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |
 | 23. Deployment | M4 | 0/TBD | Not started | - |
