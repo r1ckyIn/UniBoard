@@ -1,11 +1,8 @@
-"""Route MCP Agent tool calls to real platform adapters.
-
-Per D-13: Maps tool names to adapter methods.
-Per D-14: Requires decrypted tokens + course context.
-"""
+"""Route MCP Agent tool calls to real platform adapters."""
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 import structlog
@@ -22,11 +19,7 @@ logger = structlog.get_logger()
 
 
 class ToolExecutor:
-    """Route MCP Agent tool calls to real platform adapters.
-
-    Per D-13: Maps tool names to adapter methods.
-    Per D-14: Requires decrypted tokens + course context.
-    """
+    """Route MCP Agent tool calls to real platform adapters."""
 
     def __init__(
         self,
@@ -37,7 +30,6 @@ class ToolExecutor:
         self._canvas_token = canvas_token
         self._ed_token = ed_token
         self._course = course
-        # Adapters created lazily on first tool call that needs them
         self._canvas_adapter: CanvasAdapter | None = None
         self._ed_discussion_adapter: EdDiscussionAdapter | None = None
         self._ed_lessons_adapter: EdLessonsAdapter | None = None
@@ -53,25 +45,48 @@ class ToolExecutor:
         else:
             return f"Unknown tool: {name}"
 
-    async def _search_canvas(self, query: str) -> str:
-        """Search Canvas course modules and filter by query."""
+    async def _with_adapter_error_handling(
+        self,
+        platform: str,
+        fn: Callable[[], Awaitable[str]],
+    ) -> str:
+        """Run an adapter call with standardized error handling."""
+        try:
+            return await fn()
+        except TokenInvalidError:
+            return f"{platform} API token is invalid or expired. Please update in Settings."
+        except (UpstreamUnavailableError, UpstreamAPIError) as exc:
+            return f"{platform} API temporarily unavailable: {exc}. Try again later."
+
+    def _require_canvas_token(self) -> str | None:
+        """Return error message if Canvas token is missing, else None."""
         if self._canvas_token is None:
-            return (
-                "Canvas API token not configured. "
-                "Please add your Canvas API token in Settings."
-            )
+            return "Canvas API token not configured. Please add your Canvas API token in Settings."
         if self._course.canvas_course_id is None:
             return "No Canvas course linked."
+        return None
 
-        try:
+    def _require_ed_token(self, *, need_course: bool = True) -> str | None:
+        """Return error message if Ed token is missing, else None."""
+        if self._ed_token is None:
+            return "Ed API token not configured. Please add your Ed API token in Settings."
+        if need_course and self._course.ed_course_id is None:
+            return "No Ed Discussion course linked."
+        return None
+
+    async def _search_canvas(self, query: str) -> str:
+        """Search Canvas course modules and filter by query."""
+        if err := self._require_canvas_token():
+            return err
+
+        async def _do() -> str:
             if self._canvas_adapter is None:
-                self._canvas_adapter = CanvasAdapter(api_token=self._canvas_token)
+                self._canvas_adapter = CanvasAdapter(api_token=self._canvas_token)  # type: ignore[arg-type]
 
             modules: list[dict[str, Any]] = await self._canvas_adapter.get_modules(
                 self._course.canvas_course_id, include_items=True
             )
 
-            # Filter module items matching the query (case-insensitive substring)
             query_lower = query.lower()
             matches: list[str] = []
             for module in modules:
@@ -89,88 +104,50 @@ class ToolExecutor:
 
             if not matches:
                 return f"No Canvas modules matched query: {query}"
-
             return "\n\n".join(matches)
 
-        except TokenInvalidError:
-            return (
-                "Canvas API token is invalid or expired. "
-                "Please update in Settings."
-            )
-        except (UpstreamUnavailableError, UpstreamAPIError) as exc:
-            return (
-                f"Canvas API temporarily unavailable: {exc}. "
-                "Try again later."
-            )
+        return await self._with_adapter_error_handling("Canvas", _do)
 
     async def _search_ed_threads(self, query: str) -> str:
-        """Search Ed Discussion threads and filter by query."""
-        if self._ed_token is None:
-            return (
-                "Ed API token not configured. "
-                "Please add your Ed API token in Settings."
-            )
-        if self._course.ed_course_id is None:
-            return "No Ed Discussion course linked."
+        """Search Ed Discussion threads via server-side API search."""
+        if err := self._require_ed_token():
+            return err
 
-        try:
+        async def _do() -> str:
             if self._ed_discussion_adapter is None:
-                self._ed_discussion_adapter = EdDiscussionAdapter(
-                    api_token=self._ed_token
-                )
+                self._ed_discussion_adapter = EdDiscussionAdapter(api_token=self._ed_token)  # type: ignore[arg-type]
 
-            threads = await self._ed_discussion_adapter.get_threads(
-                self._course.ed_course_id, limit=50
+            threads = await self._ed_discussion_adapter.search_threads(
+                self._course.ed_course_id, query
             )
 
-            # Filter threads matching the query (case-insensitive)
-            query_lower = query.lower()
-            matches: list[str] = []
-            for thread in threads:
-                title = str(thread.get("title", ""))
-                content = str(thread.get("content", ""))
-                if query_lower in title.lower() or query_lower in content.lower():
-                    thread_id = thread.get("id", "?")
-                    is_endorsed = thread.get("is_endorsed", False)
-                    content_preview = content[:500]
-                    entry = (
-                        f"[Ed Thread #{thread_id}] {title} "
-                        f"(endorsed={is_endorsed}): {content_preview}"
-                    )
-                    matches.append(entry)
-
-            if not matches:
+            if not threads:
                 return f"No Ed threads matched query: {query}"
 
+            matches: list[str] = []
+            for thread in threads:
+                thread_id = thread.get("id", "?")
+                title = str(thread.get("title", ""))
+                content = str(thread.get("content", ""))[:500]
+                is_endorsed = thread.get("is_endorsed", False)
+                matches.append(
+                    f"[Ed Thread #{thread_id}] {title} "
+                    f"(endorsed={is_endorsed}): {content}"
+                )
             return "\n\n".join(matches)
 
-        except TokenInvalidError:
-            return (
-                "Ed API token is invalid or expired. "
-                "Please update in Settings."
-            )
-        except (UpstreamUnavailableError, UpstreamAPIError) as exc:
-            return (
-                f"Ed API temporarily unavailable: {exc}. "
-                "Try again later."
-            )
+        return await self._with_adapter_error_handling("Ed", _do)
 
     async def _get_ed_lesson(self, lesson_id: int) -> str:
         """Fetch a specific Ed lesson with slides."""
-        if self._ed_token is None:
-            return (
-                "Ed API token not configured. "
-                "Please add your Ed API token in Settings."
-            )
+        if err := self._require_ed_token(need_course=False):
+            return err
 
-        try:
+        async def _do() -> str:
             if self._ed_lessons_adapter is None:
-                self._ed_lessons_adapter = EdLessonsAdapter(
-                    api_token=self._ed_token
-                )
+                self._ed_lessons_adapter = EdLessonsAdapter(api_token=self._ed_token)  # type: ignore[arg-type]
 
             lesson = await self._ed_lessons_adapter.get_lesson(str(lesson_id))
-
             if not lesson:
                 return f"Lesson {lesson_id} not found or empty."
 
@@ -190,16 +167,7 @@ class ToolExecutor:
 
             return "\n".join(parts)
 
-        except TokenInvalidError:
-            return (
-                "Ed API token is invalid or expired. "
-                "Please update in Settings."
-            )
-        except (UpstreamUnavailableError, UpstreamAPIError) as exc:
-            return (
-                f"Ed API temporarily unavailable: {exc}. "
-                "Try again later."
-            )
+        return await self._with_adapter_error_handling("Ed", _do)
 
     async def close(self) -> None:
         """Close all adapter HTTP clients."""

@@ -20,7 +20,7 @@ from src.models.user import Profile
 from src.schemas.ai import QAResponse, UnitReviewResponse
 from src.schemas.common import RateLimitedError
 from src.services.ai_engine import AIEngine
-from src.services.skill import SkillService
+from src.services.skill import SkillService, _TRACE_OUTPUT_MAX_CHARS
 from src.services.tool_executor import ToolExecutor
 
 logger = structlog.get_logger()
@@ -254,13 +254,11 @@ class QAService:
             # MCP agent fallback: use tool_use loop with adapter-backed tools
             from src.services.ai_engine import AGENT_TOOLS
 
-            # Skill lookup per D-05: per-course -> global -> explore
             skill = None
             operation_type = "qa_agent"
             if self._skill_service:
                 skill = await self._skill_service.get_skill(operation_type, course_id)
 
-            # Use ToolExecutor if available, else fallback to placeholder
             if self._tool_executor:
                 tool_fn = self._tool_executor.execute
             else:
@@ -277,7 +275,7 @@ class QAService:
                 trace_steps.append({
                     "tool_name": name,
                     "input": input_data,
-                    "output": result[:2000],  # Truncate for storage
+                    "output": result[:_TRACE_OUTPUT_MAX_CHARS],
                 })
                 return result
 

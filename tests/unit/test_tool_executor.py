@@ -106,22 +106,17 @@ class TestToolExecutorSearchEdThreads:
 
     @pytest.mark.asyncio
     async def test_search_ed_threads_filters_by_query(self) -> None:
-        """Test 2: execute search_ed_threads calls EdDiscussionAdapter.get_threads and filters."""
+        """Test 2: execute search_ed_threads calls EdDiscussionAdapter.search_threads."""
         from src.services.tool_executor import ToolExecutor
 
         mock_adapter = AsyncMock()
-        mock_adapter.get_threads.return_value = [
+        # search_threads returns server-side filtered results
+        mock_adapter.search_threads.return_value = [
             {
                 "id": 1,
                 "title": "Assignment 1 clarification",
                 "content": "The due date has changed.",
                 "is_endorsed": True,
-            },
-            {
-                "id": 2,
-                "title": "General question",
-                "content": "When is the final?",
-                "is_endorsed": False,
             },
         ]
 
@@ -137,9 +132,7 @@ class TestToolExecutorSearchEdThreads:
             )
 
         assert "Assignment 1 clarification" in result
-        # "General question" should NOT match "assignment"
-        assert "General question" not in result
-        mock_adapter.get_threads.assert_awaited_once()
+        mock_adapter.search_threads.assert_awaited_once()
 
 
 class TestToolExecutorEdLesson:
@@ -276,7 +269,7 @@ class TestToolExecutorAdapterErrors:
         from src.services.tool_executor import ToolExecutor
 
         mock_adapter = AsyncMock()
-        mock_adapter.get_threads.side_effect = UpstreamAPIError("Ed", "HTTP 500")
+        mock_adapter.search_threads.side_effect = UpstreamAPIError("Ed", "HTTP 500")
 
         course = _make_course()
         executor = ToolExecutor(canvas_token=None, ed_token="tok", course=course)

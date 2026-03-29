@@ -166,7 +166,6 @@ class SkillService:
 
         Per D-05: Returns the most specific active skill for the operation.
         """
-        # Phase 1: per-course lookup
         if course_id is not None:
             stmt = select(Skill).where(
                 Skill.operation_type == operation_type,
@@ -178,8 +177,7 @@ class SkillService:
             if skill is not None:
                 return skill
 
-        # Phase 2: global fallback (course_id IS NULL)
-        # IMPORTANT: Use .is_(None) for NULL comparison (Pitfall 3 from Research)
+        # Global fallback — .is_(None) required for SQL NULL comparison
         stmt = select(Skill).where(
             Skill.operation_type == operation_type,
             Skill.course_id.is_(None),
@@ -297,7 +295,7 @@ class SkillService:
             existing_skill.version += 1
             existing_skill.workflow_steps = {"steps": common_steps}  # type: ignore[assignment]
             existing_skill.tool_sequence = {"tools": unique_tools}  # type: ignore[assignment]
-            existing_skill.status = "draft"
+            existing_skill.status = SkillStatus.DRAFT.value
             await self._session.flush()
             logger.info(
                 "skill_version_incremented",
@@ -317,7 +315,7 @@ class SkillService:
             ),
             workflow_steps={"steps": common_steps},  # type: ignore[arg-type]
             tool_sequence={"tools": unique_tools},  # type: ignore[arg-type]
-            status="draft",
+            status=SkillStatus.DRAFT.value,
             is_seeded=False,
             version=1,
         )
@@ -346,9 +344,8 @@ class SkillService:
         skill.success_count += 1
         skill.last_used_at = datetime.utcnow()
 
-        # Draft -> active on first successful replay
-        if skill.status == "draft":
-            skill.status = "active"
+        if skill.status == SkillStatus.DRAFT.value:
+            skill.status = SkillStatus.ACTIVE.value
             logger.info("skill_activated", skill_id=str(skill_id))
 
         await self._session.flush()
@@ -366,32 +363,20 @@ class SkillService:
 
         skill.failure_count += 1
         await self._session.flush()
+        self._check_degradation(skill)
 
-        # Check if skill has degraded below threshold
-        await self.check_degradation(skill_id)
-
-    async def check_degradation(self, skill_id: uuid.UUID) -> None:
-        """Check if a skill's success rate has fallen below threshold.
-
-        Per D-08: Transitions active -> needs_update when success_rate < 70%.
-        """
-        stmt = select(Skill).where(Skill.id == skill_id)
-        result = await self._session.execute(stmt)
-        skill = result.scalar_one_or_none()
-        if skill is None:
-            return
-
+    def _check_degradation(self, skill: Skill) -> None:
+        """Transition active -> needs_update when success_rate < 70%."""
         total = skill.success_count + skill.failure_count
         if total == 0:
             return
 
         success_rate = skill.success_count / total
-        if success_rate < _DEGRADATION_THRESHOLD and skill.status == "active":
-            skill.status = "needs_update"
-            await self._session.flush()
+        if success_rate < _DEGRADATION_THRESHOLD and skill.status == SkillStatus.ACTIVE.value:
+            skill.status = SkillStatus.NEEDS_UPDATE.value
             logger.warning(
                 "skill_degraded",
-                skill_id=str(skill_id),
+                skill_id=str(skill.id),
                 success_rate=round(success_rate, 2),
                 total_executions=total,
             )
@@ -402,21 +387,21 @@ class SkillService:
         Per D-10: Idempotent — skips already-seeded skills.
         Returns count of skills created.
         """
-        created = 0
-        for defn in _SEEDED_SKILLS:
-            op_type = str(defn["operation_type"])
-
-            # Check if already seeded
-            stmt = select(Skill).where(
-                Skill.operation_type == op_type,
+        # Batch-fetch existing seeded operation_types to avoid N+1
+        existing_result = await self._session.execute(
+            select(Skill.operation_type).where(
                 Skill.course_id.is_(None),
                 Skill.is_seeded.is_(True),
             )
-            result = await self._session.execute(stmt)
-            if result.scalar_one_or_none() is not None:
+        )
+        existing_ops = {row[0] for row in existing_result.all()}
+
+        created = 0
+        for defn in _SEEDED_SKILLS:
+            op_type = str(defn["operation_type"])
+            if op_type in existing_ops:
                 continue
 
-            # Resolve lazy prompt markers
             prompt = str(defn["system_prompt"])
             if prompt.startswith("_LAZY_"):
                 prompt = _resolve_lazy_prompt(prompt)
@@ -428,7 +413,7 @@ class SkillService:
                 system_prompt=prompt,
                 workflow_steps=defn.get("workflow_steps"),  # type: ignore[arg-type]
                 tool_sequence=defn.get("tool_sequence"),  # type: ignore[arg-type]
-                status="active",
+                status=SkillStatus.ACTIVE.value,
                 is_seeded=True,
                 version=1,
             )

@@ -337,39 +337,27 @@ class TestSkillServiceLifecycle:
 
     @pytest.mark.asyncio
     async def test_degradation(self) -> None:
-        """Test 9: check_degradation transitions active to needs_update when success_rate < 70%."""
+        """Test 9: _check_degradation transitions active to needs_update when success_rate < 70%."""
         from src.services.skill import SkillService
 
-        skill_id = uuid.uuid4()
-        # 2 success, 5 failure -> success_rate = 2/7 = 0.286
         skill = _mock_skill(status="active", success_count=2, failure_count=5)
 
         session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = skill
-        session.execute.return_value = mock_result
-
         svc = SkillService(session)
-        await svc.check_degradation(skill_id)
+        svc._check_degradation(skill)
 
         assert skill.status == "needs_update"
 
     @pytest.mark.asyncio
     async def test_no_degradation_healthy_skill(self) -> None:
-        """check_degradation does not change status when success_rate >= 70%."""
+        """_check_degradation does not change status when success_rate >= 70%."""
         from src.services.skill import SkillService
 
-        skill_id = uuid.uuid4()
-        # 8 success, 2 failure -> success_rate = 0.8
         skill = _mock_skill(status="active", success_count=8, failure_count=2)
 
         session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = skill
-        session.execute.return_value = mock_result
-
         svc = SkillService(session)
-        await svc.check_degradation(skill_id)
+        svc._check_degradation(skill)
 
         assert skill.status == "active"
 
@@ -404,9 +392,9 @@ class TestSkillServiceSeed:
 
         session = AsyncMock()
 
-        # No existing seeded skills
+        # Batch query returns no existing seeded operation_types
         mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
+        mock_result.all.return_value = []
         session.execute.return_value = mock_result
 
         svc = SkillService(session)
@@ -436,10 +424,12 @@ class TestSkillServiceSeed:
 
         session = AsyncMock()
 
-        # All skills already exist
-        existing = _mock_skill(is_seeded=True)
+        # Batch query returns all operation_types as already seeded
+        from src.services.skill import _SEEDED_SKILLS
         mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = existing
+        mock_result.all.return_value = [
+            (str(d["operation_type"]),) for d in _SEEDED_SKILLS
+        ]
         session.execute.return_value = mock_result
 
         svc = SkillService(session)
