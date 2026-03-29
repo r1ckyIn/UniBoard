@@ -27,9 +27,10 @@ Build a runtime skill system that auto-generates and reuses MCP Agent workflow t
 - **D-05:** Two-phase lookup: (1) exact match on `(operation_type, course_id)` → per-course skill, (2) fallback to `(operation_type, course_id=NULL)` → global skill, (3) no match → full exploration via `agent_stream()`.
 - **D-06:** No embedding-based semantic matching — operation_type enum is sufficient for UniBoard's bounded domain (~50 operations).
 
-### Auto-generation Trigger
-- **D-07:** Trigger after `agent_stream()` completes with: stop_reason="end_turn" AND 2+ tool_use calls AND response contains citations. Captures tool call names, input patterns, effective prompt.
-- **D-08:** Quality gate: compatible with Phase 18 F1 monitoring. Skills auto-generated from low-quality interactions (no citations, user retry) are marked `is_active=False`.
+### Auto-generation Trigger (AgentRR-inspired)
+- **D-07:** Do NOT generate skill on first success. Record `SkillExecution` traces (tool call sequence, params, result quality). When same `(operation_type, course_id)` has >= 2 successful traces with > 70% step pattern similarity, extract common pattern into a draft skill. Rationale: multi-trace intersection is more reliable than single-trace capture (per AgentRR "experience abstraction").
+- **D-07b:** New `skill_executions` table: tracks each `agent_stream()` run with `execution_trace` JSONB (tool calls, inputs, outputs), `success` bool, `latency_ms`, `tokens_used`. This is the raw data for auto-generation.
+- **D-08:** Quality gate: compatible with Phase 18 F1 monitoring. Auto-generated skills start as `status=draft`, become `active` after first successful replay. Skills with `success_rate < 70%` auto-degrade to `needs_update`, triggering re-exploration.
 - **D-09:** Dedup: if `(operation_type, course_id)` already exists, increment `version` and update rather than create duplicate.
 
 ### Pre-seeded vs Emergent
@@ -49,7 +50,8 @@ Build a runtime skill system that auto-generates and reuses MCP Agent workflow t
 - **D-14:** `ToolExecutor` requires user's decrypted tokens + course context. Injected via the same `Depends()` DI pattern as other services.
 
 ### Skill Lifecycle
-- **D-15:** Version column tracks evolution. `superseded_by` UUID points to newer version when updated. `is_active=False` for deprecated skills. `last_used_at` enables stale skill cleanup.
+- **D-15:** Lifecycle state machine: `draft → active → needs_update → active (version++) → deprecated → archived`. Draft = auto-generated, not yet replay-tested. Active = replay-verified. Needs_update = success_rate < 70%, triggers re-exploration. Deprecated = semester ended. Archived = deprecated > 90 days, cleanup job.
+- **D-16:** `SkillExecution` history provides full audit trail. No need for diff/rollback — re-exploration generates a better skill than reverting to an old one.
 
 ### Claude's Discretion
 - Specific pre-seeded skill definitions (exact prompts, tool sequences) — researcher/planner can determine optimal configurations
