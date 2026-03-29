@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 20-01-PLAN.md
-last_updated: "2026-03-29T04:26:09.602Z"
+stopped_at: Completed 20-02-PLAN.md
+last_updated: "2026-03-29T04:33:30.940Z"
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 20 (skill-system) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Milestone: M2 complete, M3 in progress
 
 ## Milestones Completed
@@ -118,6 +118,7 @@ Milestone: M2 complete, M3 in progress
 | Phase 19 P02 | 3min | 2 tasks | 4 files |
 | Phase 19 P04 | 5min | 2 tasks | 8 files |
 | Phase 20 P01 | 3min | 2 tasks | 5 files |
+| Phase 20 P02 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -276,6 +277,9 @@ Recent decisions affecting current work:
 - [Phase 19]: Extended OpenAPI generated types locally with language_preference rather than regenerating spec
 - [Phase 20]: Used sqlalchemy JSON (generic) matching Course.grading_weights precedent for JSONB columns
 - [Phase 20]: Composite indexes on (operation_type, course_id, status/success) for skill lookup performance
+- [Phase 20]: Lazy adapter creation in ToolExecutor — adapters only instantiated on first tool call
+- [Phase 20]: SequenceMatcher for trace similarity at 0.7 threshold — lightweight stdlib, no ML dependency
+- [Phase 20]: Lazy prompt resolution in seed_skills via marker strings to avoid circular imports
 
 ### Roadmap Evolution
 
@@ -292,6 +296,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-29T04:26:09.595Z
-Stopped at: Completed 20-01-PLAN.md
+Last session: 2026-03-29T04:33:30.935Z
+Stopped at: Completed 20-02-PLAN.md
 Resume file: None
