@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
@@ -19,6 +20,8 @@ from src.models.user import Profile
 from src.schemas.ai import QAResponse, UnitReviewResponse
 from src.schemas.common import RateLimitedError
 from src.services.ai_engine import AIEngine
+from src.services.skill import SkillService
+from src.services.tool_executor import ToolExecutor
 
 logger = structlog.get_logger()
 
@@ -37,10 +40,14 @@ class QAService:
         session: AsyncSession,
         ai_engine: AIEngine,
         voyage_api_key: str = "",
+        tool_executor: ToolExecutor | None = None,
+        skill_service: SkillService | None = None,
     ) -> None:
         self._session = session
         self._ai_engine = ai_engine
         self._voyage_api_key = voyage_api_key
+        self._tool_executor = tool_executor
+        self._skill_service = skill_service
 
     async def _check_and_increment_limit(self, user_id: uuid.UUID) -> Profile:
         """Check AI daily limit and atomically increment counter. Raises RateLimitedError.
@@ -247,25 +254,80 @@ class QAService:
             # MCP agent fallback: use tool_use loop with adapter-backed tools
             from src.services.ai_engine import AGENT_TOOLS
 
-            async def _execute_tool(
-                name: str,
-                input_data: dict[str, object],
-            ) -> str:
-                """Execute adapter-backed tool calls."""
-                # Placeholder -- full adapter integration in Phase 20
-                return (
-                    f"[Tool {name} called with {input_data}. "
-                    f"No live adapter connected yet.]"
-                )
+            # Skill lookup per D-05: per-course -> global -> explore
+            skill = None
+            operation_type = "qa_agent"
+            if self._skill_service:
+                skill = await self._skill_service.get_skill(operation_type, course_id)
 
-            async for token in self._ai_engine.agent_stream(
-                question=question,
-                context_text=materials_text,
-                tools=AGENT_TOOLS,
-                tool_executor=_execute_tool,
-                language=language,
-            ):
-                yield token
+            # Use ToolExecutor if available, else fallback to placeholder
+            if self._tool_executor:
+                tool_fn = self._tool_executor.execute
+            else:
+                async def tool_fn(name: str, input_data: dict[str, object]) -> str:
+                    return f"[Tool {name} called. No adapter connected.]"
+
+            # Track execution for tracing
+            start_time = time.monotonic()
+            trace_steps: list[dict[str, object]] = []
+
+            # Wrap tool_executor to capture trace
+            async def _traced_executor(name: str, input_data: dict[str, object]) -> str:
+                result = await tool_fn(name, input_data)
+                trace_steps.append({
+                    "tool_name": name,
+                    "input": input_data,
+                    "output": result[:2000],  # Truncate for storage
+                })
+                return result
+
+            try:
+                async for token in self._ai_engine.agent_stream(
+                    question=question,
+                    context_text=materials_text,
+                    tools=AGENT_TOOLS,
+                    tool_executor=_traced_executor,
+                    language=language,
+                ):
+                    yield token
+
+                # Record successful execution trace
+                latency_ms = int((time.monotonic() - start_time) * 1000)
+                if self._skill_service and trace_steps:
+                    await self._skill_service.record_execution(
+                        operation_type=operation_type,
+                        course_id=course_id,
+                        execution_trace=trace_steps,
+                        success=True,
+                        latency_ms=latency_ms,
+                        tokens_used=0,
+                        skill_id=skill.id if skill else None,
+                    )
+                    # Mark skill success if we used one
+                    if skill:
+                        await self._skill_service.mark_success(skill.id)
+                    # Check if we can auto-generate a skill
+                    else:
+                        await self._skill_service.maybe_generate_skill(
+                            operation_type, course_id
+                        )
+
+            except Exception:
+                # Record failed execution
+                if self._skill_service and trace_steps:
+                    latency_ms = int((time.monotonic() - start_time) * 1000)
+                    await self._skill_service.record_execution(
+                        operation_type=operation_type,
+                        course_id=course_id,
+                        execution_trace=trace_steps,
+                        success=False,
+                        latency_ms=latency_ms,
+                        tokens_used=0,
+                        skill_id=skill.id if skill else None,
+                    )
+                    if skill:
+                        await self._skill_service.mark_failure(skill.id)
+                raise
         else:
             # Direct context streaming
             async for token in self._ai_engine.stream_question(
@@ -285,6 +347,11 @@ class QAService:
         """Stream an AI unit review as markdown."""
         await self._check_and_increment_limit(user_id)
         course, materials_text = await self._load_course_materials(course_id)
+
+        # Skill lookup for review prompt (future: inject skill.system_prompt)
+        _skill = None
+        if self._skill_service:
+            _skill = await self._skill_service.get_skill("unit_review", course_id)
 
         async for token in self._ai_engine.stream_review(
             materials_text=materials_text,

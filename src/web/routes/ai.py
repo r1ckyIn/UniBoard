@@ -6,22 +6,70 @@ import uuid
 from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Depends, Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
 from src.config import get_settings
+from src.models.course import Course
+from src.models.user import Profile
 from src.schemas.ai import QARequest, QAResponse, StreamingQARequest, UnitReviewResponse
 from src.schemas.common import SuccessResponse
+from src.security.encryption import TokenEncryption
 from src.services.ai_engine import AIEngine
 from src.services.qa import QAService
-from src.web.deps import get_current_user_id, get_request_meta, get_session
+from src.services.skill import SkillService
+from src.services.tool_executor import ToolExecutor
+from src.web.deps import get_current_user_id, get_encryption, get_request_meta, get_session
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-def _build_qa_service(session: AsyncSession) -> QAService:
+async def _build_tool_executor(
+    session: AsyncSession,
+    user_id: uuid.UUID,
+    course_id: uuid.UUID,
+    encryption: TokenEncryption,
+) -> ToolExecutor | None:
+    """Build ToolExecutor with user's decrypted tokens for a specific course."""
+    # Fetch profile for tokens
+    profile_result = await session.execute(
+        select(Profile).where(Profile.id == user_id)
+    )
+    profile = profile_result.scalar_one_or_none()
+    if not profile:
+        return None
+
+    # Fetch course for platform IDs
+    course_result = await session.execute(
+        select(Course).where(Course.id == course_id, Course.user_id == user_id)
+    )
+    course = course_result.scalar_one_or_none()
+    if not course:
+        return None
+
+    # Decrypt tokens (None if not configured)
+    canvas_token = (
+        encryption.decrypt(profile.canvas_api_token_encrypted)
+        if profile.canvas_api_token_encrypted
+        else None
+    )
+    ed_token = (
+        encryption.decrypt(profile.ed_api_token_encrypted)
+        if profile.ed_api_token_encrypted
+        else None
+    )
+
+    return ToolExecutor(canvas_token=canvas_token, ed_token=ed_token, course=course)
+
+
+def _build_qa_service(
+    session: AsyncSession,
+    tool_executor: ToolExecutor | None = None,
+    skill_service: SkillService | None = None,
+) -> QAService:
     """Build QAService with real AIEngine from settings."""
     settings = get_settings()
     engine = AIEngine(api_key=settings.anthropic_api_key)
@@ -29,6 +77,8 @@ def _build_qa_service(session: AsyncSession) -> QAService:
         session=session,
         ai_engine=engine,
         voyage_api_key=settings.voyage_api_key,
+        tool_executor=tool_executor,
+        skill_service=skill_service,
     )
 
 
@@ -91,16 +141,30 @@ async def course_qa_stream(
     session: AsyncSession = Depends(get_session),
 ) -> EventSourceResponse:
     """Stream AI Q&A response via SSE."""
-    svc = _build_qa_service(session)
-    stream = svc.stream_answer_question(
-        user_id=current_user_id,
-        course_id=course_id,
-        question=body.question,
-        history=body.history,
-        search_more=body.search_more,
-        language=body.language,
+    encryption = get_encryption()
+    tool_executor = await _build_tool_executor(
+        session, current_user_id, course_id, encryption
     )
-    return EventSourceResponse(_sse_wrap(stream, "searching"), ping=15)
+    skill_service = SkillService(session)
+    svc = _build_qa_service(session, tool_executor=tool_executor, skill_service=skill_service)
+
+    async def _stream_with_cleanup() -> AsyncGenerator[dict[str, str], None]:
+        try:
+            stream = svc.stream_answer_question(
+                user_id=current_user_id,
+                course_id=course_id,
+                question=body.question,
+                history=body.history,
+                search_more=body.search_more,
+                language=body.language,
+            )
+            async for event in _sse_wrap(stream, "searching"):
+                yield event
+        finally:
+            if tool_executor:
+                await tool_executor.close()
+
+    return EventSourceResponse(_stream_with_cleanup(), ping=15)
 
 
 @router.get("/courses/{course_id}/review/stream")
@@ -111,7 +175,8 @@ async def course_review_stream(
     session: AsyncSession = Depends(get_session),
 ) -> EventSourceResponse:
     """Stream AI unit review as SSE markdown tokens."""
-    svc = _build_qa_service(session)
+    skill_service = SkillService(session)
+    svc = _build_qa_service(session, skill_service=skill_service)
     stream = svc.stream_review(
         user_id=current_user_id,
         course_id=course_id,
