@@ -34,14 +34,11 @@ class AppContext:
     ed_discussion: EdDiscussionAdapter | None
     ed_lessons: EdLessonsAdapter | None
     parser: UnitOutlineParser
-    http_client: httpx.AsyncClient
 
 
 @asynccontextmanager
 async def lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
-    """Initialize adapters from environment variables, share HTTP client."""
-    http_client = httpx.AsyncClient(timeout=30.0)
-
+    """Initialize adapters from environment variables with per-platform HTTP clients."""
     canvas_token = os.environ.get("CANVAS_API_TOKEN")
     canvas_url = os.environ.get("CANVAS_BASE_URL", "https://canvas.sydney.edu.au/api/v1")
     ed_token = os.environ.get("ED_API_TOKEN")
@@ -51,14 +48,14 @@ async def lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
     ed_lessons = None
 
     if canvas_token:
-        canvas = CanvasAdapter(canvas_token, canvas_url, http_client=http_client)
+        canvas = CanvasAdapter(canvas_token, canvas_url)
         logger.info("canvas_adapter_initialized", base_url=canvas_url)
     else:
         logger.warning("canvas_not_configured", hint="Set CANVAS_API_TOKEN env var")
 
     if ed_token:
-        ed_discussion = EdDiscussionAdapter(ed_token, http_client=http_client)
-        ed_lessons = EdLessonsAdapter(ed_token, http_client=http_client)
+        ed_discussion = EdDiscussionAdapter(ed_token)
+        ed_lessons = EdLessonsAdapter(ed_token)
         logger.info("ed_adapters_initialized")
     else:
         logger.warning("ed_not_configured", hint="Set ED_API_TOKEN env var")
@@ -71,10 +68,14 @@ async def lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
             ed_discussion=ed_discussion,
             ed_lessons=ed_lessons,
             parser=parser,
-            http_client=http_client,
         )
     finally:
-        await http_client.aclose()
+        if canvas:
+            await canvas.close()
+        if ed_discussion:
+            await ed_discussion.close()
+        if ed_lessons:
+            await ed_lessons.close()
 
 
 mcp = FastMCP("uniboard-mcp", lifespan=lifespan)
