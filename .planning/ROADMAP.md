@@ -157,7 +157,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
 | 19. MCP Agent & Streaming | M3 | 5/5 | Complete   | 2026-03-28 |
-| 20. Skill System | M3 | 3/3 | Complete   | 2026-03-29 |
+| 20. Skill System | M3 | 3/3 | Complete    | 2026-03-29 |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |
 | 23. Deployment | M4 | 0/TBD | Not started | - |

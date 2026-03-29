@@ -53,7 +53,7 @@ Requirements for full release across 4 milestones.
 - [x] **SKILL-01**: After first successful API exploration for an operation, system auto-generates a prompt template skill capturing the optimal steps
 - [x] **SKILL-02**: Subsequent executions of the same operation load and follow the generated skill instead of re-exploring
 - [x] **SKILL-03**: Skills are per-course differentiated (different courses may have different material organization patterns)
-- [x] **SKILL-04**: ~50 skills covering data collection, data processing, AI analysis, and user action dimensions
+- [x] **SKILL-04**: ~13 seeded skills covering data collection, data processing, AI analysis, and user action dimensions, with auto-generation expanding the library over time
 
 ### AI Tutoring (promoted from v2)
 
@@ -167,10 +167,10 @@ Which milestones/phases cover which requirements. Updated during roadmap creatio
 | PLAT-03 | M3 | Phase 21 | Pending |
 | PLAT-04 | M2 | Phase 17 | ✅ Complete |
 | SET-LANG | M3 | Phase 19 | Pending |
-| SKILL-01 | M3 | Phase 20 | Pending |
-| SKILL-02 | M3 | Phase 20 | Pending |
-| SKILL-03 | M3 | Phase 20 | Pending |
-| SKILL-04 | M3 | Phase 20 | Pending |
+| SKILL-01 | M3 | Phase 20 | ✅ Complete |
+| SKILL-02 | M3 | Phase 20 | ✅ Complete |
+| SKILL-03 | M3 | Phase 20 | ✅ Complete |
+| SKILL-04 | M3 | Phase 20 | ✅ Complete |
 | TUTOR-03 | M3 | Phase 21 | Pending |
 | UI-01 | M1 | Phase 5 | ✅ Complete |
 | UI-02 | M1 | Phase 6 | ✅ Complete |
