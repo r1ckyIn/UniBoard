@@ -48,7 +48,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 18: AI Enhancement** — AI thread evaluation, AI digest scoring, quality gate with F1 monitoring (completed 2026-03-28)
 - [x] **Phase 19: MCP Agent & Streaming** (4/5 plans) — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A, language preference setting (completed 2026-03-28)
 - [x] **Phase 20: Skill System** — Auto-generated prompt templates, per-course differentiation, ~50 skills (completed 2026-03-29)
-- [ ] **Phase 21: MCP Server & ROI Analysis** (3 plans) — PLAT-03 MCP server for Claude Desktop, Assignment ROI analysis
+- [x] **Phase 21: MCP Server & ROI Analysis** (3 plans) — PLAT-03 MCP server for Claude Desktop, Assignment ROI analysis (completed 2026-03-29)
 
 ### 📋 M4: Engineering (Planned)
 
@@ -111,9 +111,9 @@ Plans:
   3. MCP server handles authentication and returns data in Claude-friendly format
 **Plans**: 3 total
 Plans:
-- [ ] 21-01-PLAN.md — Standalone MCP server package (Canvas + Ed + Unit Outline, 17 tools)
+- [x] 21-01-PLAN.md — Standalone MCP server package (Canvas + Ed + Unit Outline, 17 tools)
 - [x] 21-02-PLAN.md — ROI backend service + REST endpoint
-- [ ] 21-03-PLAN.md — ROI frontend (Predict page integration)
+- [x] 21-03-PLAN.md — ROI frontend (Predict page integration)
 
 ### Phase 22: Testing Suite
 **Goal**: Comprehensive test coverage across backend and frontend
@@ -162,7 +162,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
 | 19. MCP Agent & Streaming | M3 | 5/5 | Complete   | 2026-03-28 |
 | 20. Skill System | M3 | 3/3 | Complete    | 2026-03-29 |
-| 21. MCP Server & ROI Analysis | M3 | 1/3 | In Progress|  |
+| 21. MCP Server & ROI Analysis | M3 | 3/3 | Complete   | 2026-03-29 |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |
 | 23. Deployment | M4 | 0/TBD | Not started | - |
 | 24. Operations | M4 | 0/TBD | Not started | - |

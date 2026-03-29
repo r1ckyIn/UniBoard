@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 21-02-PLAN.md
-last_updated: "2026-03-29T08:57:09.169Z"
+stopped_at: Completed 21-03-PLAN.md
+last_updated: "2026-03-29T09:06:00.856Z"
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 14
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 21 (mcp-server-roi-analysis) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Milestone: M2 complete, M3 in progress (phases 18-20 done, 21 planned)
 
 ## Milestones Completed
@@ -121,6 +121,7 @@ Milestone: M2 complete, M3 in progress (phases 18-20 done, 21 planned)
 | Phase 20 P02 | 5min | 2 tasks | 4 files |
 | Phase 20 P03 | 5min | 2 tasks | 3 files |
 | Phase 21 P02 | 5min | 2 tasks | 6 files |
+| Phase 21 P03 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -288,6 +289,7 @@ Recent decisions affecting current work:
 - [Phase 21]: Linear interpolation for score-to-difficulty mapping within 3 bands (easy/medium/hard)
 - [Phase 21]: Difficulty floored at 0.2 to prevent division-by-near-zero in ROI formula
 - [Phase 21]: AI confidence gate at 50% — below threshold falls back to default difficulty 3.0
+- [Phase 21]: RoiCard uses useQueries for parallel per-course ROI fetch (same pattern as courseDetailQueries)
 
 ### Roadmap Evolution
 
@@ -304,6 +306,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-29T08:57:09.163Z
-Stopped at: Completed 21-02-PLAN.md
+Last session: 2026-03-29T09:06:00.850Z
+Stopped at: Completed 21-03-PLAN.md
 Resume file: None
