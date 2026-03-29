@@ -1,6 +1,10 @@
 """Pydantic schemas for Assignment ROI analysis."""
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
+
+DifficultySource = Literal["historical", "ai_inference", "default"]
 
 
 class AssignmentROI(BaseModel):
@@ -11,7 +15,7 @@ class AssignmentROI(BaseModel):
     assessment_name: str
     weight: float  # 0.0-1.0
     difficulty: float  # 1.0 (easy) - 5.0 (hard)
-    difficulty_source: str  # "historical" | "ai_inference" | "default"
+    difficulty_source: DifficultySource
     roi_score: float  # weight / normalized_difficulty
     recommendation: str  # "High priority: 30% weight, estimated easy"
     score: float | None = None  # actual score if graded

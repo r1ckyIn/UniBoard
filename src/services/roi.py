@@ -189,7 +189,6 @@ class ROIService:
         if course is None:
             raise NotFoundError("Course")
 
-        # Build deadline lookup for due_date matching
         deadline_by_title: dict[str, str] = {}
         for dl in course.unified_deadlines:
             deadline_by_title[dl.title.lower()] = dl.due_date.isoformat()
@@ -198,12 +197,10 @@ class ROIService:
         assignments: list[AssignmentROI] = []
 
         for grade in course.grades:
-            # Skip zero-weight assessments (no ROI contribution)
             if grade.weight == 0:
                 continue
 
             if grade.score is not None and grade.max_score > 0:
-                # Historical difficulty from actual score
                 ratio = grade.score / grade.max_score
                 difficulty = self._score_to_difficulty(ratio)
                 source = "historical"
@@ -221,7 +218,6 @@ class ROIService:
                 grade.weight, difficulty, roi_score
             )
 
-            # Try to match a deadline for due_date
             due_date = deadline_by_title.get(grade.assessment_name.lower())
 
             assignments.append(
@@ -238,7 +234,6 @@ class ROIService:
                 )
             )
 
-        # Sort by ROI descending
         assignments.sort(key=lambda a: a.roi_score, reverse=True)
 
         return CourseROIResponse(

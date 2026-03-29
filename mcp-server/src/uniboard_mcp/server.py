@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import os
+import re
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from html import unescape
 
 import httpx
 import structlog
@@ -21,7 +23,7 @@ from uniboard_mcp.adapters.canvas import CanvasAdapter
 from uniboard_mcp.adapters.ed_discussion import EdDiscussionAdapter
 from uniboard_mcp.adapters.ed_lessons import EdLessonsAdapter
 from uniboard_mcp.errors import TokenInvalidError, UpstreamUnavailableError
-from uniboard_mcp.parsers.unit_outline import UnitOutlineParser
+from uniboard_mcp.parsers.unit_outline import UnitOutlineParseResult, UnitOutlineParser
 
 logger = structlog.get_logger()
 
@@ -159,8 +161,6 @@ def format_announcements(announcements: list[dict], course_id: str) -> str:
         message = a.get("message", "")
         # Strip HTML tags for readability
         if "<" in message:
-            from html import unescape
-            import re
             message = re.sub(r"<[^>]+>", "", unescape(message))
         preview = message[:200] + "..." if len(message) > 200 else message
         lines.append(f"### {title}")
@@ -294,8 +294,6 @@ def format_lesson_detail(lesson: dict) -> str:
 
 def format_outline(result: "UnitOutlineParseResult") -> str:
     """Format parsed Unit Outline as human-readable text."""
-    from uniboard_mcp.parsers.unit_outline import UnitOutlineParseResult
-
     if not isinstance(result, UnitOutlineParseResult):
         return "Failed to parse unit outline."
 

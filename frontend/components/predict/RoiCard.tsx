@@ -44,7 +44,15 @@ export default function RoiCard({ courses }: RoiCardProps) {
 
   const isLoading = roiQueries.some((q) => q.isLoading);
 
+  const cardHeader = (
+    <div className="flex items-center gap-[7px] mb-[10px]">
+      <TrendingUp size={16} className="text-[#d97757] flex-shrink-0" />
+      <span className="text-[0.82rem] font-semibold">{t("roi_title")}</span>
+    </div>
+  );
+
   // Merge and rank all assignments across courses
+  const updatedAts = roiQueries.map((q) => q.dataUpdatedAt).join(",");
   const rankedItems = useMemo<RankedAssignment[]>(() => {
     const items: RankedAssignment[] = [];
 
@@ -69,18 +77,13 @@ export default function RoiCard({ courses }: RoiCardProps) {
     items.sort((a, b) => b.roi_score - a.roi_score);
     return items.slice(0, MAX_ITEMS);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses, roiQueries.map((q) => q.dataUpdatedAt).join(",")]);
+  }, [courses, updatedAts]);
 
   // Don't render card while loading or with no data
   if (isLoading) {
     return (
       <RoughCard disableHover padding="py-[22px] px-[20px]">
-        <div className="flex items-center gap-[7px] mb-[10px]">
-          <TrendingUp size={16} className="text-[#d97757] flex-shrink-0" />
-          <span className="text-[0.82rem] font-semibold">
-            {t("roi_title")}
-          </span>
-        </div>
+        {cardHeader}
         <div className="space-y-[8px]">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-[32px] bg-[#eae7e0] rounded-[4px] animate-pulse" />
@@ -93,12 +96,7 @@ export default function RoiCard({ courses }: RoiCardProps) {
   if (rankedItems.length === 0) {
     return (
       <RoughCard disableHover padding="py-[22px] px-[20px]">
-        <div className="flex items-center gap-[7px] mb-[10px]">
-          <TrendingUp size={16} className="text-[#d97757] flex-shrink-0" />
-          <span className="text-[0.82rem] font-semibold">
-            {t("roi_title")}
-          </span>
-        </div>
+        {cardHeader}
         <div className="text-[0.72rem] text-[#9b9b94] text-center py-[12px]">
           {t("roi_empty")}
         </div>
@@ -108,13 +106,7 @@ export default function RoiCard({ courses }: RoiCardProps) {
 
   return (
     <RoughCard disableHover padding="py-[22px] px-[20px]">
-      {/* Card title */}
-      <div className="flex items-center gap-[7px] mb-[10px]">
-        <TrendingUp size={16} className="text-[#d97757] flex-shrink-0" />
-        <span className="text-[0.82rem] font-semibold">
-          {t("roi_title")}
-        </span>
-      </div>
+      {cardHeader}
 
       {/* Ranked assignments */}
       {rankedItems.map((item, idx) => {
