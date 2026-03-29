@@ -50,10 +50,10 @@ Requirements for full release across 4 milestones.
 
 ### Skill System (MCP Agent)
 
-- [ ] **SKILL-01**: After first successful API exploration for an operation, system auto-generates a prompt template skill capturing the optimal steps
+- [x] **SKILL-01**: After first successful API exploration for an operation, system auto-generates a prompt template skill capturing the optimal steps
 - [ ] **SKILL-02**: Subsequent executions of the same operation load and follow the generated skill instead of re-exploring
-- [ ] **SKILL-03**: Skills are per-course differentiated (different courses may have different material organization patterns)
-- [ ] **SKILL-04**: ~50 skills covering data collection, data processing, AI analysis, and user action dimensions
+- [x] **SKILL-03**: Skills are per-course differentiated (different courses may have different material organization patterns)
+- [x] **SKILL-04**: ~50 skills covering data collection, data processing, AI analysis, and user action dimensions
 
 ### AI Tutoring (promoted from v2)
 

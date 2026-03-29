@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 19-04-PLAN.md
-last_updated: "2026-03-28T07:37:27.912Z"
+status: Ready to execute
+stopped_at: Completed 20-01-PLAN.md
+last_updated: "2026-03-29T04:26:09.602Z"
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 11
+  completed_plans: 9
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 19 — mcp-agent-streaming
+**Current focus:** Phase 20 — skill-system
 
 ## Current Position
 
-Phase: 20
-Plan: Not started
+Phase: 20 (skill-system) — EXECUTING
+Plan: 2 of 3
 Milestone: M2 complete, M3 in progress
 
 ## Milestones Completed
@@ -117,6 +117,7 @@ Milestone: M2 complete, M3 in progress
 | Phase 18 P03 | 4min | 2 tasks | 10 files |
 | Phase 19 P02 | 3min | 2 tasks | 4 files |
 | Phase 19 P04 | 5min | 2 tasks | 8 files |
+| Phase 20 P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -273,6 +274,8 @@ Recent decisions affecting current work:
 - [Phase 18]: EdPostItem created as new component (CourseDetailPage had no existing Ed posts section)
 - [Phase 19]: Translation runs after module sync (sync_all_modules) with separate session for AI calls
 - [Phase 19]: Extended OpenAPI generated types locally with language_preference rather than regenerating spec
+- [Phase 20]: Used sqlalchemy JSON (generic) matching Course.grading_weights precedent for JSONB columns
+- [Phase 20]: Composite indexes on (operation_type, course_id, status/success) for skill lookup performance
 
 ### Roadmap Evolution
 
@@ -289,6 +292,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T07:26:57.452Z
-Stopped at: Completed 19-04-PLAN.md
+Last session: 2026-03-29T04:26:09.595Z
+Stopped at: Completed 20-01-PLAN.md
 Resume file: None

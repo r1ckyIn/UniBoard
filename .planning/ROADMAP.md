@@ -97,7 +97,7 @@ Plans:
   4. ~50 skills exist across data collection, data processing, AI analysis, and user action categories
 **Plans**: 3 plans
 Plans:
-- [ ] 20-01-PLAN.md — ORM models, schemas, Alembic migration
+- [x] 20-01-PLAN.md — ORM models, schemas, Alembic migration
 - [ ] 20-02-PLAN.md — ToolExecutor + SkillService
 - [ ] 20-03-PLAN.md — QAService integration + wiring
 
@@ -157,7 +157,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
 | 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
 | 19. MCP Agent & Streaming | M3 | 5/5 | Complete   | 2026-03-28 |
-| 20. Skill System | M3 | 0/3 | In progress | - |
+| 20. Skill System | M3 | 1/3 | In Progress|  |
 | 21. MCP Server & ROI Analysis | M3 | 0/TBD | Not started | - |
 | 22. Testing Suite | M4 | 0/TBD | Not started | - |
 | 23. Deployment | M4 | 0/TBD | Not started | - |
