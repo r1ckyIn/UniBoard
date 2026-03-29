@@ -303,14 +303,14 @@ class QAService:
                         tokens_used=0,
                         skill_id=skill.id if skill else None,
                     )
-                    # Mark skill success if we used one
-                    if skill:
-                        await self._skill_service.mark_success(skill.id)
                     # Check if we can auto-generate a skill
-                    else:
+                    if not skill:
                         await self._skill_service.maybe_generate_skill(
                             operation_type, course_id
                         )
+                # Mark skill success independently of trace
+                if self._skill_service and skill:
+                    await self._skill_service.mark_success(skill.id)
 
             except Exception:
                 # Record failed execution
@@ -325,8 +325,9 @@ class QAService:
                         tokens_used=0,
                         skill_id=skill.id if skill else None,
                     )
-                    if skill:
-                        await self._skill_service.mark_failure(skill.id)
+                # Mark skill failure independently of trace
+                if self._skill_service and skill:
+                    await self._skill_service.mark_failure(skill.id)
                 raise
         else:
             # Direct context streaming
@@ -347,11 +348,6 @@ class QAService:
         """Stream an AI unit review as markdown."""
         await self._check_and_increment_limit(user_id)
         course, materials_text = await self._load_course_materials(course_id)
-
-        # Skill lookup for review prompt (future: inject skill.system_prompt)
-        _skill = None
-        if self._skill_service:
-            _skill = await self._skill_service.get_skill("unit_review", course_id)
 
         async for token in self._ai_engine.stream_review(
             materials_text=materials_text,

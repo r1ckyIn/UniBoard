@@ -290,7 +290,7 @@ class SkillService:
             existing_stmt = existing_stmt.where(Skill.course_id.is_(None))
 
         existing_result = await self._session.execute(existing_stmt)
-        existing_skill = existing_result.scalar_one_or_none()
+        existing_skill = existing_result.scalars().first()
 
         if existing_skill is not None:
             # Increment version, update pattern

@@ -204,7 +204,7 @@ class TestSkillServiceAutoGeneration:
 
         # No existing skill
         mock_skill_result = MagicMock()
-        mock_skill_result.scalar_one_or_none.return_value = None
+        mock_skill_result.scalars.return_value.first.return_value = None
 
         session.execute.side_effect = [mock_traces_result, mock_skill_result]
 
@@ -281,7 +281,7 @@ class TestSkillServiceAutoGeneration:
         # Existing skill found (version=1)
         existing_skill = _mock_skill(version=1, status="active")
         mock_skill_result = MagicMock()
-        mock_skill_result.scalar_one_or_none.return_value = existing_skill
+        mock_skill_result.scalars.return_value.first.return_value = existing_skill
 
         session.execute.side_effect = [mock_traces_result, mock_skill_result]
 
