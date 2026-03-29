@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 21 context gathered
-last_updated: "2026-03-29T08:05:12.247Z"
+status: Ready to execute
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-03-29T08:57:09.169Z"
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,13 +19,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 20 — skill-system
+**Current focus:** Phase 21 — mcp-server-roi-analysis
 
 ## Current Position
 
-Phase: 21
-Plan: Not started
-Milestone: M2 complete, M3 in progress
+Phase: 21 (mcp-server-roi-analysis) — EXECUTING
+Plan: 2 of 3
+Milestone: M2 complete, M3 in progress (phases 18-20 done, 21 planned)
 
 ## Milestones Completed
 
@@ -120,6 +120,7 @@ Milestone: M2 complete, M3 in progress
 | Phase 20 P01 | 3min | 2 tasks | 5 files |
 | Phase 20 P02 | 5min | 2 tasks | 4 files |
 | Phase 20 P03 | 5min | 2 tasks | 3 files |
+| Phase 21 P02 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -284,6 +285,9 @@ Recent decisions affecting current work:
 - [Phase 20]: Inline fallback function when ToolExecutor is None for backward compatibility
 - [Phase 20]: Traced executor wrapper captures tool calls without modifying ToolExecutor class
 - [Phase 20]: _build_tool_executor as standalone async helper keeps QAService decoupled from token decryption
+- [Phase 21]: Linear interpolation for score-to-difficulty mapping within 3 bands (easy/medium/hard)
+- [Phase 21]: Difficulty floored at 0.2 to prevent division-by-near-zero in ROI formula
+- [Phase 21]: AI confidence gate at 50% — below threshold falls back to default difficulty 3.0
 
 ### Roadmap Evolution
 
@@ -300,6 +304,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-29T08:05:12.240Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-mcp-server-roi-analysis/21-CONTEXT.md
+Last session: 2026-03-29T08:57:09.163Z
+Stopped at: Completed 21-02-PLAN.md
+Resume file: None
