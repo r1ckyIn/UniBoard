@@ -14,6 +14,7 @@ from src.web.routes.health import router as health_router
 from src.web.routes.intelligence import router as intelligence_router
 from src.web.routes.materials import router as materials_router
 from src.web.routes.notifications import router as notifications_router
+from src.web.routes.roi import router as roi_router
 from src.web.routes.sync import router as sync_router
 from src.web.routes.users import router as users_router
 
@@ -31,5 +32,6 @@ api_router.include_router(digest_router, prefix="/digest", tags=["digest"])
 api_router.include_router(alerts_router, prefix="/alerts", tags=["alerts"])
 api_router.include_router(feedback_router, prefix="", tags=["feedback"])
 api_router.include_router(ai_router, prefix="", tags=["ai"])
+api_router.include_router(roi_router, prefix="/courses", tags=["roi"])
 
 __all__ = ["ai_router", "api_router", "feedback_router", "health_router"]
