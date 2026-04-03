@@ -9,6 +9,7 @@ from src.schemas.common import SuccessResponse
 from src.schemas.roi import CourseROIResponse
 from src.services.roi import ROIService
 from src.web.deps import get_current_user_id, get_request_meta, get_session
+from src.web.rate_limit import limiter
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ def get_roi_service(session: AsyncSession = Depends(get_session)) -> ROIService:
 
 
 @router.get("/{course_id}/roi")
+@limiter.limit("10/minute")
 async def get_course_roi(
     course_id: uuid.UUID,
     request: Request,
