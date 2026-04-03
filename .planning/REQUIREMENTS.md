@@ -97,8 +97,8 @@ Requirements for full release across 4 milestones.
 ### Security & Observability (M4)
 
 - [ ] **SEC-01**: CORS origins configurable via environment variable, defaulting to localhost:3001 for development
-- [ ] **SEC-02**: Next.js and FastAPI return security response headers (HSTS, X-Frame-Options, X-Content-Type-Options, CSP)
-- [ ] **SEC-03**: Every HTTP request logged with method, path, status_code, duration_ms; request_id bound to structlog contextvars for downstream correlation
+- [x] **SEC-02**: Next.js and FastAPI return security response headers (HSTS, X-Frame-Options, X-Content-Type-Options, CSP)
+- [x] **SEC-03**: Every HTTP request logged with method, path, status_code, duration_ms; request_id bound to structlog contextvars for downstream correlation
 - [ ] **SEC-04**: Frontend has error.tsx and global-error.tsx error boundaries with basic error logging to console
 
 ### Code Quality (M4)
