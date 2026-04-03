@@ -1,9 +1,6 @@
 """Unit tests for Skill and SkillExecution ORM models and schema enums."""
 
 import uuid
-from datetime import datetime
-
-import pytest
 
 
 class TestSkillStatus:
@@ -130,10 +127,10 @@ class TestSkillModel:
         assert skill.parameters == params
 
     def test_default_values(self) -> None:
-        """Default values per plan: version=1, success_count=0, failure_count=0, is_seeded=False, status='draft'."""
+        """Default values: version=1, success_count=0, failure_count=0, is_seeded=False."""
         from src.models.skill import Skill
 
-        skill = Skill(
+        _skill = Skill(
             operation_type="default_test",
             category="user_action",
             system_prompt="Defaults.",

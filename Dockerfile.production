@@ -1,0 +1,58 @@
+# ============================================================
+# Stage 1: Builder -- install dependencies and copy source
+# ============================================================
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+# Install uv for fast, reproducible dependency resolution
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy dependency lockfiles first for layer caching
+COPY pyproject.toml uv.lock ./
+
+# Install production dependencies only (no dev, no editable)
+RUN uv sync --locked --no-dev --no-editable
+
+# Copy production source code only (no tests, no docs)
+COPY src/ src/
+COPY alembic/ alembic/
+COPY alembic.ini ./
+
+# ============================================================
+# Stage 2: Runtime -- minimal image with only what's needed
+# ============================================================
+FROM python:3.12-slim AS runtime
+
+WORKDIR /app
+
+# Install tini for proper PID 1 signal handling and zombie reaping
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tini \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security isolation
+RUN useradd --create-home --shell /bin/bash appuser
+
+# Copy virtual environment and source from builder
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/src /app/src
+COPY --from=builder /app/alembic /app/alembic
+COPY --from=builder /app/alembic.ini /app/alembic.ini
+
+# Add venv to PATH so uvicorn and alembic are available
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-8000}/health')" || exit 1
+
+# Switch to non-root user
+USER appuser
+
+EXPOSE 8000
+
+# Use tini as init system, shell form CMD for ${PORT} expansion
+# Railway injects PORT env var dynamically
+ENTRYPOINT ["tini", "--"]
+CMD uvicorn src.web.main:app --host 0.0.0.0 --port ${PORT:-8000}

@@ -11,6 +11,8 @@ from src.models.discussion import DiscussionThread
 from src.models.user import Profile
 from src.services.intelligence import EdIntelligenceService
 
+pytestmark = pytest.mark.db
+
 
 @pytest_asyncio.fixture(loop_scope="session")
 async def _seed_intelligence_data(session: AsyncSession) -> dict[str, object]:

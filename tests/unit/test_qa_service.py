@@ -424,6 +424,113 @@ async def test_stream_answer_records_trace_on_failure() -> None:
 
 
 @pytest.mark.asyncio(loop_scope="session")
+async def test_answer_rag_uses_async_client() -> None:
+    """_answer_rag() must use voyageai.AsyncClient (not Client) with await on embed()."""
+    import sys
+    from unittest.mock import patch
+
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    mock_ai.ask_question = AsyncMock(
+        return_value=QAResponse(
+            answer="RAG answer",
+            citations=["[chunk 0]"],
+            method="rag",
+            tokens_used=100,
+        )
+    )
+
+    # Mock voyageai module
+    mock_voyageai = MagicMock()
+    mock_async_client_instance = MagicMock()
+    # embed() must be AsyncMock since we await it
+    mock_embed_result = MagicMock()
+    mock_embed_result.embeddings = [[0.1] * 1024]
+    mock_async_client_instance.embed = AsyncMock(return_value=mock_embed_result)
+    mock_voyageai.AsyncClient = MagicMock(return_value=mock_async_client_instance)
+
+    course_id = uuid.uuid4()
+
+    # Build session that returns chunks from vector query
+    mock_session = AsyncMock()
+    mock_chunk = MagicMock()
+    mock_chunk.source_type = "mixed"
+    mock_chunk.chunk_index = 0
+    mock_chunk.chunk_text = "Test chunk content"
+    chunks_result = MagicMock()
+    chunks_result.scalars = MagicMock(
+        return_value=MagicMock(all=MagicMock(return_value=[mock_chunk]))
+    )
+    mock_session.execute = AsyncMock(return_value=chunks_result)
+    mock_session.flush = AsyncMock()
+
+    svc = QAService(session=mock_session, ai_engine=mock_ai, voyage_api_key="test-key")
+
+    # Use real ContentEmbedding and inject cosine_distance into pgvector.sqlalchemy
+    from sqlalchemy import text
+
+    # cosine_distance must return a valid SQLAlchemy expression
+    mock_cosine_distance = MagicMock(side_effect=lambda col, vec: text("1"))
+    pgvector_sa_mod = sys.modules["pgvector.sqlalchemy"]
+
+    with (
+        patch.dict(sys.modules, {"voyageai": mock_voyageai}),
+        patch.object(pgvector_sa_mod, "cosine_distance", mock_cosine_distance, create=True),
+    ):
+        result = await svc._answer_rag(question="What is X?", course_id=course_id)
+
+    # Verify AsyncClient was used (not Client)
+    mock_voyageai.AsyncClient.assert_called_once_with(api_key="test-key")
+    # Verify embed was awaited
+    mock_async_client_instance.embed.assert_called_once()
+    assert result.method == "rag"
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_embed_course_materials_uses_async_client() -> None:
+    """embed_course_materials() must use voyageai.AsyncClient (not Client) with await."""
+    import sys
+    from unittest.mock import patch
+
+    from src.services.qa import QAService
+
+    mock_ai = AsyncMock()
+    course_id = uuid.uuid4()
+
+    # Build a mock course with some materials
+    mock_course = _make_mock_course(text_tokens=500)
+
+    # Session: first call returns course, second call (delete) succeeds, flush succeeds
+    mock_session = AsyncMock()
+    course_result = MagicMock()
+    course_result.scalar_one_or_none = MagicMock(return_value=mock_course)
+    mock_session.execute = AsyncMock(return_value=course_result)
+    mock_session.flush = AsyncMock()
+    mock_session.add = MagicMock()
+
+    # Mock voyageai module -- only mock voyageai, use real ContentEmbedding
+    mock_voyageai = MagicMock()
+    mock_async_client_instance = MagicMock()
+    mock_embed_result = MagicMock()
+    # Return multiple embeddings for multiple chunks
+    mock_embed_result.embeddings = [[0.1] * 1024, [0.2] * 1024]
+    mock_async_client_instance.embed = AsyncMock(return_value=mock_embed_result)
+    mock_voyageai.AsyncClient = MagicMock(return_value=mock_async_client_instance)
+
+    svc = QAService(session=mock_session, ai_engine=mock_ai, voyage_api_key="test-key")
+
+    with patch.dict(sys.modules, {"voyageai": mock_voyageai}):
+        count = await svc.embed_course_materials(course_id=course_id)
+
+    # Verify AsyncClient was used (not Client)
+    mock_voyageai.AsyncClient.assert_called_once_with(api_key="test-key")
+    # Verify embed was awaited
+    mock_async_client_instance.embed.assert_called_once()
+    assert count == 2
+
+
+@pytest.mark.asyncio(loop_scope="session")
 async def test_stream_answer_backward_compatible() -> None:
     """QAService works with tool_executor=None, skill_service=None (original constructor)."""
     from src.services.qa import QAService

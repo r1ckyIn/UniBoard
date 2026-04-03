@@ -37,7 +37,7 @@ class _SessionCtx:
 
 
 @pytest.mark.asyncio
-@patch("src.sync.tasks._get_sync_session_factory")
+@patch("src.sync.scheduled._get_sync_session_factory")
 async def test_expired_canvas_token_creates_notification(
     mock_factory_fn: MagicMock,
 ) -> None:
@@ -69,7 +69,7 @@ async def test_expired_canvas_token_creates_notification(
         mock_svc.create_notification = AsyncMock(return_value=MagicMock())
         MockNotifSvc.return_value = mock_svc
 
-        from src.sync.tasks import check_token_health
+        from src.sync.scheduled import check_token_health
 
         await check_token_health()
 
@@ -82,7 +82,7 @@ async def test_expired_canvas_token_creates_notification(
 
 
 @pytest.mark.asyncio
-@patch("src.sync.tasks._get_sync_session_factory")
+@patch("src.sync.scheduled._get_sync_session_factory")
 async def test_both_tokens_expired_creates_two_notifications(
     mock_factory_fn: MagicMock,
 ) -> None:
@@ -112,7 +112,7 @@ async def test_both_tokens_expired_creates_two_notifications(
         mock_svc.create_notification = AsyncMock(return_value=MagicMock())
         MockNotifSvc.return_value = mock_svc
 
-        from src.sync.tasks import check_token_health
+        from src.sync.scheduled import check_token_health
 
         await check_token_health()
 
@@ -126,7 +126,7 @@ async def test_both_tokens_expired_creates_two_notifications(
 
 
 @pytest.mark.asyncio
-@patch("src.sync.tasks._get_sync_session_factory")
+@patch("src.sync.scheduled._get_sync_session_factory")
 async def test_no_expired_tokens_skips_notifications(
     mock_factory_fn: MagicMock,
 ) -> None:
@@ -141,7 +141,7 @@ async def test_no_expired_tokens_skips_notifications(
         side_effect=lambda: _SessionCtx(session1)
     )
 
-    from src.sync.tasks import check_token_health
+    from src.sync.scheduled import check_token_health
 
     await check_token_health()
     # Should return early, no error

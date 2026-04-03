@@ -19,7 +19,6 @@ interface UnitReviewSectionProps {
  */
 export default function UnitReviewSection({
   courseId,
-  courseName,
 }: UnitReviewSectionProps) {
   const t = useTranslations("courseDetail");
   const locale = useLocale();

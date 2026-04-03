@@ -139,7 +139,7 @@ async def test_token_expiry_detection(test_client: httpx.AsyncClient) -> None:
         await test_session.flush()
 
         # Simulate the token expiry flow directly via _sync_user_grades
-        from src.sync.tasks import _sync_user_grades
+        from src.sync.grades import _sync_user_grades
 
         with patch("src.adapters.canvas.CanvasAdapter") as mock_adapter_cls:
             mock_adapter = AsyncMock()

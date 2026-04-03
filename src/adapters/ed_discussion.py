@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-import asyncio
-import time
 from typing import Any
 
 import httpx
 import structlog
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from src.adapters._ed_base import EdRequestMixin
 from src.adapters.base import DiscussionAdapter
 from src.adapters.resilience import CircuitBreaker, RetryConfig
-from src.schemas.common import TokenInvalidError, UpstreamUnavailableError
+from src.schemas.common import UpstreamUnavailableError
 
 logger = structlog.get_logger()
 
@@ -49,7 +48,7 @@ class EdThreadResponse(BaseModel):
     created_at: str = ""
 
 
-class EdDiscussionAdapter(DiscussionAdapter):
+class EdDiscussionAdapter(EdRequestMixin, DiscussionAdapter):
     """Ed Discussion API client with circuit breaker and defensive parsing."""
 
     def __init__(
@@ -64,56 +63,7 @@ class EdDiscussionAdapter(DiscussionAdapter):
         )
         self._circuit = CircuitBreaker()
         self._retry = RetryConfig()
-
-    async def _request(
-        self,
-        method: str,
-        path: str,
-        params: dict[str, Any] | None = None,
-    ) -> httpx.Response:
-        """Execute an Ed API request with retry and circuit breaker."""
-        for attempt in range(self._retry.max_attempts):
-            if not self._circuit.can_execute():
-                logger.warning("ed_discussion_circuit_open")
-                raise UpstreamUnavailableError("Ed Discussion circuit breaker is open")
-
-            start = time.monotonic()
-            response = await self._client.request(method, path, params=params)
-            duration = time.monotonic() - start
-
-            logger.debug(
-                "ed_discussion_request",
-                method=method,
-                path=path,
-                status=response.status_code,
-                duration_ms=round(duration * 1000),
-                attempt=attempt + 1,
-            )
-
-            if response.status_code in (401, 403):
-                self._circuit.record_failure()
-                raise TokenInvalidError("Ed Discussion")
-
-            if self._retry.is_retryable(response.status_code):
-                self._circuit.record_failure()
-                if attempt < self._retry.max_attempts - 1:
-                    delay = self._retry.get_delay(attempt)
-                    logger.warning(
-                        "ed_discussion_request_retry",
-                        attempt=attempt + 1,
-                        status=response.status_code,
-                        delay=delay,
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                # Final attempt — return the response as-is for caller to handle
-                return response
-
-            self._circuit.record_success()
-            return response
-
-        # Unreachable, but satisfies mypy
-        raise UpstreamUnavailableError("Ed Discussion request failed after retries")
+        self._platform_name = "Ed Discussion"
 
     def _parse_threads(self, items: list[dict[str, object]]) -> list[dict[str, object]]:
         """Parse thread items with per-item error handling.

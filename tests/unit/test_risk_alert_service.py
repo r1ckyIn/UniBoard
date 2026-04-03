@@ -10,6 +10,8 @@ from src.models.course import Course
 from src.models.grade import Grade
 from src.models.user import Profile
 
+pytestmark = pytest.mark.db
+
 
 async def _create_profile_with_grades(
     session: AsyncSession,

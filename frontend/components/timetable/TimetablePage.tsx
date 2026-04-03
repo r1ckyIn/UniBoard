@@ -16,7 +16,6 @@ import { useDeadlines } from "@/hooks/use-deadlines";
 import { useCourses } from "@/hooks/use-courses";
 import type { WeekMode, SemesterWeek } from "@/lib/timetable/types";
 import type { DeadlineItem } from "@/components/timetable/TimetableDeadlineOverlay";
-import { getCourseColor } from "@/lib/dashboard/course-colors";
 import { classifyUrgency, MAX_UPCOMING_DEADLINES } from "@/lib/timetable/urgency";
 
 import TimetableTitleRow from "@/components/timetable/TimetableTitleRow";
@@ -84,7 +83,7 @@ export default function TimetablePage() {
   }, [weeksQuery.data]);
 
   // ── Semester weeks data ────────────────────────────────────────
-  const semesterWeeks = weeksQuery.data?.data ?? [];
+  const semesterWeeks = useMemo(() => weeksQuery.data?.data ?? [], [weeksQuery.data]);
 
   // ── Current week derived state ─────────────────────────────────
   const currentWeek = useMemo(
@@ -110,7 +109,7 @@ export default function TimetablePage() {
     weekPosition === actualCurrentPosition && mode === "week";
 
   // ── Filtered sessions ──────────────────────────────────────────
-  const allSessions = sessionsQuery.data?.data ?? [];
+  const allSessions = useMemo(() => sessionsQuery.data?.data ?? [], [sessionsQuery.data]);
 
   const filteredSessions = useMemo(() => {
     if (mode === "all") return allSessions;
@@ -121,7 +120,7 @@ export default function TimetablePage() {
   }, [allSessions, mode, isBreak, currentWeek.teaching_week]);
 
   // ── Deadline processing (single pass for both grid + right panel) ──
-  const allDeadlines = deadlinesQuery.data?.data ?? [];
+  const allDeadlines = useMemo(() => deadlinesQuery.data?.data ?? [], [deadlinesQuery.data]);
 
   const { deadlineItems, upcomingDeadlines } = useMemo(() => {
     const active = allDeadlines

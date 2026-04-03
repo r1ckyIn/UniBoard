@@ -16,7 +16,7 @@ type Deadline = components["schemas"]["Deadline"];
 export default function DeadlinesPage() {
   const t = useTranslations("deadlines");
   const { data, isLoading, isError } = useDeadlines();
-  const deadlineList: Deadline[] = data?.data ?? [];
+  const deadlineList: Deadline[] = useMemo(() => data?.data ?? [], [data]);
 
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [selectedCourse, setSelectedCourse] = useState<string>("");

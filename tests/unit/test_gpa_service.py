@@ -135,6 +135,7 @@ async def _create_course_with_grades(
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_single_course_wam(session: AsyncSession) -> None:
     """One course with two graded assessments calculates correct WAM."""
@@ -157,6 +158,7 @@ async def test_single_course_wam(session: AsyncSession) -> None:
     assert result.cumulative_wam == pytest.approx(87.0, abs=0.01)
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_multi_course_cumulative_wam(session: AsyncSession) -> None:
     """Two courses with different credit points weighted correctly."""
@@ -190,6 +192,7 @@ async def test_multi_course_cumulative_wam(session: AsyncSession) -> None:
     assert result.cumulative_wam == pytest.approx(85.0, abs=0.01)
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_grade_band_boundaries(session: AsyncSession) -> None:
     """Test exact grade band boundary values."""
@@ -206,6 +209,7 @@ async def test_grade_band_boundaries(session: AsyncSession) -> None:
     assert GPAService._mark_to_grade_band(Decimal("100")) == ("HD", 7)
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_ungraded_assessment_excluded(session: AsyncSession) -> None:
     """Assessments with score=None are excluded from WAM calculation."""
@@ -230,6 +234,7 @@ async def test_ungraded_assessment_excluded(session: AsyncSession) -> None:
     assert result.courses[0].assessment_count == 2
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_pct_assessed_calculation(session: AsyncSession) -> None:
     """Verify pct_assessed reflects graded weight / total weight."""
@@ -252,6 +257,7 @@ async def test_pct_assessed_calculation(session: AsyncSession) -> None:
     assert result.courses[0].pct_assessed == pytest.approx(50.0, abs=0.01)
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_whatif_simulate(session: AsyncSession) -> None:
     """Create a what-if scenario with hypothetical scores and verify recalculation."""
@@ -282,6 +288,7 @@ async def test_whatif_simulate(session: AsyncSession) -> None:
     assert result.name == "Optimistic"
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_whatif_persistence(session: AsyncSession) -> None:
     """What-if scenarios are persisted and can be retrieved."""
@@ -311,6 +318,7 @@ async def test_whatif_persistence(session: AsyncSession) -> None:
     assert any(s.name == "Scenario A" for s in scenarios)
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_target_path_uniform_achievable(session: AsyncSession) -> None:
     """Target path uniform mode returns achievable scores <= 100."""
@@ -336,6 +344,7 @@ async def test_target_path_uniform_achievable(session: AsyncSession) -> None:
         assert rs.minimum_score <= 100.0
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_target_path_unreachable(session: AsyncSession) -> None:
     """Target too high returns is_achievable=False with max_achievable_wam."""
@@ -359,6 +368,7 @@ async def test_target_path_unreachable(session: AsyncSession) -> None:
     assert result.max_achievable_wam == pytest.approx(65.0, abs=0.01)
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_trend_multiple_semesters(session: AsyncSession) -> None:
     """Trend returns chronologically ordered semester data."""
@@ -412,6 +422,7 @@ async def test_trend_multiple_semesters(session: AsyncSession) -> None:
     )
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_empty_grades_returns_zero(session: AsyncSession) -> None:
     """No graded assessments returns WAM=0.00, GPA=0."""

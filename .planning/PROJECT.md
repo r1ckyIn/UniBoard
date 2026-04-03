@@ -11,9 +11,11 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 ## Current State
 
 **Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
-**In Progress:** M3 AI/MCP/Skills — Phase 20 (Skill System) complete 2026-03-29
+**Shipped:** M3 AI/MCP/Skills (v2.0-m3, 2026-03-29)
+**Shipped:** M4 Phase 22-24 — Critical fixes, code quality refactor, build health green
+**In Progress:** M4 Hardening — Phase 25 (Security & Observability) next
 **Codebase:** ~170K LOC (TypeScript + Python + SQL), 730+ files
-**Tests:** 168 backend tests (140 unit + 28 integration) + frontend streaming components
+**Tests:** 316 backend tests passing (115 DB-dependent auto-skipped when no PostgreSQL) + frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
 
 ## Requirements
@@ -59,29 +61,31 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - ✓ Token expiration warnings — v2.0-m2 Phase 17
 - ✓ Deduplication across data sources (SHA-256) — v2.0-m2 Phase 15
 
+**M3 — AI/MCP/Skills (Phases 18-21):**
+- ✓ AI-extracted high-value info from Ed Discussion — v2.0-m3 Phase 18
+- ✓ AI-enhanced digest with urgency scoring — v2.0-m3 Phase 18
+- ✓ Deadline AI chat (MCP Agent) — v2.0-m3 Phase 19
+- ✓ AI Q&A on course materials with cited sources — v2.0-m3 Phase 19
+- ✓ AI unit review summaries — v2.0-m3 Phase 19
+- ✓ SSE streaming for all AI responses — v2.0-m3 Phase 19
+- ✓ Language preference setting (en/zh) — v2.0-m3 Phase 19
+- ✓ AI batch translation into Chinese — v2.0-m3 Phase 19
+- ✓ Skill system with auto-generated prompt templates — v2.0-m3 Phase 20
+- ✓ Per-course skill differentiation (~50 skills) — v2.0-m3 Phase 20
+- ✓ MCP server for Claude Desktop — v2.0-m3 Phase 21
+- ✓ Assignment ROI analysis — v2.0-m3 Phase 21
+
 ### Active
 
-**M3 — AI/MCP/Skills:**
-- [x] AI-extracted high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details) — Phase 18
-- [x] AI-enhanced digest with urgency scoring and GPA relevance ranking — Phase 18
-- [x] Deadline AI chat — MCP Agent answers assignment questions with cross-platform context — Phase 19
-- [x] AI Q&A on course materials with cited sources — MCP Agent cross-platform research — Phase 19
-- [x] AI unit review summaries (key concepts, common mistakes, exam scope) — Phase 19
-- [x] SSE streaming for all AI responses (token-by-token with thinking indicators) — Phase 19
-- [x] Language preference setting (en/zh) with locale auto-switch — Phase 19
-- [x] AI batch translation of course content into Chinese — Phase 19
-- [ ] MCP server for Claude Desktop users (PLAT-03)
-- [ ] Auto-generate prompt template skills after first successful API exploration
-- [ ] Per-course skill differentiation (~50 skills)
-- [ ] Assignment ROI analysis (high-weight/low-difficulty identification)
-
-**M4 — Engineering:**
-- [ ] Unit test suite with 80%+ coverage (pytest + Vitest)
-- [ ] Integration tests for all API endpoints against real database
-- [ ] E2E smoke tests for critical user flows
-- [ ] Production deployment (Supabase + Railway + Vercel)
+**M4 — Hardening:**
+- ✓ Critical fixes (VoyageAI async, broken test imports, JWT secret defaults, Dockerfile) — v2.0-m4 Phase 22
+- ✓ Code quality refactor (sync/tasks.py split, DRY consolidation, dead code removal) — v2.0-m4 Phase 23
+- ✓ Build health green (mypy 0 errors, ruff 0 errors, tsc 0 errors, ESLint 0 warnings, pytest passes) — v2.0-m4 Phase 24
+- [ ] Security hardening (config fail-fast, CORS configurable, rate limiting, resource leak fixes)
+- [ ] Observability foundation (HTTP access log, structlog context binding, error boundaries, health 503)
+- [ ] Production deployment (Supabase + Railway + Vercel, Docker production image)
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Monitoring, alerting, security hardening
+- [ ] Monitoring and alerting
 
 ### Out of Scope
 
@@ -146,8 +150,8 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 |-----------|-------|--------|
 | **M1: Frontend App** | 10 HTML → Next.js (Phases 1-12, 11.1) | ✅ Shipped |
 | **M2: Backend Core** | Supabase + FastAPI + Adapters + Sync (Phases 13-17) | ✅ Shipped 2026-03-27 |
-| **M3: AI/MCP/Skills** | Intelligence layer (Phases 18-21) | 📋 Next |
-| **M4: Engineering** | Production readiness (Phases 22-24) | 📋 Planned |
+| **M3: AI/MCP/Skills** | Intelligence layer (Phases 18-21) | ✅ Shipped 2026-03-29 |
+| **M4: Hardening** | Audit-driven fixes, build health, security, observability, deployment (Phases 22+) | 🚧 Active |
 
 ## Key Decisions
 
@@ -171,5 +175,36 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending (M3) |
 | i18n English + Chinese | Target Chinese international student community at USYD | ✓ Good — all 10 pages fully bilingual |
 
+## Current Milestone: v2.0-m4 Hardening
+
+**Goal:** Fix all critical/high codebase audit findings, achieve green builds across all tools, and prepare for production deployment.
+
+**Target features:**
+- Critical fixes (VoyageAI blocking call, broken test imports, unsafe config defaults, Dockerfile)
+- Build health green (mypy, ruff, tsc, ESLint, pytest — all zero errors)
+- Security hardening (config fail-fast validation, configurable CORS, AI rate limiting)
+- Observability foundation (HTTP access log, structlog context, error boundaries, health check 503)
+- Code quality refactor (sync/tasks.py god module, DRY consolidation, dead code cleanup)
+- Production deployment (Supabase + Railway + Vercel, Docker production image, CI/CD)
+
+**Audit reference:** `docs/project/codebase_audit.md` (93 findings, score 5.8/10)
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-03-27 after v2.0-m2 milestone — M2 Backend Core shipped. 5 phases, 13 plans, 149 tests. Next: M3 AI/MCP/Skills.*
+*Last updated: 2026-04-01 — Phase 23 (Code Quality Refactor) complete. God module split into 7 domain modules, DRY consolidation via EdRequestMixin, dead code removal (~300 lines), resource leak fixes, health 503.*

@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import Notification
 from src.models.push_record import PushRecord
-from src.models.user import Profile
 
 logger = structlog.get_logger()
 

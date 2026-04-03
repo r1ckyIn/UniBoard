@@ -29,6 +29,7 @@ from src.schemas.gpa import (
     WhatIfScore,
 )
 
+
 def _parse_level_weight(course_code: str) -> int:
     """Extract course level from code. E.g., COMP2017 -> 2, MATH1005 -> 1."""
     match = re.search(r"[A-Z]{4}(\d)", course_code)

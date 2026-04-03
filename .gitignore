@@ -1,8 +1,20 @@
 # Claude Code configuration (NEVER commit to GitHub)
 CLAUDE.md
 
+# Claude Code local state (worktrees, hooks, pr-cycle)
+.claude/hooks/
+.claude/worktrees/
+.claude/skills/pr-cycle
+.claude/skills/server-troubleshooting/
+
 # Planning UI reviews
 .planning/ui-reviews/
+
+# Frontend planning (separate GSD workspace)
+frontend/.planning/
+
+# Dev server PID
+*.pid
 
 # Local Chinese documentation
 *_CN.md

@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         return
 
     # Import tasks here to avoid circular imports when sync is disabled
-    from src.sync.tasks import (
+    from src.sync import (
         check_deadline_reminders,
         check_token_health,
         generate_daily_digests,
@@ -163,4 +163,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     finally:
         scheduler.shutdown(wait=False)
         scheduler = None
+        # Dispose sync engine connection pool
+        from src.sync._shared import dispose_sync_engine
+        await dispose_sync_engine()
+        # Dispose main database engine connection pool
+        from src.database import dispose_engine
+        await dispose_engine()
         logger.info("sync_engine_stopped")

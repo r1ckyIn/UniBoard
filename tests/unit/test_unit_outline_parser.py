@@ -1,4 +1,7 @@
-"""Unit tests for UnitOutlineParser: CSS selectors, positional fallback, weight validation, snapshot."""
+"""Unit tests for UnitOutlineParser.
+
+Covers CSS selectors, positional fallback, weight validation, and snapshot.
+"""
 
 from __future__ import annotations
 
@@ -19,7 +22,8 @@ COMP2017_HTML = (FIXTURE_DIR / "usyd_comp2017_2026s1.html").read_text()
 CSS_CLASS_HTML = """<html><body>
 <table id="assessment-table" class="table table-striped table-bordered">
   <thead>
-    <tr><th>Assessment</th><th>Weight</th><th>Due</th><th>Length</th><th>Description</th><th>Use of AI</th></tr>
+    <tr><th>Assessment</th><th>Weight</th><th>Due</th>
+    <th>Length</th><th>Description</th><th>Use of AI</th></tr>
   </thead>
   <tbody>
     <tr>

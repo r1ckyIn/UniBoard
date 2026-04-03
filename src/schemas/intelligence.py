@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, ConfigDict
 
-
 # --- Contract-aligned schema (types.gen.d.ts) ---
 
 

@@ -3,7 +3,7 @@
 import enum
 
 
-class SkillStatus(str, enum.Enum):
+class SkillStatus(enum.StrEnum):
     """Skill lifecycle states per D-15: draft->active->needs_update->deprecated->archived."""
 
     DRAFT = "draft"
@@ -13,7 +13,7 @@ class SkillStatus(str, enum.Enum):
     ARCHIVED = "archived"
 
 
-class SkillCategory(str, enum.Enum):
+class SkillCategory(enum.StrEnum):
     """Skill taxonomy categories per D-03."""
 
     DATA_COLLECTION = "data_collection"

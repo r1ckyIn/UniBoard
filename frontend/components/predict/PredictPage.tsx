@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useQueries } from "@tanstack/react-query";
 
@@ -56,12 +55,11 @@ function readFacultyScheme(): FacultyScheme {
  * wires all components together, and injects right panel content via portal-slot.
  */
 export default function PredictPage() {
-  const t = useTranslations("predict");
   const searchParams = useSearchParams();
 
   // ── Data fetching ──────────────────────────────────────────────
   const gpaReport = useGpaReport();
-  const courses = gpaReport.data?.data.courses ?? [];
+  const courses = useMemo(() => gpaReport.data?.data.courses ?? [], [gpaReport.data]);
 
   // Fetch course details for all courses (assessment_weights)
   const courseDetailQueries = useQueries({

@@ -4,22 +4,16 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 
 from src.schemas.ai import QAResponse, UnitReviewResponse
-from src.web.deps import get_current_user
+from src.web.deps import get_current_user_id
 
-
-def _mock_user() -> MagicMock:
-    """Build a mock User for dependency override."""
-    user = MagicMock()
-    user.id = uuid.uuid4()
-    user.email = "test@test.com"
-    user.display_name = "Tester"
-    return user
+# Fixed user ID for dependency override
+_TEST_USER_ID = uuid.uuid4()
 
 
 @pytest.mark.asyncio(loop_scope="session")
@@ -28,7 +22,6 @@ async def test_post_course_qa_returns_200(
 ) -> None:
     """POST /courses/{id}/qa returns 200 with QAResponse."""
     course_id = uuid.uuid4()
-    mock_user = _mock_user()
 
     qa_response = QAResponse(
         answer="The answer is 42 [Canvas: Week 1 Notes].",
@@ -38,7 +31,7 @@ async def test_post_course_qa_returns_200(
     )
 
     app = test_client._transport.app  # type: ignore[union-attr]
-    app.dependency_overrides[get_current_user] = lambda: mock_user
+    app.dependency_overrides[get_current_user_id] = lambda: _TEST_USER_ID
 
     with patch("src.web.routes.ai._build_qa_service") as mock_build:
         mock_svc = AsyncMock()
@@ -51,7 +44,7 @@ async def test_post_course_qa_returns_200(
             headers={"Authorization": "Bearer fake-token"},
         )
 
-    app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_current_user_id, None)
 
     assert resp.status_code == 200
     body = resp.json()["data"]
@@ -65,7 +58,6 @@ async def test_get_course_review_returns_200(
 ) -> None:
     """GET /courses/{id}/review returns 200 with UnitReviewResponse."""
     course_id = uuid.uuid4()
-    mock_user = _mock_user()
 
     review_response = UnitReviewResponse(
         course_id=str(course_id),
@@ -78,7 +70,7 @@ async def test_get_course_review_returns_200(
     )
 
     app = test_client._transport.app  # type: ignore[union-attr]
-    app.dependency_overrides[get_current_user] = lambda: mock_user
+    app.dependency_overrides[get_current_user_id] = lambda: _TEST_USER_ID
 
     with patch("src.web.routes.ai._build_qa_service") as mock_build:
         mock_svc = AsyncMock()
@@ -90,7 +82,7 @@ async def test_get_course_review_returns_200(
             headers={"Authorization": "Bearer fake-token"},
         )
 
-    app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_current_user_id, None)
 
     assert resp.status_code == 200
     body = resp.json()["data"]
@@ -104,10 +96,9 @@ async def test_get_intelligence_ai_returns_200(
 ) -> None:
     """GET /courses/{id}/intelligence/ai returns 200 with AI-scored posts."""
     course_id = uuid.uuid4()
-    mock_user = _mock_user()
 
     app = test_client._transport.app  # type: ignore[union-attr]
-    app.dependency_overrides[get_current_user] = lambda: mock_user
+    app.dependency_overrides[get_current_user_id] = lambda: _TEST_USER_ID
 
     with patch(
         "src.web.routes.intelligence._build_ai_engine"
@@ -118,7 +109,7 @@ async def test_get_intelligence_ai_returns_200(
             headers={"Authorization": "Bearer fake-token"},
         )
 
-    app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_current_user_id, None)
 
     assert resp.status_code == 200
     body = resp.json()["data"]

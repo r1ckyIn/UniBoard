@@ -314,21 +314,21 @@ class AIEngine:
                     # Append assistant message with tool_use blocks
                     messages.append({
                         "role": "assistant",
-                        "content": final_message.content,  # type: ignore[dict-item]
+                        "content": final_message.content,
                     })
 
                     # Execute each tool call
                     tool_results: list[dict[str, object]] = []
                     for block in final_message.content:
                         if block.type == "tool_use":
-                            result = await tool_executor(block.name, block.input)  # type: ignore[arg-type]
+                            result = await tool_executor(block.name, block.input)
                             tool_results.append({
                                 "type": "tool_result",
                                 "tool_use_id": block.id,
                                 "content": result,
                             })
 
-                    messages.append({"role": "user", "content": tool_results})  # type: ignore[dict-item]
+                    messages.append({"role": "user", "content": tool_results})
                     continue
                 else:
                     # stop_reason is "end_turn" -- done

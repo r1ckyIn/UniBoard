@@ -25,7 +25,6 @@ interface LinkConfig {
  * to Canvas Home, Ed Discussion, and Ed Lessons.
  */
 export default function QuickLinksPanel({
-  courseCode,
   canvasCourseId,
   edCourseId,
 }: QuickLinksPanelProps) {

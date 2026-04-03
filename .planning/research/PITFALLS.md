@@ -1,294 +1,268 @@
-# Domain Pitfalls
+# Pitfalls Research: Hardening & Production Deployment
 
-**Domain:** University GPA maximization dashboard — HTML prototype to Next.js conversion, contract-first Mock API, MCP Agent in production, i18n with canvas rendering
-**Researched:** 2026-03-20
-
----
-
-## Critical Pitfalls
-
-Mistakes that cause rewrites or major issues.
-
-### Pitfall 1: Rough.js Hydration Mismatch in Next.js SSR
-
-**What goes wrong:** Rough.js generates SVG paths with randomized seed values — every call to `rc.rectangle()` or `rc.circle()` produces slightly different output. When Next.js renders on the server, the SVG output differs from what the client generates, causing React hydration errors ("Text content does not match server-rendered HTML"). Suppressing with `suppressHydrationWarning` hides the symptom but causes visible flickers as the client re-renders.
-
-**Why it happens:** Rough.js uses `Math.random()` internally for its "hand-drawn" aesthetic. Server and client produce different random seeds, so the SVG paths never match between SSR and CSR.
-
-**Consequences:** Hundreds of console errors in development, visual flashing on page load, SEO impact if the initial render is broken, and potential layout shift (CLS penalty).
-
-**Prevention:**
-- **All Rough.js components must be client-only.** Use `next/dynamic` with `{ ssr: false }` for every component that uses Rough.js or Rough Notation.
-- Create a `<RoughBorder>` wrapper component that renders a placeholder `<div>` on server, then draws the Rough.js border after mount via `useEffect`.
-- Use `rough.svg()` (not `rough.canvas()`) in React for DOM-retained SVG elements that React can manage — but still render client-side only.
-- The `react-rough-notation` npm package exists but has limited maintenance; `@turahe/react-rough-notation` advertises SSR-ready support and React 19 compatibility — evaluate before writing custom wrappers.
-
-**Detection:** Hydration mismatch warnings in browser console. CLS > 0.1 in Lighthouse. Visual "pop-in" of hand-drawn borders after page load.
-
-**Phase mapping:** M1 (Frontend App) — must be solved in the very first component sprint.
-
-**Confidence:** HIGH — well-documented pattern for any randomized rendering library in SSR frameworks.
+**Domain:** FastAPI + Next.js production hardening for University GPA dashboard
+**Researched:** 2026-04-01
+**Scope:** Adding CI/CD, Docker, monitoring, security, and deployment hardening to existing UniBoard codebase
+**Overall confidence:** HIGH -- pitfalls derived from codebase audit + verified community patterns
 
 ---
 
-### Pitfall 2: Contract Drift Between M1 Mock API and M2 Real Backend
+## Common Mistakes
 
-**What goes wrong:** M1 defines OpenAPI contracts and implements them as mock responses. M2 builds the real backend months later. During M2 development, the backend deviates from the original contract (field renames, type changes, new required fields, different pagination format). The frontend breaks silently — 67% of developers report production bugs caused by mismatched API contracts.
+Mistakes organized by area, mapped to the phases that should address them.
 
-**Why it happens:** Without automated enforcement, the contract exists as a document that developers reference manually. Backend developers "improve" the API during implementation (changing snake_case to camelCase, wrapping responses in `{data: ...}`, adding `meta` fields). These changes seem harmless but break frontend type expectations.
+### 1. CI/CD Pipeline (GitHub Actions for Python + Next.js Monorepo)
 
-**Consequences:** M2 integration phase becomes a debugging marathon. Frontend "zero-change" promise fails. Every API endpoint requires manual frontend adjustment. Estimated 2-3 weeks of unplanned integration work.
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **Full rebuild on every push** -- both Python and Next.js rebuild even when only one changed | Wasted CI minutes, 5-10min per PR. At scale, blocks merges. | Use `dorny/paths-filter` or `tj-actions/changed-files` to detect which subdirectory changed. Run `backend-ci` only when `src/`, `tests/`, `pyproject.toml` change; `frontend-ci` only when `frontend/` changes. Always run both on `main` merges. | CI setup |
+| **uv cache miss on every run** -- not caching `uv` dependency resolution | Python CI takes 60-90s extra per run for dependency install. | Cache `~/.cache/uv` with key `${{ hashFiles('pyproject.toml') }}`. uv is fast but network-bound package downloads still add up. For pnpm, cache `~/.pnpm-store` with `pnpm-lock.yaml` hash. | CI setup |
+| **Running mypy/ruff/pytest in same job** -- one failure blocks feedback on others | Developer waits 3min for pytest to finish only to learn ruff already failed. | Parallelize: separate jobs for `lint` (ruff), `typecheck` (mypy), `test` (pytest), `frontend-lint`, `frontend-typecheck`, `frontend-test`. Use `needs: [lint, typecheck]` only for deploy job. | CI setup |
+| **No required status checks configured** -- PRs merge with failing CI | Broken code reaches main. Deployment fails downstream. | Configure branch protection: require `backend-lint`, `backend-typecheck`, `backend-test`, `frontend-build` as required checks. Use `if: always()` on a final `ci-gate` job that reports overall status. | CI setup |
+| **Alembic migration not tested in CI** -- schema changes break at deploy time | Migration syntax errors, missing imports, or upgrade/downgrade asymmetry discovered only during Railway deploy. | Add a CI step: start a disposable PostgreSQL service container, run `alembic upgrade head`, then `alembic downgrade -1` to verify reversibility. Use `services: postgres:15` in the GitHub Actions job. | CI setup |
+| **Forgetting `UNIBOARD_DISABLE_SYNC=true` in test CI** -- APScheduler starts during pytest | Tests hang or produce flaky failures from background sync tasks executing. The codebase already has this env guard but CI must set it. | Always set `UNIBOARD_DISABLE_SYNC=true` in pytest CI environment. Also set dummy values for `SUPABASE_JWT_SECRET` and `DATABASE_URL` (pointing to CI Postgres). | CI setup |
+| **Next.js build failure from missing env vars** -- `NEXT_PUBLIC_*` vars not set at build time | Build succeeds locally (`.env.local` exists) but fails in CI because env vars aren't injected. `process.env.NEXT_PUBLIC_SUPABASE_URL!` becomes `undefined!`. | Create `.env.ci` with placeholder values for all `NEXT_PUBLIC_*` vars. In CI, either source this file or set vars explicitly. Document every required env var in a `env.example` file. | CI setup |
 
-**Prevention:**
-1. **Single-source OpenAPI spec** — Write `openapi.yaml` in M1, generate both mock server responses AND TypeScript types from it. Use `openapi-ts` (by hey-api) to generate TanStack Query hooks directly from the spec.
-2. **Contract tests in CI** — When M2 implements an endpoint, run contract tests that validate the real response against the OpenAPI spec. Use `schemathesis` (Python) for FastAPI contract testing.
-3. **Automated drift detection** — Add `oasdiff` to CI pipeline. Any PR that modifies an API response must also update the OpenAPI spec, and the diff is flagged for frontend review.
-4. **Type generation, not manual types** — Never hand-write TypeScript interfaces for API responses. Always generate from OpenAPI spec. When the spec changes, TypeScript compilation fails immediately at every usage site.
-5. **Response envelope convention** — Decide the response wrapper format (`{data, meta, error}` vs flat) in M1 and codify it in the OpenAPI spec. This is the #1 source of drift.
+### 2. Railway Deployment (FastAPI Backend)
 
-**Detection:** TypeScript compilation errors after regenerating types from updated spec. Contract test failures in CI. Frontend `undefined` errors when accessing renamed fields.
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **APScheduler duplicate execution with multiple workers** -- gunicorn spawns N processes, each starts its own scheduler | Sync tasks run N times concurrently (duplicate API calls, race conditions on DB writes, N times the Canvas API rate limit consumption). This is the #1 Railway deployment bug for this codebase. | **Option A (recommended for v1):** Run exactly 1 uvicorn worker (`--workers 1`) on Railway. APScheduler runs in-process safely. Scale vertically (more RAM/CPU on single instance). **Option B (future):** Extract scheduler to a separate Railway service (worker process) communicating via Redis/database job queue. Web service runs with multiple workers but no scheduler. | Docker + Deploy |
+| **`--reload` in production Dockerfile** -- file watcher consumes CPU, triggers restarts on any file change | CPU overhead from inotify watches. Any stray file write (log, temp) can restart the server. Known existing issue in the Dockerfile. | Remove `--reload` from CMD. Use `uvicorn src.web.main:app --host 0.0.0.0 --port 8000` for production. Keep `--reload` only in `docker-compose.yml` for local dev (via volume mount). | Docker |
+| **Health check always returns 200** -- Railway/Docker thinks service is healthy when database is down | Traffic routes to an instance that can't serve requests. Users see 500 errors but orchestrator doesn't restart. Current health endpoint returns 200 even with `status: degraded`. | Return HTTP 503 when database is disconnected. Railway's health check uses HTTP status codes, not response body. Keep a separate `/ready` (for traffic routing) and `/health` (for liveness). `/ready` returns 503 if DB is down. `/health` returns 200 unless the process itself is broken. | Health check |
+| **No graceful shutdown** -- Railway sends SIGTERM, uvicorn gets 10s to shut down, APScheduler jobs may be mid-execution | In-flight sync tasks get killed mid-write. Database connections left open. Partial data written. | Handle SIGTERM: `scheduler.shutdown(wait=True)` with a reasonable timeout (e.g., 30s). Set Railway's `RAILWAY_HEALTHCHECK_TIMEOUT` accordingly. Ensure database sessions are committed/rolled back in sync task finally blocks. The current code uses `wait=False` which is unsafe for production. | Deploy config |
+| **Cold start timeout** -- Railway sleeps free-tier services. First request after sleep has 10-20s latency (import time + DB pool + APScheduler startup + initial sync triggers) | First user after idle period sees timeout or very slow response. Initial sync tasks (5 one-shot jobs) compete with the first request for CPU/memory. | Delay initial sync triggers by 30-60 seconds after startup (use `misfire_grace_time` and `next_run_time=datetime.now() + timedelta(seconds=60)`). Ensure health check endpoint responds before sync starts. Consider Railway's always-on option ($5/mo) to avoid cold starts entirely. | Deploy config |
+| **No connection pooling limits** -- asyncpg creates unlimited connections, exhausts Supabase's pool | Supabase free tier allows 60 direct connections. If APScheduler tasks + web requests all open connections, pool exhaustion causes `too many connections` errors. | Set SQLAlchemy pool limits: `pool_size=5, max_overflow=10` in engine creation. Use Supabase's connection pooler (PgBouncer on port 6543) for the web process. Direct connection (port 5432) for migrations only. | DB config |
+| **VoyageAI blocking call in async context** -- `vo.embed()` is a synchronous HTTP call inside `async def _answer_rag()` | Blocks the entire asyncio event loop for 1-5 seconds per embedding call. All concurrent requests stall. Known existing issue. | Wrap in `asyncio.to_thread()`: `embeddings = await asyncio.to_thread(vo.embed, chunks, model="voyage-3", input_type="document")`. The project already uses this pattern in `src/email/ses.py` for boto3 calls. Apply the same pattern to both `_answer_rag` and `embed_course_materials`. | Code fix |
 
-**Phase mapping:** M1 (define contracts) + M2 (enforce contracts). The OpenAPI spec file and codegen pipeline must be set up in M1 Phase 1.
+### 3. Vercel Deployment (Next.js Frontend)
 
-**Confidence:** HIGH — contract drift is the most documented failure mode of contract-first development.
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **API route timeout for AI streaming** -- Vercel free tier has 10s function timeout, AI chat streaming can take 30-60s | SSE stream from `/api/v1/threads/` gets killed at 10s. User sees partial response then connection drops. | **Do not proxy AI streaming through Vercel API routes.** Connect directly from the browser to the Railway FastAPI backend for streaming endpoints (the frontend already does this via `NEXT_PUBLIC_API_URL`). For non-streaming API routes, set `maxDuration` in route config: `export const maxDuration = 30;` (requires Vercel Pro for >10s). | Deploy config |
+| **Frontend health check is fake** -- current `/api/v1/health/route.ts` hardcodes `status: "healthy"` without checking anything | Monitoring tools show green even when backend is down or Supabase is unreachable. False confidence. | Either (a) remove the frontend health endpoint entirely (Vercel manages frontend health), or (b) make it actually ping the Python backend `/health` endpoint. Option (a) is simpler and correct -- Vercel's own health monitoring is sufficient for static/SSR apps. | Health check |
+| **`NEXT_PUBLIC_API_URL` empty string fallback** -- code uses `process.env.NEXT_PUBLIC_API_URL \|\| ""` which resolves to same-origin | In production, frontend is on `uniboard.vercel.app` and backend is on `uniboard.railway.app`. Empty string means API calls go to Vercel's own domain, returning 404. | Make `NEXT_PUBLIC_API_URL` **required** in production. Add a build-time check: if `NODE_ENV=production` and `NEXT_PUBLIC_API_URL` is empty, fail the build. Add a runtime warning in the API client if the URL is relative. | Env var management |
+| **Server Components calling Python API without error boundaries** -- RSC data fetching fails, entire page crashes | User sees Next.js error page instead of graceful degradation. One backend timeout breaks the whole page. | Wrap data-fetching Server Components in `<Suspense>` with fallback UI. Use `error.tsx` boundary files per route segment. For critical data (grades, deadlines), show cached/stale data when backend is unreachable. | Frontend hardening |
+| **Middleware auth check latency** -- Next.js middleware runs on every request, Supabase token refresh adds 100-300ms | Every page navigation gets slower. Users on slow connections see noticeable delay. | Use Supabase's `getSession()` which reads from cookies without network call. Only call `getUser()` (which makes a network request) when you need fresh user data. Cache the session check result for the request lifetime. | Auth optimization |
 
----
+### 4. Docker Production Image
 
-### Pitfall 3: MCP Agent Cost Explosion with Opus 4.6
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **No init system (PID 1 problem)** -- Python process runs as PID 1, doesn't reap zombie processes or handle signals properly | `SIGTERM` is ignored (Python's default PID 1 behavior). `docker stop` waits 10s then `SIGKILL`s the process. APScheduler tasks get no chance to clean up. Zombie processes accumulate from subprocesses (if any). Known existing issue. | Add `tini` as init system. In Dockerfile: `RUN apt-get update && apt-get install -y --no-install-recommends tini && rm -rf /var/lib/apt/lists/*` then `ENTRYPOINT ["tini", "--"]`. Alternatively use `--init` flag in docker-compose or Docker's built-in `DOCKER_DEFAULT_INIT`. | Docker |
+| **Running as root** -- current Dockerfile doesn't create a non-root user | Container compromise gives attacker root on the host (in some configurations). Against security best practices. | Add to Dockerfile: `RUN useradd -r -s /bin/false appuser && USER appuser`. Ensure `/app` is writable by appuser. Place this after `COPY` and before `CMD`. | Docker |
+| **Dev dependencies in production image** -- `uv pip install -e ".[dev]"` installs pytest, mypy, ruff in production | Image 200-400MB larger than necessary. Attack surface increased (dev tools available to attacker). Slower builds and deploys. | Multi-stage build: stage 1 (`builder`) installs all deps and runs tests; stage 2 (`runtime`) copies only production deps. `uv pip install --system --no-cache "."` (without `[dev]`). | Docker |
+| **No `.dockerignore`** -- entire repo (including `.git`, `node_modules`, `frontend/`, `prototype/`) is sent as build context | Build context is 500MB+ instead of 20MB. Builds take 30-60s longer. Sensitive files (`.env`) may be included. | Create `.dockerignore` excluding: `.git`, `frontend/`, `prototype/`, `node_modules/`, `*.pyc`, `__pycache__/`, `.env*`, `.planning/`, `docs/`, `supabase/`, `.claude/`, `mcp-server/`. | Docker |
+| **Source code mounted as volume in production** -- `docker-compose.yml` mounts `./src:/app/src` | In production, this would override the built image's code with whatever is on the host. If deployed via compose in production (unlikely but possible), this is catastrophic. | Create separate `docker-compose.prod.yml` without volume mounts. Or better: use `docker-compose.yml` only for local dev, deploy via Railway's Dockerfile build. | Docker |
+| **Large base image** -- `python:3.12-slim` is ~150MB, acceptable but could be smaller | Slower pulls during deploy. | `python:3.12-slim` is actually the right choice for this project. Don't use Alpine -- asyncpg, lxml, and cryptography all require C compilation that breaks on musl libc. The slim image is the pragmatic choice. | Docker |
 
-**What goes wrong:** Each MCP Agent query (Deadline AI chat, File Q&A, Ed Discussion intelligence) invokes Claude Opus 4.6 with MCP tools. A single user question triggers 5-12 tool calls, each appending to the conversation context. With the full conversation context growing per turn, a single complex query can consume 50K-200K input tokens + 5K-15K output tokens. At $5/M input + $25/M output, a single query costs $0.25-$1.38. With 100 active students asking 5 questions/day, monthly AI cost reaches $3,750-$20,700.
+### 5. Monitoring and Logging
 
-**Why it happens:** MCP tool descriptions alone consume significant context window space (40-50% reported in production deployments). Each tool call result (Canvas assignment data, Ed Discussion threads, course materials) adds thousands of tokens. The agent's "thinking" across multiple tool calls compounds input costs because each subsequent API call includes all prior context.
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **Logging every request body** -- structlog with verbose middleware logs full request/response payloads | Log storage costs explode. PII/tokens accidentally logged (despite redaction, new fields slip through). Performance overhead of serializing large payloads. | Log request metadata only: method, path, status, duration, user_id, request_id. Log full payloads only at DEBUG level (disabled in production). The current `redact_sensitive_fields` processor is good but only catches known key names -- new sensitive fields won't be caught. | Monitoring |
+| **No request duration tracking** -- current middleware adds request_id but not timing | Can't identify slow endpoints. Can't set SLO alerts. Invisible performance degradation. | Add timing to the request_id middleware: `start = time.monotonic()` at entry, `duration_ms = (time.monotonic() - start) * 1000` at exit. Log with structlog: `logger.info("request_completed", method=..., path=..., status=..., duration_ms=...)`. | Monitoring |
+| **Alert fatigue from APScheduler** -- every sync cycle logs success for every user for every data type | 8 sync types x 100 users x every-15-min = 3,200 log entries/hour of "sync completed successfully." Obscures actual errors. | Log sync summaries, not per-user results: `sync_grades_completed: users=95, failed=5, duration=12s`. Log individual failures at WARNING level. Only log individual successes at DEBUG level. | Monitoring |
+| **No error rate tracking** -- errors logged but not counted/aggregated | Can't detect gradual degradation (error rate rising from 1% to 5%). No alerting threshold. | Use structlog's bound logger to tag error types. Expose `/metrics` endpoint with error counts per endpoint (or integrate Sentry for error tracking with deduplication). Railway provides basic metrics; supplement with Sentry free tier (5K errors/mo). | Monitoring |
+| **structlog using PrintLoggerFactory in production** -- bypasses standard library, no integration with log aggregation tools | Railway captures stdout, so this works, but loses integration with tools expecting standard library logging. No log level filtering in production -- `make_filtering_bound_logger(0)` means level 0 (DEBUG) and above. | Change to `make_filtering_bound_logger(logging.INFO)` in production (import from settings). Keep `PrintLoggerFactory` for Railway (stdout capture is correct). Add `log_level` env var support (already in Settings but not wired into `configure_logging`). | Monitoring |
+| **Missing correlation IDs in sync tasks** -- request_id middleware only covers HTTP requests, not background scheduler tasks | Can't trace a sync failure through multiple service calls. Debugging APScheduler issues requires manual timestamp correlation. | Bind a `sync_id` (UUID) to structlog context at the start of each sync task using `structlog.contextvars.bind_contextvars(sync_id=...)`. Clear it at task end. | Monitoring |
 
-**Consequences:** Project becomes financially unsustainable. A single student's heavy usage day could cost more than the entire infrastructure budget. No cost ceiling without explicit controls.
+### 6. Security Hardening
 
-**Prevention:**
-1. **Tiered model strategy** — Use Sonnet 4.6 ($0.30/$1.50 per M tokens) for routine queries (deadline lookups, material search). Reserve Opus 4.6 only for complex multi-source research that requires deep reasoning. Implement a query classifier that routes based on complexity.
-2. **Pre-collected data pattern for digest** — Already planned in PROJECT.md: scheduled sync + Claude API scoring. Extend this pattern to more features. Pre-aggregate Ed Discussion highlights, deadline summaries, and material indexes during background sync. Serve from database, not live MCP queries.
-3. **Token budget per query** — Set `max_tokens` limit (e.g., 4096) on output. Implement a conversation turn limit (max 5 tool calls per query). Truncate tool results to essential fields before passing to the model.
-4. **Caching layer** — Cache MCP tool results for identical queries within a time window (e.g., "What are my deadlines?" is the same for 15 minutes). Cache AI responses for common question patterns.
-5. **Rate limiting per user** — Daily query quota (e.g., 20 AI queries/day free, then degraded to Sonnet). Weekly cost cap per user.
-6. **Prompt caching** — Use Anthropic's prompt caching (cache hit costs 10% of input price). System prompts, tool definitions, and static course context should be cached across queries.
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **Over-restrictive CORS breaks production auth** -- changing from `allow_origins=["http://localhost:3001"]` to a strict production origin breaks preflight requests | Login fails silently. API calls return CORS errors that are hard to debug (browser shows generic "blocked by CORS" without details). | Make CORS origins configurable via env var: `ALLOWED_ORIGINS=https://uniboard.vercel.app,http://localhost:3001`. Parse as comma-separated list. In production, include the exact Vercel deployment URL. Remember Vercel generates preview URLs (`uniboard-*.vercel.app`) -- decide whether to allow wildcard for previews or restrict to production only. | Security |
+| **CORS wildcard in desperation** -- after CORS errors in staging, developer sets `allow_origins=["*"]` to "fix" it | Any website can make authenticated API calls on behalf of logged-in users. Combined with `allow_credentials=True`, this is a critical security vulnerability. Browsers actually reject `*` with credentials, so it breaks AND is insecure. | Never use `allow_origins=["*"]` with `allow_credentials=True`. Debug CORS methodically: check the `Origin` header in the preflight request, verify it's in the allowed list, check that `Access-Control-Allow-Credentials: true` is in the response. | Security |
+| **Supabase JWT secret mismatch** -- dev uses the default `super-secret-jwt-token-with-at-least-32-characters-long`, production needs the real Supabase project JWT secret | All JWT validation fails silently (returns 401 for every request). Users appear "logged out" even with valid sessions. The current config default is a known placeholder. | Make `SUPABASE_JWT_SECRET` **required** in production (no default). Add a startup check: if `debug=False` and `supabase_jwt_secret` equals the default placeholder, raise `RuntimeError("Production requires real SUPABASE_JWT_SECRET")`. | Security |
+| **Config defaults unsafe for production** -- `debug: bool = True`, `encryption_key: str = ""`, `supabase_jwt_secret` has dev default | Production accidentally runs in debug mode (verbose errors, possibly debug endpoints). Empty encryption key means tokens stored unencrypted or encryption silently fails. Known existing issue. | Add a `validate_production_config()` method on Settings that runs when `debug=False`. It should assert: encryption_key is not empty, supabase_jwt_secret is not the placeholder, anthropic_api_key is set (if AI features enabled), database_url does not contain `localhost`. Call this in the FastAPI lifespan before starting the scheduler. | Security |
+| **Missing rate limiting** -- no rate limiting on any endpoint | Single user or attacker can exhaust API resources. AI endpoints (`/api/v1/ai/ask`) could trigger unlimited Claude API costs. Background sync could be triggered repeatedly via `/api/v1/sync/trigger`. | Add `slowapi` (built on `limits` library) for per-user rate limiting. Critical limits: AI endpoints (20/hour per user), sync trigger (5/hour per user), auth endpoints (10/minute per IP). Configure via env vars so production limits differ from dev. | Security |
+| **No HTTPS enforcement** -- FastAPI doesn't enforce HTTPS, relies on Railway/Vercel reverse proxy | Man-in-the-middle attacks intercept JWTs. Cookies without `Secure` flag sent over HTTP. | Railway and Vercel enforce HTTPS at the edge, so this is handled by infrastructure. But add `TrustedHostMiddleware` to reject requests to unexpected hostnames. Add `Secure` and `SameSite=Lax` to any cookies. Set `HSTS` header via middleware. | Security |
 
-**Detection:** Monthly API bill exceeds budget. Average tokens-per-query metrics trending upward. User complaints about slow responses (latency correlates with token count).
+### 7. Database Migration During Deployment
 
-**Phase mapping:** M3 (AI/MCP/Skills) — but cost architecture decisions must be made in M2 (data pre-collection patterns) and M1 (UI must support graceful degradation when AI is unavailable).
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **Running migrations in app startup** -- `alembic upgrade head` runs in FastAPI lifespan | If migration fails, the app crashes on startup. If migration takes 30s, health check times out and Railway restarts the container (infinite restart loop). Two instances starting simultaneously run migrations concurrently (race condition). | Run migrations as a **separate step** before starting the app. In Railway: use a release command or a separate deploy step. In Docker: use an entrypoint script that runs `alembic upgrade head` then `exec uvicorn ...`. Never run migrations inside the FastAPI lifespan handler. | Deploy pipeline |
+| **Alembic and Supabase CLI migration conflict** -- project uses both Alembic (in `alembic/`) and Supabase CLI migrations (in `supabase/`) | Two migration systems managing the same database. One doesn't know about the other's changes. `alembic upgrade head` may conflict with `supabase db push` changes. Schema drift between the two systems. | **Choose one migration system and stick with it.** Since the Python backend owns the data model (SQLAlchemy models), Alembic should be the single source of truth for schema migrations. Use Supabase CLI only for Auth/RLS policies and Edge Functions, not for table DDL. Document this boundary clearly. | Migration strategy |
+| **No migration downgrade path** -- Alembic migrations have `upgrade()` but empty `downgrade()` | If a migration breaks production data, there's no automated rollback. Manual SQL fixes under pressure lead to more errors. | Write `downgrade()` for every migration. Test downgrade in CI (see CI pipeline section). For destructive changes (DROP COLUMN), the downgrade should re-add the column. For data migrations, consider if downgrade is even possible (it may not be). | Migration discipline |
+| **Large migration locks tables** -- `ALTER TABLE ADD COLUMN ... DEFAULT ...` on a large table acquires an exclusive lock | All reads/writes to that table block for the duration of the migration. Users see 500 errors or timeouts. For tables like `grades` or `deadlines` with many rows, this can take minutes. | Use `ADD COLUMN ... DEFAULT NULL` (instant on PostgreSQL 11+). Add the default value via a separate `UPDATE` in batches. For index creation, use `CREATE INDEX CONCURRENTLY` (requires Alembic's `op.execute()` with raw SQL, not `op.create_index()`). | Migration discipline |
+| **Forgetting pgvector extension in migration** -- Alembic migration references `VECTOR` type but pgvector extension isn't installed | `alembic upgrade head` fails with `type "vector" does not exist`. This already bit the project once (documented in CLAUDE.md). | Add `op.execute("CREATE EXTENSION IF NOT EXISTS vector")` as the first operation in any migration that introduces vector columns. Test the full migration chain from scratch in CI. | Migration discipline |
 
-**Confidence:** HIGH — Anthropic's own documentation confirms these cost dynamics. Opus 4.6 pricing is verified at $5/$25 per million tokens.
+### 8. Environment Variable Mismatches
 
----
-
-### Pitfall 4: Losing Prototype Animation/Interaction Fidelity During Conversion
-
-**What goes wrong:** The 10 HTML prototypes contain 6,930 lines of hand-tuned CSS animations, JavaScript interactions, and Rough.js rendering. During React conversion, developers translate the visual layout but lose the micro-interactions: staggered entrance animations (.anim .d1-.d10), breathing scroll hint, hover-triggered Rough Notation circles on grade cells, donut chart leader lines, hand-drawn timeline dots, and slider-based WAM recalculation. The final product "looks similar" but "feels dead."
-
-**Why it happens:**
-- Inline event handlers (`onclick`, `onmouseenter`) get refactored into React event handlers but the timing/sequencing logic is lost.
-- CSS animations with specific delays (.d1 through .d10 at 40-720ms intervals) get simplified to a generic `fade-in`.
-- `requestAnimationFrame(function(){ requestAnimationFrame(function(){ ... })})` double-RAF pattern (used for Rough.js border drawing) isn't understood and gets replaced with a simple `useEffect`.
-- `setTimeout` sequences for Rough Notation annotation groups (900ms delay, then sequential show) are hard to express in React's declarative model.
-- The predict page's WAM calculation has imperative DOM manipulation (`scoreEl.textContent = ...`, `iconWrap.className = ...`) that must be restructured into React state.
-
-**Consequences:** 103 design iterations wasted. The product's core differentiator (the "notebook on a student's desk" aesthetic) is compromised. Users perceive the app as "just another dashboard."
-
-**Prevention:**
-1. **Animation inventory document** — Before converting any page, create a spreadsheet listing every animation, its trigger, timing, and the exact CSS/JS that implements it. Cross-reference against the converted React component.
-2. **Side-by-side visual regression** — Open the HTML prototype and the React version side-by-side during development. Use Playwright screenshot comparison for automated regression.
-3. **Convert page-by-page, not component-by-component** — Each HTML prototype is self-contained. Convert one complete page, verify all interactions match, then move to the next. Do not extract shared components until 3+ pages are converted and patterns are clear.
-4. **Preserve the double-RAF pattern** — Create a `useRoughBorder` hook that replicates the double `requestAnimationFrame` timing. This is critical for Rough.js borders to render after layout is complete.
-5. **Animation delay system** — Create a `useStaggeredAnimation` hook that maps `.d1` through `.d10` delay classes. The delays (40ms to 720ms in non-linear steps) are intentionally designed — don't linearize them.
-6. **Predict page state machine** — The predict page's WAM calculation (`recalcAll → computeWAM → updateTarget → updateRequired → computeRequired`) is a complex state machine with ~15 derived values. Model it explicitly with `useReducer` + `useMemo`, not scattered `useState` calls.
-
-**Detection:** Visual diff between prototype HTML and React output shows missing animations. User feedback mentions the app feels "static" or "plain." Animation count in React version is lower than prototype inventory.
-
-**Phase mapping:** M1 (Frontend App) — every phase within M1 must include animation verification as acceptance criteria.
-
-**Confidence:** HIGH — based on direct analysis of the 6,930-line prototype codebase with specific patterns identified.
-
----
-
-### Pitfall 5: Rough.js Performance Degradation with Many Elements
-
-**What goes wrong:** Each card with `data-hand-border` creates an SVG element with randomized paths. The dashboard page alone has 10+ cards, each with a Rough.js border. Add the donut chart (4 slices + 4 leader lines + 8 labels + 4 dots = ~20 Rough elements), timeline (vertical line + dots), progress bars (canvas elements), and hero doodles (11 decorative shapes). A single page renders 50-80 Rough.js elements. In React, if any parent state changes, all these elements re-render, causing Rough.js to regenerate all randomized SVG paths — visible as borders "flickering" and 200-500ms jank.
-
-**Why it happens:** Rough.js generates new random paths on every call. React's reconciliation sees different SVG `d` attributes and updates the DOM. Unlike static SVGs, Rough.js output is never stable between renders.
-
-**Consequences:** Janky scrolling, border flickering on any state update, high CPU usage on pages with many cards (dashboard, courses, course-detail). Mobile performance is especially impacted.
-
-**Prevention:**
-1. **Memoize Rough.js output** — Generate Rough.js SVG paths once on mount, store the serialized SVG string in a ref, and only regenerate when the element's dimensions actually change.
-2. **Use a fixed seed** — Rough.js supports a `seed` option: `rc.rectangle(0, 0, w, h, { seed: 42 })`. Pass a deterministic seed per component instance so the same element always generates the same paths. This prevents re-render flickering AND helps with potential future SSR.
-3. **Isolate Rough.js from React's render cycle** — Wrap each Rough.js element in `React.memo` with a custom comparator that only allows re-render on dimension changes.
-4. **Prefer Canvas mode for non-interactive Rough elements** — Progress bars and weight bars are already using `rough.canvas()`. For elements that don't need DOM event handling (borders, decorative shapes), canvas is more performant because it doesn't create DOM nodes that React needs to reconcile.
-5. **Virtualize on scroll-heavy pages** — If a page has 20+ cards (courses list), only render Rough.js borders for visible cards. Use Intersection Observer to draw borders as cards enter viewport.
-
-**Detection:** React DevTools Profiler shows Rough.js components taking >16ms per render. Chrome Performance tab shows long "Recalculate Style" tasks. Visible border flickering when typing in search or toggling filters.
-
-**Phase mapping:** M1 (Frontend App) — the `<RoughBorder>` component design in Phase 1 must include memoization from day one.
-
-**Confidence:** HIGH — SVG performance degradation with many elements is well-documented; Rough.js compounds it with randomized regeneration.
+| Pitfall | Impact | Prevention | Phase |
+|---------|--------|------------|-------|
+| **Dev defaults silently used in production** -- pydantic-settings fills defaults when env vars are missing, no error raised | Production runs against `localhost:54322` database, `localhost:54321` Supabase, debug mode enabled. Symptoms are subtle: app "works" but talks to nothing or the wrong service. Current config has dev-friendly defaults for EVERY setting. | Create two tiers of settings: required-in-production (no defaults) and optional (with defaults). Use a custom validator: `@model_validator(mode="after")` that checks if `self.debug is False` and critical fields are still at their default values. Raise `ValueError` with a clear message listing which env vars are missing. | Config hardening |
+| **NEXT_PUBLIC_ vs server-only env var confusion** -- putting secret keys in `NEXT_PUBLIC_*` exposes them to the browser | Supabase service role key or API secrets visible in browser JavaScript bundle. `NEXT_PUBLIC_` variables are inlined at build time into client bundles. | Audit all env vars: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are correct (these are public by design). `SUPABASE_SERVICE_ROLE_KEY` must NEVER be `NEXT_PUBLIC_` prefixed. Backend secrets stay in Railway env vars only. | Security |
+| **Railway and Vercel env vars not synced** -- adding a new feature requires env vars in both services, developer forgets one | Backend expects `VOYAGE_API_KEY` but it's only set in Railway, not needed in Vercel. Or `NEXT_PUBLIC_API_URL` is updated in Vercel but the old Railway URL still hardcoded somewhere. | Maintain a single `env.requirements.md` document listing every env var, which service needs it (Railway/Vercel/both), whether it's required or optional, and the production value source. Review this document during every PR that adds a new env var. | Env management |
+| **`.env` file committed to git** -- especially dangerous with real Canvas/Ed tokens during development | Tokens exposed in git history forever. Even deleting the file doesn't remove it from history. GitHub secret scanning may flag it. | `.env` is already in `.gitignore`. Add a pre-commit hook check: if any `.env*` file (except `.env.example`) is staged, reject the commit. Provide `.env.example` with placeholder values and comments explaining each variable. | Security |
+| **Encrypted token key rotation impossible** -- `ENCRYPTION_KEY` used for AES-256-GCM but no rotation mechanism | If the key is compromised, all stored Canvas/Ed tokens must be re-encrypted. Without rotation logic, this requires manual database intervention. | Design encryption with key versioning from the start. Store `key_version` alongside encrypted data. When rotating, encrypt new tokens with the new key, and re-encrypt existing tokens in a background migration. Support decryption with any known key version. | Security (future) |
 
 ---
 
-## Moderate Pitfalls
+## Integration Pitfalls
 
-### Pitfall 6: i18n Text in Rough.js Canvas/SVG Elements
+Mistakes specific to adding hardening features to an **existing working codebase** -- the risk of breaking what already works.
 
-**What goes wrong:** The donut chart renders text labels as SVG `<text>` elements (e.g., "Assignment 1", "Final Exam", "15%"). The Rough.js timeline renders deadline names as HTML text. When i18n switches to Chinese, SVG text width calculations change (Chinese characters are wider/taller), breaking leader line positioning and label overlap. Canvas-rendered text doesn't participate in React's i18n system at all — `useTranslation()` can't reach into canvas draw calls.
+### Integration Pitfall 1: CORS Change Breaks Existing Frontend
 
-**Prevention:**
-1. **Separate data from rendering** — Chart labels should come from React state (translated), not be hardcoded in Rough.js draw functions. Pass translated strings as props to chart components.
-2. **Use SVG `<text>` over canvas text** — SVG text can be styled with CSS and measured with `getBBox()` for layout. Canvas text measurement (`ctx.measureText()`) is less reliable across fonts/languages.
-3. **Dynamic leader line positioning** — Calculate leader line endpoints based on actual rendered text width, not static offsets. Chinese "期末考试" is wider than English "Final Exam."
-4. **Font loading guard** — Source Serif 4 and Inter must be loaded before Rough.js draws text. Use `document.fonts.ready` or `next/font` preloading. Measuring text width with a fallback font produces incorrect positions.
+**What goes wrong:** Developer changes CORS from `allow_origins=["http://localhost:3001"]` to a configurable list but forgets to include `http://localhost:3001` in the dev default. Local development immediately breaks -- API calls return CORS errors, but the browser console error is vague ("blocked by CORS policy").
 
-**Phase mapping:** M1 — i18n must be integrated into chart components from the start, not bolted on after.
+**Prevention:** Add CORS origins via environment variable with a dev-friendly default:
+```python
+cors_origins: str = "http://localhost:3001"  # comma-separated, production adds real origin
+```
+Parse as list in middleware setup. Test CORS changes by running frontend AND backend locally before merging.
 
-**Confidence:** MEDIUM — based on general i18n + canvas/SVG text challenges; no UniBoard-specific evidence yet.
-
----
-
-### Pitfall 7: Ed Discussion API Instability and Missing Documentation
-
-**What goes wrong:** Ed Discussion has no public API documentation. The API is reverse-engineered from the Ed web app and referenced via the hschafer/edstem OSS library. API endpoints can change without notice. Authentication tokens expire or change format. Response schemas have undocumented fields that vary between Ed courses (some courses have `is_endorsed`, others don't).
-
-**Prevention:**
-1. **Defensive Pydantic parsing** — Already planned. Every field should have a default value. Use `model_config = ConfigDict(extra="ignore")` to silently drop unknown fields.
-2. **Response schema versioning** — Store raw API responses alongside parsed data. When parsing fails, log the raw response for debugging without losing the data.
-3. **Circuit breaker per adapter** — If Ed API returns 5 consecutive errors, stop polling for 30 minutes. Don't let one broken adapter cascade to the entire sync engine.
-4. **Fallback content strategy** — If Ed data is unavailable, the UI must still function. Deadline page shows Canvas-only deadlines. Intelligence features show "Ed data temporarily unavailable" rather than crashing.
-
-**Phase mapping:** M2 (Backend Core) — adapter resilience patterns.
-
-**Confidence:** HIGH — this is a known constraint documented in TRD and CLAUDE.md. The project already experienced this in v1.0.
+**Detection:** Any API call from the browser returns a CORS error. Check browser Network tab -- preflight `OPTIONS` request returns without `Access-Control-Allow-Origin` header.
 
 ---
 
-### Pitfall 8: Over-Componentizing During Prototype Conversion
+### Integration Pitfall 2: Health Check Change Triggers Restart Loop
 
-**What goes wrong:** Developer sees 10 HTML prototypes sharing sidebar, header, and card patterns. They immediately extract a `<Card>`, `<Sidebar>`, `<Header>`, `<StatCard>`, `<Timeline>`, `<RoughBorder>`, `<GradeBadge>`, `<CalendarGrid>`, etc. before converting a single page. The abstractions are designed based on assumptions about how components should be shared, not actual usage patterns. Later, page-specific variations (dashboard cards need donut charts, course cards need progress bars, predict cards need input fields) don't fit the premature abstractions.
+**What goes wrong:** Developer fixes health check to return 503 when database is down. But during deployment, the new code starts before the database connection is established (async pool initialization takes 2-3 seconds). Railway's health check hits `/health` during startup, gets 503, considers the service unhealthy, and restarts it. Infinite restart loop.
 
-**Prevention:**
-1. **Three-page rule** — Do not extract a shared component until you've implemented the same pattern in 3 different pages. Copy-paste is acceptable during M1.
-2. **Convert pages in complexity order** — Start with simpler pages (auth, setup, settings) → medium (courses, timetable, digest) → complex (dashboard, course-detail, predict, deadline). Shared patterns emerge naturally.
-3. **Layout-first, features-second** — Extract layout components (sidebar, header, main content area, right panel) first because they're truly shared. Page-specific components (donut chart, predict sliders, deadline timeline) stay local to their pages.
+**Prevention:** Implement a startup grace period. The health endpoint should return 200 for the first 30 seconds after process start regardless of DB status. Use a module-level `_startup_time = time.monotonic()` and check if `time.monotonic() - _startup_time < 30` before reporting DB failures. Alternatively, configure Railway's health check with a start period / initial delay.
 
-**Phase mapping:** M1 — component architecture decisions in Phase 1.
-
-**Confidence:** MEDIUM — general React best practice, amplified by the prototype-to-React conversion context.
+**Detection:** Railway logs show repeated "Service restarting" entries every 30-60 seconds. Health check endpoint always returns 503 in the first few seconds.
 
 ---
 
-### Pitfall 9: MCP Agent Latency Ruining UX
+### Integration Pitfall 3: Docker Multi-Stage Build Breaks Dev Workflow
 
-**What goes wrong:** User asks "What do I need to score on my final to get a Distinction?" in the Deadline AI chat. The MCP Agent makes 5 sequential tool calls: (1) list courses → (2) get assignments for course → (3) get grades → (4) get unit outline weights → (5) synthesize answer. Each tool call is a separate API round-trip to Canvas/Ed. Total latency: 8-15 seconds. User has already left the page.
+**What goes wrong:** Developer creates a production multi-stage Dockerfile. Now `docker-compose up` for local development uses the production image (no dev dependencies, no volume mounts, no `--reload`). Developer must maintain two Dockerfiles or gets confused switching between them.
 
-**Prevention:**
-1. **Streaming responses** — Use Anthropic's streaming API to show partial responses as they arrive. Show "Checking your Canvas grades..." during tool execution.
-2. **Pre-computed answers** — For common questions (grade requirements, deadline summaries), pre-compute during background sync and serve from database. Only invoke MCP Agent for genuinely novel queries.
-3. **Parallel tool calls** — When multiple tools are independent (get grades + get unit outline), execute them in parallel, not sequentially. MCP protocol supports this.
-4. **Progress indicators** — Show each tool call as a step: "Reading your grades... Reading assignment weights... Calculating..." Users tolerate 10-second waits when they see progress.
-5. **Optimistic UI** — Show pre-collected data immediately (cached grades, known deadlines) while the AI processes the full answer. The AI response enriches what's already displayed.
+**Prevention:** Keep the existing Dockerfile for local development (renamed to `Dockerfile.dev` or keep as-is with docker-compose override). Create `Dockerfile.prod` for production/Railway. Railway's Dockerfile config can point to `Dockerfile.prod`. The local `docker-compose.yml` continues using the dev Dockerfile.
 
-**Phase mapping:** M3 (AI/MCP/Skills) — but M1 UI must include loading state designs for AI-powered features.
-
-**Confidence:** MEDIUM — latency estimates are based on typical API round-trip times; actual MCP Agent latency depends on tool implementation.
+**Detection:** `docker-compose up` fails to mount volumes or doesn't have pytest available.
 
 ---
 
-### Pitfall 10: Unit Outline HTML Parser Fragility
+### Integration Pitfall 4: Adding Gunicorn Breaks APScheduler
 
-**What goes wrong:** USYD Unit Outline pages are rendered HTML pages with no stable schema. Different faculties use different HTML templates. Assessment tables have inconsistent column headers ("Assessment Task" vs "Task" vs "Assessment Item"). Weight columns may use "%" or not. Some pages use `<table>`, others use `<dl>` or styled `<div>` grids. The parser works for the 5 courses tested in development, then breaks for 20% of courses in production.
+**What goes wrong:** Developer adds gunicorn for production (`gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.web.main:app`). Each of the 4 workers starts its own APScheduler instance. Sync tasks run 4 times simultaneously. Canvas API rate limits are hit. Database receives 4x the writes. Duplicate data everywhere.
 
-**Prevention:**
-1. **Weight-sum validation** — Already planned in TRD. If parsed weights don't sum to 100% (within tolerance), flag the unit outline for manual review rather than serving incorrect data.
-2. **Multiple parser strategies** — Implement 2-3 parsing strategies (table-based, definition-list-based, regex-based) and use the one that produces a valid result (weights sum to ~100%).
-3. **Graceful degradation** — If parsing fails, show "Assessment weights not available for this course" rather than incorrect percentages. GPA predictions should still work with user-entered weights as fallback.
-4. **Parser test suite** — Collect HTML samples from 20+ different faculties/courses during development. Each is a test case. Run regression tests when parser logic changes.
-5. **Once-per-semester tolerance** — Unit outlines change once per semester. A parser failure is not urgent. Log failures for manual investigation, don't block the user.
+**Prevention:** For this project's architecture, **do not add gunicorn multi-worker mode until APScheduler is extracted to a separate service.** Run a single uvicorn worker in production. This is sufficient for the expected user load (100-500 students). When scaling is needed, extract the scheduler to a worker service first, then add gunicorn workers to the web service.
 
-**Phase mapping:** M2 (Backend Core) — adapter/parser implementation.
-
-**Confidence:** HIGH — HTML scraping fragility is a universal problem; USYD's inconsistent templates are confirmed from v1.0 experience.
+**Detection:** Database has duplicate sync entries. Canvas API returns 429 (rate limit). Sync logs show the same user being synced multiple times within the same cycle.
 
 ---
 
-## Minor Pitfalls
+### Integration Pitfall 5: Production Config Validation Breaks Tests
 
-### Pitfall 11: Canvas Token Special Characters in Environment Variables
+**What goes wrong:** Developer adds startup validation that rejects default/empty config values when `debug=False`. Tests that don't explicitly set `debug=True` now crash on import because `get_settings()` is called at module level and the validator fires.
 
-**What goes wrong:** Canvas API tokens and Ed API tokens contain special characters (`+`, `/`, `=`) that get mangled by shell escaping when stored in `.env` files or exported via `zsh export`. The token works in browser but fails when passed through environment variable pipelines.
+**Prevention:** The validator should only run when explicitly called (e.g., in FastAPI lifespan), not in the `Settings.__init__`. Use a separate `validate_for_production()` method, not a `@model_validator`. Tests set `UNIBOARD_DISABLE_SYNC=true` but don't set `DEBUG=true` -- add `DEBUG=true` to the test environment setup.
 
-**Prevention:** Already documented in CLAUDE.md. Use direct inline tokens in development curl tests. In production, store tokens encrypted in PostgreSQL (AES-256-GCM as planned), never in environment variables.
-
-**Phase mapping:** M2 — already a known issue.
-
-**Confidence:** HIGH — confirmed from v1.0 development.
+**Detection:** `pytest` fails on import with `RuntimeError: Production requires real SUPABASE_JWT_SECRET`.
 
 ---
 
-### Pitfall 12: Next.js App Router i18n Static Export Limitation
+### Integration Pitfall 6: Rate Limiting Breaks Background Sync
 
-**What goes wrong:** Next.js App Router's i18n support has constraints with static export. If the project later needs static export (e.g., for S3/CloudFront hosting without Lambda@Edge), the internationalized routing (`/en/dashboard`, `/zh/dashboard`) won't work with `next export`.
+**What goes wrong:** Developer adds rate limiting (e.g., 60 requests/minute per IP) to all endpoints. The background sync engine calls the **same API endpoints internally** (or uses the same services). Internal sync requests get rate-limited and start failing.
 
-**Prevention:**
-1. Use `next-intl` with App Router — it supports both SSR and static generation modes.
-2. Design routing for middleware-based locale detection, not filesystem-based routing.
-3. Since the deployment plan is AWS Lambda + API Gateway (server-rendered), this is not an immediate blocker — but avoid architectural choices that assume static export.
+**Prevention:** Rate limiting should be applied at the API layer (FastAPI middleware/dependency), not at the service layer. Background sync tasks call services directly, bypassing the API router, so they're unaffected. If sync does go through the API (e.g., internal HTTP calls), exempt internal requests by checking the source (local IP or a special header with a secret).
 
-**Phase mapping:** M1 — i18n setup decision in early phases.
-
-**Confidence:** MEDIUM — constraint documented in Next.js docs; impact depends on deployment strategy.
+**Detection:** Sync logs show HTTP 429 errors. Sync success rate drops after rate limiting is deployed.
 
 ---
 
-### Pitfall 13: Background Sync Race Conditions
+### Integration Pitfall 7: Logging Changes Break Structured Log Parsing
 
-**What goes wrong:** Multiple sync tasks run on different schedules (grades every 15min, deadlines every 1h, modules daily). If a user's Canvas token expires mid-sync, some tasks succeed and others fail, leaving the database in an inconsistent state. A grade sync succeeds but the deadline sync fails, so the user sees updated grades but stale deadlines.
+**What goes wrong:** Developer changes structlog configuration (new processors, different field names, different JSON structure). Existing log monitoring/alerting rules (if any) break because they depend on specific field names like `event`, `timestamp`, `level`.
 
-**Prevention:**
-1. **Token validation before sync batch** — Check token validity once at the start of each sync cycle, not per-task.
-2. **Atomic sync transactions** — Each sync task either fully succeeds or fully rolls back. Use database transactions.
-3. **Last-synced timestamps per data type** — Store `grades_synced_at`, `deadlines_synced_at`, etc. separately. Show "Deadlines last updated 2h ago" in the UI when sync is stale.
-4. **Sync health dashboard** — Track per-user, per-data-type sync status. Alert when a user's sync has failed 3+ consecutive times.
+**Prevention:** Define a log schema contract. The minimum fields that every log entry must have: `event` (string), `level` (string), `timestamp` (ISO 8601), `request_id` or `sync_id` (UUID). New fields can be added but these core fields must never be renamed or removed. Test this contract with a unit test that asserts log output structure.
 
-**Phase mapping:** M2 (Backend Core) — sync engine design.
-
-**Confidence:** MEDIUM — standard distributed sync challenge.
+**Detection:** Log aggregation dashboard shows "parse error" or missing fields. Alerts stop firing because the field they match on was renamed.
 
 ---
 
-## Phase-Specific Warnings
+## Warning Signs
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| M1: Rough.js integration | Hydration mismatch (#1), Performance (#5) | Client-only rendering, memoization with seed |
-| M1: Prototype conversion | Animation fidelity loss (#4), Over-componentizing (#8) | Animation inventory, three-page rule |
-| M1: Contract definition | Contract drift setup (#2) | OpenAPI spec + codegen pipeline in Phase 1 |
-| M1: i18n | Canvas/SVG text (#6), Static export (#12) | SVG text over canvas, next-intl |
-| M2: API implementation | Contract drift enforcement (#2) | schemathesis contract tests in CI |
-| M2: Adapters | Ed API instability (#7), HTML parser fragility (#10), Token issues (#11) | Defensive parsing, multiple strategies, circuit breakers |
-| M2: Sync engine | Race conditions (#13) | Token pre-validation, atomic transactions |
-| M3: MCP Agent | Cost explosion (#3), Latency (#9) | Tiered models, pre-computed answers, streaming |
-| M3: Skill system | Token budget | Per-query limits, caching, prompt caching |
+How to detect if you're making these mistakes during the hardening process.
+
+### Pre-Deploy Checklist
+
+| Check | Command / Method | Red Flag |
+|-------|-----------------|----------|
+| Docker image runs without `--reload` | `docker run <image>` and check logs | Logs show "Watching for changes" or uvicorn reload messages |
+| Non-root user in container | `docker run <image> whoami` | Output is `root` |
+| Health check returns real status | `curl -s http://localhost:8000/health` then stop DB, curl again | Status is still 200 when DB is down |
+| CORS allows production origin | `curl -H "Origin: https://yourdomain.com" -X OPTIONS http://localhost:8000/api/v1/courses` | No `Access-Control-Allow-Origin` header in response |
+| No dev defaults in production | Set `DEBUG=false`, unset all optional env vars, start the app | App starts successfully instead of failing with missing config |
+| Migrations run independently | Run `alembic upgrade head` in a fresh database | Errors about missing tables, extensions, or circular dependencies |
+| APScheduler runs exactly once | Start 2 instances, check logs for sync execution | Same sync task logged in both instances simultaneously |
+| VoyageAI doesn't block event loop | Trigger a RAG query while sending concurrent requests | Concurrent requests stall during embedding |
+| Docker image size is reasonable | `docker images <image>` | Image is >1GB (should be 300-500MB with slim base) |
+| Signal handling works | `docker stop <container>` and check logs | No "graceful shutdown" log entry; container takes 10s to stop (SIGKILL) |
+
+### Runtime Warning Signs
+
+| Symptom | Likely Cause | Investigation |
+|---------|-------------|---------------|
+| Duplicate database entries after sync | Multiple APScheduler instances (gunicorn workers) | Check process count, verify single worker |
+| 401 errors on all API calls in production | JWT secret mismatch between Supabase and Python config | Compare `SUPABASE_JWT_SECRET` with Supabase dashboard |
+| Frontend API calls return CORS errors | Missing production origin in CORS allowed list | Check `Access-Control-Allow-Origin` response header |
+| Alembic migration hangs | Table lock from non-concurrent index creation | Check `pg_locks` and `pg_stat_activity` |
+| Container restarts every 30-60 seconds | Health check returning 503 during startup | Add startup grace period, check Railway deploy logs |
+| Sync tasks suddenly stop running | APScheduler crashed silently (no error handler) | Check if scheduler is still alive: `/health` should report scheduler status |
+| Memory leak over days | structlog or APScheduler accumulating state | Monitor RSS over time; check if scheduler stores growing job history |
 
 ---
 
 ## Sources
 
-- [Next.js Hydration Error Documentation](https://nextjs.org/docs/messages/react-hydration-error)
-- [Evil Martians: API Contracts Frontend Survival Guide](https://evilmartians.com/chronicles/api-contracts-and-everything-i-wish-i-knew-a-frontend-survival-guide)
-- [SmartBear: API-First Development and Mocking](https://smartbear.com/blog/api-first-development-and-the-case-for-api-mocking/)
-- [hey-api/openapi-ts: OpenAPI to TypeScript Codegen](https://github.com/hey-api/openapi-ts)
-- [Anthropic API Pricing (2026)](https://platform.claude.com/docs/en/about-claude/pricing)
-- [Anthropic Rate Limits Documentation](https://platform.claude.com/docs/en/api/rate-limits)
-- [MCP vs API: When to Use Each (2026)](https://atlan.com/know/when-to-use-mcp-vs-api/)
-- [Anthropic: Code Execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp)
-- [From SVG to Canvas: Performance Analysis](https://www.felt.com/blog/from-svg-to-canvas-part-1-making-felt-faster)
-- [Rough.js Official Documentation](https://roughjs.com/)
-- [react-rough-notation on npm](https://www.npmjs.com/package/react-rough-notation)
-- [@turahe/react-rough-notation (SSR-ready)](https://www.npmjs.com/package/@turahe/react-rough-notation)
-- [Next.js Lazy Loading / Dynamic Import](https://nextjs.org/docs/pages/guides/lazy-loading)
-- [next-intl Documentation](https://next-intl.dev/)
-- UniBoard v1.0 CLAUDE.md (project-specific learnings)
-- UniBoard prototype source code analysis (6,930 lines across 10 files)
+### FastAPI Production Deployment
+- [FastAPI Deployment Documentation](https://fastapi.tiangolo.com/deployment/)
+- [FastAPI Best Practices for Production 2026](https://fastlaunchapi.dev/blog/fastapi-best-practices-production-2026)
+- [10 FastAPI Scaling Mistakes (2025)](https://medium.com/@ThinkingLoop/10-fastapi-scaling-mistakes-that-break-performance-39a426e360e3)
+- [FastAPI Server Workers with Uvicorn](https://fastapi.tiangolo.com/deployment/server-workers/)
+
+### Railway Deployment
+- [Railway FastAPI Guide](https://docs.railway.com/guides/fastapi)
+- [Deploy FastAPI to Railway with Dockerfile](https://www.codingforentrepreneurs.com/blog/deploy-fastapi-to-railway-with-this-dockerfile)
+- [APScheduler with FastAPI Discussions](https://github.com/fastapi/fastapi/discussions/9143)
+
+### Docker Best Practices
+- [Docker Best Practices for Python (TestDriven.io)](https://testdriven.io/blog/docker-best-practices/)
+- [Docker PID 1 and Tini](https://dev-aditya.medium.com/pid-1-and-tini-in-docker-why-your-container-ignores-ctrl-c-800b565cb76e)
+- [dumb-init: Init System for Docker](https://engineeringblog.yelp.com/2016/01/dumb-init-an-init-for-docker.html)
+- [Docker Official Best Practices](https://docs.docker.com/build/building/best-practices/)
+
+### Vercel / Next.js Deployment
+- [How to Solve Next.js Timeouts (Inngest)](https://www.inngest.com/blog/how-to-solve-nextjs-timeouts)
+- [Vercel Functions Limitations](https://vercel.com/docs/functions/limitations)
+- [Vercel Limits](https://vercel.com/docs/limits)
+
+### CI/CD Monorepo
+- [GitHub Actions Monorepo CI/CD Guide (2026)](https://dev.to/pockit_tools/github-actions-in-2026-the-complete-guide-to-monorepo-cicd-and-self-hosted-runners-1jop)
+- [Vanilla GitHub Actions Monorepo Setup](https://generalreasoning.com/blog/2025/03/22/github-actions-vanilla-monorepo.html)
+
+### Database Migrations
+- [Supabase Database Migrations](https://supabase.com/docs/guides/deployment/database-migrations)
+- [Supabase Managing Environments](https://supabase.com/docs/guides/deployment/managing-environments)
+
+### Security
+- [Supabase Product Security](https://supabase.com/docs/guides/security/product-security)
+- [Supabase Securing Your API](https://supabase.com/docs/guides/api/securing-your-api)
+
+### Monitoring / Logging
+- [structlog Logging Best Practices](https://www.structlog.org/en/stable/logging-best-practices.html)
+- [structlog Performance](https://www.structlog.org/en/stable/performance.html)
+
+### Environment Management
+- [Environment Management Best Practices (2026)](https://www.envsentinel.dev/blog/environment-variable-management-tips-best-practices)
+- [Storing Secrets in Env Vars Considered Harmful (Arcjet)](https://blog.arcjet.com/storing-secrets-in-env-vars-considered-harmful/)
+
+### UniBoard Codebase (Direct Analysis)
+- `Dockerfile` -- identified `--reload` in CMD, no init system, no non-root user, dev deps in production
+- `src/config.py` -- identified unsafe defaults (debug=True, empty encryption_key, placeholder JWT secret)
+- `src/web/main.py` -- identified hardcoded CORS origin, no rate limiting
+- `src/web/routes/health.py` -- identified always-200 health check
+- `src/sync/engine.py` -- identified `scheduler.shutdown(wait=False)`, initial sync at startup
+- `src/services/qa.py` -- identified blocking VoyageAI calls in async context (lines 171-173, 387-389)
+- `src/logging.py` -- identified `make_filtering_bound_logger(0)` (DEBUG level), `PrintLoggerFactory`
+- `frontend/app/api/v1/health/route.ts` -- identified fake health check (hardcoded "healthy")
+- `docker-compose.yml` -- identified volume mounts and dev environment defaults
+- `CLAUDE.md` -- referenced known issues and project architecture

@@ -40,10 +40,8 @@ export default function HighlightItem({
   urgency,
   urgencyScore,
   threadId,
-  sourceThreadId,
   sourceUrl,
   createdAt,
-  courseCode,
 }: HighlightItemProps) {
   const t = useTranslations("digest");
   const locale = useLocale();

@@ -9,12 +9,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from src.models.course import Course
 from src.models.sync_history import SyncHistory
 from src.models.user import Profile
-from src.sync.tasks import (
-    _record_sync_history,
-    sync_all_deadlines,
-    sync_all_grades,
-    sync_all_outlines,
-)
+from src.sync._shared import _record_sync_history
+from src.sync.deadlines import sync_all_deadlines
+from src.sync.grades import sync_all_grades
+from src.sync.outlines import sync_all_outlines
 
 
 def _make_profile(
@@ -131,9 +129,9 @@ def _mock_session_factory(
 class TestSyncAllDeadlinesEdWiring:
     """Verify Ed Lessons and Discussion data flows into deadline aggregation."""
 
-    @patch("src.sync.tasks._record_sync_history", new_callable=AsyncMock)
-    @patch("src.sync.tasks.get_encryption")
-    @patch("src.sync.tasks._get_sync_session_factory")
+    @patch("src.sync.deadlines._record_sync_history", new_callable=AsyncMock)
+    @patch("src.sync.deadlines.get_encryption")
+    @patch("src.sync.deadlines._get_sync_session_factory")
     async def test_sync_all_deadlines_wires_ed_lessons(
         self,
         mock_factory_fn: MagicMock,
@@ -172,7 +170,7 @@ class TestSyncAllDeadlinesEdWiring:
             ed_disc_inst.get_threads.return_value = []
             MockEdDisc.return_value = ed_disc_inst
 
-            with patch("src.sync.tasks.DeadlineService") as MockSvc:
+            with patch("src.sync.deadlines.DeadlineService") as MockSvc:
                 svc_inst = AsyncMock()
                 svc_inst.aggregate_and_dedup.return_value = 1
                 MockSvc.return_value = svc_inst
@@ -187,9 +185,9 @@ class TestSyncAllDeadlinesEdWiring:
                     "Ed Lessons data should be passed to aggregate_and_dedup"
                 )
 
-    @patch("src.sync.tasks._record_sync_history", new_callable=AsyncMock)
-    @patch("src.sync.tasks.get_encryption")
-    @patch("src.sync.tasks._get_sync_session_factory")
+    @patch("src.sync.deadlines._record_sync_history", new_callable=AsyncMock)
+    @patch("src.sync.deadlines.get_encryption")
+    @patch("src.sync.deadlines._get_sync_session_factory")
     async def test_sync_all_deadlines_wires_ed_discussion(
         self,
         mock_factory_fn: MagicMock,
@@ -227,7 +225,7 @@ class TestSyncAllDeadlinesEdWiring:
             ed_disc_inst.get_threads.return_value = sample_threads
             MockEdDisc.return_value = ed_disc_inst
 
-            with patch("src.sync.tasks.DeadlineService") as MockSvc:
+            with patch("src.sync.deadlines.DeadlineService") as MockSvc:
                 svc_inst = AsyncMock()
                 svc_inst.aggregate_and_dedup.return_value = 1
                 MockSvc.return_value = svc_inst
@@ -245,9 +243,9 @@ class TestSyncAllDeadlinesEdWiring:
                 assert isinstance(first, tuple)
                 assert len(first) == 2
 
-    @patch("src.sync.tasks._record_sync_history", new_callable=AsyncMock)
-    @patch("src.sync.tasks.get_encryption")
-    @patch("src.sync.tasks._get_sync_session_factory")
+    @patch("src.sync.deadlines._record_sync_history", new_callable=AsyncMock)
+    @patch("src.sync.deadlines.get_encryption")
+    @patch("src.sync.deadlines._get_sync_session_factory")
     async def test_sync_all_deadlines_ed_token_expired(
         self,
         mock_factory_fn: MagicMock,
@@ -286,7 +284,7 @@ class TestSyncAllDeadlinesEdWiring:
             ed_disc_inst.get_threads.return_value = []
             MockEdDisc.return_value = ed_disc_inst
 
-            with patch("src.sync.tasks.DeadlineService") as MockSvc:
+            with patch("src.sync.deadlines.DeadlineService") as MockSvc:
                 svc_inst = AsyncMock()
                 svc_inst.aggregate_and_dedup.return_value = 0
                 MockSvc.return_value = svc_inst
@@ -306,7 +304,7 @@ class TestSyncAllDeadlinesEdWiring:
 class TestSyncAllOutlines:
     """Verify outline sync calls UnitOutlineParser and handles retries."""
 
-    @patch("src.sync.tasks._get_sync_session_factory")
+    @patch("src.sync.outlines._get_sync_session_factory")
     async def test_sync_all_outlines_calls_parser(
         self,
         mock_factory_fn: MagicMock,
@@ -340,7 +338,7 @@ class TestSyncAllOutlines:
                 "https://www.sydney.edu.au/units/COMP2017/2024-S1"
             )
 
-    @patch("src.sync.tasks._get_sync_session_factory")
+    @patch("src.sync.outlines._get_sync_session_factory")
     async def test_sync_all_outlines_retries_on_error(
         self,
         mock_factory_fn: MagicMock,
@@ -374,7 +372,7 @@ class TestSyncAllOutlines:
 
         with (
             patch("src.parsers.usyd_outline.UnitOutlineParser") as MockParser,
-            patch("src.sync.tasks.asyncio.sleep", new_callable=AsyncMock),
+            patch("src.sync.outlines.asyncio.sleep", new_callable=AsyncMock),
         ):
             parser_inst = AsyncMock()
             parser_inst.fetch_and_parse.side_effect = _fetch_side_effect
@@ -434,9 +432,9 @@ class TestRecordSyncHistory:
         assert entry.completed_at is not None
         mock_session.commit.assert_awaited_once()
 
-    @patch("src.sync.tasks._record_sync_history", wraps=_record_sync_history)
-    @patch("src.sync.tasks.get_encryption")
-    @patch("src.sync.tasks._get_sync_session_factory")
+    @patch("src.sync.grades._record_sync_history", wraps=_record_sync_history)
+    @patch("src.sync.grades.get_encryption")
+    @patch("src.sync.grades._get_sync_session_factory")
     async def test_sync_all_grades_records_history(
         self,
         mock_factory_fn: MagicMock,
@@ -454,7 +452,7 @@ class TestRecordSyncHistory:
         mock_get_enc.return_value = enc
 
         with patch(
-            "src.sync.tasks._sync_user_grades", new_callable=AsyncMock, return_value=1
+            "src.sync.grades._sync_user_grades", new_callable=AsyncMock, return_value=1
         ):
             await sync_all_grades()
 

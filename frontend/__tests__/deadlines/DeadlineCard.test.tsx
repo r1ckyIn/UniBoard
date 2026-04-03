@@ -81,6 +81,7 @@ function makeMockDeadline(overrides: Partial<{
     weight: 0.1,
     status: "upcoming" as const,
     days_remaining: 2,
+    course_id: "test-course-uuid-1",
     course_code: "COMP2017",
     course_name: "Systems Programming",
     is_confirmed: true,

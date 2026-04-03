@@ -69,7 +69,7 @@ class TestToolExecutorSearchCanvas:
         # "Lecture Notes" should NOT match "midterm"
         assert "Lecture Notes" not in result
         mock_adapter.get_modules.assert_awaited_once_with(
-            course.canvas_course_id, include_items=True
+            course.canvas_course_id,
         )
 
     @pytest.mark.asyncio

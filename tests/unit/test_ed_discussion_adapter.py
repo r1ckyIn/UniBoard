@@ -50,6 +50,7 @@ def _make_adapter(
     )
     adapter._circuit = CircuitBreaker()
     adapter._retry = RetryConfig(base_delay=retry_base_delay)
+    adapter._platform_name = "Ed Discussion"
     return adapter
 
 

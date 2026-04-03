@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.user import Profile
 
+pytestmark = pytest.mark.db
+
 
 async def _create_test_profile(
     session: AsyncSession,

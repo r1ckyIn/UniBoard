@@ -7,7 +7,7 @@ courses, grades, deadlines, discussions, modules, and unit outlines.
 
 import hashlib
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -56,7 +56,7 @@ async def seed_test_grades(
     - Quiz 1: score=70, max=100, weight=0.2, group=Quizzes (graded)
     - Midterm: score=None, max=100, weight=0.5, group=Exams (ungraded)
     """
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     grade_data = [
         {
             "assessment_name": "Assignment 1",
@@ -110,7 +110,7 @@ async def seed_test_deadlines(
     - "Final Project" due in 10 days (future)
     - "Quiz 2" due 2 days ago (past/overdue)
     """
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     deadline_data = [
         {
             "title": "Assignment 2",
@@ -171,14 +171,17 @@ async def seed_test_discussions(
     - 1 staff post (not endorsed)
     - 2 community posts (neither endorsed nor staff)
     """
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(UTC).replace(tzinfo=None)
     thread_data = [
         {
             "ed_thread_id": "ed-thread-001",
             "title": "Clarification on Assignment 2 marking criteria",
             "author": "Prof. Smith",
             "category": "Assignments",
-            "content": "The marking criteria for Assignment 2 has been updated. Please review the rubric.",
+            "content": (
+                "The marking criteria for Assignment 2 has been updated."
+                " Please review the rubric."
+            ),
             "is_endorsed": True,
             "is_staff_post": True,
             "gpa_relevance_score": 0.8,
@@ -330,7 +333,7 @@ async def seed_test_outline(
             "Design and implement concurrent programs",
             "Analyze system-level performance",
         ],
-        fetched_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        fetched_at=datetime.now(UTC).replace(tzinfo=None),
         semester="2026-S1",
     )
     session.add(outline)

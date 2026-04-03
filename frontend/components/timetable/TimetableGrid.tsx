@@ -55,7 +55,6 @@ function hourLabel(h: number): string {
 export default function TimetableGrid({
   sessions,
   deadlines,
-  weekPosition,
   mode,
   currentWeek,
   isBreak,

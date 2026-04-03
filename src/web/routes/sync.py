@@ -72,7 +72,7 @@ async def trigger_sync(
     next_allowed_at = now + _SYNC_COOLDOWN
 
     # Dispatch actual sync task in background based on scope
-    from src.sync.tasks import (
+    from src.sync import (
         sync_all_deadlines,
         sync_all_grades,
         sync_all_modules,

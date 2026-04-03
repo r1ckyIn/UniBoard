@@ -20,7 +20,7 @@ from src.models.user import Profile
 from src.schemas.ai import QAResponse, UnitReviewResponse
 from src.schemas.common import RateLimitedError
 from src.services.ai_engine import AIEngine
-from src.services.skill import SkillService, _TRACE_OUTPUT_MAX_CHARS
+from src.services.skill import _TRACE_OUTPUT_MAX_CHARS, SkillService
 from src.services.tool_executor import ToolExecutor
 
 logger = structlog.get_logger()
@@ -168,10 +168,11 @@ class QAService:
             from src.models.embedding import ContentEmbedding
 
             # Embed the question
-            vo = voyageai.Client(api_key=self._voyage_api_key)  # type: ignore[attr-defined]
-            q_embedding = vo.embed(
+            vo = voyageai.AsyncClient(api_key=self._voyage_api_key)  # type: ignore[attr-defined]
+            embed_result = await vo.embed(
                 [question], model="voyage-3", input_type="query"
-            ).embeddings[0]
+            )
+            q_embedding = embed_result.embeddings[0]
 
             # Query similar chunks
             stmt = (
@@ -384,10 +385,11 @@ class QAService:
             return 0
 
         # Embed all chunks
-        vo = voyageai.Client(api_key=self._voyage_api_key)  # type: ignore[attr-defined]
-        embeddings = vo.embed(
+        vo = voyageai.AsyncClient(api_key=self._voyage_api_key)  # type: ignore[attr-defined]
+        result = await vo.embed(
             chunks, model="voyage-3", input_type="document"
-        ).embeddings
+        )
+        embeddings = result.embeddings
 
         # Delete existing embeddings for this course
         from sqlalchemy import delete

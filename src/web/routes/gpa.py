@@ -7,9 +7,9 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from src.models.course import Course
+from src.models.grade import Grade
 from src.models.user import Profile
 from src.schemas.common import SuccessResponse
 from src.schemas.gpa import (
@@ -26,7 +26,7 @@ from src.schemas.gpa import (
     WhatIfScenarioResponse,
     WhatIfScoreRequest,
 )
-from src.services.gpa import GPAService, _TWO_PLACES, _parse_level_weight
+from src.services.gpa import _TWO_PLACES, GPAService, _parse_level_weight
 from src.web.deps import get_current_user_id, get_request_meta, get_session
 
 router = APIRouter()
@@ -195,7 +195,7 @@ async def calculate_path(
     ))
 
     # Group ungraded assessments by course
-    course_ungraded: dict[str, list] = {}
+    course_ungraded: dict[str, list[tuple[Grade, Course]]] = {}
     current_weighted = Decimal("0")
     current_weight_total = Decimal("0")
     total_weight_all = Decimal("0")

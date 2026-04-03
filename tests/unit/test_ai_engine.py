@@ -249,7 +249,11 @@ async def test_agent_stream_tool_use_then_end_turn() -> None:
         async for tok in engine.agent_stream(
             question="What is quicksort?",
             context_text="Some context",
-            tools=[{"name": "search_canvas_modules", "description": "test", "input_schema": {"type": "object", "properties": {}}}],
+            tools=[{
+                "name": "search_canvas_modules",
+                "description": "test",
+                "input_schema": {"type": "object", "properties": {}},
+            }],
             tool_executor=tool_executor,
             language="en",
         ):

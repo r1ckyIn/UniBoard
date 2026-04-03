@@ -1,6 +1,7 @@
 """Shared test fixtures for integration tests."""
 
 import os
+import socket
 
 # Enable debug mode for tests so production-only validators (e.g. secret_key guard) don't fire
 os.environ.setdefault("DEBUG", "true")
@@ -30,9 +31,33 @@ TEST_DATABASE_URL = (
 )
 
 
+def _pg_is_reachable(host: str = "localhost", port: int = 5432, timeout: float = 1.0) -> bool:
+    """Check if PostgreSQL is accepting connections."""
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """Auto-skip tests marked with @pytest.mark.db when no PostgreSQL is available."""
+    if _pg_is_reachable():
+        return  # DB available, run all tests
+    skip_db = pytest.mark.skip(reason="PostgreSQL not available on localhost:5432")
+    for item in items:
+        if "db" in item.keywords:
+            item.add_marker(skip_db)
+
+
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def test_engine() -> AsyncGenerator[AsyncEngine, None]:
-    """Session-scoped async engine. Creates all tables, disposes on teardown."""
+    """Session-scoped async engine. Creates all tables, disposes on teardown.
+
+    Skips all dependent tests when PostgreSQL is not reachable.
+    """
+    if not _pg_is_reachable():
+        pytest.skip("PostgreSQL not available on localhost:5432")
     engine = create_async_engine(
         TEST_DATABASE_URL,
         pool_size=5,

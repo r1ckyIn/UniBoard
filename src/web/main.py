@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from src.config import get_settings
 from src.logging import configure_logging
 from src.schemas.common import ErrorDetail, ErrorResponse, MetaInfo, UniboardError
 from src.sync.engine import lifespan
@@ -27,10 +28,12 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # CORS middleware -- allow frontend dev server to connect
+    # CORS middleware -- origins configurable via CORS_ORIGINS env var
+    settings = get_settings()
+    origins = [o.strip() for o in settings.cors_origins.split(",")]
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3001"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

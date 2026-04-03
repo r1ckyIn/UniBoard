@@ -1,6 +1,5 @@
 """Unit tests for contract-aligned Pydantic schemas matching types.gen.d.ts."""
 
-import pytest
 
 from src.schemas.deadline import ContractDeadlineResponse, DeadlineResponse
 from src.schemas.intelligence import DiscussionResponse, HighValuePostResponse

@@ -1,8 +1,10 @@
-"""Unit tests for the resilience module: CircuitBreaker, CanvasRateLimiter, RetryConfig, execute_with_retry."""
+"""Unit tests for the resilience module.
+
+Covers CircuitBreaker, CanvasRateLimiter, RetryConfig, execute_with_retry.
+"""
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import httpx
@@ -15,7 +17,6 @@ from src.adapters.resilience import (
     RetryConfig,
     execute_with_retry,
 )
-
 
 # --- CircuitBreaker tests ---
 
@@ -211,14 +212,18 @@ class TestExecuteWithRetry:
         )
         rc = RetryConfig()
 
-        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
-            # We need to replace the real asyncio.sleep in resilience module
-            with patch("src.adapters.resilience.asyncio.sleep", new_callable=AsyncMock) as mock_res_sleep:
-                result = await execute_with_retry(func, rc)
+        with (
+            patch("asyncio.sleep", new_callable=AsyncMock),
+            patch(
+                "src.adapters.resilience.asyncio.sleep",
+                new_callable=AsyncMock,
+            ) as mock_res_sleep,
+        ):
+            result = await execute_with_retry(func, rc)
 
-                assert result.status_code == 200
-                # The retry sleep should use the Retry-After value of 5.0
-                mock_res_sleep.assert_called_once_with(5.0)
+            assert result.status_code == 200
+            # The retry sleep should use the Retry-After value of 5.0
+            mock_res_sleep.assert_called_once_with(5.0)
 
     async def test_execute_with_retry_exhausts_retries(self) -> None:
         """All retries exhausted raises the last exception."""
@@ -232,8 +237,10 @@ class TestExecuteWithRetry:
         )
         rc = RetryConfig(max_attempts=2, base_delay=0.01, max_delay=0.1)
 
-        with patch("src.adapters.resilience.asyncio.sleep", new_callable=AsyncMock):
-            with pytest.raises(httpx.HTTPStatusError):
-                await execute_with_retry(func, rc)
+        with (
+            patch("src.adapters.resilience.asyncio.sleep", new_callable=AsyncMock),
+            pytest.raises(httpx.HTTPStatusError),
+        ):
+            await execute_with_retry(func, rc)
 
         assert func.call_count == 2

@@ -41,7 +41,7 @@ class ToolExecutor:
         elif name == "search_ed_threads":
             return await self._search_ed_threads(str(input_data.get("query", "")))
         elif name == "get_ed_lesson_content":
-            return await self._get_ed_lesson(int(input_data.get("lesson_id", 0)))
+            return await self._get_ed_lesson(int(str(input_data.get("lesson_id", 0))))
         else:
             return f"Unknown tool: {name}"
 
@@ -83,8 +83,11 @@ class ToolExecutor:
             if self._canvas_adapter is None:
                 self._canvas_adapter = CanvasAdapter(api_token=self._canvas_token)  # type: ignore[arg-type]
 
+            course_id = self._course.canvas_course_id
+            if course_id is None:
+                return "No Canvas course linked."
             modules: list[dict[str, Any]] = await self._canvas_adapter.get_modules(
-                self._course.canvas_course_id, include_items=True
+                course_id,
             )
 
             query_lower = query.lower()
@@ -117,8 +120,11 @@ class ToolExecutor:
             if self._ed_discussion_adapter is None:
                 self._ed_discussion_adapter = EdDiscussionAdapter(api_token=self._ed_token)  # type: ignore[arg-type]
 
+            ed_course_id = self._course.ed_course_id
+            if ed_course_id is None:
+                return "No Ed Discussion course linked."
             threads = await self._ed_discussion_adapter.search_threads(
-                self._course.ed_course_id, query
+                ed_course_id, query
             )
 
             if not threads:
@@ -152,7 +158,8 @@ class ToolExecutor:
                 return f"Lesson {lesson_id} not found or empty."
 
             title = lesson.get("title", "Unknown Lesson")
-            slides: list[dict[str, Any]] = lesson.get("slides", [])
+            raw_slides = lesson.get("slides", [])
+            slides: list[dict[str, Any]] = raw_slides if isinstance(raw_slides, list) else []
 
             parts: list[str] = [f"Lesson: {title}\n"]
             if slides:

@@ -9,17 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.course import Course
 from src.models.lesson import Lesson
 from src.models.module import Module, ModuleItem
-from src.models.user import Profile as User
-from src.security.password import hash_password
+from src.models.user import Profile
 from src.services.materials import CourseMaterialService
+
+pytestmark = pytest.mark.db
 
 
 @pytest_asyncio.fixture(loop_scope="session")
 async def _search_data(session: AsyncSession) -> dict[str, object]:
     """Seed user, course, module items and lessons for search tests."""
-    user = User(
-        email=f"search-{uuid.uuid4().hex[:8]}@test.com",
-        hashed_password=hash_password("testpass123"),
+    user = Profile(
+        id=uuid.uuid4(),
         display_name="Search Test",
     )
     session.add(user)

@@ -2,6 +2,7 @@
 
 import os
 
+import cryptography.exceptions
 import pytest
 
 from src.security.encryption import TokenEncryption
@@ -22,7 +23,7 @@ def test_wrong_key_fails() -> None:
     enc1 = TokenEncryption(key1)
     enc2 = TokenEncryption(key2)
     encrypted = enc1.encrypt("secret-token")
-    with pytest.raises(Exception):
+    with pytest.raises(cryptography.exceptions.InvalidTag):
         enc2.decrypt(encrypted)
 
 

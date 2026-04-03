@@ -43,6 +43,19 @@ def _get_session_factory() -> async_sessionmaker[AsyncSession]:
     return _session_factory
 
 
+async def dispose_engine() -> None:
+    """Dispose the main database engine's connection pool.
+
+    Called during application shutdown to prevent connection leaks.
+    """
+    global _engine  # noqa: PLW0603
+    global _session_factory  # noqa: PLW0603
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None
+        _session_factory = None
+
+
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency -- yields one session per request."""
     factory = _get_session_factory()

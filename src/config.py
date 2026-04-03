@@ -1,6 +1,17 @@
 """Application configuration via pydantic-settings."""
 
+from typing import Any
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_KNOWN_UNSAFE_JWT_SECRETS = frozenset({
+    "super-secret-jwt-token-with-at-least-32-characters-long",
+})
+
+_KNOWN_UNSAFE_ENCRYPTION_KEYS = frozenset({
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "",
+})
 
 
 class Settings(BaseSettings):
@@ -73,6 +84,27 @@ class Settings(BaseSettings):
     # Debug (default True for local dev; production sets DEBUG=false explicitly)
     debug: bool = True
     log_level: str = "INFO"
+
+    # CORS
+    cors_origins: str = "http://localhost:3001"
+
+    def model_post_init(self, __context: Any) -> None:
+        """Reject known-insecure defaults in production mode."""
+        if self.debug:
+            return  # Allow defaults in dev mode
+
+        errors: list[str] = []
+        if self.supabase_jwt_secret in _KNOWN_UNSAFE_JWT_SECRETS:
+            errors.append("SUPABASE_JWT_SECRET uses a known default value")
+        if self.encryption_key in _KNOWN_UNSAFE_ENCRYPTION_KEYS:
+            errors.append("ENCRYPTION_KEY is missing or uses a known default")
+        if "localhost" in self.database_url:
+            errors.append("DATABASE_URL points to localhost in production")
+        if errors:
+            raise ValueError(
+                "Production config validation failed:\n"
+                + "\n".join(f"  - {e}" for e in errors)
+            )
 
 
 _settings: Settings | None = None

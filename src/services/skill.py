@@ -32,7 +32,9 @@ _SEEDED_SKILLS: list[dict[str, object]] = [
         "operation_type": "deadline_check",
         "category": SkillCategory.DATA_COLLECTION.value,
         "system_prompt": "Collect and verify upcoming deadlines from Canvas and Ed platforms.",
-        "workflow_steps": {"steps": ["fetch_canvas_assignments", "fetch_ed_deadlines", "merge_deduplicate"]},
+        "workflow_steps": {
+            "steps": ["fetch_canvas_assignments", "fetch_ed_deadlines", "merge_deduplicate"],
+        },
         "tool_sequence": {"tools": ["search_canvas_modules", "search_ed_threads"]},
     },
     {
@@ -45,7 +47,9 @@ _SEEDED_SKILLS: list[dict[str, object]] = [
     {
         "operation_type": "assessment_analysis",
         "category": SkillCategory.DATA_COLLECTION.value,
-        "system_prompt": "Collect assessment details, weights, and deadlines from course materials.",
+        "system_prompt": (
+            "Collect assessment details, weights, and deadlines from course materials."
+        ),
         "workflow_steps": {"steps": ["fetch_assignments", "parse_weights", "compile_overview"]},
         "tool_sequence": {"tools": ["search_canvas_modules"]},
     },
@@ -77,7 +81,9 @@ _SEEDED_SKILLS: list[dict[str, object]] = [
         "category": SkillCategory.AI_ANALYSIS.value,
         "system_prompt": "_LAZY_QA",
         "workflow_steps": {"steps": ["load_context", "generate_answer", "cite_sources"]},
-        "tool_sequence": {"tools": ["search_canvas_modules", "search_ed_threads", "get_ed_lesson_content"]},
+        "tool_sequence": {
+            "tools": ["search_canvas_modules", "search_ed_threads", "get_ed_lesson_content"],
+        },
     },
     {
         "operation_type": "qa_rag",
@@ -111,7 +117,9 @@ _SEEDED_SKILLS: list[dict[str, object]] = [
         "operation_type": "risk_analysis",
         "category": SkillCategory.AI_ANALYSIS.value,
         "system_prompt": "_LAZY_RISK",
-        "workflow_steps": {"steps": ["analyze_gap", "identify_priorities", "generate_recommendations"]},
+        "workflow_steps": {
+            "steps": ["analyze_gap", "identify_priorities", "generate_recommendations"],
+        },
         "tool_sequence": None,
     },
     # user_action
@@ -213,7 +221,7 @@ class SkillService:
             operation_type=operation_type,
             course_id=course_id,
             skill_id=skill_id,
-            execution_trace=truncated_trace,  # type: ignore[arg-type]
+            execution_trace=truncated_trace,
             success=success,
             latency_ms=latency_ms,
             tokens_used=tokens_used,
@@ -262,8 +270,8 @@ class SkillService:
             return None
 
         # Extract tool sequences from the 2 most recent traces
-        trace_a = traces[0].execution_trace or []
-        trace_b = traces[1].execution_trace or []
+        trace_a: list[dict[str, object]] = traces[0].execution_trace or []  # type: ignore[assignment]
+        trace_b: list[dict[str, object]] = traces[1].execution_trace or []  # type: ignore[assignment]
         steps_a = [step.get("tool_name", "") for step in trace_a]
         steps_b = [step.get("tool_name", "") for step in trace_b]
 
@@ -293,8 +301,8 @@ class SkillService:
         if existing_skill is not None:
             # Increment version, update pattern
             existing_skill.version += 1
-            existing_skill.workflow_steps = {"steps": common_steps}  # type: ignore[assignment]
-            existing_skill.tool_sequence = {"tools": unique_tools}  # type: ignore[assignment]
+            existing_skill.workflow_steps = {"steps": common_steps}
+            existing_skill.tool_sequence = {"tools": unique_tools}
             existing_skill.status = SkillStatus.DRAFT.value
             await self._session.flush()
             logger.info(
@@ -313,8 +321,8 @@ class SkillService:
                 f"Auto-generated skill for {operation_type}. "
                 f"Optimized tool sequence based on {len(traces)} successful executions."
             ),
-            workflow_steps={"steps": common_steps},  # type: ignore[arg-type]
-            tool_sequence={"tools": unique_tools},  # type: ignore[arg-type]
+            workflow_steps={"steps": common_steps},
+            tool_sequence={"tools": unique_tools},
             status=SkillStatus.DRAFT.value,
             is_seeded=False,
             version=1,
@@ -411,8 +419,8 @@ class SkillService:
                 category=str(defn["category"]),
                 course_id=None,
                 system_prompt=prompt,
-                workflow_steps=defn.get("workflow_steps"),  # type: ignore[arg-type]
-                tool_sequence=defn.get("tool_sequence"),  # type: ignore[arg-type]
+                workflow_steps=defn.get("workflow_steps"),
+                tool_sequence=defn.get("tool_sequence"),
                 status=SkillStatus.ACTIVE.value,
                 is_seeded=True,
                 version=1,

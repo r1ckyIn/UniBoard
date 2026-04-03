@@ -4,11 +4,9 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from src.schemas.skill import SkillCategory, SkillStatus
 
 
 def _mock_skill(
@@ -159,7 +157,7 @@ class TestSkillServiceTraceRecording:
         trace = [
             {"tool_name": "search_canvas_modules", "input": {}, "output": "x" * 3000}
         ]
-        result = await svc.record_execution(
+        await svc.record_execution(
             operation_type="qa_direct",
             course_id=uuid.uuid4(),
             execution_trace=trace,
@@ -209,7 +207,7 @@ class TestSkillServiceAutoGeneration:
         session.execute.side_effect = [mock_traces_result, mock_skill_result]
 
         svc = SkillService(session)
-        result = await svc.maybe_generate_skill("qa_direct", None)
+        await svc.maybe_generate_skill("qa_direct", None)
 
         # Should have added a new skill
         session.add.assert_called_once()
@@ -245,7 +243,11 @@ class TestSkillServiceAutoGeneration:
 
         # Two very different traces
         trace_a = _mock_execution(
-            tool_sequence=["search_canvas_modules", "search_canvas_modules", "search_canvas_modules"]
+            tool_sequence=[
+                "search_canvas_modules",
+                "search_canvas_modules",
+                "search_canvas_modules",
+            ]
         )
         trace_b = _mock_execution(
             tool_sequence=["get_ed_lesson_content", "search_ed_threads"]
@@ -286,7 +288,7 @@ class TestSkillServiceAutoGeneration:
         session.execute.side_effect = [mock_traces_result, mock_skill_result]
 
         svc = SkillService(session)
-        result = await svc.maybe_generate_skill("qa_direct", None)
+        await svc.maybe_generate_skill("qa_direct", None)
 
         # Should update the existing skill instead of creating new one
         assert existing_skill.version == 2

@@ -67,6 +67,7 @@ async def _create_profile_with_data(session: AsyncSession) -> Profile:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_generate_rule_based_digest(session: AsyncSession) -> None:
     """DigestService generates digest with grades and deadlines from last 24h."""
@@ -88,6 +89,7 @@ async def test_generate_rule_based_digest(session: AsyncSession) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.db
 @pytest.mark.asyncio
 async def test_enhance_with_ai(session: AsyncSession) -> None:
     """AI enhancement adds urgency_score (1-5) and ai_summary to digest."""

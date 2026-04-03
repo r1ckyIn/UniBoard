@@ -54,7 +54,7 @@ class _SessionCtx:
 
 
 @pytest.mark.asyncio
-@patch("src.sync.tasks._get_sync_session_factory")
+@patch("src.sync.scheduled._get_sync_session_factory")
 async def test_72h_reminder_creates_info_notification(
     mock_factory_fn: MagicMock,
 ) -> None:
@@ -104,7 +104,7 @@ async def test_72h_reminder_creates_info_notification(
         mock_instance.create_notification = AsyncMock(return_value=MagicMock())
         MockNotifSvc.return_value = mock_instance
 
-        from src.sync.tasks import check_deadline_reminders
+        from src.sync.scheduled import check_deadline_reminders
 
         await check_deadline_reminders()
 
@@ -113,7 +113,7 @@ async def test_72h_reminder_creates_info_notification(
 
 
 @pytest.mark.asyncio
-@patch("src.sync.tasks._get_sync_session_factory")
+@patch("src.sync.scheduled._get_sync_session_factory")
 async def test_no_reminders_when_no_users(mock_factory_fn: MagicMock) -> None:
     """No notifications when there are no users."""
     # Session returns empty profile list
@@ -126,14 +126,14 @@ async def test_no_reminders_when_no_users(mock_factory_fn: MagicMock) -> None:
         side_effect=lambda: _SessionCtx(session1)
     )
 
-    from src.sync.tasks import check_deadline_reminders
+    from src.sync.scheduled import check_deadline_reminders
 
     # Should return early without error
     await check_deadline_reminders()
 
 
 @pytest.mark.asyncio
-@patch("src.sync.tasks._get_sync_session_factory")
+@patch("src.sync.scheduled._get_sync_session_factory")
 async def test_no_reminders_when_no_courses(mock_factory_fn: MagicMock) -> None:
     """User with no courses produces no notifications."""
     profile = _make_profile()
@@ -160,7 +160,7 @@ async def test_no_reminders_when_no_courses(mock_factory_fn: MagicMock) -> None:
 
     mock_factory_fn.return_value = MagicMock(side_effect=_factory)
 
-    from src.sync.tasks import check_deadline_reminders
+    from src.sync.scheduled import check_deadline_reminders
 
     await check_deadline_reminders()
     # Should not raise; no notification service calls expected

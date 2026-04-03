@@ -22,7 +22,7 @@ export default function AiCourseChat({
 }: AiCourseChatProps) {
   const t = useTranslations("courseDetail");
   const locale = useLocale();
-  const { messages, isStreaming, status, error, sendMessage, clearMessages } =
+  const { messages, isStreaming, status, error, sendMessage } =
     useAiStream(courseId, locale);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);

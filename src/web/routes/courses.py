@@ -1,7 +1,7 @@
 """Course REST endpoints matching OpenAPI contract."""
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
@@ -251,7 +251,7 @@ async def list_course_deadlines(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
 ) -> SuccessResponse[list[CourseDeadlineResponse]]:
     """List deadlines for a course."""
-    course = await _get_course_or_404(session, course_id, current_user_id)
+    await _get_course_or_404(session, course_id, current_user_id)
 
     stmt = (
         select(UnifiedDeadline)
@@ -306,7 +306,7 @@ async def get_course_outline(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
 ) -> SuccessResponse[CourseOutlineResponse]:
     """Return course outline from unit outline data."""
-    course = await _get_course_or_404(session, course_id, current_user_id)
+    await _get_course_or_404(session, course_id, current_user_id)
 
     stmt = (
         select(UnitOutline)

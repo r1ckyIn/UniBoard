@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ExternalLink, Settings, Key, Copy } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
 import { PLATFORM_CONFIG } from "./platform-config";
 
 interface GuideCardProps {

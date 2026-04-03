@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 // Mock roughjs since jsdom can't render SVG paths
@@ -44,7 +44,7 @@ vi.mock("@/lib/i18n/navigation", () => ({
 
 // Mock withClientOnly to passthrough the component
 vi.mock("@/components/design-system/ClientOnly", () => ({
-  withClientOnly: (importFn: () => Promise<{ default: React.ComponentType }>) => {
+  withClientOnly: () => {
     // Return a simple wrapper that renders children/placeholder
     const MockComponent = (props: Record<string, unknown>) => {
       return <div data-testid="client-only-mock" {...props} />;

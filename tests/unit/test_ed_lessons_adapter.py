@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -58,6 +57,7 @@ def _make_adapter(
     )
     adapter._circuit = CircuitBreaker()
     adapter._retry = RetryConfig(base_delay=0.01, max_delay=0.1)
+    adapter._platform_name = "Ed Lessons"
     return adapter
 
 

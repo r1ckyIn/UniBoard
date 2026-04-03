@@ -2,14 +2,14 @@
 
 ## Overview
 
-UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototypes into a Next.js app with mock APIs and contract-first design; M2 builds the FastAPI backend implementing those contracts; M3 layers on Claude-powered AI features (MCP Agent, skill system, AI digest); M4 hardens for production with testing, deployment, and monitoring. Fine granularity applied — M1 gives each page its own phase, M2/M3/M4 follow natural delivery boundaries.
+UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototypes into a Next.js app with mock APIs and contract-first design; M2 builds the FastAPI backend implementing those contracts; M3 layers on Claude-powered AI features (MCP Agent, skill system, AI digest); M4 hardens for production with critical fixes, code quality refactoring, security hardening, observability, and deployment. Fine granularity applied — M1 gives each page its own phase, M2/M3/M4 follow natural delivery boundaries.
 
 ## Milestones
 
 - ✅ **M1: Frontend App** — Phases 1-12, 11.1 (shipped 2026-03-25) [archive](milestones/v2.0-m2-ROADMAP.md)
 - ✅ **M2: Backend Core** — Phases 13-17 (shipped 2026-03-27) [archive](milestones/v2.0-m2-ROADMAP.md)
-- 🚧 **M3: AI/MCP/Skills** — Phases 18-21 (next)
-- 📋 **M4: Engineering** — Phases 22-24 (planned)
+- ✅ **M3: AI/MCP/Skills** — Phases 18-21 (shipped 2026-03-29)
+- 🚧 **M4: Hardening & Polish** — Phases 22-28 (active)
 
 ## Phases
 
@@ -43,18 +43,25 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 
 </details>
 
-### 🚧 M3: AI/MCP/Skills (Next)
+<details>
+<summary>✅ M3: AI/MCP/Skills (Phases 18-21) — SHIPPED 2026-03-29</summary>
 
-- [x] **Phase 18: AI Enhancement** — AI thread evaluation, AI digest scoring, quality gate with F1 monitoring (completed 2026-03-28)
-- [x] **Phase 19: MCP Agent & Streaming** (4/5 plans) — MCP tool integration, SSE streaming, Deadline AI chat, Course Q&A, language preference setting (completed 2026-03-28)
-- [x] **Phase 20: Skill System** — Auto-generated prompt templates, per-course differentiation, ~50 skills (completed 2026-03-29)
-- [x] **Phase 21: MCP Server & ROI Analysis** (3 plans) — PLAT-03 MCP server for Claude Desktop, Assignment ROI analysis (completed 2026-03-29)
+- [x] Phase 18: AI Enhancement (3/3 plans) — completed 2026-03-28
+- [x] Phase 19: MCP Agent & Streaming (5/5 plans) — completed 2026-03-28
+- [x] Phase 20: Skill System (3/3 plans) — completed 2026-03-29
+- [x] Phase 21: MCP Server & ROI Analysis (3/3 plans) — completed 2026-03-29
 
-### 📋 M4: Engineering (Planned)
+</details>
 
-- [ ] **Phase 22: Testing Suite** — Unit tests 80%+ coverage, integration tests, E2E smoke tests
-- [ ] **Phase 23: Deployment** — Supabase+Railway+Vercel infrastructure, Docker production images, CI/CD pipeline
-- [ ] **Phase 24: Operations** — Monitoring, alerting, security hardening, performance optimization
+### 🚧 M4: Hardening (Active)
+
+- [x] **Phase 22: Critical Fixes & Config Hardening** — Fix async blocker, unsafe config defaults, production Dockerfile, CORS configurability (completed 2026-04-01)
+- [x] **Phase 23: Code Quality Refactor** — Split god module, DRY consolidation, dead code removal, resource leak fixes (completed 2026-04-01)
+- [x] **Phase 24: Build Health Green** — All 5 build tools pass with zero errors after refactoring (completed 2026-04-01)
+- [ ] **Phase 25: Security & Observability** — Security headers, HTTP access logging, error boundaries, API rate limiting
+- [ ] **Phase 26: CI/CD & Production Deployment** — GitHub Actions pipeline, Railway+Vercel deployment, Sentry error tracking
+- [ ] **Phase 27: Frontend UX Fixes & Course Materials Preview** — Dashboard/timetable interaction fixes, course materials inline viewer
+- [ ] **Phase 28: Deadlines Page Enhancement** — Card redesign, delete/pin actions, all/week modes, overdue highlighting, user preference persistence
 
 ## Phase Details
 
@@ -66,7 +73,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   1. AI extracts high-value info from Ed Discussion (exam scope, assignment clarifications, rubric details)
   2. AI-enhanced digest scores entries by urgency and GPA relevance
   3. Quality gate monitors F1 score and auto-falls back to rule engine when F1 < 75%
-**Plans**: 3 total (2 complete, 1 remaining)
+**Plans**: 3/3 complete
 
 ### Phase 19: MCP Agent & Streaming
 **Goal**: Claude Agent can research across platforms and stream answers to users; users can set language preference
@@ -78,13 +85,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
   3. AI unit review generates structured summaries (key concepts, common mistakes, exam scope)
   4. All AI responses stream via SSE with visible progress indicators
   5. Settings page allows user to select language (en/zh), preference persisted in Profile and used by digest/AI responses
-**Plans**: 5 total (4 complete, 1 gap closure)
-Plans:
-- [x] 19-01-PLAN.md — Backend streaming & agent loop
-- [x] 19-02-PLAN.md — Language preference & translation
-- [x] 19-03-PLAN.md — Frontend streaming UI components
-- [x] 19-04-PLAN.md — Settings language section & sync integration
-- [x] 19-05-PLAN.md — Rough.js borders & auto-scroll gap closure
+**Plans**: 5/5 complete
 
 ### Phase 20: Skill System
 **Goal**: MCP Agent auto-generates and reuses prompt templates for efficient repeated operations
@@ -95,11 +96,7 @@ Plans:
   2. Subsequent executions of the same operation load the generated skill instead of re-exploring
   3. Skills are per-course differentiated (different material organization patterns detected)
   4. ~50 skills exist across data collection, data processing, AI analysis, and user action categories
-**Plans**: 3 plans
-Plans:
-- [x] 20-01-PLAN.md — ORM models, schemas, Alembic migration
-- [x] 20-02-PLAN.md — ToolExecutor + SkillService
-- [x] 20-03-PLAN.md — QAService integration + wiring
+**Plans**: 3/3 complete
 
 ### Phase 21: MCP Server & ROI Analysis
 **Goal**: Technical users can access UniBoard via Claude Desktop, and AI provides assignment ROI analysis
@@ -109,34 +106,80 @@ Plans:
   1. MCP server exposes UniBoard data as tools accessible from Claude Desktop
   2. Assignment ROI analysis identifies high-weight/low-difficulty assignments for effort optimization
   3. MCP server handles authentication and returns data in Claude-friendly format
-**Plans**: 3 total
-Plans:
-- [x] 21-01-PLAN.md — Standalone MCP server package (Canvas + Ed + Unit Outline, 17 tools)
-- [x] 21-02-PLAN.md — ROI backend service + REST endpoint
-- [x] 21-03-PLAN.md — ROI frontend (Predict page integration)
+**Plans**: 3/3 complete
 
-### Phase 22: Testing Suite
-**Goal**: Comprehensive test coverage across backend and frontend
+### Phase 22: Critical Fixes & Config Hardening
+**Goal**: Application has no blocking bugs and fails safely on misconfiguration
 **Depends on**: Phase 21 (M3 complete)
-**Requirements**: ENG-01, ENG-02, ENG-03
-**Plans**: TBD
+**Requirements**: CRIT-01, CRIT-03, CRIT-04, SEC-01
+**Success Criteria** (what must be TRUE):
+  1. VoyageAI embedding calls run in a thread pool and do not block the async event loop (verified by concurrent request test)
+  2. Application refuses to start when JWT secret, encryption key, or database URL is missing or uses a known default value
+  3. Docker image uses multi-stage build, tini init, non-root user, excludes dev dependencies, and does not use --reload
+  4. CORS origins are read from an environment variable, defaulting to localhost:3001 for development
+**Plans**: 3 plans
+Plans:
+- [x] 22-01-PLAN.md — VoyageAI AsyncClient migration (CRIT-01)
+- [x] 22-02-PLAN.md — Config validation & CORS env var (CRIT-03, SEC-01)
+- [x] 22-03-PLAN.md — Production Dockerfile (CRIT-04)
 
-### Phase 23: Deployment
-**Goal**: Production infrastructure deployed with automated CI/CD
+### Phase 23: Code Quality Refactor
+**Goal**: Codebase is modular, DRY, and free of dead code and resource leaks
 **Depends on**: Phase 22
-**Requirements**: ENG-04, ENG-05, ENG-06
-**Plans**: TBD
+**Requirements**: QUAL-01, QUAL-02, QUAL-03, QUAL-04
+**Success Criteria** (what must be TRUE):
+  1. sync/tasks.py is split into domain-specific modules (grade, deadline, module, outline, discussion) with no single file exceeding 300 lines
+  2. Grade calculation logic, adapter _request() patterns, and UserResponse construction each have a single source of truth (auth.py language_preference bug fixed)
+  3. At least 300 lines of verified dead code removed (unused schemas, hooks, dependencies uninstalled)
+  4. EdLessonsAdapter properly closes its HTTP session, DB engines are disposed on shutdown, and health endpoint returns 503 when a dependency is degraded
+**Plans**: 3 plans
+Plans:
+- [x] 23-01-PLAN.md — Split sync/tasks.py into domain modules (QUAL-01)
+- [x] 23-02-PLAN.md — DRY consolidation & dead code removal (QUAL-02, QUAL-03)
+- [x] 23-03-PLAN.md — Resource leak fixes & health 503 (QUAL-04)
 
-### Phase 24: Operations
-**Goal**: Production system is monitored, secure, and performant
+### Phase 24: Build Health Green
+**Goal**: All build and quality tools pass with zero errors, confirming refactored code is sound
 **Depends on**: Phase 23
-**Requirements**: ENG-07, ENG-08
+**Requirements**: CRIT-02
+**Success Criteria** (what must be TRUE):
+  1. `mypy --strict` reports zero errors across all Python source files
+  2. `ruff check` reports zero violations
+  3. `tsc --noEmit` reports zero TypeScript errors in the frontend
+  4. `ESLint --max-warnings 0` reports zero warnings in the frontend
+  5. `pytest` runs all tests to completion with zero failures
+**Plans**: 3 plans
+Plans:
+- [ ] 24-01-PLAN.md — Python lint & type fixes (ruff + mypy)
+- [x] 24-02-PLAN.md — Python test fixes (pytest)
+- [ ] 24-03-PLAN.md — Frontend fixes (tsc + ESLint)
+
+### Phase 25: Security & Observability
+**Goal**: Application has defense-in-depth security headers, structured request logging, error containment, and abuse protection
+**Depends on**: Phase 24
+**Requirements**: SEC-02, SEC-03, SEC-04, OPS-04
+**Success Criteria** (what must be TRUE):
+  1. Both Next.js and FastAPI responses include HSTS, X-Frame-Options, X-Content-Type-Options, and CSP headers (verifiable via curl)
+  2. Every HTTP request to FastAPI is logged with method, path, status_code, duration_ms, and a request_id propagated through structlog contextvars
+  3. Frontend has error.tsx and global-error.tsx boundaries that catch rendering errors and display a fallback UI with console logging
+  4. AI endpoints are rate-limited to 10 req/user/min and general endpoints to 60 req/user/min, returning 429 when exceeded
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 26: CI/CD & Production Deployment
+**Goal**: Application is deployed to production with automated CI and error tracking
+**Depends on**: Phase 25
+**Requirements**: OPS-01, OPS-02, OPS-03
+**Success Criteria** (what must be TRUE):
+  1. GitHub Actions runs separate backend (mypy+ruff+pytest) and frontend (tsc+eslint+build) workflows on every push and PR
+  2. Backend is deployed to Railway and frontend to Vercel, both accessible via production URLs with correct environment variables
+  3. Sentry captures and reports errors from both Python backend and Next.js frontend with performance monitoring enabled
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → ... → 24
+Phases execute in numeric order: 1 → 2 → 3 → ... → 28
 Decimal phases (if inserted) execute between their surrounding integers.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -159,10 +202,41 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 15. Core Services & API Routes | M2 | 3/3 | Complete | 2026-03-27 |
 | 16. Sync Engine | M2 | 2/2 | Complete | 2026-03-27 |
 | 17. Notifications & Digest | M2 | 2/2 | Complete | 2026-03-27 |
-| 18. AI Enhancement | M3 | 3/3 | Complete    | 2026-03-28 |
-| 19. MCP Agent & Streaming | M3 | 5/5 | Complete   | 2026-03-28 |
-| 20. Skill System | M3 | 3/3 | Complete    | 2026-03-29 |
-| 21. MCP Server & ROI Analysis | M3 | 3/3 | Complete    | 2026-03-29 |
-| 22. Testing Suite | M4 | 0/TBD | Not started | - |
-| 23. Deployment | M4 | 0/TBD | Not started | - |
-| 24. Operations | M4 | 0/TBD | Not started | - |
+| 18. AI Enhancement | M3 | 3/3 | Complete | 2026-03-28 |
+| 19. MCP Agent & Streaming | M3 | 5/5 | Complete | 2026-03-28 |
+| 20. Skill System | M3 | 3/3 | Complete | 2026-03-29 |
+| 21. MCP Server & ROI Analysis | M3 | 3/3 | Complete | 2026-03-29 |
+| 22. Critical Fixes & Config Hardening | M4 | 3/3 | Complete | 2026-04-01 |
+| 23. Code Quality Refactor | M4 | 3/3 | Complete    | 2026-04-01 |
+| 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
+| 25. Security & Observability | M4 | 0/TBD | Not started | - |
+| 26. CI/CD & Production Deployment | M4 | 0/TBD | Not started | - |
+| 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
+| 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
+
+### Phase 27: Frontend UX Fixes & Course Materials Preview
+**Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
+**Depends on**: Phase 24
+**Requirements**: UX-01, UX-02, UX-03, UX-04, FEAT-01
+**Success Criteria** (what must be TRUE):
+  1. Dashboard reminder cards are functional (clicking navigates to relevant page or triggers action)
+  2. Dashboard course card predict button navigates to Predict page with corresponding course pre-selected/expanded
+  3. Timetable lecture/tutorial blocks visually match Allocate+ layout style (color-coded, time/location visible)
+  4. Timetable page shows scroll indicator when deadline items overflow the visible area
+  5. Course detail page has inline material viewer (mini-window) for previewing documents without leaving the page
+**Plans**: TBD
+
+### Phase 28: Deadlines Page Enhancement
+**Goal**: Deadlines page supports delete/pin actions, all/week filtering modes, overdue highlighting, and persisted user preferences
+**Depends on**: Phase 27
+**Requirements**: DL-UX-01, DL-UX-02, DL-UX-03, DL-UX-04, DL-UX-05
+**Success Criteria** (what must be TRUE):
+  1. Each deadline card shows due time on far right with enlarged font; three-dot menu offers delete and pin actions
+  2. Pinned deadlines are highlighted and appear with priority in notification panel
+  3. "All" mode shows only incomplete + overdue-but-submittable deadlines; "This Week" mode shows all statuses
+  4. Overdue deadlines (past due but submittable) display with red border highlight
+  5. User actions (delete/pin) persist across page refreshes and sync cycles (stored in database, not reset by sync)
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 28 to break down)

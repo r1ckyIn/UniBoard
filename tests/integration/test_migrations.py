@@ -6,7 +6,10 @@ event loop (alembic async env.py uses asyncio.run() internally).
 
 import subprocess
 
+import pytest
 from sqlalchemy import create_engine, text
+
+pytestmark = pytest.mark.db
 
 # Synchronous URL for table counting
 SYNC_DATABASE_URL = (

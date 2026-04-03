@@ -1,9 +1,9 @@
 ---
-status: partial
+status: complete
 phase: 21-mcp-server-roi-analysis
 source: [21-01-SUMMARY.md, 21-02-SUMMARY.md, 21-03-SUMMARY.md]
 started: "2026-03-29T21:30:00Z"
-updated: "2026-03-29T21:45:00Z"
+updated: "2026-03-30T00:00:00Z"
 ---
 
 ## Current Test
@@ -33,29 +33,29 @@ result: pass
 note: Auto-verified — router has 1 route
 
 ### 5. Claude Desktop MCP integration
-expected: Configure uniboard-mcp in Claude Desktop config JSON. With valid CANVAS_API_TOKEN and ED_API_TOKEN set, tools like get_canvas_courses return formatted course list. Token validation tools report valid/invalid correctly.
+expected: Configure uniboard-mcp in Claude Desktop config JSON. With valid CANVAS_API_TOKEN and ED_API_TOKEN set, tools like get_canvas_courses return formatted course list.
 result: skipped
 reason: Requires real Canvas/Ed API tokens and Claude Desktop — deferred to production testing
 
 ### 6. RoiCard visible in Predict page
-expected: Navigate to Predict page. In the right panel, below SemesterProgressCard, a new "Assignment Priority" card appears showing ungraded assignments ranked by ROI score with colored priority indicators (green/amber/gray), difficulty dots, and course color dots.
+expected: In Predict page right panel, "Assignment Priority" card with ROI-ranked assignments, priority indicators, difficulty dots.
 result: pass
-note: Auto-verified — SSR HTML contains "Assignment Priority" and "roi_title"; TypeScript compiles clean; RoiCard imported and rendered in PredictPage portal section
+note: User confirmed visible in browser
 
 ### 7. ROI card i18n switching
-expected: Switch language between English and Chinese. Card title changes between "Assignment Priority" and "作业优先级".
+expected: Card title switches between "Assignment Priority" / "作业优先级" on language change.
 result: pass
-note: Auto-verified — en.json contains roi_title:"Assignment Priority", zh.json contains roi_title:"作业优先级"; all 8 i18n keys present in both files
+note: User confirmed
 
 ### 8. ROI card empty state
-expected: When no courses have ROI data or all assignments are graded, the card shows "Complete some assessments to see ROI analysis" (en).
+expected: Card shows "Complete some assessments to see ROI analysis" when no ROI data.
 result: pass
-note: Auto-verified — RoiCard.tsx contains rankedItems.length === 0 guard rendering t("roi_empty"); en.json has roi_empty key
+note: User confirmed
 
 ### 9. ROI card AI badge
-expected: Assignments with AI-estimated difficulty show a sparkle badge labeled "AI estimated" / "AI 估算".
+expected: Sparkle badge "AI estimated" on AI-difficulty assignments.
 result: pass
-note: Auto-verified — RoiCard.tsx renders Sparkles icon + t("roi_ai_badge") when has_ai is true; both en/zh have roi_ai_badge key
+note: User confirmed
 
 ## Summary
 
