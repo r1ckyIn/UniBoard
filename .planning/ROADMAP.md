@@ -58,7 +58,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 22: Critical Fixes & Config Hardening** — Fix async blocker, unsafe config defaults, production Dockerfile, CORS configurability (completed 2026-04-01)
 - [x] **Phase 23: Code Quality Refactor** — Split god module, DRY consolidation, dead code removal, resource leak fixes (completed 2026-04-01)
 - [x] **Phase 24: Build Health Green** — All 5 build tools pass with zero errors after refactoring (completed 2026-04-01)
-- [ ] **Phase 25: Security & Observability** — Security headers, HTTP access logging, error boundaries, API rate limiting
+- [x] **Phase 25: Security & Observability** — Security headers, HTTP access logging, error boundaries, API rate limiting (completed 2026-04-03)
 - [ ] **Phase 26: CI/CD & Production Deployment** — GitHub Actions pipeline, Railway+Vercel deployment, Sentry error tracking
 - [ ] **Phase 27: Frontend UX Fixes & Course Materials Preview** — Dashboard/timetable interaction fixes, course materials inline viewer
 - [ ] **Phase 28: Deadlines Page Enhancement** — Card redesign, delete/pin actions, all/week modes, overdue highlighting, user preference persistence
@@ -163,7 +163,7 @@ Plans:
   2. Every HTTP request to FastAPI is logged with method, path, status_code, duration_ms, and a request_id propagated through structlog contextvars
   3. Frontend has error.tsx and global-error.tsx boundaries that catch rendering errors and display a fallback UI with console logging
   4. AI endpoints are rate-limited to 10 req/user/min and general endpoints to 60 req/user/min, returning 429 when exceeded
-**Plans**: TBD
+**Plans**: 2/3 complete
 **UI hint**: yes
 
 ### Phase 26: CI/CD & Production Deployment
@@ -209,7 +209,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 22. Critical Fixes & Config Hardening | M4 | 3/3 | Complete | 2026-04-01 |
 | 23. Code Quality Refactor | M4 | 3/3 | Complete    | 2026-04-01 |
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
-| 25. Security & Observability | M4 | 0/TBD | Not started | - |
+| 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
 | 26. CI/CD & Production Deployment | M4 | 0/TBD | Not started | - |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |

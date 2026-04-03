@@ -1,20 +1,49 @@
 """FastAPI application factory and entry point."""
 
+import time
 import uuid
 from datetime import UTC, datetime
 
 import structlog
+import structlog.contextvars
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.middleware import SlowAPIMiddleware
 
 from src.config import get_settings
 from src.logging import configure_logging
 from src.schemas.common import ErrorDetail, ErrorResponse, MetaInfo, UniboardError
 from src.sync.engine import lifespan
+from src.web.rate_limit import limiter
 from src.web.routes import api_router, health_router
 
 logger = structlog.get_logger()
+
+
+def _build_429_response(request: Request) -> JSONResponse:
+    """Build a structured 429 response using ErrorResponse format."""
+    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    return JSONResponse(
+        status_code=429,
+        content=ErrorResponse(
+            error=ErrorDetail(
+                code="RATE_LIMITED",
+                message="Too many requests. Please try again later.",
+            ),
+            meta=MetaInfo(request_id=request_id, timestamp=datetime.now(UTC)),
+        ).model_dump(mode="json"),
+    )
+
+
+class _RateLimitMiddleware(SlowAPIMiddleware):
+    """Custom rate-limit middleware that returns structured 429 responses."""
+
+    async def dispatch(self, request: Request, call_next):  # type: ignore[no-untyped-def]
+        response = await super().dispatch(request, call_next)
+        if response.status_code == 429:
+            return _build_429_response(request)
+        return response
 
 
 def create_app() -> FastAPI:
@@ -40,13 +69,51 @@ def create_app() -> FastAPI:
         expose_headers=["X-Request-ID"],
     )
 
+    # Rate limiting -- attach limiter to app state and add middleware
+    application.state.limiter = limiter
+    application.add_middleware(_RateLimitMiddleware)
+
     @application.middleware("http")
-    async def request_id_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
-        """Inject request_id into every request and response."""
+    async def access_log_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
+        """Log HTTP request with method, path, status, duration; bind request_id."""
+        structlog.contextvars.clear_contextvars()
         request_id = str(uuid.uuid4())
         request.state.request_id = request_id
+        structlog.contextvars.bind_contextvars(request_id=request_id)
+        start = time.perf_counter()
         response = await call_next(request)
+        duration_ms = round((time.perf_counter() - start) * 1000, 2)
+        logger.info(
+            "http_request",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=duration_ms,
+        )
         response.headers["X-Request-ID"] = request_id
+        return response
+
+    # Keep in sync with frontend/next.config.ts securityHeaders
+    _SECURITY_HEADERS = {
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Security-Policy": "; ".join([
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+        ]),
+    }
+
+    @application.middleware("http")
+    async def security_headers_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
+        response = await call_next(request)
+        for header, value in _SECURITY_HEADERS.items():
+            response.headers[header] = value
         return response
 
     @application.exception_handler(UniboardError)

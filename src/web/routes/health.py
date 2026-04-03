@@ -8,11 +8,13 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.web.deps import get_session
+from src.web.rate_limit import limiter
 
 router = APIRouter()
 
 
 @router.get("/health")
+@limiter.exempt  # type: ignore[untyped-decorator]
 async def health_check(
     session: AsyncSession = Depends(get_session),
 ) -> JSONResponse:

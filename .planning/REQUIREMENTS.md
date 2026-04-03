@@ -97,9 +97,9 @@ Requirements for full release across 4 milestones.
 ### Security & Observability (M4)
 
 - [ ] **SEC-01**: CORS origins configurable via environment variable, defaulting to localhost:3001 for development
-- [ ] **SEC-02**: Next.js and FastAPI return security response headers (HSTS, X-Frame-Options, X-Content-Type-Options, CSP)
+- [x] **SEC-02**: Next.js and FastAPI return security response headers (HSTS, X-Frame-Options, X-Content-Type-Options, CSP)
 - [ ] **SEC-03**: Every HTTP request logged with method, path, status_code, duration_ms; request_id bound to structlog contextvars for downstream correlation
-- [ ] **SEC-04**: Frontend has error.tsx and global-error.tsx error boundaries with basic error logging to console
+- [x] **SEC-04**: Frontend has error.tsx and global-error.tsx error boundaries with basic error logging to console
 
 ### Code Quality (M4)
 
@@ -113,7 +113,7 @@ Requirements for full release across 4 milestones.
 - [ ] **OPS-01**: GitHub Actions CI pipeline with separate backend (mypy+ruff+pytest) and frontend (tsc+eslint+build) workflows
 - [ ] **OPS-02**: Railway and Vercel deployment config (railway.toml, vercel.json, env var documentation), deployed to production
 - [ ] **OPS-03**: Sentry integrated for both Python backend (sentry-sdk) and Next.js frontend (@sentry/nextjs) with error tracking and performance monitoring
-- [ ] **OPS-04**: API rate limiting via slowapi (60 req/user/min general, 10 req/user/min for AI endpoints)
+- [x] **OPS-04**: API rate limiting via slowapi (60 req/user/min general, 10 req/user/min for AI endpoints)
 
 ## v2 Requirements
 

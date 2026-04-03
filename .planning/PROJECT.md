@@ -12,10 +12,10 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 **Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
 **Shipped:** M3 AI/MCP/Skills (v2.0-m3, 2026-03-29)
-**Shipped:** M4 Phase 22-24 — Critical fixes, code quality refactor, build health green
-**In Progress:** M4 Hardening — Phase 25 (Security & Observability) next
+**Shipped:** M4 Phase 22-25 — Critical fixes, code quality refactor, build health green, security & observability
+**In Progress:** M4 Hardening — Phase 26 (CI/CD & Production Deployment) next
 **Codebase:** ~170K LOC (TypeScript + Python + SQL), 730+ files
-**Tests:** 316 backend tests passing (115 DB-dependent auto-skipped when no PostgreSQL) + frontend component tests
+**Tests:** 332 backend tests passing (115 DB-dependent auto-skipped when no PostgreSQL) + frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
 
 ## Requirements
@@ -81,8 +81,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - ✓ Critical fixes (VoyageAI async, broken test imports, JWT secret defaults, Dockerfile) — v2.0-m4 Phase 22
 - ✓ Code quality refactor (sync/tasks.py split, DRY consolidation, dead code removal) — v2.0-m4 Phase 23
 - ✓ Build health green (mypy 0 errors, ruff 0 errors, tsc 0 errors, ESLint 0 warnings, pytest passes) — v2.0-m4 Phase 24
-- [ ] Security hardening (config fail-fast, CORS configurable, rate limiting, resource leak fixes)
-- [ ] Observability foundation (HTTP access log, structlog context binding, error boundaries, health 503)
+- ✓ Security & observability (security headers, HTTP access logging, error boundaries, rate limiting) — v2.0-m4 Phase 25
 - [ ] Production deployment (Supabase + Railway + Vercel, Docker production image)
 - [ ] CI/CD pipeline (GitHub Actions)
 - [ ] Monitoring and alerting
