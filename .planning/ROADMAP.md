@@ -174,7 +174,11 @@ Plans:
   1. GitHub Actions runs separate backend (mypy+ruff+pytest) and frontend (tsc+eslint+build) workflows on every push and PR
   2. Backend is deployed to Railway and frontend to Vercel, both accessible via production URLs with correct environment variables
   3. Sentry captures and reports errors from both Python backend and Next.js frontend with performance monitoring enabled
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 26-01-PLAN.md — GitHub Actions CI pipelines + Dependabot (OPS-01)
+- [ ] 26-02-PLAN.md — Railway + Vercel deployment config & env var docs (OPS-02)
+- [ ] 26-03-PLAN.md — Sentry integration for Python + Next.js (OPS-03)
 
 ## Progress
 
@@ -210,7 +214,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 23. Code Quality Refactor | M4 | 3/3 | Complete    | 2026-04-01 |
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
-| 26. CI/CD & Production Deployment | M4 | 0/TBD | Not started | - |
+| 26. CI/CD & Production Deployment | M4 | 0/3 | Not started | - |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
 
