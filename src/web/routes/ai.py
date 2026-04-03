@@ -21,6 +21,7 @@ from src.services.qa import QAService
 from src.services.skill import SkillService
 from src.services.tool_executor import ToolExecutor
 from src.web.deps import get_current_user_id, get_encryption, get_request_meta, get_session
+from src.web.rate_limit import limiter
 
 logger = structlog.get_logger()
 
@@ -100,6 +101,7 @@ async def _sse_wrap(
 
 
 @router.post("/courses/{course_id}/qa")
+@limiter.limit("10/minute")
 async def course_qa(
     course_id: uuid.UUID,
     body: QARequest,
@@ -118,6 +120,7 @@ async def course_qa(
 
 
 @router.get("/courses/{course_id}/review")
+@limiter.limit("10/minute")
 async def course_review(
     course_id: uuid.UUID,
     request: Request,
@@ -134,9 +137,11 @@ async def course_review(
 
 
 @router.post("/courses/{course_id}/qa/stream")
+@limiter.limit("10/minute")
 async def course_qa_stream(
     course_id: uuid.UUID,
     body: StreamingQARequest,
+    request: Request,
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> EventSourceResponse:
@@ -168,8 +173,10 @@ async def course_qa_stream(
 
 
 @router.get("/courses/{course_id}/review/stream")
+@limiter.limit("10/minute")
 async def course_review_stream(
     course_id: uuid.UUID,
+    request: Request,
     lang: str = "en",
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),

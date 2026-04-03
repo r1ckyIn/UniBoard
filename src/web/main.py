@@ -9,14 +9,42 @@ import structlog.contextvars
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.middleware import SlowAPIMiddleware
 
 from src.config import get_settings
 from src.logging import configure_logging
 from src.schemas.common import ErrorDetail, ErrorResponse, MetaInfo, UniboardError
 from src.sync.engine import lifespan
+from src.web.rate_limit import limiter
 from src.web.routes import api_router, health_router
 
 logger = structlog.get_logger()
+
+
+def _build_429_response(request: Request) -> JSONResponse:
+    """Build a structured 429 response using ErrorResponse format."""
+    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    return JSONResponse(
+        status_code=429,
+        content=ErrorResponse(
+            error=ErrorDetail(
+                code="RATE_LIMITED",
+                message="Too many requests. Please try again later.",
+            ),
+            meta=MetaInfo(request_id=request_id, timestamp=datetime.now(UTC)),
+        ).model_dump(mode="json"),
+    )
+
+
+class _RateLimitMiddleware(SlowAPIMiddleware):
+    """Custom rate-limit middleware that returns structured 429 responses."""
+
+    async def dispatch(self, request: Request, call_next):  # type: ignore[no-untyped-def]
+        """Override to replace default text/plain 429 with ErrorResponse JSON."""
+        response = await super().dispatch(request, call_next)
+        if response.status_code == 429:
+            return _build_429_response(request)
+        return response
 
 
 def create_app() -> FastAPI:
@@ -41,6 +69,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["X-Request-ID"],
     )
+
+    # Rate limiting -- attach limiter to app state and add middleware
+    application.state.limiter = limiter
+    application.add_middleware(_RateLimitMiddleware)
 
     @application.middleware("http")
     async def access_log_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
