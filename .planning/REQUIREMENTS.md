@@ -113,7 +113,7 @@ Requirements for full release across 4 milestones.
 - [ ] **OPS-01**: GitHub Actions CI pipeline with separate backend (mypy+ruff+pytest) and frontend (tsc+eslint+build) workflows
 - [ ] **OPS-02**: Railway and Vercel deployment config (railway.toml, vercel.json, env var documentation), deployed to production
 - [ ] **OPS-03**: Sentry integrated for both Python backend (sentry-sdk) and Next.js frontend (@sentry/nextjs) with error tracking and performance monitoring
-- [ ] **OPS-04**: API rate limiting via slowapi (60 req/user/min general, 10 req/user/min for AI endpoints)
+- [x] **OPS-04**: API rate limiting via slowapi (60 req/user/min general, 10 req/user/min for AI endpoints)
 
 ## v2 Requirements
 

@@ -163,7 +163,7 @@ Plans:
   2. Every HTTP request to FastAPI is logged with method, path, status_code, duration_ms, and a request_id propagated through structlog contextvars
   3. Frontend has error.tsx and global-error.tsx boundaries that catch rendering errors and display a fallback UI with console logging
   4. AI endpoints are rate-limited to 10 req/user/min and general endpoints to 60 req/user/min, returning 429 when exceeded
-**Plans**: TBD
+**Plans**: 2/3 complete
 **UI hint**: yes
 
 ### Phase 26: CI/CD & Production Deployment
