@@ -1,10 +1,10 @@
 """AI-powered course Q&A and review REST endpoints."""
 
 import json
-import logging
 import uuid
 from collections.abc import AsyncGenerator
 
+import structlog
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,7 +22,7 @@ from src.services.skill import SkillService
 from src.services.tool_executor import ToolExecutor
 from src.web.deps import get_current_user_id, get_encryption, get_request_meta, get_session
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 router = APIRouter()
 
@@ -95,7 +95,7 @@ async def _sse_wrap(
 
         yield {"event": "done", "data": json.dumps({"status": "complete"})}
     except Exception as exc:
-        logger.exception("SSE stream error: %s", exc)
+        logger.exception("sse_stream_error", error=str(exc))
         yield {"event": "error", "data": json.dumps({"message": "AI request failed"})}
 
 

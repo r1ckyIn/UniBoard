@@ -1,9 +1,11 @@
 """FastAPI application factory and entry point."""
 
+import time
 import uuid
 from datetime import UTC, datetime
 
 import structlog
+import structlog.contextvars
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -41,12 +43,43 @@ def create_app() -> FastAPI:
     )
 
     @application.middleware("http")
-    async def request_id_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
-        """Inject request_id into every request and response."""
+    async def access_log_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
+        """Log HTTP request with method, path, status, duration; bind request_id."""
+        structlog.contextvars.clear_contextvars()
         request_id = str(uuid.uuid4())
         request.state.request_id = request_id
+        structlog.contextvars.bind_contextvars(request_id=request_id)
+        start = time.perf_counter()
         response = await call_next(request)
+        duration_ms = round((time.perf_counter() - start) * 1000, 2)
+        logger.info(
+            "http_request",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=duration_ms,
+        )
         response.headers["X-Request-ID"] = request_id
+        return response
+
+    @application.middleware("http")
+    async def security_headers_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
+        """Add defense-in-depth security headers to every response."""
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=63072000; includeSubDomains"
+        )
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: blob:; "
+            "font-src 'self' data:; "
+            "connect-src 'self' https://*.supabase.co wss://*.supabase.co"
+        )
         return response
 
     @application.exception_handler(UniboardError)
