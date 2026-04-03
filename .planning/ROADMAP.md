@@ -163,8 +163,11 @@ Plans:
   2. Every HTTP request to FastAPI is logged with method, path, status_code, duration_ms, and a request_id propagated through structlog contextvars
   3. Frontend has error.tsx and global-error.tsx boundaries that catch rendering errors and display a fallback UI with console logging
   4. AI endpoints are rate-limited to 10 req/user/min and general endpoints to 60 req/user/min, returning 429 when exceeded
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 3 plans
+Plans:
+- [ ] 25-01-PLAN.md — Security headers + access logging middleware (SEC-02, SEC-03)
+- [ ] 25-02-PLAN.md — API rate limiting with slowapi (OPS-04)
+- [ ] 25-03-PLAN.md — Next.js security headers + error boundaries (SEC-02, SEC-04)
 
 ### Phase 26: CI/CD & Production Deployment
 **Goal**: Application is deployed to production with automated CI and error tracking
@@ -209,7 +212,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 22. Critical Fixes & Config Hardening | M4 | 3/3 | Complete | 2026-04-01 |
 | 23. Code Quality Refactor | M4 | 3/3 | Complete    | 2026-04-01 |
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
-| 25. Security & Observability | M4 | 0/TBD | Not started | - |
+| 25. Security & Observability | M4 | 0/3 | Not started | - |
 | 26. CI/CD & Production Deployment | M4 | 0/TBD | Not started | - |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
