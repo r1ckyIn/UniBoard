@@ -3,28 +3,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
-
-from src.web.main import create_app
-
-
-@pytest.fixture()
-def client() -> TestClient:
-    """Create a test client from the full application."""
-    app = create_app()
-
-    # Override DB session to avoid real database connection
-    from src.web.deps import get_session as real_get_session
-
-    mock_session = AsyncMock()
-    mock_session.execute = AsyncMock()
-
-    async def override_session():  # type: ignore[no-untyped-def]
-        yield mock_session
-
-    app.dependency_overrides[real_get_session] = override_session
-    return TestClient(app, raise_server_exceptions=False)
 
 
 class TestAccessLogging:

@@ -40,7 +40,6 @@ class _RateLimitMiddleware(SlowAPIMiddleware):
     """Custom rate-limit middleware that returns structured 429 responses."""
 
     async def dispatch(self, request: Request, call_next):  # type: ignore[no-untyped-def]
-        """Override to replace default text/plain 429 with ErrorResponse JSON."""
         response = await super().dispatch(request, call_next)
         if response.status_code == 429:
             return _build_429_response(request)
@@ -94,24 +93,27 @@ def create_app() -> FastAPI:
         response.headers["X-Request-ID"] = request_id
         return response
 
+    # Keep in sync with frontend/next.config.ts securityHeaders
+    _SECURITY_HEADERS = {
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Security-Policy": "; ".join([
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+        ]),
+    }
+
     @application.middleware("http")
     async def security_headers_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
-        """Add defense-in-depth security headers to every response."""
         response = await call_next(request)
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=63072000; includeSubDomains"
-        )
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: blob:; "
-            "font-src 'self' data:; "
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co"
-        )
+        for header, value in _SECURITY_HEADERS.items():
+            response.headers[header] = value
         return response
 
     @application.exception_handler(UniboardError)
