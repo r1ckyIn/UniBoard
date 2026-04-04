@@ -13,9 +13,12 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy import delete as sa_delete
+
 from src.models.course import Course
 from src.models.deadline import UnifiedDeadline
-from src.schemas.common import NotFoundError
+from src.models.deadline_user_action import DeadlineUserAction
+from src.schemas.common import NotFoundError, ValidationError
 from src.schemas.deadline import ConflictDay, DeadlineDetailResponse, DeadlineResponse
 
 # Fuzzy matching threshold (0-100 scale, rapidfuzz token_set_ratio)
@@ -358,3 +361,79 @@ class DeadlineService:
                 new_count += 1
 
         return new_count
+
+    # --- User action methods (pin/delete persistence) ---
+
+    async def get_user_actions(self, user_id: uuid.UUID) -> dict[str, set[str]]:
+        """Get all user actions grouped by action_type.
+
+        Returns: {"pinned": {deadline_id_1, ...}, "deleted": {deadline_id_2, ...}}
+        """
+        stmt = select(DeadlineUserAction).where(DeadlineUserAction.user_id == user_id)
+        result = await self._session.execute(stmt)
+        actions: dict[str, set[str]] = {"pinned": set(), "deleted": set()}
+        for action in result.scalars().all():
+            actions.setdefault(action.action_type, set()).add(str(action.deadline_id))
+        return actions
+
+    async def create_user_action(
+        self,
+        user_id: uuid.UUID,
+        deadline_id: uuid.UUID,
+        action_type: str,
+    ) -> DeadlineUserAction:
+        """Create or upsert a user action (pin or delete) on a deadline."""
+        if action_type not in ("pinned", "deleted"):
+            raise ValidationError(f"Invalid action_type: {action_type}")
+
+        # Verify deadline exists and belongs to user
+        dl_stmt = (
+            select(UnifiedDeadline)
+            .join(Course, UnifiedDeadline.course_id == Course.id)
+            .where(Course.user_id == user_id)
+            .where(UnifiedDeadline.id == deadline_id)
+        )
+        dl_result = await self._session.execute(dl_stmt)
+        if dl_result.scalar_one_or_none() is None:
+            raise NotFoundError("Deadline")
+
+        values = {
+            "id": uuid.uuid4(),
+            "user_id": user_id,
+            "deadline_id": deadline_id,
+            "action_type": action_type,
+        }
+        insert_stmt = pg_insert(DeadlineUserAction).values(**values)
+        insert_stmt = insert_stmt.on_conflict_do_nothing(
+            constraint="deadline_user_actions_user_id_deadline_id_action_type_key",
+        )
+        await self._session.execute(insert_stmt)
+        await self._session.commit()
+
+        # Fetch the created/existing action to return
+        fetch_stmt = (
+            select(DeadlineUserAction)
+            .where(DeadlineUserAction.user_id == user_id)
+            .where(DeadlineUserAction.deadline_id == deadline_id)
+            .where(DeadlineUserAction.action_type == action_type)
+        )
+        fetch_result = await self._session.execute(fetch_stmt)
+        return fetch_result.scalar_one()
+
+    async def delete_user_action(
+        self,
+        user_id: uuid.UUID,
+        deadline_id: uuid.UUID,
+        action_type: str,
+    ) -> None:
+        """Remove a user action (unpin or undelete) on a deadline."""
+        stmt = (
+            sa_delete(DeadlineUserAction)
+            .where(DeadlineUserAction.user_id == user_id)
+            .where(DeadlineUserAction.deadline_id == deadline_id)
+            .where(DeadlineUserAction.action_type == action_type)
+        )
+        result = await self._session.execute(stmt)
+        if result.rowcount == 0:
+            raise NotFoundError("Deadline action")
+        await self._session.commit()
