@@ -148,6 +148,9 @@ def create_app() -> FastAPI:
             request_id=request_id,
             exc_info=exc,
         )
+        # Forward to Sentry before returning (catch-all prevents ASGI propagation)
+        if settings.sentry_dsn:
+            sentry_sdk.capture_exception(exc)
         return JSONResponse(
             status_code=500,
             content=ErrorResponse(
