@@ -59,7 +59,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 23: Code Quality Refactor** — Split god module, DRY consolidation, dead code removal, resource leak fixes (completed 2026-04-01)
 - [x] **Phase 24: Build Health Green** — All 5 build tools pass with zero errors after refactoring (completed 2026-04-01)
 - [x] **Phase 25: Security & Observability** — Security headers, HTTP access logging, error boundaries, API rate limiting (completed 2026-04-03)
-- [ ] **Phase 26: CI/CD & Production Deployment** — GitHub Actions pipeline, Railway+Vercel deployment, Sentry error tracking
+- [x] **Phase 26: CI/CD & Production Deployment** — GitHub Actions pipeline, Railway+Vercel deployment, Sentry error tracking (completed 2026-04-04)
 - [ ] **Phase 27: Frontend UX Fixes & Course Materials Preview** — Dashboard/timetable interaction fixes, course materials inline viewer
 - [ ] **Phase 28: Deadlines Page Enhancement** — Card redesign, delete/pin actions, all/week modes, overdue highlighting, user preference persistence
 
@@ -178,7 +178,7 @@ Plans:
 Plans:
 - [x] 26-01-PLAN.md — GitHub Actions CI pipelines + Dependabot (OPS-01)
 - [x] 26-02-PLAN.md — Railway + Vercel deployment config & env var docs (OPS-02)
-- [ ] 26-03-PLAN.md — Sentry integration for Python + Next.js (OPS-03)
+- [x] 26-03-PLAN.md — Sentry integration for Python + Next.js (OPS-03)
 
 ## Progress
 
@@ -214,7 +214,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 23. Code Quality Refactor | M4 | 3/3 | Complete    | 2026-04-01 |
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
-| 26. CI/CD & Production Deployment | M4 | 2/3 | In Progress |  |
+| 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
 
