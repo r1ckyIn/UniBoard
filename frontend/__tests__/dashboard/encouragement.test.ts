@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
 
 describe("encouragement", () => {
   it.todo("returns encouragement for multiple completed items");

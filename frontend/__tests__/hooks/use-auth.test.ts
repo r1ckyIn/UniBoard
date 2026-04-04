@@ -24,8 +24,10 @@ function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) =>
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
+  Wrapper.displayName = "TestWrapper";
+  return Wrapper;
 }
 
 describe("useLogin", () => {
