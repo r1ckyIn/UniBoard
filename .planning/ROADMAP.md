@@ -216,7 +216,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
-| 28. Deadlines Page Enhancement | M4 | 3/3 | Complete   | 2026-04-04 |
+| 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -243,4 +243,4 @@ Decimal phases (if inserted) execute between their surrounding integers.
 **Plans**: TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 28 to break down)
+- [x] TBD (run /gsd:plan-phase 28 to break down) (completed 2026-04-04)
