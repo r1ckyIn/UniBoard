@@ -9,6 +9,7 @@ interface TimetableEventProps {
   session: TimetableSession & { _col?: number; _cc?: number };
   top: number;
   height: number;
+  hasAttendance?: boolean;
   onClick?: () => void;
 }
 
@@ -21,6 +22,7 @@ export default function TimetableEvent({
   session,
   top,
   height,
+  hasAttendance,
   onClick,
 }: TimetableEventProps) {
   const router = useRouter();
@@ -54,7 +56,7 @@ export default function TimetableEvent({
         left: leftStyle,
         width: widthStyle,
         background: `rgba(${hexToRgb(color.base)}, 0.13)`,
-        borderLeft: `3px solid ${color.base}`,
+        borderLeft: `3px ${hasAttendance ? 'solid' : 'dashed'} ${color.base}`,
       }}
       onClick={handleClick}
     >

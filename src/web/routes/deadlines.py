@@ -10,6 +10,8 @@ from src.schemas.common import SuccessResponse
 from src.schemas.deadline import (
     ConflictDay,
     ContractDeadlineResponse,
+    DeadlineActionCreate,
+    DeadlineActionResponse,
     DeadlineDetailResponse,
     DeadlineResponse,
 )
@@ -76,6 +78,27 @@ def _to_contract_deadline(
     )
 
 
+# Maps frontend action verbs to DB action_type values
+_ACTION_MAP: dict[str, str] = {"pin": "pinned", "delete": "deleted"}
+
+
+async def _enrich_with_actions(
+    deadlines: list[DeadlineResponse],
+    svc: DeadlineService,
+    user_id: uuid.UUID,
+) -> list[ContractDeadlineResponse]:
+    """Convert deadlines to contract responses with user action flags."""
+    user_actions = await svc.get_user_actions(user_id)
+    now_utc = datetime.now(UTC)
+    data: list[ContractDeadlineResponse] = []
+    for d in deadlines:
+        contract = _to_contract_deadline(d, now_utc)
+        contract.is_pinned = d.id in user_actions.get("pinned", set())
+        contract.is_deleted = d.id in user_actions.get("deleted", set())
+        data.append(contract)
+    return data
+
+
 @router.get("")
 async def list_deadlines(
     request: Request,
@@ -89,7 +112,7 @@ async def list_deadlines(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     svc: DeadlineService = Depends(get_deadline_service),
 ) -> SuccessResponse[list[ContractDeadlineResponse]]:
-    """Return filtered, urgency-graded deadline list."""
+    """Return filtered, urgency-graded deadline list with user actions."""
     result = await svc.get_deadlines(
         current_user_id,
         course_code=course_code,
@@ -100,11 +123,8 @@ async def list_deadlines(
         sort=sort,
         order=order,
     )
-    now_utc = datetime.now(UTC)
-    return SuccessResponse(
-        data=[_to_contract_deadline(d, now_utc) for d in result],
-        meta=get_request_meta(request),
-    )
+    data = await _enrich_with_actions(result, svc, current_user_id)
+    return SuccessResponse(data=data, meta=get_request_meta(request))
 
 
 @router.get("/upcoming")
@@ -122,11 +142,8 @@ async def get_upcoming_deadlines(
         to_date=now + timedelta(days=7),
         include_past=False,
     )
-    now_utc = datetime.now(UTC)
-    return SuccessResponse(
-        data=[_to_contract_deadline(d, now_utc) for d in result],
-        meta=get_request_meta(request),
-    )
+    data = await _enrich_with_actions(result, svc, current_user_id)
+    return SuccessResponse(data=data, meta=get_request_meta(request))
 
 
 @router.get("/conflicts")
@@ -150,3 +167,39 @@ async def get_deadline(
     """Return single deadline detail with dedup metadata."""
     result = await svc.get_deadline(current_user_id, deadline_id)
     return SuccessResponse(data=result, meta=get_request_meta(request))
+
+
+@router.post("/{deadline_id}/actions")
+async def create_deadline_action(
+    deadline_id: uuid.UUID,
+    body: DeadlineActionCreate,
+    request: Request,
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    svc: DeadlineService = Depends(get_deadline_service),
+) -> SuccessResponse[DeadlineActionResponse]:
+    """Pin or soft-delete a deadline for the current user. Per D-08."""
+    action_type = _ACTION_MAP.get(body.action, body.action)
+    action = await svc.create_user_action(current_user_id, deadline_id, action_type)
+    return SuccessResponse(
+        data=DeadlineActionResponse(
+            id=str(action.id),
+            deadline_id=str(action.deadline_id),
+            action_type=action.action_type,
+            created_at=action.created_at.isoformat(),
+        ),
+        meta=get_request_meta(request),
+    )
+
+
+@router.delete("/{deadline_id}/actions/{action}")
+async def remove_deadline_action(
+    deadline_id: uuid.UUID,
+    action: str,
+    request: Request,
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    svc: DeadlineService = Depends(get_deadline_service),
+) -> SuccessResponse[None]:
+    """Remove a pin or undelete a deadline for the current user. Per D-08."""
+    action_type = _ACTION_MAP.get(action, action)
+    await svc.delete_user_action(current_user_id, deadline_id, action_type)
+    return SuccessResponse(data=None, meta=get_request_meta(request))

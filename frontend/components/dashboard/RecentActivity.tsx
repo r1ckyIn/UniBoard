@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/lib/i18n/navigation";
 import {
   Activity,
   CheckCircle,
@@ -51,13 +52,19 @@ const ICON_CONFIG: Record<
 
 export default function RecentActivity({ activities }: RecentActivityProps) {
   const t = useTranslations("dashboard");
+  const router = useRouter();
   const [dialogUrl, setDialogUrl] = useState<string | null>(null);
 
-  const handleItemClick = useCallback((url?: string) => {
-    if (url) {
-      setDialogUrl(url);
-    }
-  }, []);
+  const handleItemClick = useCallback(
+    (item: ActivityItem) => {
+      if (item.internalPath) {
+        router.push(item.internalPath);
+      } else if (item.externalUrl) {
+        setDialogUrl(item.externalUrl);
+      }
+    },
+    [router]
+  );
 
   const handleDialogConfirm = useCallback(() => {
     setDialogUrl(null);
@@ -96,15 +103,15 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
             return (
               <div
                 key={item.id}
-                role={item.externalUrl ? "button" : undefined}
-                tabIndex={item.externalUrl ? 0 : undefined}
-                onClick={() => handleItemClick(item.externalUrl)}
+                role={item.internalPath || item.externalUrl ? "button" : undefined}
+                tabIndex={item.internalPath || item.externalUrl ? 0 : undefined}
+                onClick={() => handleItemClick(item)}
                 onKeyDown={
-                  item.externalUrl
+                  item.internalPath || item.externalUrl
                     ? (e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          handleItemClick(item.externalUrl);
+                          handleItemClick(item);
                         }
                       }
                     : undefined
@@ -113,7 +120,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
                   "flex gap-[10px] items-start rounded-[8px] px-2 py-2 -mx-2",
                   "transition-all duration-150 ease-out",
                   "hover:bg-[rgba(217,119,87,.04)] hover:shadow-[0_2px_8px_rgba(217,119,87,.10)] hover:-translate-y-[1px]",
-                  item.externalUrl && "cursor-pointer"
+                  (item.internalPath || item.externalUrl) && "cursor-pointer"
                 )}
               >
                 {/* Icon box */}

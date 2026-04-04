@@ -14,6 +14,7 @@ interface MaterialItemProps {
   courseColor: string;
   courseSoft: string;
   isNew?: boolean;
+  onPreview?: (url: string, title: string) => void;
 }
 
 /**
@@ -25,10 +26,12 @@ export default function MaterialItem({
   sourceType,
   itemCount,
   slideCount,
+  url,
   weekNumber,
   courseColor,
   courseSoft,
   isNew,
+  onPreview,
 }: MaterialItemProps) {
   const t = useTranslations("courseDetail");
 
@@ -39,7 +42,10 @@ export default function MaterialItem({
       : `Lesson${slideCount ? ` \u00b7 ${t("materials.slideCount", { count: slideCount })}` : ""}`;
 
   return (
-    <div className="mat-item flex items-center gap-[14px] px-[14px] py-[12px] rounded-[8px] cursor-pointer border-b border-[#eae7e0] last:border-b-0 transition-colors duration-150 hover:bg-[#efede6]">
+    <div
+      className={`mat-item flex items-center gap-[14px] px-[14px] py-[12px] rounded-[8px] border-b border-[#eae7e0] last:border-b-0 transition-colors duration-150 hover:bg-[#efede6] ${url && onPreview ? "cursor-pointer" : "cursor-default"}`}
+      onClick={url && onPreview ? () => onPreview(url, title) : undefined}
+    >
       {/* Week badge */}
       <span
         className="mat-week text-[0.66rem] font-bold px-[8px] py-[3px] rounded-[5px] whitespace-nowrap flex-shrink-0 min-w-[52px] text-center"

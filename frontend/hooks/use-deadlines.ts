@@ -1,4 +1,9 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import type { paths } from "@/lib/api/types.gen";
 
@@ -19,6 +24,7 @@ export const deadlineKeys = {
   upcoming: () => [...deadlineKeys.all, "upcoming"] as const,
   byCourse: (courseId: string) =>
     [...deadlineKeys.all, "course", courseId] as const,
+  actions: () => [...deadlineKeys.all, "actions"] as const,
 };
 
 // ── queryOptions factory ────────────────────────────────────────────────────
@@ -70,4 +76,56 @@ export function useUpcomingDeadlines() {
 
 export function useCourseDeadlines(courseId: string) {
   return useQuery(deadlineOptions.byCourse(courseId));
+}
+
+// ── Mutation hooks ─────────────────────────────────────────────────────────
+
+/** Create a deadline action (pin or delete). Per D-08. */
+export function useCreateDeadlineAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { deadlineId: string; action: "pin" | "delete" }) =>
+      api
+        .post(`deadlines/${payload.deadlineId}/actions`, {
+          json: { action: payload.action },
+        })
+        .json(),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: deadlineKeys.all });
+      const previous = queryClient.getQueryData(deadlineKeys.list());
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(deadlineKeys.list(), context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: deadlineKeys.all });
+    },
+  });
+}
+
+/** Remove a deadline action (unpin or undelete). Per D-08. */
+export function useRemoveDeadlineAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { deadlineId: string; action: "pin" | "delete" }) =>
+      api
+        .delete(`deadlines/${payload.deadlineId}/actions/${payload.action}`)
+        .json(),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: deadlineKeys.all });
+      const previous = queryClient.getQueryData(deadlineKeys.list());
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(deadlineKeys.list(), context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: deadlineKeys.all });
+    },
+  });
 }

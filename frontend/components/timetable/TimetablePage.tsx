@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQueries } from "@tanstack/react-query";
 import { Calendar } from "lucide-react";
 import { addDays, format, isWithinInterval, startOfDay } from "date-fns";
 
@@ -13,7 +13,7 @@ import {
   timetableKeys,
 } from "@/hooks/use-timetable";
 import { useDeadlines } from "@/hooks/use-deadlines";
-import { useCourses } from "@/hooks/use-courses";
+import { useCourses, courseOptions } from "@/hooks/use-courses";
 import type { WeekMode, SemesterWeek } from "@/lib/timetable/types";
 import type { DeadlineItem } from "@/components/timetable/TimetableDeadlineOverlay";
 import { classifyUrgency, MAX_UPCOMING_DEADLINES } from "@/lib/timetable/urgency";
@@ -58,6 +58,31 @@ export default function TimetablePage() {
   const sessionsQuery = useTimetableSessions();
   const deadlinesQuery = useDeadlines();
   const coursesQuery = useCourses();
+
+  // Fetch course details to determine attendance/participation assessment
+  const courseDetailQueries = useQueries({
+    queries: (coursesQuery.data?.data ?? []).map((c) =>
+      courseOptions.detail(c.id)
+    ),
+  });
+
+  // Compute set of course codes that have attendance/participation assessments
+  const ATTENDANCE_KEYWORDS = ["attendance", "participation"];
+
+  const attendanceCourses = useMemo(() => {
+    const set = new Set<string>();
+    for (const q of courseDetailQueries) {
+      if (!q.data?.data) continue;
+      const detail = q.data.data;
+      const hasAttendance = detail.assessment_weights.some((aw) =>
+        ATTENDANCE_KEYWORDS.some((kw) =>
+          aw.group_name.toLowerCase().includes(kw)
+        )
+      );
+      if (hasAttendance) set.add(detail.code);
+    }
+    return set;
+  }, [courseDetailQueries]);
 
   const isLoading =
     weeksQuery.isLoading ||
@@ -337,6 +362,7 @@ export default function TimetablePage() {
             currentWeek={currentWeek}
             isBreak={isBreak}
             isCurrentWeekView={isCurrentWeekView}
+            attendanceCourses={attendanceCourses}
           />
         </AnimatedEntry>
       </div>

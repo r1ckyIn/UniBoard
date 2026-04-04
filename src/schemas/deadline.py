@@ -21,6 +21,26 @@ class ContractDeadlineResponse(BaseModel):
     course_code: str
     course_name: str
     is_confirmed: bool
+    is_pinned: bool = False
+    is_deleted: bool = False
+
+
+# --- User action schemas ---
+
+
+class DeadlineActionCreate(BaseModel):
+    """Request body for creating a deadline user action."""
+
+    action: str  # "pin" | "delete"
+
+
+class DeadlineActionResponse(BaseModel):
+    """Response for a deadline user action."""
+
+    id: str
+    deadline_id: str
+    action_type: str
+    created_at: str  # ISO 8601
 
 
 # --- Legacy schemas (used by existing service layer and tests) ---

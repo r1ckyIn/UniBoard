@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Clock } from "lucide-react";
 import { format, differenceInCalendarDays } from "date-fns";
@@ -32,6 +33,31 @@ export default function TimetableUpcomingDeadlines({
   deadlines,
 }: TimetableUpcomingDeadlinesProps) {
   const t = useTranslations("timetable");
+  const listRef = useRef<HTMLDivElement>(null);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const threshold = 2;
+    setCanScrollDown(
+      el.scrollHeight > el.clientHeight + threshold &&
+      el.scrollTop + el.clientHeight < el.scrollHeight - threshold
+    );
+  }, []);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      ro.disconnect();
+    };
+  }, [checkScroll, deadlines]);
 
   return (
     <RoughCard disableHover padding="py-[18px] px-[18px]">
@@ -42,7 +68,13 @@ export default function TimetableUpcomingDeadlines({
         </div>
       </div>
 
-      <div className="flex flex-col gap-[6px]">
+      <div className="relative">
+        <div
+          ref={listRef}
+          data-testid="deadline-scroll-container"
+          className="flex flex-col gap-[6px] overflow-y-auto"
+          style={{ maxHeight: 320 }}
+        >
         {deadlines.map((dl) => {
           const daysRemaining =
             dl.days_remaining ??
@@ -98,6 +130,18 @@ export default function TimetableUpcomingDeadlines({
             </div>
           );
         })}
+        </div>
+
+        {/* Scroll overflow gradient indicator */}
+        {canScrollDown && (
+          <div
+            data-testid="scroll-indicator"
+            className="absolute bottom-0 left-0 right-0 h-[32px] pointer-events-none z-10"
+            style={{
+              background: "linear-gradient(transparent, rgba(246,245,240,0.95))",
+            }}
+          />
+        )}
       </div>
     </RoughCard>
   );

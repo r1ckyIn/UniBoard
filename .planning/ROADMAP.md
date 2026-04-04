@@ -61,7 +61,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 25: Security & Observability** — Security headers, HTTP access logging, error boundaries, API rate limiting (completed 2026-04-03)
 - [x] **Phase 26: CI/CD & Production Deployment** — GitHub Actions pipeline, Railway+Vercel deployment, Sentry error tracking (completed 2026-04-04)
 - [ ] **Phase 27: Frontend UX Fixes & Course Materials Preview** — Dashboard/timetable interaction fixes, course materials inline viewer
-- [ ] **Phase 28: Deadlines Page Enhancement** — Card redesign, delete/pin actions, all/week modes, overdue highlighting, user preference persistence
+- [x] **Phase 28: Deadlines Page Enhancement** — Card redesign, delete/pin actions, all/week modes, overdue highlighting, user preference persistence (completed 2026-04-04)
 
 ## Phase Details
 
@@ -216,7 +216,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
-| 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
+| 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -243,4 +243,4 @@ Decimal phases (if inserted) execute between their surrounding integers.
 **Plans**: TBD
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 28 to break down)
+- [x] TBD (run /gsd:plan-phase 28 to break down) (completed 2026-04-04)
