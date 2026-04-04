@@ -25,6 +25,7 @@ dependencies = [
     "voyageai>=0.3,<1.0",
     "sse-starlette>=3.0,<4.0",
     "slowapi>=0.1.9,<1.0",
+    "sentry-sdk[fastapi]>=2.50,<3.0",
 ]
 
 [project.optional-dependencies]
@@ -79,6 +80,8 @@ module = [
     "pgvector.*",
     "slowapi",
     "slowapi.*",
+    "sentry_sdk",
+    "sentry_sdk.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = false

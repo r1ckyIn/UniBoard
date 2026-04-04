@@ -79,3 +79,7 @@ supabase/.temp/
 # Obsidian
 .obsidian/
 .hypothesis/
+
+# Sentry
+.sentryclirc
+sentry.properties
