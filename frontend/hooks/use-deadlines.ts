@@ -92,12 +92,12 @@ export function useCreateDeadlineAction() {
         .json(),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: deadlineKeys.all });
-      const previous = queryClient.getQueryData(deadlineKeys.lists());
+      const previous = queryClient.getQueryData(deadlineKeys.list());
       return { previous };
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(deadlineKeys.lists(), context.previous);
+        queryClient.setQueryData(deadlineKeys.list(), context.previous);
       }
     },
     onSettled: () => {
@@ -116,12 +116,12 @@ export function useRemoveDeadlineAction() {
         .json(),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: deadlineKeys.all });
-      const previous = queryClient.getQueryData(deadlineKeys.lists());
+      const previous = queryClient.getQueryData(deadlineKeys.list());
       return { previous };
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(deadlineKeys.lists(), context.previous);
+        queryClient.setQueryData(deadlineKeys.list(), context.previous);
       }
     },
     onSettled: () => {

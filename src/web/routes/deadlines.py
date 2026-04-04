@@ -128,11 +128,15 @@ async def get_upcoming_deadlines(
         to_date=now + timedelta(days=7),
         include_past=False,
     )
+    user_actions = await svc.get_user_actions(current_user_id)
     now_utc = datetime.now(UTC)
-    return SuccessResponse(
-        data=[_to_contract_deadline(d, now_utc) for d in result],
-        meta=get_request_meta(request),
-    )
+    data = []
+    for d in result:
+        contract = _to_contract_deadline(d, now_utc)
+        contract.is_pinned = d.id in user_actions.get("pinned", set())
+        contract.is_deleted = d.id in user_actions.get("deleted", set())
+        data.append(contract)
+    return SuccessResponse(data=data, meta=get_request_meta(request))
 
 
 @router.get("/conflicts")

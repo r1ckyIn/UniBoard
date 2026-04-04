@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   RefreshCw,
   Bell,
-  Pin,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -23,7 +22,6 @@ interface NotificationItem {
   is_read: boolean;
   action_url?: string;
   created_at: string;
-  is_pinned?: boolean;
 }
 
 interface NotificationPanelProps {
@@ -93,11 +91,9 @@ export default function NotificationPanel({
         {t("notifications.title")}
       </div>
 
-      {/* Scrollable notification list — pinned deadlines sorted to top */}
+      {/* Scrollable notification list */}
       <div className="max-h-[260px] overflow-y-auto overflow-x-hidden [-webkit-overflow-scrolling:touch]">
-        {[...notifications]
-          .sort((a, b) => (a.is_pinned === b.is_pinned ? 0 : a.is_pinned ? -1 : 1))
-          .map((notification) => {
+        {notifications.map((notification) => {
           const mapping = ICON_MAP[notification.type] ?? DEFAULT_ICON;
           const Icon = mapping.icon;
 
@@ -128,9 +124,6 @@ export default function NotificationPanel({
               </div>
               <div>
                 <div className="text-[0.78rem] text-text-2 leading-[1.4]">
-                  {notification.is_pinned && (
-                    <Pin size={11} className="inline-block text-[#b08968] mr-1 -rotate-45" />
-                  )}
                   <strong className="text-text-1 font-semibold">
                     {notification.title}
                   </strong>{" "}
