@@ -1,8 +1,44 @@
 import type { components } from "@/lib/api/types.gen";
 
-type Deadline = components["schemas"]["Deadline"];
+// Extended Deadline type with user action fields (not yet in OpenAPI spec)
+type Deadline = components["schemas"]["Deadline"] & {
+  is_pinned?: boolean;
+  is_deleted?: boolean;
+};
 
 export const deadlines: Deadline[] = [
+  // ── Overdue (past due, not completed -- submittable) ───────────
+  {
+    id: "ddl_comp2017_w3",
+    title: "Weekly Task W3 (Late Submission Open)",
+    due_date: "2026-03-19T23:59:00+11:00",
+    source: "canvas_assignment",
+    weight: 0.02,
+    status: "overdue",
+    days_remaining: -6,
+    course_id: "crs_comp2017",
+    course_code: "COMP2017",
+    course_name: "Systems Programming",
+    is_confirmed: false,
+    is_pinned: false,
+    is_deleted: false,
+  },
+  {
+    id: "ddl_math2021_hw0",
+    title: "Homework 0 (Extended)",
+    due_date: "2026-03-20T23:59:00+11:00",
+    source: "canvas_assignment",
+    weight: 0.01,
+    status: "overdue",
+    days_remaining: -5,
+    course_id: "crs_math2021",
+    course_code: "MATH2021",
+    course_name: "Vector Calculus and Differential Equations",
+    is_confirmed: false,
+    is_pinned: false,
+    is_deleted: false,
+  },
+
   // ── Completed / graded ──────────────────────────────────────────
   {
     id: "ddl_comp2017_w4",
@@ -16,6 +52,8 @@ export const deadlines: Deadline[] = [
     course_code: "COMP2017",
     course_name: "Systems Programming",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_stat2011_q1",
@@ -29,6 +67,8 @@ export const deadlines: Deadline[] = [
     course_code: "STAT2011",
     course_name: "Probability and Estimation Theory",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
 
   // ── Upcoming this week ──────────────────────────────────────────
@@ -44,6 +84,8 @@ export const deadlines: Deadline[] = [
     course_code: "COMP3221",
     course_name: "Distributed Systems",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_comp2017_w5",
@@ -57,6 +99,8 @@ export const deadlines: Deadline[] = [
     course_code: "COMP2017",
     course_name: "Systems Programming",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
 
   // ── Upcoming weeks ──────────────────────────────────────────────
@@ -72,6 +116,8 @@ export const deadlines: Deadline[] = [
     course_code: "COMP2017",
     course_name: "Systems Programming",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_math2021_a1",
@@ -85,6 +131,8 @@ export const deadlines: Deadline[] = [
     course_code: "MATH2021",
     course_name: "Vector Calculus and Differential Equations",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_edgu1003_q1",
@@ -98,6 +146,8 @@ export const deadlines: Deadline[] = [
     course_code: "EDGU1003",
     course_name: "Diet, Nutrition and Lifestyle",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_math2021_q1",
@@ -111,6 +161,8 @@ export const deadlines: Deadline[] = [
     course_code: "MATH2021",
     course_name: "Vector Calculus and Differential Equations",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_edgu1003_q2",
@@ -124,6 +176,8 @@ export const deadlines: Deadline[] = [
     course_code: "EDGU1003",
     course_name: "Diet, Nutrition and Lifestyle",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_stat2011_q2",
@@ -137,6 +191,8 @@ export const deadlines: Deadline[] = [
     course_code: "STAT2011",
     course_name: "Probability and Estimation Theory",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_edgu1003_report",
@@ -150,6 +206,8 @@ export const deadlines: Deadline[] = [
     course_code: "EDGU1003",
     course_name: "Diet, Nutrition and Lifestyle",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_comp3221_a2",
@@ -163,6 +221,8 @@ export const deadlines: Deadline[] = [
     course_code: "COMP3221",
     course_name: "Distributed Systems",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_comp2017_p2",
@@ -176,6 +236,8 @@ export const deadlines: Deadline[] = [
     course_code: "COMP2017",
     course_name: "Systems Programming",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_stat2011_assign",
@@ -189,6 +251,8 @@ export const deadlines: Deadline[] = [
     course_code: "STAT2011",
     course_name: "Probability and Estimation Theory",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_math2021_a2",
@@ -202,6 +266,8 @@ export const deadlines: Deadline[] = [
     course_code: "MATH2021",
     course_name: "Vector Calculus and Differential Equations",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_edgu1003_q3",
@@ -215,6 +281,8 @@ export const deadlines: Deadline[] = [
     course_code: "EDGU1003",
     course_name: "Diet, Nutrition and Lifestyle",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
   {
     id: "ddl_math2021_q2",
@@ -228,5 +296,7 @@ export const deadlines: Deadline[] = [
     course_code: "MATH2021",
     course_name: "Vector Calculus and Differential Equations",
     is_confirmed: true,
+    is_pinned: false,
+    is_deleted: false,
   },
 ];

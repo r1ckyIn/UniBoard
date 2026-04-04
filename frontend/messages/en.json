@@ -294,6 +294,12 @@
     "emptyTitle": "No Deadlines",
     "emptyBody": "No upcoming deadlines found. Enjoy the break!",
     "errorMessage": "Failed to load deadlines. Please try refreshing the page.",
+    "pinToTop": "Pin to top",
+    "unpin": "Unpin",
+    "deleteDeadline": "Delete",
+    "undoDelete": "Undo",
+    "deletedToast": "Deadline removed",
+    "overdue": "Overdue",
     "calendar": {
       "today": "Today"
     }

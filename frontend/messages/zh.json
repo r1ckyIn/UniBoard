@@ -294,6 +294,12 @@
     "emptyTitle": "没有截止日期",
     "emptyBody": "没有即将到期的任务。享受休息时间吧！",
     "errorMessage": "加载截止日期失败。请刷新页面重试。",
+    "pinToTop": "置顶",
+    "unpin": "取消置顶",
+    "deleteDeadline": "删除",
+    "undoDelete": "撤销",
+    "deletedToast": "截止日期已移除",
+    "overdue": "已逾期",
     "calendar": {
       "today": "今天"
     }
