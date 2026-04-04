@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import { getUrgency, URGENCY_COLORS } from "@/lib/deadlines/urgency";
 import { getCourseColor } from "@/lib/dashboard/course-colors";
@@ -26,15 +27,29 @@ export default function DeadlineTimelineView({
   expandedId,
   onToggleExpand,
 }: DeadlineTimelineViewProps) {
+  // Sort: pinned deadlines first, then by due_date (per D-03)
+  const sortedDeadlines = useMemo(() => {
+    return [...deadlines].sort((a, b) => {
+      const aPinned = (a as Record<string, unknown>).is_pinned ? 1 : 0;
+      const bPinned = (b as Record<string, unknown>).is_pinned ? 1 : 0;
+      if (aPinned !== bPinned) return bPinned - aPinned; // pinned first
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    });
+  }, [deadlines]);
+
   return (
     <div className="relative pl-[30px] flex flex-col gap-[14px] min-h-[200px] before:content-[''] before:absolute before:left-[9px] before:top-[24px] before:bottom-[24px] before:w-[2px] before:bg-[#d5d2ca] before:rounded-[1px]">
-      {deadlines.map((dl, index) => {
+      {sortedDeadlines.map((dl, index) => {
         const daysRemaining = differenceInCalendarDays(
           new Date(dl.due_date),
           new Date()
         );
         const urgency = getUrgency(daysRemaining);
-        const dotColor = URGENCY_COLORS[urgency].dot;
+        const isPinned = !!(dl as Record<string, unknown>).is_pinned;
+        // For pinned deadlines, override dot color to amber
+        const dotColor = isPinned
+          ? "#b08968"
+          : URGENCY_COLORS[urgency].dot;
         const courseColor = getCourseColor(dl.course_code);
         const delay = Math.min(index + 2, 6) as 1 | 2 | 3 | 4 | 5 | 6;
 

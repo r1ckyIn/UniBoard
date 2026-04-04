@@ -6,17 +6,24 @@ import {
   Folder,
   Clipboard,
   FileText,
+  MoreHorizontal,
+  Pin,
 } from "lucide-react";
 import DeadlineAiChat from "@/components/deadlines/DeadlineAiChat";
 import { differenceInCalendarDays, format } from "date-fns";
 import { getUrgency, URGENCY_COLORS } from "@/lib/deadlines/urgency";
+import {
+  useCreateDeadlineAction,
+  useRemoveDeadlineAction,
+} from "@/hooks/use-deadlines";
 import type { components } from "@/lib/api/types.gen";
+import { useState, useRef, useEffect } from "react";
 import type { MouseEvent } from "react";
 
 type Deadline = components["schemas"]["Deadline"];
 
 interface DeadlineCardProps {
-  deadline: Deadline;
+  deadline: Deadline & { is_pinned?: boolean; is_deleted?: boolean };
   isExpanded: boolean;
   onToggle: () => void;
   courseColor: { base: string; soft: string };
@@ -58,12 +65,57 @@ export default function DeadlineCard({
   const urgency = getUrgency(daysRemaining);
   const colors = URGENCY_COLORS[urgency];
 
+  // Three-dot menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const createAction = useCreateDeadlineAction();
+  const removeAction = useRemoveDeadlineAction();
+  const isPinned = !!deadline.is_pinned;
+  const isOverdue = urgency === "overdue";
+
+  // Click-outside handler (use mousedown per Research Pitfall 4)
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e: globalThis.MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    // Use setTimeout to avoid immediate close from the same click that opened it
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  // Pin/Unpin handler
+  const handlePin = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (isPinned) {
+      removeAction.mutate({ deadlineId: deadline.id, action: "pin" });
+    } else {
+      createAction.mutate({ deadlineId: deadline.id, action: "pin" });
+    }
+    setMenuOpen(false);
+  };
+
+  // Delete handler
+  const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    createAction.mutate({ deadlineId: deadline.id, action: "delete" });
+    setMenuOpen(false);
+  };
+
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    // Exclude clicks on AI input and material items
+    // Exclude clicks on AI input, material items, and three-dot menu
     const target = e.target as HTMLElement;
     if (
       target.closest("[data-ai-input-row]") ||
-      target.closest("[data-mat-item]")
+      target.closest("[data-mat-item]") ||
+      target.closest("[data-actions-menu]")
     ) {
       return;
     }
@@ -76,41 +128,103 @@ export default function DeadlineCard({
       onClick={handleClick}
       data-testid="deadline-card"
     >
-      {/* Inner card wrapper */}
-      <div className="bg-[#f6f5f0] border-[1.5px] border-[#d0cdc4] rounded-[14px] shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)] overflow-hidden relative hover:shadow-[0_2px_8px_rgba(20,20,19,0.06),0_8px_24px_rgba(20,20,19,0.04)] transition-shadow duration-200">
-        {/* Left color stripe */}
+      {/* Inner card wrapper -- overdue gets red 2px border (D-04) */}
+      <div
+        className={`bg-[#f6f5f0] border-[1.5px] rounded-[14px] shadow-[0_1px_3px_rgba(20,20,19,0.04),0_4px_14px_rgba(20,20,19,0.025)] overflow-hidden relative hover:shadow-[0_2px_8px_rgba(20,20,19,0.06),0_8px_24px_rgba(20,20,19,0.04)] transition-shadow duration-200 ${isOverdue ? "border-[#d97757] border-[2px]" : "border-[#d0cdc4]"}`}
+      >
+        {/* Left color stripe -- amber for pinned (D-03) */}
         <div
           className="absolute left-0 top-0 bottom-0 w-[5px] z-[3] pointer-events-none"
-          style={{ backgroundColor: courseColor.base }}
+          style={{ backgroundColor: isPinned ? "#b08968" : courseColor.base }}
           data-testid="color-stripe"
         />
 
         {/* Summary section (always visible) */}
         <div className="p-[16px_20px_16px_24px] min-w-0">
-          {/* Top row: title + days badge */}
+          {/* Top row: title (+ pin icon if pinned) + due time + three-dot menu */}
           <div className="flex items-start justify-between gap-3 mb-[6px]">
-            <div className="font-serif font-semibold text-[0.95rem] text-[#2d2d2a] leading-[1.3]">
-              {deadline.title}
+            <div className="flex items-center gap-[6px] min-w-0 flex-1">
+              {isPinned && (
+                <Pin
+                  size={14}
+                  className="text-[#b08968] flex-shrink-0 -rotate-45"
+                  data-testid="pin-icon"
+                />
+              )}
+              <div className="font-serif font-semibold text-[0.95rem] text-[#2d2d2a] leading-[1.3] truncate">
+                {deadline.title}
+              </div>
             </div>
-            <span
-              className="text-[0.68rem] font-bold py-[3px] px-[10px] rounded-[5px] whitespace-nowrap flex-shrink-0"
-              style={{
-                backgroundColor: colors.soft,
-                color: colors.dot,
-              }}
-              data-testid="urgency-badge"
-            >
-              {daysRemaining <= 0
+
+            <div className="flex items-center gap-[8px] flex-shrink-0">
+              {/* Due time -- enlarged font per D-01 */}
+              <span
+                className="font-serif font-bold text-[1.05rem] text-[#2d2d2a] whitespace-nowrap"
+                data-testid="due-time"
+              >
+                {format(new Date(deadline.due_date), "h:mm a")}
+              </span>
+
+              {/* Three-dot menu per D-02 */}
+              <div className="relative" data-actions-menu ref={menuRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen((prev) => !prev);
+                  }}
+                  className="p-1 rounded-md hover:bg-[#efede6] transition-colors"
+                  data-testid="deadline-menu-trigger"
+                >
+                  <MoreHorizontal size={16} className="text-[#9b9b94]" />
+                </button>
+
+                {menuOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-1 bg-white border border-[#e8e5dd] rounded-[8px] shadow-md z-10 py-1 min-w-[140px] animate-in fade-in duration-150"
+                    data-testid="deadline-menu-dropdown"
+                  >
+                    <button
+                      onClick={handlePin}
+                      className="w-full text-left px-3 py-[6px] text-[0.78rem] text-[#2d2d2a] hover:bg-[#efede6] transition-colors flex items-center gap-2"
+                    >
+                      <Pin
+                        size={13}
+                        className={
+                          isPinned ? "text-[#b08968]" : "text-[#9b9b94]"
+                        }
+                      />
+                      {isPinned ? t("unpin") : t("pinToTop")}
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="w-full text-left px-3 py-[6px] text-[0.78rem] text-[#c44] hover:bg-[rgba(204,68,85,.06)] transition-colors flex items-center gap-2"
+                    >
+                      {t("deleteDeadline")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Urgency badge -- shows "overdue" text for overdue deadlines */}
+          <span
+            className="text-[0.68rem] font-bold py-[3px] px-[10px] rounded-[5px] whitespace-nowrap inline-block"
+            style={{ backgroundColor: colors.soft, color: colors.dot }}
+            data-testid="urgency-badge"
+          >
+            {daysRemaining < 0
+              ? t("overdue")
+              : daysRemaining === 0
                 ? t("pastDue")
                 : daysRemaining === 1
                   ? t("dayRemaining")
                   : t("daysRemaining", { count: String(daysRemaining) })}
-            </span>
-          </div>
+          </span>
 
           {/* Course line */}
           <div
-            className="text-[0.76rem] font-semibold mb-[4px]"
+            className="text-[0.76rem] font-semibold mb-[4px] mt-[6px]"
             style={{ color: courseColor.base }}
           >
             {deadline.course_code} &middot; {deadline.course_name}
@@ -184,7 +298,12 @@ export default function DeadlineCard({
             })}
 
             {/* AI Chat section — only mount when expanded to avoid 16 idle hooks */}
-            {isExpanded && <DeadlineAiChat courseId={deadline.course_id} isExpanded={isExpanded} />}
+            {isExpanded && (
+              <DeadlineAiChat
+                courseId={deadline.course_id}
+                isExpanded={isExpanded}
+              />
+            )}
           </div>
         </div>
       </div>
