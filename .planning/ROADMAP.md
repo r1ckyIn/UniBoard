@@ -177,7 +177,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 26-01-PLAN.md — GitHub Actions CI pipelines + Dependabot (OPS-01)
-- [ ] 26-02-PLAN.md — Railway + Vercel deployment config & env var docs (OPS-02)
+- [x] 26-02-PLAN.md — Railway + Vercel deployment config & env var docs (OPS-02)
 - [ ] 26-03-PLAN.md — Sentry integration for Python + Next.js (OPS-03)
 
 ## Progress
@@ -214,7 +214,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 23. Code Quality Refactor | M4 | 3/3 | Complete    | 2026-04-01 |
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
-| 26. CI/CD & Production Deployment | M4 | 1/3 | In Progress |  |
+| 26. CI/CD & Production Deployment | M4 | 2/3 | In Progress |  |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
 
