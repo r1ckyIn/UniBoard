@@ -1,6 +1,6 @@
-# UniBoard
-
 <div align="center">
+
+# UniBoard
 
 [![Language](https://img.shields.io/badge/Backend-Python_3.12-3776AB?style=flat-square&logo=python)](https://python.org)
 [![Language](https://img.shields.io/badge/Frontend-TypeScript-3178C6?style=flat-square&logo=typescript)](https://typescriptlang.org)
