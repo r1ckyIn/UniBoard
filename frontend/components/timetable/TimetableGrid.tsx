@@ -25,6 +25,7 @@ interface TimetableGridProps {
   currentWeek: SemesterWeek;
   isBreak: boolean;
   isCurrentWeekView: boolean;
+  attendanceCourses?: Set<string>;
 }
 
 /** Width of the time-label gutter in pixels */
@@ -59,6 +60,7 @@ export default function TimetableGrid({
   currentWeek,
   isBreak,
   isCurrentWeekView,
+  attendanceCourses,
 }: TimetableGridProps) {
   const t = useTranslations("timetable");
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -262,6 +264,7 @@ export default function TimetableGrid({
                       session={s}
                       top={timeToY(s.start_hour)}
                       height={timeToY(s.end_hour) - timeToY(s.start_hour)}
+                      hasAttendance={attendanceCourses?.has(s.course_code)}
                     />
                   ))}
 
