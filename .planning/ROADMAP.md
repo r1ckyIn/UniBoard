@@ -216,7 +216,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 3/3 | Complete    | 2026-04-04 |
-| 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
+| 28. Deadlines Page Enhancement | M4 | 0/3 | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -244,7 +244,9 @@ Plans:
   3. "All" mode shows only incomplete + overdue-but-submittable deadlines; "This Week" mode shows all statuses
   4. Overdue deadlines (past due but submittable) display with red border highlight
   5. User actions (delete/pin) persist across page refreshes and sync cycles (stored in database, not reset by sync)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 28 to break down)
+- [ ] 28-01-PLAN.md — Backend persistence layer: DB migration, ORM model, API endpoints (DL-UX-05)
+- [ ] 28-02-PLAN.md — Urgency extension, filter logic, fixtures, mock handlers, mutation hooks (DL-UX-03, DL-UX-04)
+- [ ] 28-03-PLAN.md — DeadlineCard redesign, pin visual, overdue border, NotificationPanel integration (DL-UX-01, DL-UX-02)
