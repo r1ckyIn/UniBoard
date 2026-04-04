@@ -10,13 +10,16 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ## Current State
 
-**Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
-**Shipped:** M3 AI/MCP/Skills (v2.0-m3, 2026-03-29)
-**Shipped:** M4 Phase 22-27 — Critical fixes, code quality, build health, security, CI/CD & deployment, frontend UX fixes & materials preview
-**In Progress:** M4 Hardening — Phase 28 (Deadlines Page Enhancement) next
-**Codebase:** ~170K LOC (TypeScript + Python + SQL), 730+ files
-**Tests:** 336 backend tests passing (115 DB-dependent auto-skipped when no PostgreSQL) + frontend component tests
+**Shipped:** UniBoard v2.0 complete (2026-04-05)
+- M1 Frontend App — Phases 1-12, 11.1 (shipped 2026-03-25)
+- M2 Backend Core — Phases 13-17 (shipped 2026-03-27)
+- M3 AI/MCP/Skills — Phases 18-21 (shipped 2026-03-29)
+- M4 Hardening — Phases 22-28 (shipped 2026-04-04)
+**Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
+**Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
+**Deployment:** Railway (Python) + Vercel (Next.js) + Supabase (DB + Auth) + Sentry (error tracking)
+**CI/CD:** GitHub Actions (separate backend/frontend pipelines) + Dependabot
 
 ## Requirements
 
@@ -75,16 +78,19 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - ✓ MCP server for Claude Desktop — v2.0-m3 Phase 21
 - ✓ Assignment ROI analysis — v2.0-m3 Phase 21
 
-### Active
-
-**M4 — Hardening:**
+**M4 — Hardening (Phases 22-28):**
 - ✓ Critical fixes (VoyageAI async, broken test imports, JWT secret defaults, Dockerfile) — v2.0-m4 Phase 22
 - ✓ Code quality refactor (sync/tasks.py split, DRY consolidation, dead code removal) — v2.0-m4 Phase 23
 - ✓ Build health green (mypy 0 errors, ruff 0 errors, tsc 0 errors, ESLint 0 warnings, pytest passes) — v2.0-m4 Phase 24
 - ✓ Security & observability (security headers, HTTP access logging, error boundaries, rate limiting) — v2.0-m4 Phase 25
-- [ ] Production deployment (Supabase + Railway + Vercel, Docker production image)
-- [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Monitoring and alerting
+- ✓ CI/CD pipeline (GitHub Actions with path-filtered triggers, Dependabot) — v2.0-m4 Phase 26
+- ✓ Production deployment (Railway + Vercel + Supabase, Docker production image, Sentry) — v2.0-m4 Phase 26
+- ✓ Frontend UX fixes (dashboard navigation, timetable borders, materials inline viewer) — v2.0-m4 Phase 27
+- ✓ Deadlines page enhancement (card redesign, pin/delete, overdue highlighting, filter modes) — v2.0-m4 Phase 28
+
+### Active
+
+(No active requirements — v2.0 complete. Define next milestone to add new requirements.)
 
 ### Out of Scope
 
