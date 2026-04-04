@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { streamAiResponse, type SSEEvent } from "@/lib/api/ai-stream";
+import { streamAiResponse } from "@/lib/api/ai-stream";
 import { useAuthStore } from "@/lib/auth/store";
 
 export interface ChatMessage {
