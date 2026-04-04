@@ -12,10 +12,10 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 **Shipped:** M1 Frontend App + M2 Backend Core (v2.0-m2, 2026-03-27)
 **Shipped:** M3 AI/MCP/Skills (v2.0-m3, 2026-03-29)
-**Shipped:** M4 Phase 22-25 — Critical fixes, code quality refactor, build health green, security & observability
-**In Progress:** M4 Hardening — Phase 26 (CI/CD & Production Deployment) next
+**Shipped:** M4 Phase 22-26 — Critical fixes, code quality, build health, security, CI/CD & deployment
+**In Progress:** M4 Hardening — Phase 27 (Frontend UX Fixes) next
 **Codebase:** ~170K LOC (TypeScript + Python + SQL), 730+ files
-**Tests:** 332 backend tests passing (115 DB-dependent auto-skipped when no PostgreSQL) + frontend component tests
+**Tests:** 336 backend tests passing (115 DB-dependent auto-skipped when no PostgreSQL) + frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
 
 ## Requirements
