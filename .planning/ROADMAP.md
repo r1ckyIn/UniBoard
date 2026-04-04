@@ -60,7 +60,7 @@ UniBoard v2.0 is a full rebuild across 4 milestones: M1 converts 10 HTML prototy
 - [x] **Phase 24: Build Health Green** — All 5 build tools pass with zero errors after refactoring (completed 2026-04-01)
 - [x] **Phase 25: Security & Observability** — Security headers, HTTP access logging, error boundaries, API rate limiting (completed 2026-04-03)
 - [x] **Phase 26: CI/CD & Production Deployment** — GitHub Actions pipeline, Railway+Vercel deployment, Sentry error tracking (completed 2026-04-04)
-- [ ] **Phase 27: Frontend UX Fixes & Course Materials Preview** — Dashboard/timetable interaction fixes, course materials inline viewer
+- [x] **Phase 27: Frontend UX Fixes & Course Materials Preview** — Dashboard/timetable interaction fixes, course materials inline viewer (completed 2026-04-04)
 - [ ] **Phase 28: Deadlines Page Enhancement** — Card redesign, delete/pin actions, all/week modes, overdue highlighting, user preference persistence
 
 ## Phase Details
@@ -215,7 +215,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
-| 27. Frontend UX Fixes & Materials Preview | M4 | 0/3 | Not started | - |
+| 27. Frontend UX Fixes & Materials Preview | M4 | 3/3 | Complete    | 2026-04-04 |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
@@ -230,9 +230,9 @@ Decimal phases (if inserted) execute between their surrounding integers.
   5. Course detail page has inline material viewer (mini-window) for previewing documents without leaving the page
 **Plans**: 3 plans
 Plans:
-- [ ] 27-01-PLAN.md — Dashboard reminder card per-type navigation (UX-01, UX-02)
-- [ ] 27-02-PLAN.md — Timetable event border distinction & scroll indicator (UX-03, UX-04)
-- [ ] 27-03-PLAN.md — Course materials inline viewer panel (FEAT-01)
+- [x] 27-01-PLAN.md — Dashboard reminder card per-type navigation (UX-01, UX-02)
+- [x] 27-02-PLAN.md — Timetable event border distinction & scroll indicator (UX-03, UX-04)
+- [x] 27-03-PLAN.md — Course materials inline viewer panel (FEAT-01)
 
 ### Phase 28: Deadlines Page Enhancement
 **Goal**: Deadlines page supports delete/pin actions, all/week filtering modes, overdue highlighting, and persisted user preferences
