@@ -21,6 +21,7 @@ import UnitReviewSection from "@/components/course-detail/UnitReviewSection";
 import QuickLinksPanel from "@/components/course-detail/QuickLinksPanel";
 import CourseDeadlinesPanel from "@/components/course-detail/CourseDeadlinesPanel";
 import CourseActivityPanel from "@/components/course-detail/CourseActivityPanel";
+import MaterialViewerPanel from "@/components/course-detail/MaterialViewerPanel";
 
 interface CourseDetailPageProps {
   courseId: string;
@@ -59,6 +60,20 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
     },
     []
   );
+
+  // ── Material preview state ──
+  const [previewMaterial, setPreviewMaterial] = useState<{
+    url: string;
+    title: string;
+  } | null>(null);
+
+  const handlePreview = useCallback((url: string, title: string) => {
+    setPreviewMaterial({ url, title });
+  }, []);
+
+  const handleClosePreview = useCallback(() => {
+    setPreviewMaterial(null);
+  }, []);
 
   // ── Portal for right panel ──
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
@@ -116,6 +131,7 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
   const course = courseDetail.data.data;
 
   return (
+    <>
     <div className="flex flex-col gap-5" style={colorStyle}>
       {/* Back link */}
       <AnimatedEntry delay={1}>
@@ -158,6 +174,7 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
           materials={materials.data?.data ?? []}
           courseColor={courseColor.base}
           courseSoft={courseColor.soft}
+          onPreview={handlePreview}
         />
       </AnimatedEntry>
 
@@ -196,5 +213,13 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
           portalTarget
         )}
     </div>
+
+    {/* Material viewer slide-out panel */}
+    <MaterialViewerPanel
+      url={previewMaterial?.url ?? null}
+      title={previewMaterial?.title ?? ""}
+      onClose={handleClosePreview}
+    />
+    </>
   );
 }

@@ -12,6 +12,7 @@ interface MaterialsSectionProps {
   materials: Material[];
   courseColor: string;
   courseSoft: string;
+  onPreview?: (url: string, title: string) => void;
 }
 
 /**
@@ -31,6 +32,7 @@ export default function MaterialsSection({
   materials,
   courseColor,
   courseSoft,
+  onPreview,
 }: MaterialsSectionProps) {
   const t = useTranslations("courseDetail");
 
@@ -79,6 +81,7 @@ export default function MaterialsSection({
             courseColor={courseColor}
             courseSoft={courseSoft}
             isNew={i === lastEdLessonIndex}
+            onPreview={onPreview}
           />
         ))
       )}
