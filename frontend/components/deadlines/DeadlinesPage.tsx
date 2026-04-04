@@ -26,14 +26,29 @@ export default function DeadlinesPage() {
     const now = new Date();
     let result = [...deadlineList];
 
+    // Exclude user-deleted deadlines in all modes
+    result = result.filter(
+      (dl) => !(dl as Record<string, unknown>).is_deleted
+    );
+
     if (selectedCourse) {
       result = result.filter((dl) => dl.course_code === selectedCourse);
     }
 
-    if (filterMode === "week") {
+    if (filterMode === "all") {
+      // D-05: "All" shows only incomplete + overdue-submittable
+      // Hide completed deadlines. Show: upcoming, overdue, submitted
+      result = result.filter(
+        (dl) =>
+          dl.status === "upcoming" ||
+          dl.status === "overdue" ||
+          dl.status === "submitted"
+      );
+    } else if (filterMode === "week") {
+      // D-06: "This Week" shows ALL statuses within 7-day window (including completed)
       result = result.filter((dl) => {
         const days = differenceInCalendarDays(new Date(dl.due_date), now);
-        return days >= 0 && days <= 7;
+        return days >= -7 && days <= 7;
       });
     }
 
