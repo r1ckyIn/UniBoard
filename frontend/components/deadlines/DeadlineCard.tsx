@@ -65,7 +65,6 @@ export default function DeadlineCard({
   const urgency = getUrgency(daysRemaining);
   const colors = URGENCY_COLORS[urgency];
 
-  // Three-dot menu state
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const createAction = useCreateDeadlineAction();
@@ -91,7 +90,6 @@ export default function DeadlineCard({
     };
   }, [menuOpen]);
 
-  // Pin/Unpin handler
   const handlePin = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     if (isPinned) {
@@ -102,7 +100,6 @@ export default function DeadlineCard({
     setMenuOpen(false);
   };
 
-  // Delete handler
   const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     createAction.mutate({ deadlineId: deadline.id, action: "delete" });

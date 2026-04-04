@@ -78,6 +78,27 @@ def _to_contract_deadline(
     )
 
 
+# Maps frontend action verbs to DB action_type values
+_ACTION_MAP: dict[str, str] = {"pin": "pinned", "delete": "deleted"}
+
+
+async def _enrich_with_actions(
+    deadlines: list[DeadlineResponse],
+    svc: DeadlineService,
+    user_id: uuid.UUID,
+) -> list[ContractDeadlineResponse]:
+    """Convert deadlines to contract responses with user action flags."""
+    user_actions = await svc.get_user_actions(user_id)
+    now_utc = datetime.now(UTC)
+    data: list[ContractDeadlineResponse] = []
+    for d in deadlines:
+        contract = _to_contract_deadline(d, now_utc)
+        contract.is_pinned = d.id in user_actions.get("pinned", set())
+        contract.is_deleted = d.id in user_actions.get("deleted", set())
+        data.append(contract)
+    return data
+
+
 @router.get("")
 async def list_deadlines(
     request: Request,
@@ -102,14 +123,7 @@ async def list_deadlines(
         sort=sort,
         order=order,
     )
-    user_actions = await svc.get_user_actions(current_user_id)
-    now_utc = datetime.now(UTC)
-    data = []
-    for d in result:
-        contract = _to_contract_deadline(d, now_utc)
-        contract.is_pinned = d.id in user_actions.get("pinned", set())
-        contract.is_deleted = d.id in user_actions.get("deleted", set())
-        data.append(contract)
+    data = await _enrich_with_actions(result, svc, current_user_id)
     return SuccessResponse(data=data, meta=get_request_meta(request))
 
 
@@ -128,14 +142,7 @@ async def get_upcoming_deadlines(
         to_date=now + timedelta(days=7),
         include_past=False,
     )
-    user_actions = await svc.get_user_actions(current_user_id)
-    now_utc = datetime.now(UTC)
-    data = []
-    for d in result:
-        contract = _to_contract_deadline(d, now_utc)
-        contract.is_pinned = d.id in user_actions.get("pinned", set())
-        contract.is_deleted = d.id in user_actions.get("deleted", set())
-        data.append(contract)
+    data = await _enrich_with_actions(result, svc, current_user_id)
     return SuccessResponse(data=data, meta=get_request_meta(request))
 
 
@@ -171,8 +178,7 @@ async def create_deadline_action(
     svc: DeadlineService = Depends(get_deadline_service),
 ) -> SuccessResponse[DeadlineActionResponse]:
     """Pin or soft-delete a deadline for the current user. Per D-08."""
-    action_map = {"pin": "pinned", "delete": "deleted"}
-    action_type = action_map.get(body.action, body.action)
+    action_type = _ACTION_MAP.get(body.action, body.action)
     action = await svc.create_user_action(current_user_id, deadline_id, action_type)
     return SuccessResponse(
         data=DeadlineActionResponse(
@@ -194,7 +200,6 @@ async def remove_deadline_action(
     svc: DeadlineService = Depends(get_deadline_service),
 ) -> SuccessResponse[None]:
     """Remove a pin or undelete a deadline for the current user. Per D-08."""
-    action_map = {"pin": "pinned", "delete": "deleted"}
-    action_type = action_map.get(action, action)
+    action_type = _ACTION_MAP.get(action, action)
     await svc.delete_user_action(current_user_id, deadline_id, action_type)
     return SuccessResponse(data=None, meta=get_request_meta(request))
