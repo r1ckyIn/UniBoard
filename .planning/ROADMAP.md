@@ -215,7 +215,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 24. Build Health Green | M4 | 1/3 | Complete    | 2026-04-01 |
 | 25. Security & Observability | M4 | 0/TBD | Complete    | 2026-04-03 |
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
-| 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
+| 27. Frontend UX Fixes & Materials Preview | M4 | 0/3 | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 0/TBD | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
@@ -228,7 +228,11 @@ Decimal phases (if inserted) execute between their surrounding integers.
   3. Timetable lecture/tutorial blocks visually match Allocate+ layout style (color-coded, time/location visible)
   4. Timetable page shows scroll indicator when deadline items overflow the visible area
   5. Course detail page has inline material viewer (mini-window) for previewing documents without leaving the page
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 27-01-PLAN.md — Dashboard reminder card per-type navigation (UX-01, UX-02)
+- [ ] 27-02-PLAN.md — Timetable event border distinction & scroll indicator (UX-03, UX-04)
+- [ ] 27-03-PLAN.md — Course materials inline viewer panel (FEAT-01)
 
 ### Phase 28: Deadlines Page Enhancement
 **Goal**: Deadlines page supports delete/pin actions, all/week filtering modes, overdue highlighting, and persisted user preferences
