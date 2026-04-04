@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 28 context gathered
-last_updated: "2026-04-04T11:02:19.516Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 28-01-PLAN.md
+last_updated: "2026-04-04T11:36:05.762Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 11
-  completed_phases: 10
-  total_plans: 32
-  completed_plans: 32
+  completed_phases: 8
+  total_plans: 26
+  completed_plans: 30
 ---
 
 # Project State
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 27 — frontend-ux-fixes-and-course-materials-preview
+**Current focus:** Phase 26 — cicd-deployment
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
+Phase: 26 (cicd-deployment) — EXECUTING
+Plan: 3 of 3 complete
 Last activity: 2026-04-04
 
 ## Milestones Completed
@@ -132,6 +132,7 @@ Last activity: 2026-04-04
 | Phase 26 P01 | 2min | 2 tasks | 3 files |
 | Phase 26 P02 | 3min | 2 tasks | 3 files |
 | Phase 26 P03 | 6min | 2 tasks | 13 files |
+| Phase 28 P01 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -314,6 +315,9 @@ Recent decisions affecting current work:
 - [Phase 26]: Railway DOCKERFILE builder with existing Dockerfile.production over Nixpacks auto-detect
 - [Phase 26]: Sentry init is conditional on DSN presence -- app works normally without Sentry
 - [Phase 26]: withSentryConfig outermost wrapper in next.config.ts (Sentry > next-intl > nextConfig)
+- [Phase 28]: ForeignKey references profiles.id in ORM while SQL migration references auth.users(id) directly
+- [Phase 28]: on_conflict_do_nothing for idempotent pin/delete upsert
+- [Phase 28]: Action map at route level translates frontend verbs (pin/delete) to DB values (pinned/deleted)
 
 ### Roadmap Evolution
 
@@ -331,6 +335,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-04T11:02:19.509Z
-Stopped at: Phase 28 context gathered
-Resume file: .planning/phases/28-deadlines-page-enhancement/28-CONTEXT.md
+Last session: 2026-04-04T11:36:05.755Z
+Stopped at: Completed 28-01-PLAN.md
+Resume file: None

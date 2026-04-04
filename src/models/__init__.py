@@ -3,6 +3,7 @@
 from src.models.base import Base
 from src.models.course import Course
 from src.models.deadline import UnifiedDeadline
+from src.models.deadline_user_action import DeadlineUserAction
 from src.models.digest import Digest
 from src.models.discussion import DiscussionThread
 from src.models.embedding import ContentEmbedding
@@ -21,6 +22,7 @@ __all__ = [
     "Base",
     "ContentEmbedding",
     "Course",
+    "DeadlineUserAction",
     "Digest",
     "DiscussionThread",
     "Grade",
