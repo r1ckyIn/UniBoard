@@ -1,14 +1,8 @@
 version: 2
 
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "python"
+  # pip ecosystem removed — project uses uv with uv.lock;
+  # Dependabot cannot update uv.lock, causing CI --locked failures
 
   - package-ecosystem: "npm"
     directory: "/frontend"
