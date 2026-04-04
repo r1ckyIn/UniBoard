@@ -85,6 +85,9 @@ class Settings(BaseSettings):
     debug: bool = True
     log_level: str = "INFO"
 
+    # Sentry
+    sentry_dsn: str = ""
+
     # CORS
     cors_origins: str = "http://localhost:3001"
 

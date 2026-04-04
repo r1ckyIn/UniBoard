@@ -4,6 +4,7 @@ import time
 import uuid
 from datetime import UTC, datetime
 
+import sentry_sdk
 import structlog
 import structlog.contextvars
 from fastapi import FastAPI, Request
@@ -59,6 +60,16 @@ def create_app() -> FastAPI:
 
     # CORS middleware -- origins configurable via CORS_ORIGINS env var
     settings = get_settings()
+
+    # Sentry error tracking (conditional -- no-op when DSN is empty)
+    if settings.sentry_dsn:
+        sentry_sdk.init(
+            dsn=settings.sentry_dsn,
+            traces_sample_rate=0.1,
+            send_default_pii=False,
+            environment="production" if not settings.debug else "development",
+        )
+
     origins = [o.strip() for o in settings.cors_origins.split(",")]
     application.add_middleware(
         CORSMiddleware,
@@ -105,7 +116,7 @@ def create_app() -> FastAPI:
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob:",
             "font-src 'self' data:",
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+            "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io",
         ]),
     }
 
@@ -137,6 +148,8 @@ def create_app() -> FastAPI:
             request_id=request_id,
             exc_info=exc,
         )
+        # Catch-all prevents ASGI-level propagation to Sentry middleware
+        sentry_sdk.capture_exception(exc)
         return JSONResponse(
             status_code=500,
             content=ErrorResponse(
