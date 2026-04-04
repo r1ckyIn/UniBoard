@@ -9,6 +9,12 @@ import {
 import { deadlines } from "@/lib/fixtures/deadlines";
 import { courses } from "@/lib/fixtures/courses";
 
+// Module-scoped state for mock pin/delete persistence
+// (survives page navigation, resets on server restart)
+export const deadlineActions = new Map<string, Set<string>>();
+deadlineActions.set("pinned", new Set<string>());
+deadlineActions.set("deleted", new Set<string>());
+
 export async function GET(request: NextRequest) {
   const authError = requireAuth(request);
   if (authError) return authError;
@@ -48,5 +54,14 @@ export async function GET(request: NextRequest) {
     filtered = filtered.filter((d) => new Date(d.due_date) <= toDate);
   }
 
-  return mockResponse(filtered);
+  // Annotate each deadline with user action state
+  const pinnedIds = deadlineActions.get("pinned")!;
+  const deletedIds = deadlineActions.get("deleted")!;
+  const enriched = filtered.map((d) => ({
+    ...d,
+    is_pinned: pinnedIds.has(d.id),
+    is_deleted: deletedIds.has(d.id),
+  }));
+
+  return mockResponse(enriched);
 }
