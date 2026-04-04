@@ -9,6 +9,7 @@ export interface ActivityItem {
   strongText: string;
   time: string;
   externalUrl?: string;
+  internalPath?: string;
 }
 
 type TranslateFn = (key: string, values?: Record<string, string>) => string;
@@ -36,12 +37,31 @@ export function mapNotificationToActivity(
         ? t("time.hoursAgo", { count: String(diffHours) })
         : t("time.daysAgo", { count: String(Math.floor(diffHours / 24)) });
 
+  // Classify action_url as internal path or external URL based on type and format
+  let internalPath: string | undefined;
+  let externalUrl: string | undefined;
+
+  if (activityType === "grade") {
+    // Grade notifications always point to internal course pages
+    internalPath = n.action_url;
+  } else if (n.type === "deadline_reminder") {
+    // Deadline activities navigate to /deadlines page per D-01
+    internalPath = "/deadlines";
+  } else if (n.action_url?.startsWith("/")) {
+    // Internal route (discussion/endorsed with local path, or other types)
+    internalPath = n.action_url;
+  } else if (n.action_url?.startsWith("http")) {
+    // External URL (Ed Discussion/Lessons links)
+    externalUrl = n.action_url;
+  }
+
   return {
     id: n.id,
     type: activityType,
     text: n.body,
     strongText: n.title.split(":")[0].split(" ").slice(-2).join(" "),
     time: timeStr,
-    externalUrl: n.action_url,
+    externalUrl,
+    internalPath,
   };
 }
