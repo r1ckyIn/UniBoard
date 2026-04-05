@@ -6,7 +6,7 @@
 -- Extensions
 -- =============================================================================
 
-CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- =============================================================================
 -- Helper functions

@@ -27,6 +27,8 @@ def _get_engine() -> AsyncEngine:
             pool_recycle=300,
             pool_pre_ping=True,
             echo=settings.debug,
+            # Disable prepared statement cache for Supavisor transaction pooler
+            connect_args={"prepared_statement_cache_size": 0},
         )
     return _engine
 
