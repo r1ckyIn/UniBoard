@@ -9,11 +9,9 @@ from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 
 from rapidfuzz import fuzz
-from sqlalchemy import select
+from sqlalchemy import delete as sa_delete, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from sqlalchemy import delete as sa_delete
 
 from src.models.course import Course
 from src.models.deadline import UnifiedDeadline

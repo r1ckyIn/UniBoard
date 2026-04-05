@@ -1,7 +1,6 @@
 """Tests for MCP server resilience patterns, parser, and format helpers."""
 
 import time
-from unittest.mock import MagicMock
 
 import httpx
 import pytest
