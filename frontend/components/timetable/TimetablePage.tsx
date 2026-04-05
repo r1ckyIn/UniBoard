@@ -82,7 +82,7 @@ export default function TimetablePage() {
       if (hasAttendance) set.add(detail.code);
     }
     return set;
-  }, [courseDetailQueries]);
+  }, [courseDetailQueries, ATTENDANCE_KEYWORDS]);
 
   const isLoading =
     weeksQuery.isLoading ||
