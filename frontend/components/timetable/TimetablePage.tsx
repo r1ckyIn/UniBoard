@@ -67,22 +67,19 @@ export default function TimetablePage() {
   });
 
   // Compute set of course codes that have attendance/participation assessments
-  const ATTENDANCE_KEYWORDS = ["attendance", "participation"];
-
   const attendanceCourses = useMemo(() => {
+    const keywords = ["attendance", "participation"];
     const set = new Set<string>();
     for (const q of courseDetailQueries) {
       if (!q.data?.data) continue;
       const detail = q.data.data;
       const hasAttendance = detail.assessment_weights.some((aw) =>
-        ATTENDANCE_KEYWORDS.some((kw) =>
-          aw.group_name.toLowerCase().includes(kw)
-        )
+        keywords.some((kw) => aw.group_name.toLowerCase().includes(kw))
       );
       if (hasAttendance) set.add(detail.code);
     }
     return set;
-  }, [courseDetailQueries, ATTENDANCE_KEYWORDS]);
+  }, [courseDetailQueries]);
 
   const isLoading =
     weeksQuery.isLoading ||
