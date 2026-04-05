@@ -433,6 +433,6 @@ class DeadlineService:
             .where(DeadlineUserAction.action_type == action_type)
         )
         result = await self._session.execute(stmt)
-        if result.rowcount == 0:
+        if result.rowcount == 0:  # type: ignore[attr-defined]
             raise NotFoundError("Deadline action")
         await self._session.commit()
