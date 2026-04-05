@@ -9,11 +9,10 @@ from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 
 from rapidfuzz import fuzz
+from sqlalchemy import delete as sa_delete
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from sqlalchemy import delete as sa_delete
 
 from src.models.course import Course
 from src.models.deadline import UnifiedDeadline
@@ -434,6 +433,6 @@ class DeadlineService:
             .where(DeadlineUserAction.action_type == action_type)
         )
         result = await self._session.execute(stmt)
-        if result.rowcount == 0:
+        if result.rowcount == 0:  # type: ignore[attr-defined]
             raise NotFoundError("Deadline action")
         await self._session.commit()
