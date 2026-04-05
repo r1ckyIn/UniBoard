@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
@@ -31,13 +30,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const baseConfig = withNextIntl(nextConfig);
-
-// Only wrap with Sentry when DSN is configured
-export default process.env.NEXT_PUBLIC_SENTRY_DSN
-  ? withSentryConfig(baseConfig, {
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      silent: !process.env.CI,
-    })
-  : baseConfig;
+export default withNextIntl(nextConfig);
