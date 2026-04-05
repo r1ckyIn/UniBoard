@@ -31,8 +31,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withNextIntl(nextConfig), {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  silent: !process.env.CI,
-});
+const baseConfig = withNextIntl(nextConfig);
+
+// Only wrap with Sentry when DSN is configured
+export default process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(baseConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      silent: !process.env.CI,
+    })
+  : baseConfig;
