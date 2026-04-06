@@ -370,6 +370,7 @@
       "description": "Canvas and Ed are connected. We're syncing your courses, grades, and deadlines right now.",
       "syncing": "Syncing your data...",
       "synced": "{count} courses synced successfully",
+      "syncSlow": "Sync is taking longer than expected. You can continue to the dashboard — data will appear as it syncs.",
       "cta": "Go to Dashboard",
       "toast": "Welcome! Your accounts are connected."
     }

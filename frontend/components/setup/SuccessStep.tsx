@@ -87,7 +87,7 @@ export default function SuccessStep() {
           </>
         ) : timedOut ? (
           <span className="text-text-3 text-sm">
-            {t("syncSlow", { defaultMessage: "Sync is taking longer than expected. You can continue to the dashboard — data will appear as it syncs." })}
+            {t("syncSlow")}
           </span>
         ) : (
           <>
