@@ -17,11 +17,12 @@ export default function SuccessStep() {
   const syncTrigger = useSyncTrigger();
 
   const [syncStarted, setSyncStarted] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
 
   // Poll sync status every 3 seconds once sync has been triggered
   const { data: syncData } = useQuery({
     ...syncOptions.status(),
-    refetchInterval: syncStarted ? 3000 : false,
+    refetchInterval: syncStarted && !timedOut ? 3000 : false,
     enabled: syncStarted,
   });
 
@@ -34,6 +35,9 @@ export default function SuccessStep() {
   const syncStatus = syncData?.data?.last_sync?.status;
   const syncComplete = syncStarted && (syncStatus === "completed" || syncStatus === "failed");
 
+  // Show dashboard button after timeout even if sync hasn't reported completion
+  const showDashboard = syncComplete || timedOut;
+
   // Trigger sync on mount
   useEffect(() => {
     syncTrigger
@@ -42,10 +46,15 @@ export default function SuccessStep() {
         setSyncStarted(true);
       })
       .catch(() => {
-        // Still poll even if trigger failed (sync may already be running)
         setSyncStarted(true);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Timeout fallback: show dashboard button after 30 seconds regardless
+  useEffect(() => {
+    const timer = setTimeout(() => setTimedOut(true), 30000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleGoToDashboard = () => {
@@ -69,17 +78,21 @@ export default function SuccessStep() {
       </p>
 
       <div className="flex items-center justify-center gap-2 mt-6" aria-live="polite">
-        {!syncComplete ? (
-          <>
-            <div className="w-3.5 h-3.5 border-2 border-card-border border-t-[#d97757] rounded-full animate-spin [animation-duration:0.8s]" />
-            <span className="italic text-text-3">{t("syncing")}</span>
-          </>
-        ) : (
+        {syncComplete ? (
           <>
             <Check size={16} className="text-[#788c5d]" />
             <span className="text-[#788c5d] font-semibold">
               {t("synced", { count: courses.length })}
             </span>
+          </>
+        ) : timedOut ? (
+          <span className="text-text-3 text-sm">
+            {t("syncSlow", { defaultMessage: "Sync is taking longer than expected. You can continue to the dashboard — data will appear as it syncs." })}
+          </span>
+        ) : (
+          <>
+            <div className="w-3.5 h-3.5 border-2 border-card-border border-t-[#d97757] rounded-full animate-spin [animation-duration:0.8s]" />
+            <span className="italic text-text-3">{t("syncing")}</span>
           </>
         )}
       </div>
@@ -88,7 +101,7 @@ export default function SuccessStep() {
         <p className="mt-3 text-sm text-text-2">{courseNames.join(", ")}</p>
       )}
 
-      {syncComplete && (
+      {showDashboard && (
         <button
           type="button"
           onClick={handleGoToDashboard}
