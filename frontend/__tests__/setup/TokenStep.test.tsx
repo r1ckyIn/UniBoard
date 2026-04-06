@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import TokenStep from "@/components/setup/TokenStep";
 
@@ -65,7 +65,6 @@ describe("TokenStep", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useRealTimers();
   });
 
   it("renders Canvas and Ed token input fields with correct labels", () => {
@@ -83,10 +82,12 @@ describe("TokenStep", () => {
     expect(screen.getByText("cta")).toBeInTheDocument();
   });
 
-  it("validates both tokens and calls onSuccess when both are valid", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    const user = userEvent.setup({
-      advanceTimers: vi.advanceTimersByTime,
+  it("validates both tokens and calls onSuccess when both backend calls succeed", async () => {
+    const user = userEvent.setup();
+
+    // Backend returns success for both platforms
+    mockConfigureTokenMutateAsync.mockResolvedValue({
+      data: { status: "active", courses_found: 5 },
     });
 
     render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
@@ -100,30 +101,31 @@ describe("TokenStep", () => {
     const validateButton = screen.getByText("cta");
     await user.click(validateButton);
 
-    // Wait for 0.8s delay between canvas and ed validation
-    await act(async () => {
-      vi.advanceTimersByTime(800);
+    // Wait for backend calls to complete and onSuccess to be called
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
-    // Wait for 0.5s delay after both pass
-    await act(async () => {
-      vi.advanceTimersByTime(500);
+    // Verify backend was called for both platforms
+    expect(mockConfigureTokenMutateAsync).toHaveBeenCalledTimes(2);
+    expect(mockConfigureTokenMutateAsync).toHaveBeenCalledWith({
+      platform: "canvas",
+      body: { token: VALID_CANVAS_TOKEN },
+    });
+    expect(mockConfigureTokenMutateAsync).toHaveBeenCalledWith({
+      platform: "ed",
+      body: { token: VALID_ED_TOKEN },
     });
 
-    // Both should show valid status (check-circle icons present)
+    // Both should show valid status
     const canvasValid = document.querySelector('[data-testid="status-valid-canvas"]');
     const edValid = document.querySelector('[data-testid="status-valid-ed"]');
     expect(canvasValid).toBeInTheDocument();
     expect(edValid).toBeInTheDocument();
-
-    expect(mockOnSuccess).toHaveBeenCalledTimes(1);
   });
 
-  it("shows Canvas invalid error and stops when Canvas token is invalid", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    const user = userEvent.setup({
-      advanceTimers: vi.advanceTimersByTime,
-    });
+  it("shows Canvas invalid error and stops when Canvas token fails regex", async () => {
+    const user = userEvent.setup();
 
     render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
 
@@ -143,20 +145,81 @@ describe("TokenStep", () => {
     // Error message should contain the error text
     expect(screen.getByText("errors.canvas")).toBeInTheDocument();
 
-    // Ed token should NOT be validated (no status icon)
-    const edValid = document.querySelector('[data-testid="status-valid-ed"]');
-    const edInvalid = document.querySelector('[data-testid="status-invalid-ed"]');
-    expect(edValid).not.toBeInTheDocument();
-    expect(edInvalid).not.toBeInTheDocument();
+    // Backend should NOT be called (regex failed before backend call)
+    expect(mockConfigureTokenMutateAsync).not.toHaveBeenCalled();
 
     // onSuccess should NOT be called
     expect(mockOnSuccess).not.toHaveBeenCalled();
   });
 
-  it("shows Ed invalid error when Canvas valid but Ed invalid", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    const user = userEvent.setup({
-      advanceTimers: vi.advanceTimersByTime,
+  it("shows backend error when canvas token is rejected by API", async () => {
+    const user = userEvent.setup();
+
+    // Backend rejects canvas token
+    mockConfigureTokenMutateAsync.mockRejectedValueOnce(
+      new Error("Invalid Canvas API token")
+    );
+
+    render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
+
+    const canvasInput = screen.getByPlaceholderText("canvas.placeholder");
+    const edInput = screen.getByPlaceholderText("ed.placeholder");
+
+    await user.type(canvasInput, VALID_CANVAS_TOKEN);
+    await user.type(edInput, VALID_ED_TOKEN);
+
+    const validateButton = screen.getByText("cta");
+    await user.click(validateButton);
+
+    // Wait for backend error to surface
+    await waitFor(() => {
+      const invalidIcon = document.querySelector('[data-testid="status-invalid-canvas"]');
+      expect(invalidIcon).toBeInTheDocument();
+    });
+
+    // onSuccess should NOT be called
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+  });
+
+  it("shows ed error when canvas passes but ed rejected by API", async () => {
+    const user = userEvent.setup();
+
+    // Canvas succeeds, Ed fails
+    mockConfigureTokenMutateAsync
+      .mockResolvedValueOnce({ data: { status: "active", courses_found: 5 } })
+      .mockRejectedValueOnce(new Error("Invalid Ed API token"));
+
+    render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
+
+    const canvasInput = screen.getByPlaceholderText("canvas.placeholder");
+    const edInput = screen.getByPlaceholderText("ed.placeholder");
+
+    await user.type(canvasInput, VALID_CANVAS_TOKEN);
+    await user.type(edInput, VALID_ED_TOKEN);
+
+    const validateButton = screen.getByText("cta");
+    await user.click(validateButton);
+
+    // Wait for Ed error to surface
+    await waitFor(() => {
+      const edInvalid = document.querySelector('[data-testid="status-invalid-ed"]');
+      expect(edInvalid).toBeInTheDocument();
+    });
+
+    // Canvas should show valid
+    const canvasValid = document.querySelector('[data-testid="status-valid-canvas"]');
+    expect(canvasValid).toBeInTheDocument();
+
+    // onSuccess should NOT be called
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+  });
+
+  it("shows Ed invalid error when Canvas valid but Ed fails regex", async () => {
+    const user = userEvent.setup();
+
+    // Canvas backend succeeds
+    mockConfigureTokenMutateAsync.mockResolvedValueOnce({
+      data: { status: "active", courses_found: 5 },
     });
 
     render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
@@ -170,18 +233,15 @@ describe("TokenStep", () => {
     const validateButton = screen.getByText("cta");
     await user.click(validateButton);
 
-    // Wait for 0.8s delay
-    await act(async () => {
-      vi.advanceTimersByTime(800);
+    // Wait for canvas backend call to complete, then Ed regex fails
+    await waitFor(() => {
+      const edInvalid = document.querySelector('[data-testid="status-invalid-ed"]');
+      expect(edInvalid).toBeInTheDocument();
     });
 
     // Canvas should show valid
     const canvasValid = document.querySelector('[data-testid="status-valid-canvas"]');
     expect(canvasValid).toBeInTheDocument();
-
-    // Ed should show invalid
-    const edInvalid = document.querySelector('[data-testid="status-invalid-ed"]');
-    expect(edInvalid).toBeInTheDocument();
 
     // Ed error message should appear
     expect(screen.getByText("errors.ed")).toBeInTheDocument();
@@ -202,10 +262,12 @@ describe("TokenStep", () => {
   });
 
   it("shows 'Validating...' text during validation", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    const user = userEvent.setup({
-      advanceTimers: vi.advanceTimersByTime,
-    });
+    const user = userEvent.setup();
+
+    // Backend call never resolves to keep validating state
+    mockConfigureTokenMutateAsync.mockImplementation(
+      () => new Promise(() => {})
+    );
 
     render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
 
@@ -220,10 +282,5 @@ describe("TokenStep", () => {
 
     // Button should show "Validating..." text
     expect(screen.getByText("validating")).toBeInTheDocument();
-
-    // Clean up timers
-    await act(async () => {
-      vi.advanceTimersByTime(1300);
-    });
   });
 });
