@@ -18,6 +18,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 **In Progress:** v3.0 Production Ready + AI Core
 - Phase 29 Sentry Hardening — complete
 - Phase 30 BFF Proxy Conversion — complete (2026-04-06). All 25 Route Handlers converted from mock fixtures to proxyRequest BFF proxy pattern
+- Phase 31 E2E Verification & AI Config — complete (2026-04-06). Setup flow wired to real backend, SSE streaming via BFF proxy, AI API key guard added, ANTHROPIC_API_KEY configured in Railway
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
@@ -95,9 +96,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 **v2.1 — Observability & Data Pipeline:**
 - [ ] Sentry error tracking (Python FastAPI + Next.js projects, DSN configuration)
-- [ ] Convert 17/29 mock API Route Handlers to proxy to Railway Python backend
-- [ ] End-to-end user journey (register → token setup → first sync → real data displayed)
-- [ ] ANTHROPIC_API_KEY configuration for AI features
+- [x] Convert 25/25 mock API Route Handlers to proxy to Railway Python backend — v3.0 Phase 30
+- [x] End-to-end user journey (register → token setup → first sync → real data displayed) — v3.0 Phase 31
+- [x] ANTHROPIC_API_KEY configuration for AI features — v3.0 Phase 31
 - [ ] Frontend CSP update for Railway backend connect-src
 
 **v2.2 — Multi-User Ready:**
@@ -230,4 +231,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 — Phase 30 (BFF proxy conversion) complete. All routes now proxy to Python backend.*
+*Last updated: 2026-04-06 — Phase 31 (E2E verification & AI config) complete. Setup flow wired to real backend, AI features configured for production.*
