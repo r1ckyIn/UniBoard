@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { Check, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { useCourses } from "@/hooks/use-courses";
 export default function SuccessStep() {
   const t = useTranslations("setup.success");
   const router = useRouter();
+  const locale = useLocale();
   const syncTrigger = useSyncTrigger();
 
   const [syncStarted, setSyncStarted] = useState(false);
@@ -50,7 +51,7 @@ export default function SuccessStep() {
   const handleGoToDashboard = () => {
     toast.success(t("toast"));
     useAuthStore.getState().setTokenConfigured(true);
-    router.push("/");
+    router.push(`/${locale}`);
   };
 
   return (

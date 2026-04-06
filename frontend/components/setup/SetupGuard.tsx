@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/auth/store";
 
 export function SetupGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const locale = useLocale();
   const { isAuthenticated, tokenConfigured } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
 
@@ -24,9 +26,9 @@ export function SetupGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     if (!isAuthenticated) {
-      router.replace("/auth");
+      router.replace(`/${locale}/auth`);
     } else if (tokenConfigured) {
-      router.replace("/");
+      router.replace(`/${locale}`);
     }
   }, [hydrated, isAuthenticated, tokenConfigured, router]);
 

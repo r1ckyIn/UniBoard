@@ -6,27 +6,25 @@ import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/auth/store";
 import { createClient } from "@/lib/supabase/client";
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
+export function DashboardGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useLocale();
   const { isAuthenticated, tokenConfigured } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
-    // zustand persist hydrates async from localStorage
     const unsub = useAuthStore.persist.onFinishHydration(() => {
       setHydrated(true);
     });
-    // If already hydrated (e.g. not first render)
     if (useAuthStore.persist.hasHydrated()) {
       setHydrated(true);
     }
     return unsub;
   }, []);
 
+  // Check Supabase session on mount (handles page refresh)
   useEffect(() => {
-    // Check Supabase session on mount (handles page refresh where
-    // zustand may have stale data but Supabase cookie has valid session)
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -39,18 +37,20 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           },
         );
       }
+      setSessionChecked(true);
     });
   }, []);
 
   useEffect(() => {
-    if (hydrated && isAuthenticated) {
-      router.replace(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
+    if (!hydrated || !sessionChecked) return;
+    if (!isAuthenticated) {
+      router.replace(`/${locale}/auth`);
+    } else if (!tokenConfigured) {
+      router.replace(`/${locale}/setup`);
     }
-  }, [hydrated, isAuthenticated, tokenConfigured, router]);
+  }, [hydrated, sessionChecked, isAuthenticated, tokenConfigured, locale, router]);
 
-  // Show nothing until hydration completes (prevents flash)
-  if (!hydrated) return null;
-  // Authenticated users see nothing while redirect happens
-  if (isAuthenticated) return null;
+  if (!hydrated || !sessionChecked) return null;
+  if (!isAuthenticated || !tokenConfigured) return null;
   return <>{children}</>;
 }

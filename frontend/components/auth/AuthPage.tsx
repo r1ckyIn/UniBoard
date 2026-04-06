@@ -87,7 +87,10 @@ export default function AuthPage() {
           />
           <SuccessOverlay
             visible={showSuccess}
-            onContinue={() => router.push("/setup")}
+            onContinue={() => {
+              const locale = pathname.split("/")[1] || "en";
+              router.push(`/${locale}/setup`);
+            }}
           />
         </div>
       </motion.div>

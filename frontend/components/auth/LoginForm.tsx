@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
@@ -18,6 +18,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const t = useTranslations();
   const router = useRouter();
+  const locale = useLocale();
   const loginMutation = useLogin();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,7 +39,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           // onAuthStateChange fires synchronously during signInWithPassword
           // and updates zustand before this callback runs
           const { tokenConfigured } = useAuthStore.getState();
-          router.push(tokenConfigured ? "/" : "/setup");
+          router.push(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
         },
       },
     );
