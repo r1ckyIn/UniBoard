@@ -46,7 +46,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (hydrated && isAuthenticated) {
       router.replace(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
     }
-  }, [hydrated, isAuthenticated, tokenConfigured, router]);
+  }, [hydrated, isAuthenticated, tokenConfigured, locale, router]);
 
   // Show nothing until hydration completes (prevents flash)
   if (!hydrated) return null;

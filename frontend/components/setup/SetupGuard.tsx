@@ -30,7 +30,7 @@ export function SetupGuard({ children }: { children: React.ReactNode }) {
     } else if (tokenConfigured) {
       router.replace(`/${locale}`);
     }
-  }, [hydrated, isAuthenticated, tokenConfigured, router]);
+  }, [hydrated, isAuthenticated, tokenConfigured, locale, router]);
 
   // Show nothing until hydration completes (prevents flash)
   if (!hydrated) return null;
