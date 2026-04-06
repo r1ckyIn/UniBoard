@@ -70,7 +70,6 @@ describe("proxyRequest", () => {
       body: JSON.stringify({ platform: "canvas", token: "12345" }),
     });
     await proxyRequest(req, {
-      method: "POST",
       body: JSON.stringify({ platform: "canvas", token: "12345" }),
     });
 
@@ -179,7 +178,7 @@ describe("proxyRequest", () => {
     const req = makeRequest("http://localhost:3001/api/v1/tokens/canvas", {
       method: "DELETE",
     });
-    const resp = await proxyRequest(req, { method: "DELETE" });
+    const resp = await proxyRequest(req);
 
     expect(resp.status).toBe(204);
     expect(resp.body).toBeNull();
@@ -245,7 +244,6 @@ describe("proxyRequest", () => {
       method: "POST",
     });
     await proxyRequest(reqPost, {
-      method: "POST",
       body: JSON.stringify({ token: "abc" }),
     });
 

@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-/**
- * Backend URL resolved from environment variable with local fallback.
- * Uses NEXT_PUBLIC_API_URL since this runs server-side in Route Handlers.
- */
-function getBackendUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-}
-
-/**
- * User-friendly error messages mapped by HTTP status code.
- * These replace raw backend error messages to avoid leaking internals.
- */
 const ERROR_MESSAGES: Record<number, string> = {
   400: "Invalid request. Please check your input.",
   401: "Session expired. Please sign in again.",
@@ -24,14 +12,9 @@ const ERROR_MESSAGES: Record<number, string> = {
   503: "Service temporarily unavailable.",
 };
 
-/**
- * Options for customizing the proxy request behavior.
- */
 export interface ProxyOptions {
   /** Override backend path (for dynamic param routes like /courses/${id}) */
   backendPath?: string;
-  /** HTTP method override */
-  method?: string;
   /** Request body to forward (caller reads with request.text()) */
   body?: string | null;
   /** Additional headers to send to backend */
@@ -40,49 +23,27 @@ export interface ProxyOptions {
   stream?: boolean;
 }
 
-/**
- * Shared BFF proxy utility. Forwards an incoming Next.js Route Handler
- * request to the Python FastAPI backend, handling:
- * - URL construction with query parameter passthrough
- * - Authorization header forwarding (Supabase JWT)
- * - Structured error transformation with user-friendly messages
- * - 204 No Content responses (no JSON parse)
- * - SSE streaming passthrough for AI features
- *
- * @param request - Incoming NextRequest from Route Handler
- * @param options - Optional proxy configuration
- * @returns NextResponse (JSON) or raw Response (SSE stream)
- */
 export async function proxyRequest(
   request: NextRequest,
   options: ProxyOptions = {},
 ): Promise<NextResponse | Response> {
-  const { backendPath, method, body, extraHeaders, stream } = options;
+  const { backendPath, body, extraHeaders, stream } = options;
 
-  // Build target URL: backend base + path + query string
   const url = new URL(request.url);
-  const targetPath = backendPath ?? url.pathname;
-  const targetUrl = `${getBackendUrl()}${targetPath}${url.search}`;
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  const targetUrl = `${base}${backendPath ?? url.pathname}${url.search}`;
 
-  // Build headers: always forward Authorization
-  const headers: Record<string, string> = {
-    Authorization: request.headers.get("Authorization") || "",
-    ...extraHeaders,
-  };
+  const headers: Record<string, string> = { ...extraHeaders };
+  const auth = request.headers.get("Authorization");
+  if (auth) headers["Authorization"] = auth;
+  if (body != null) headers["Content-Type"] = "application/json";
 
-  // Only set Content-Type for requests with a body
-  if (body != null) {
-    headers["Content-Type"] = "application/json";
-  }
-
-  // Forward request to backend
   const resp = await fetch(targetUrl, {
-    method: method ?? request.method,
+    method: request.method,
     headers,
     body: body ?? undefined,
   });
 
-  // SSE streaming passthrough
   if (stream && resp.ok) {
     return new Response(resp.body, {
       status: resp.status,
@@ -94,7 +55,6 @@ export async function proxyRequest(
     });
   }
 
-  // Error responses: transform to user-friendly messages
   if (!resp.ok) {
     const friendlyMessage =
       ERROR_MESSAGES[resp.status] ?? "An unexpected error occurred.";
@@ -115,12 +75,10 @@ export async function proxyRequest(
     );
   }
 
-  // 204 No Content: return empty response
   if (resp.status === 204) {
     return new NextResponse(null, { status: 204 });
   }
 
-  // Standard JSON response passthrough
   const data = await resp.json();
   return NextResponse.json(data, { status: resp.status });
 }
