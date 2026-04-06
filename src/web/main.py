@@ -104,8 +104,18 @@ def create_app() -> FastAPI:
         response.headers["X-Request-ID"] = request_id
         return response
 
+    # Dynamic CSP: include CORS origins in connect-src
+    connect_src_parts = [
+        "'self'",
+        "https://*.supabase.co",
+        "wss://*.supabase.co",
+        "https://*.ingest.sentry.io",
+    ]
+    connect_src_parts.extend(origins)
+    connect_src = " ".join(connect_src_parts)
+
     # Keep in sync with frontend/next.config.ts securityHeaders
-    _SECURITY_HEADERS = {
+    _security_headers = {
         "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
         "X-Frame-Options": "DENY",
         "X-Content-Type-Options": "nosniff",
@@ -116,14 +126,14 @@ def create_app() -> FastAPI:
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob:",
             "font-src 'self' data:",
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io",
+            f"connect-src {connect_src}",
         ]),
     }
 
     @application.middleware("http")
     async def security_headers_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
         response = await call_next(request)
-        for header, value in _SECURITY_HEADERS.items():
+        for header, value in _security_headers.items():
             response.headers[header] = value
         return response
 

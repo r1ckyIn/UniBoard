@@ -39,6 +39,69 @@ class TestCspContainsSentryIngest:
             config_module._settings = None
 
 
+class TestCspContainsCorsOrigins:
+    """Verify CSP header includes CORS origins in connect-src."""
+
+    def test_csp_contains_cors_origin(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """CSP connect-src must include the configured CORS origin."""
+        monkeypatch.setenv("CORS_ORIGINS", "https://uniboard.vercel.app")
+        monkeypatch.setenv("DEBUG", "true")
+        config_module._settings = None
+        try:
+            from src.web.main import create_app
+
+            app = create_app()
+            client = TestClient(app)
+            response = client.get("/health")
+            csp = response.headers.get("Content-Security-Policy", "")
+            assert "https://uniboard.vercel.app" in csp
+        finally:
+            config_module._settings = None
+
+    def test_csp_contains_multiple_cors_origins(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """CSP connect-src must include all comma-separated CORS origins."""
+        monkeypatch.setenv(
+            "CORS_ORIGINS",
+            "https://uniboard.vercel.app,https://staging.uniboard.vercel.app",
+        )
+        monkeypatch.setenv("DEBUG", "true")
+        config_module._settings = None
+        try:
+            from src.web.main import create_app
+
+            app = create_app()
+            client = TestClient(app)
+            response = client.get("/health")
+            csp = response.headers.get("Content-Security-Policy", "")
+            assert "https://uniboard.vercel.app" in csp
+            assert "https://staging.uniboard.vercel.app" in csp
+        finally:
+            config_module._settings = None
+
+    def test_csp_retains_existing_entries_with_cors(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Adding CORS origins must not remove existing CSP entries."""
+        monkeypatch.setenv("CORS_ORIGINS", "https://uniboard.vercel.app")
+        monkeypatch.setenv("DEBUG", "true")
+        config_module._settings = None
+        try:
+            from src.web.main import create_app
+
+            app = create_app()
+            client = TestClient(app)
+            response = client.get("/health")
+            csp = response.headers.get("Content-Security-Policy", "")
+            assert "'self'" in csp
+            assert "*.supabase.co" in csp
+            assert "*.ingest.sentry.io" in csp
+            assert "https://uniboard.vercel.app" in csp
+        finally:
+            config_module._settings = None
+
+
 class TestSentryInitConditional:
     """Verify Sentry init is conditional on DSN presence."""
 
