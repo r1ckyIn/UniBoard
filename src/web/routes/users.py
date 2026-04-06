@@ -143,8 +143,10 @@ async def configure_token(
                         courses_found = len(courses_data)
 
             elif platform == "ed":
+                # Ed API: /api/user returns user info + enrolled courses
+                # /api/courses returns 403 with Bearer token
                 resp = await client.get(
-                    f"{settings.ed_base_url}/courses",
+                    f"{settings.ed_base_url}/user",
                     headers={"Authorization": f"Bearer {body.token}"},
                 )
                 if resp.status_code != 200:
