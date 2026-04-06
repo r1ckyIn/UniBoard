@@ -1,32 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: milestone
-status: v2.0 milestone complete
-stopped_at: Phase 28 context gathered
-last_updated: "2026-04-04T13:18:05.846Z"
-last_activity: 2026-04-04
+milestone: v3.0
+milestone_name: Production Ready + AI Core
+status: executing
+stopped_at: Phase 30 Plan 03 complete
+last_updated: "2026-04-06T05:08:00Z"
+last_activity: 2026-04-06 -- Phase 30 Plan 03 executed (parallel agent)
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 35
-  completed_plans: 35
+  total_phases: 7
+  completed_phases: 1
+  total_plans: 5
+  completed_plans: 3
+  percent: 20
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-27)
+See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 28 — deadlines-page-enhancement
+**Current focus:** Phase 30 — bff-proxy-conversion
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
-Last activity: 2026-04-04
+Phase: 30 (bff-proxy-conversion) — EXECUTING
+Plan: 3 of 3
+Status: Plan 03 complete (parallel agent)
+Last activity: 2026-04-06 -- Phase 30 Plan 03 executed
 
 ## Milestones Completed
 
@@ -132,6 +134,7 @@ Last activity: 2026-04-04
 | Phase 26 P01 | 2min | 2 tasks | 3 files |
 | Phase 26 P02 | 3min | 2 tasks | 3 files |
 | Phase 26 P03 | 6min | 2 tasks | 13 files |
+| Phase 30 P03 | 5min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -314,6 +317,9 @@ Recent decisions affecting current work:
 - [Phase 26]: Railway DOCKERFILE builder with existing Dockerfile.production over Nixpacks auto-detect
 - [Phase 26]: Sentry init is conditional on DSN presence -- app works normally without Sentry
 - [Phase 26]: withSentryConfig outermost wrapper in next.config.ts (Sentry > next-intl > nextConfig)
+- [Phase 30]: All 4 deadline routes converted atomically to avoid import errors from removed deadlineActions shared state
+- [Phase 30]: Dynamic param routes use backendPath template literals for correct Python backend URL construction
+- [Phase 30]: Body forwarding uses request.text() in caller, passed as body option to proxyRequest
 
 ### Roadmap Evolution
 
@@ -331,6 +337,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-04T11:02:19.509Z
-Stopped at: Phase 28 context gathered
-Resume file: .planning/phases/28-deadlines-page-enhancement/28-CONTEXT.md
+Last session: 2026-04-06T05:08:00Z
+Stopped at: Completed 30-03-PLAN.md (parallel agent)
