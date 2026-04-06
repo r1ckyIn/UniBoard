@@ -14,8 +14,10 @@ export const api = ky.create({
       },
     ],
     afterResponse: [
-      async (_request, _options, response) => {
-        if (response.status === 401) {
+      async (request, _options, response) => {
+        // Only clear auth on 401 for GET requests. Mutations (PUT/POST/DELETE)
+        // may fail with 401 transiently; clearing auth mid-setup causes redirect loops.
+        if (response.status === 401 && request.method === "GET") {
           useAuthStore.getState().clearAuth();
         }
       },
