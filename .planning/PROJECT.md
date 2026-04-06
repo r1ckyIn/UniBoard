@@ -1,4 +1,4 @@
-# UniBoard v2.0
+# UniBoard v3.0
 
 ## What This Is
 
@@ -15,6 +15,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - M2 Backend Core — Phases 13-17 (shipped 2026-03-27)
 - M3 AI/MCP/Skills — Phases 18-21 (shipped 2026-03-29)
 - M4 Hardening — Phases 22-28 (shipped 2026-04-04)
+**In Progress:** v3.0 Production Ready + AI Core
+- Phase 29 Sentry Hardening — complete
+- Phase 30 BFF Proxy Conversion — complete (2026-04-06). All 25 Route Handlers converted from mock fixtures to proxyRequest BFF proxy pattern
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
@@ -90,7 +93,24 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ### Active
 
-(No active requirements — v2.0 complete. Define next milestone to add new requirements.)
+**v2.1 — Observability & Data Pipeline:**
+- [ ] Sentry error tracking (Python FastAPI + Next.js projects, DSN configuration)
+- [ ] Convert 17/29 mock API Route Handlers to proxy to Railway Python backend
+- [ ] End-to-end user journey (register → token setup → first sync → real data displayed)
+- [ ] ANTHROPIC_API_KEY configuration for AI features
+- [ ] Frontend CSP update for Railway backend connect-src
+
+**v2.2 — Multi-User Ready:**
+- [ ] Custom SMTP (Resend/SendGrid) replacing Supabase built-in email
+- [ ] Token expiry auto-remind + re-authorization flow
+- [ ] User onboarding flow polish
+- [ ] Production email templates (branded signup confirmation, password reset)
+
+**v3.0 — AI Core Differentiation:**
+- [ ] AI study suggestions based on assessment weights
+- [ ] Course material QA (RAG on Ed Lessons with cited sources) — live with real data
+- [ ] GPA path planning with specific score targets
+- [ ] Push notifications (deadline reminders via browser push or email)
 
 ### Out of Scope
 
@@ -100,11 +120,10 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - Homework ghostwriting / direct answers — academic integrity violation
 - Social/chat features — irrelevant to GPA
 - Course recommendations — out of GPA tracking scope
-- Mobile-first design — desktop-first, mobile later
-- Multi-university support — USYD-only
-- AWS CDK / Lambda / API Gateway — replaced by Supabase + Railway + Vercel for MVP speed
-- Interactive AI tutoring (TUTOR-01/02) — deferred to v2
-- Personalized dashboard questionnaire — deferred to v2
+- Multi-university support — USYD-only, deferred to v4.0+
+- Mobile app / PWA — deferred to v4.0+
+- OAuth Canvas integration — manual token sufficient for now
+- AWS CDK / Lambda / API Gateway — replaced by Supabase + Railway + Vercel
 
 ## Context
 
@@ -180,19 +199,18 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending (M3) |
 | i18n English + Chinese | Target Chinese international student community at USYD | ✓ Good — all 10 pages fully bilingual |
 
-## Current Milestone: v2.0-m4 Hardening
+## Current Milestone: v3.0 Production Ready + AI Core
 
-**Goal:** Fix all critical/high codebase audit findings, achieve green builds across all tools, and prepare for production deployment.
+**Goal:** Take UniBoard from deployed-with-mock-data to a fully functional production app with error tracking, real data flow, multi-user support, and AI-powered differentiation.
 
 **Target features:**
-- Critical fixes (VoyageAI blocking call, broken test imports, unsafe config defaults, Dockerfile)
-- Build health green (mypy, ruff, tsc, ESLint, pytest — all zero errors)
-- Security hardening (config fail-fast validation, configurable CORS, AI rate limiting)
-- Observability foundation (HTTP access log, structlog context, error boundaries, health check 503)
-- Code quality refactor (sync/tasks.py god module, DRY consolidation, dead code cleanup)
-- Production deployment (Supabase + Railway + Vercel, Docker production image, CI/CD)
-
-**Audit reference:** `docs/project/codebase_audit.md` (93 findings, score 5.8/10)
+- Sentry error tracking setup (Python + Next.js, org: yuan-qin)
+- BFF proxy conversion (17/29 mock Route Handlers → Railway backend proxy)
+- End-to-end user journey with real data
+- Custom SMTP for production email
+- Token lifecycle management (expiry, re-auth)
+- AI study suggestions, course QA, GPA path planning with live data
+- Push notifications for deadline reminders
 
 ## Evolution
 
@@ -212,4 +230,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — Phase 27 (Frontend UX Fixes & Course Materials Preview) complete. Dashboard per-type navigation routing, timetable attendance border distinction + scroll gradient, inline material viewer panel with iframe.*
+*Last updated: 2026-04-06 — Phase 30 (BFF proxy conversion) complete. All routes now proxy to Python backend.*
