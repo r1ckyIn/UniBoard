@@ -15,6 +15,9 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - M2 Backend Core — Phases 13-17 (shipped 2026-03-27)
 - M3 AI/MCP/Skills — Phases 18-21 (shipped 2026-03-29)
 - M4 Hardening — Phases 22-28 (shipped 2026-04-04)
+**In Progress:** v3.0 Production Ready + AI Core
+- Phase 29 Sentry Hardening — complete
+- Phase 30 BFF Proxy Conversion — complete (2026-04-06). All 25 Route Handlers converted from mock fixtures to proxyRequest BFF proxy pattern
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
@@ -227,4 +230,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 — Milestone v3.0 started. v2.0 deployed to production (Railway + Vercel + Supabase).*
+*Last updated: 2026-04-06 — Phase 30 (BFF proxy conversion) complete. All routes now proxy to Python backend.*
