@@ -32,7 +32,13 @@ def _get_sync_session_factory() -> async_sessionmaker[AsyncSession]:
     global _sync_engine  # noqa: PLW0603
     if _sync_engine is None:
         settings = get_settings()
-        _sync_engine = create_async_engine(settings.database_url, pool_size=3)
+        _sync_engine = create_async_engine(
+            settings.database_url,
+            pool_size=3,
+            pool_recycle=300,
+            pool_pre_ping=True,
+            connect_args={"prepared_statement_cache_size": 0},
+        )
     return async_sessionmaker(_sync_engine, class_=AsyncSession, expire_on_commit=False)
 
 
