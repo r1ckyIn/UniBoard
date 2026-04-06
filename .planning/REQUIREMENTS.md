@@ -13,9 +13,9 @@
 
 ### Data Pipeline — BFF Proxy (BFF)
 
-- [ ] **BFF-01**: 将 17 个 mock Route Handler 转换为代理到 Railway Python 后端
-- [ ] **BFF-02**: 前端 API 请求自动附带 Supabase JWT Authorization header
-- [ ] **BFF-03**: 代理层统一错误处理（后端 4xx/5xx → 前端友好提示）
+- [x] **BFF-01**: 将 17 个 mock Route Handler 转换为代理到 Railway Python 后端
+- [x] **BFF-02**: 前端 API 请求自动附带 Supabase JWT Authorization header
+- [x] **BFF-03**: 代理层统一错误处理（后端 4xx/5xx → 前端友好提示）
 - [ ] **BFF-04**: 端到端用户旅程验证（注册 → Token 配置 → 首次同步 → 看到真实数据）
 
 ### AI Configuration (AICONF)
@@ -67,9 +67,9 @@
 | OBS-01 | Phase 29 | Pending |
 | OBS-02 | Phase 29 | Pending |
 | OBS-03 | Phase 29 | Pending |
-| BFF-01 | Phase 30 | Pending |
-| BFF-02 | Phase 30 | Pending |
-| BFF-03 | Phase 30 | Pending |
+| BFF-01 | Phase 30 | Complete |
+| BFF-02 | Phase 30 | Complete |
+| BFF-03 | Phase 30 | Complete |
 | BFF-04 | Phase 31 | Pending |
 | AICONF-01 | Phase 31 | Pending |
 | AICONF-02 | Phase 31 | Pending |
