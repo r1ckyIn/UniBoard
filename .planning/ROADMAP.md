@@ -218,6 +218,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 | 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
+| 31. E2E Verification & AI Config | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -245,3 +246,23 @@ Decimal phases (if inserted) execute between their surrounding integers.
 
 Plans:
 - [x] TBD (run /gsd:plan-phase 28 to break down) (completed 2026-04-04)
+
+### Phase 30: BFF Proxy Conversion
+**Goal**: All Next.js Route Handlers proxy requests to Railway Python backend instead of returning mock fixtures
+**Depends on**: Phase 29
+**Requirements**: BFF-01, BFF-02, BFF-03
+**Success Criteria** (what must be TRUE):
+  1. All 25 Route Handlers use proxyRequest() to forward to Railway backend
+  2. Frontend API requests include Supabase JWT Authorization header
+  3. Proxy layer has unified error handling for backend 4xx/5xx responses
+**Plans**: 1/3 complete (completed 2026-04-06)
+
+### Phase 31: E2E Verification & AI Config
+**Goal**: End-to-end user journey works with real data and AI features are configured for production
+**Depends on**: Phase 30
+**Requirements**: BFF-04, AICONF-01, AICONF-02
+**Success Criteria** (what must be TRUE):
+  1. A user can register, configure API tokens, trigger first sync, and see real Canvas/Ed data displayed in the frontend
+  2. ANTHROPIC_API_KEY is configured in Railway environment variables and accessible by AI services
+  3. AI features (Deadline Chat, Course QA, Unit Review) return real AI-generated results with streaming via SSE
+**Plans**: TBD
