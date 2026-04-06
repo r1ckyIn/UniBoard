@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: milestone
 status: v2.0 milestone complete
 stopped_at: Phase 28 context gathered
-last_updated: "2026-04-04T13:18:05.846Z"
-last_activity: 2026-04-04
+last_updated: "2026-04-06T03:15:13Z"
+last_activity: 2026-04-06 -- Phase 29-01 completed (frontend Sentry integration)
 progress:
   total_phases: 11
   completed_phases: 11
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 28 — deadlines-page-enhancement
+**Current focus:** Phase 29 — sentry-hardening
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
-Last activity: 2026-04-04
+Phase: 29 (sentry-hardening) — EXECUTING
+Plan: 1 of 2 complete
+Last activity: 2026-04-06 -- Phase 29 Plan 01 executed (frontend Sentry integration)
 
 ## Milestones Completed
 
@@ -132,6 +132,7 @@ Last activity: 2026-04-04
 | Phase 26 P01 | 2min | 2 tasks | 3 files |
 | Phase 26 P02 | 3min | 2 tasks | 3 files |
 | Phase 26 P03 | 6min | 2 tasks | 13 files |
+| Phase 29 P01 | 5min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -314,6 +315,9 @@ Recent decisions affecting current work:
 - [Phase 26]: Railway DOCKERFILE builder with existing Dockerfile.production over Nixpacks auto-detect
 - [Phase 26]: Sentry init is conditional on DSN presence -- app works normally without Sentry
 - [Phase 26]: withSentryConfig outermost wrapper in next.config.ts (Sentry > next-intl > nextConfig)
+- [Phase 29]: Used instrumentation-client.ts (not deprecated sentry.client.config.ts) per Sentry SDK v10.x
+- [Phase 29]: replaysSessionSampleRate: 0 + replaysOnErrorSampleRate: 1.0 for cost-effective error debugging
+- [Phase 29]: Dynamic CSP connect-src reads NEXT_PUBLIC_API_URL origin at build time via new URL().origin
 
 ### Roadmap Evolution
 
@@ -331,6 +335,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-04T11:02:19.509Z
-Stopped at: Phase 28 context gathered
-Resume file: .planning/phases/28-deadlines-page-enhancement/28-CONTEXT.md
+Last session: 2026-04-06T03:15:13Z
+Stopped at: Completed 29-01-PLAN.md (frontend Sentry integration)
