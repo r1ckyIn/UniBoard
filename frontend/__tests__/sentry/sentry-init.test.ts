@@ -26,7 +26,7 @@ describe("instrumentation-client.ts", () => {
 
   it("calls Sentry.init with correct DSN when NEXT_PUBLIC_SENTRY_DSN is set", async () => {
     process.env.NEXT_PUBLIC_SENTRY_DSN = "https://test@sentry.io/1";
-    process.env.NODE_ENV = "production";
+    (process.env as Record<string, string>).NODE_ENV = "production";
 
     await import("@/instrumentation-client");
 
@@ -89,7 +89,7 @@ describe("instrumentation-client.ts", () => {
 
   it("sets environment to process.env.NODE_ENV", async () => {
     process.env.NEXT_PUBLIC_SENTRY_DSN = "https://test@sentry.io/1";
-    process.env.NODE_ENV = "production";
+    (process.env as Record<string, string>).NODE_ENV = "production";
 
     await import("@/instrumentation-client");
 

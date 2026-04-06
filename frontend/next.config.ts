@@ -1,7 +1,22 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
+
+// Dynamic CSP: include Railway backend domain from env var (per D-06)
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiHost = apiUrl ? new URL(apiUrl).origin : "";
+
+const connectSrc = [
+  "'self'",
+  "https://*.supabase.co",
+  "wss://*.supabase.co",
+  "https://*.ingest.sentry.io",
+  apiHost,
+]
+  .filter(Boolean)
+  .join(" ");
 
 const securityHeaders = [
   {
@@ -19,7 +34,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.ingest.sentry.io",
+      `connect-src ${connectSrc}`,
     ].join("; "),
   },
 ];
@@ -30,4 +45,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+// Sentry plugin composition: Sentry outermost, then nextIntl (per D-02)
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+});
