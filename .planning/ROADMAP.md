@@ -87,7 +87,10 @@ UniBoard v2.0 shipped across 4 milestones (28 phases) delivering a full-stack GP
   1. Sentry Python project (FastAPI) is created under org yuan-qin with DSN configured in Railway environment variables
   2. Sentry Next.js project is created under org yuan-qin with DSN configured in Vercel environment variables
   3. Frontend CSP connect-src includes both the Railway backend domain and Sentry ingest domain (no CSP violations in browser console)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 29-01-PLAN.md — Frontend Sentry SDK setup, config files, CSP dynamic API URL, error boundary integration
+- [ ] 29-02-PLAN.md — Backend CSP CORS origins update, Sentry project creation & env var verification
 
 ### Phase 30: BFF Proxy Conversion
 **Goal**: All frontend data requests flow through to the real Python backend instead of returning mock fixtures
@@ -188,7 +191,7 @@ Note: Phase 32 can run in parallel with Phases 30-31 (independent dependency cha
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 3/3 | Complete | 2026-04-04 |
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete | 2026-04-04 |
-| 29. Sentry Hardening | v3.0 | 0/TBD | Not started | - |
+| 29. Sentry Hardening | v3.0 | 0/2 | Not started | - |
 | 30. BFF Proxy Conversion | v3.0 | 0/TBD | Not started | - |
 | 31. E2E Verification & AI Config | v3.0 | 0/TBD | Not started | - |
 | 32. Production Email | v3.0 | 0/TBD | Not started | - |
