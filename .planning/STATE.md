@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Production Ready + AI Core
-status: defining requirements
+status: ready to plan
 stopped_at: null
-last_updated: "2026-04-05"
-last_activity: 2026-04-05
+last_updated: "2026-04-06"
+last_activity: 2026-04-06
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Defining requirements for v3.0
+**Current focus:** Phase 29 — Sentry Hardening
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 29 of 35 (Sentry Hardening) — first of 7 v3.0 phases
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-05 — Milestone v3.0 started
+Status: Ready to plan
+Last activity: 2026-04-06 — Roadmap created for v3.0 (7 phases, 18 requirements)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Milestones Completed
 
@@ -41,15 +43,13 @@ Last activity: 2026-04-05 — Milestone v3.0 started
 
 - v2.0 deployed to production (Railway + Vercel + Supabase Sydney)
 - Middleware removed from Next.js (Edge Runtime incompatibility on Vercel)
-- Vercel framework set to nextjs via API (was None, caused 404s)
-- SSO Protection set to preview-only (production publicly accessible)
-- CORS_ORIGINS set to uni-board-tau.vercel.app on Railway
-- Supabase Site URL updated to production domain
 - Sentry org: yuan-qin (14-day Business trial started 2026-04-05)
+- v3.0 roadmap: 7 phases (29-35), 18 requirements mapped
 
 ### Roadmap Evolution
 
-(New milestone — no phase changes yet)
+- Phase 32 (Production Email) can run in parallel with Phases 30-31 (independent dep chain)
+- Phase 34 (AI Features Live) depends on Phase 31 (needs real data flow + ANTHROPIC_API_KEY)
 
 ### Pending Todos
 
@@ -57,12 +57,12 @@ None.
 
 ### Blockers/Concerns
 
-- 17/29 frontend API Route Handlers return mock fixture data — biggest gap
-- ANTHROPIC_API_KEY not yet configured on Railway
-- Ed APIs are unofficial (reverse-engineered) — fragile
-- Supabase built-in email has rate limits — need custom SMTP for production
+- 17/29 frontend API Route Handlers return mock fixture data — Phase 30 resolves this
+- ANTHROPIC_API_KEY not yet configured on Railway — Phase 31 resolves this
+- Ed APIs are unofficial (reverse-engineered) — fragile, monitor during E2E verification
+- Supabase built-in email has rate limits — Phase 32 resolves with Resend SMTP
 
 ## Session Continuity
 
-Last session: 2026-04-05
-Stopped at: Defining requirements for v3.0
+Last session: 2026-04-06
+Stopped at: Roadmap created for v3.0, ready to plan Phase 29

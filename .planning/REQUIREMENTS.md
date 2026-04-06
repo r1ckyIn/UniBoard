@@ -62,17 +62,32 @@
 
 ## Traceability
 
-（由 roadmapper 填充）
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| OBS-01 | Phase 29 | Pending |
+| OBS-02 | Phase 29 | Pending |
+| OBS-03 | Phase 29 | Pending |
+| BFF-01 | Phase 30 | Pending |
+| BFF-02 | Phase 30 | Pending |
+| BFF-03 | Phase 30 | Pending |
+| BFF-04 | Phase 31 | Pending |
+| AICONF-01 | Phase 31 | Pending |
+| AICONF-02 | Phase 31 | Pending |
+| EMAIL-01 | Phase 32 | Pending |
+| EMAIL-02 | Phase 32 | Pending |
+| EMAIL-03 | Phase 33 | Pending |
+| ONBD-01 | Phase 33 | Pending |
+| ONBD-02 | Phase 33 | Pending |
+| AIFEAT-01 | Phase 34 | Pending |
+| AIFEAT-02 | Phase 34 | Pending |
+| AIFEAT-03 | Phase 34 | Pending |
+| AIFEAT-04 | Phase 35 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 18 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 18
+- Mapped to phases: 18/18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-06 after initial definition*
+*Last updated: 2026-04-06 — Traceability populated by roadmapper*
