@@ -69,7 +69,7 @@ UniBoard v2.0 shipped across 4 milestones (28 phases) delivering a full-stack GP
 
 ### 🚧 v3.0: Production Ready + AI Core (Active)
 
-- [ ] **Phase 29: Sentry Hardening** - Configure Sentry projects for Python + Next.js with DSN env vars and CSP update
+- [x] **Phase 29: Sentry Hardening** - Configure Sentry projects for Python + Next.js with DSN env vars and CSP update (completed 2026-04-06)
 - [ ] **Phase 30: BFF Proxy Conversion** - Replace 17 mock Route Handlers with proxies to Railway Python backend
 - [ ] **Phase 31: E2E Verification & AI Config** - Validate full user journey with real data and enable AI features in production
 - [ ] **Phase 32: Production Email** - Custom SMTP via Resend with branded email templates
@@ -87,7 +87,7 @@ UniBoard v2.0 shipped across 4 milestones (28 phases) delivering a full-stack GP
   1. Sentry Python project (FastAPI) is created under org yuan-qin with DSN configured in Railway environment variables
   2. Sentry Next.js project is created under org yuan-qin with DSN configured in Vercel environment variables
   3. Frontend CSP connect-src includes both the Railway backend domain and Sentry ingest domain (no CSP violations in browser console)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 29-01-PLAN.md — Frontend Sentry SDK setup, config files, CSP dynamic API URL, error boundary integration
 - [ ] 29-02-PLAN.md — Backend CSP CORS origins update, Sentry project creation & env var verification
@@ -191,7 +191,7 @@ Note: Phase 32 can run in parallel with Phases 30-31 (independent dependency cha
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 3/3 | Complete | 2026-04-04 |
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete | 2026-04-04 |
-| 29. Sentry Hardening | v3.0 | 0/2 | Not started | - |
+| 29. Sentry Hardening | v3.0 | 0/2 | Complete    | 2026-04-06 |
 | 30. BFF Proxy Conversion | v3.0 | 0/TBD | Not started | - |
 | 31. E2E Verification & AI Config | v3.0 | 0/TBD | Not started | - |
 | 32. Production Email | v3.0 | 0/TBD | Not started | - |
