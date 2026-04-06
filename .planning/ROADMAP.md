@@ -67,7 +67,7 @@ UniBoard v2.0 shipped across 4 milestones (28 phases) delivering a full-stack GP
 
 </details>
 
-### 🚧 v3.0: Production Ready + AI Core (Active)
+### v3.0: Production Ready + AI Core (Active)
 
 - [x] **Phase 29: Sentry Hardening** - Configure Sentry projects for Python + Next.js with DSN env vars and CSP update (completed 2026-04-06)
 - [ ] **Phase 30: BFF Proxy Conversion** - Replace 17 mock Route Handlers with proxies to Railway Python backend
@@ -100,7 +100,11 @@ Plans:
   1. All 17 previously-mock Route Handlers proxy requests to the Railway Python backend and return real data
   2. Every proxied request includes the Supabase JWT in the Authorization header (authenticated users see their own data)
   3. Backend error responses (4xx/5xx) are transformed into user-friendly error messages in the frontend (no raw error JSON shown to users)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 30-01-PLAN.md — Shared proxyRequest utility + comprehensive unit tests (BFF-01/02/03 foundation)
+- [ ] 30-02-PLAN.md — Convert courses domain (9 routes) + GPA (3 routes) + alerts (1 route)
+- [ ] 30-03-PLAN.md — Convert deadlines domain (4 routes) + user/digest/search/sync/notifications (8 routes) + spot-check tests
 
 ### Phase 31: E2E Verification & AI Config
 **Goal**: A new user can complete the full journey from registration to seeing real data, and AI features return real results
@@ -192,7 +196,7 @@ Note: Phase 32 can run in parallel with Phases 30-31 (independent dependency cha
 | 27. Frontend UX Fixes & Materials Preview | M4 | 3/3 | Complete | 2026-04-04 |
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete | 2026-04-04 |
 | 29. Sentry Hardening | v3.0 | 0/2 | Complete    | 2026-04-06 |
-| 30. BFF Proxy Conversion | v3.0 | 0/TBD | Not started | - |
+| 30. BFF Proxy Conversion | v3.0 | 0/3 | Not started | - |
 | 31. E2E Verification & AI Config | v3.0 | 0/TBD | Not started | - |
 | 32. Production Email | v3.0 | 0/TBD | Not started | - |
 | 33. Token Lifecycle & Onboarding | v3.0 | 0/TBD | Not started | - |
