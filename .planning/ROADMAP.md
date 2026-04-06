@@ -218,7 +218,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 | 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
-| 31. E2E Verification & AI Config | v3.0 | 0/TBD | Not started | - |
+| 31. E2E Verification & AI Config | v3.0 | 0/2 | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -265,4 +265,8 @@ Plans:
   1. A user can register, configure API tokens, trigger first sync, and see real Canvas/Ed data displayed in the frontend
   2. ANTHROPIC_API_KEY is configured in Railway environment variables and accessible by AI services
   3. AI features (Deadline Chat, Course QA, Unit Review) return real AI-generated results with streaming via SSE
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 31-01-PLAN.md — Wire setup flow to real backend APIs (BFF-04)
+- [ ] 31-02-PLAN.md — Fix SSE dual-path, AI key guard, Railway config (AICONF-01, AICONF-02)
