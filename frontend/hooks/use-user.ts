@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import type { paths } from "@/lib/api/types.gen";
-import { useAuthStore } from "@/lib/auth/store";
+
 import { createClient } from "@/lib/supabase/client";
 
 // ── Response type aliases ───────────────────────────────────────────────────
