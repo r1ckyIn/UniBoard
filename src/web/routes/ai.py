@@ -5,7 +5,7 @@ import uuid
 from collections.abc import AsyncGenerator
 
 import structlog
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
@@ -66,6 +66,16 @@ async def _build_tool_executor(
     return ToolExecutor(canvas_token=canvas_token, ed_token=ed_token, course=course)
 
 
+def _require_ai_configured() -> None:
+    """Raise 503 if AI features are not configured."""
+    settings = get_settings()
+    if not settings.anthropic_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="AI features are not configured. ANTHROPIC_API_KEY is required.",
+        )
+
+
 def _build_qa_service(
     session: AsyncSession,
     tool_executor: ToolExecutor | None = None,
@@ -110,6 +120,7 @@ async def course_qa(
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[QAResponse]:
     """Ask a question about course materials with AI-powered citation."""
+    _require_ai_configured()
     svc = _build_qa_service(session)
     result = await svc.answer_question(
         user_id=current_user_id,
@@ -128,6 +139,7 @@ async def course_review(
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[UnitReviewResponse]:
     """Generate an AI-powered unit review summary for a course."""
+    _require_ai_configured()
     svc = _build_qa_service(session)
     result = await svc.generate_review(
         user_id=current_user_id,
@@ -146,6 +158,7 @@ async def course_qa_stream(
     session: AsyncSession = Depends(get_session),
 ) -> EventSourceResponse:
     """Stream AI Q&A response via SSE."""
+    _require_ai_configured()
     encryption = get_encryption()
     tool_executor = await _build_tool_executor(
         session, current_user_id, course_id, encryption
@@ -182,6 +195,7 @@ async def course_review_stream(
     session: AsyncSession = Depends(get_session),
 ) -> EventSourceResponse:
     """Stream AI unit review as SSE markdown tokens."""
+    _require_ai_configured()
     skill_service = SkillService(session)
     svc = _build_qa_service(session, skill_service=skill_service)
     stream = svc.stream_review(

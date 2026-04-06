@@ -53,8 +53,7 @@ export default function UnitReviewSection({
     setError(null);
 
     const token = useAuthStore.getState().accessToken;
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
-    const url = `${apiBase}/api/v1/courses/${courseId}/review/stream?lang=${locale}`;
+    const url = `/api/v1/courses/${courseId}/review/stream?lang=${locale}`;
 
     let text = "";
     try {

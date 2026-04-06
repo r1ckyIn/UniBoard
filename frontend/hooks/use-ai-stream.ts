@@ -61,8 +61,7 @@ export function useAiStream(
       }));
 
       const token = useAuthStore.getState().accessToken;
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
-      const url = `${apiBase}/api/v1/courses/${courseId}/qa/stream`;
+      const url = `/api/v1/courses/${courseId}/qa/stream`;
 
       let assistantContent = "";
 
