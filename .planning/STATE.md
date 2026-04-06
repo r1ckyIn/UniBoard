@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Production Ready + AI Core
 status: executing
-stopped_at: Phase 29 executing — human checkpoint pending for Sentry project verification
-last_updated: "2026-04-06T04:52:23.234Z"
-last_activity: 2026-04-06 -- Phase 30 execution started
+stopped_at: Completed 30-02-PLAN.md
+last_updated: "2026-04-06T05:07:05.830Z"
+last_activity: 2026-04-06
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 5
-  completed_plans: 2
+  completed_plans: 4
   percent: 14
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 30 (bff-proxy-conversion) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 30
-Last activity: 2026-04-06 -- Phase 30 execution started
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-06
 
 Progress: [█░░░░░░░░░] ~14%
 
@@ -49,6 +49,8 @@ Progress: [█░░░░░░░░░] ~14%
 - [Phase 29]: Used instrumentation-client.ts (not deprecated sentry.client.config.ts) per Sentry SDK v10.x
 - [Phase 29]: replaysSessionSampleRate: 0 + replaysOnErrorSampleRate: 1.0 for cost-effective error debugging
 - [Phase 29]: Dynamic CSP connect-src reads NEXT_PUBLIC_API_URL origin at build time via new URL().origin
+- [Phase 30]: Dynamic param routes use backendPath override for /api/v1/courses/${id}/... path construction
+- [Phase 30]: POST routes read body via request.text() for format-agnostic forwarding to Python backend
 
 ### Roadmap Evolution
 
@@ -68,5 +70,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T03:15:13Z
-Stopped at: Phase 29 executing — human checkpoint pending for Sentry project verification
+Last session: 2026-04-06T05:07:05.825Z
+Stopped at: Completed 30-02-PLAN.md
