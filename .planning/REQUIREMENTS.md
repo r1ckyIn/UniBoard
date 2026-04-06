@@ -16,7 +16,7 @@
 - [x] **BFF-01**: 将 17 个 mock Route Handler 转换为代理到 Railway Python 后端
 - [x] **BFF-02**: 前端 API 请求自动附带 Supabase JWT Authorization header
 - [x] **BFF-03**: 代理层统一错误处理（后端 4xx/5xx → 前端友好提示）
-- [ ] **BFF-04**: 端到端用户旅程验证（注册 → Token 配置 → 首次同步 → 看到真实数据）
+- [x] **BFF-04**: 端到端用户旅程验证（注册 → Token 配置 → 首次同步 → 看到真实数据）
 
 ### AI Configuration (AICONF)
 
@@ -70,7 +70,7 @@
 | BFF-01 | Phase 30 | Complete |
 | BFF-02 | Phase 30 | Complete |
 | BFF-03 | Phase 30 | Complete |
-| BFF-04 | Phase 31 | Pending |
+| BFF-04 | Phase 31 | Complete |
 | AICONF-01 | Phase 31 | Pending |
 | AICONF-02 | Phase 31 | Pending |
 | EMAIL-01 | Phase 32 | Pending |

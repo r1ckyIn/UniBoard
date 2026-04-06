@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 30-03-PLAN.md (parallel agent)
-last_updated: "2026-04-06T05:20:17.256Z"
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-04-06T06:37:00.256Z"
 last_activity: 2026-04-06
 progress:
   total_phases: 11
-  completed_phases: 11
-  total_plans: 35
+  completed_phases: 10
+  total_plans: 32
   completed_plans: 35
 ---
 
@@ -134,6 +134,7 @@ Last activity: 2026-04-06
 | Phase 26 P02 | 3min | 2 tasks | 3 files |
 | Phase 26 P03 | 6min | 2 tasks | 13 files |
 | Phase 30 P03 | 5min | 2 tasks | 13 files |
+| Phase 31 P01 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -319,6 +320,9 @@ Recent decisions affecting current work:
 - [Phase 30]: All 4 deadline routes converted atomically to avoid import errors from removed deadlineActions shared state
 - [Phase 30]: Dynamic param routes use backendPath template literals for correct Python backend URL construction
 - [Phase 30]: Body forwarding uses request.text() in caller, passed as body option to proxyRequest
+- [Phase 31]: Keep regex as client-side pre-check before backend token API call for instant feedback
+- [Phase 31]: Use last_sync.status from SyncStatusResponse (completed/failed) instead of is_syncing boolean
+- [Phase 31]: Poll sync status every 3s with conditional refetchInterval, enabled only after sync trigger fires
 
 ### Roadmap Evolution
 
@@ -336,5 +340,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T05:08:00Z
-Stopped at: Completed 30-03-PLAN.md (parallel agent)
+Last session: 2026-04-06T06:37:00.250Z
+Stopped at: Completed 31-01-PLAN.md
