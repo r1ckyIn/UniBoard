@@ -88,10 +88,10 @@ export function useConfigureToken() {
       api
         .put(`users/me/tokens/${platform}`, { json: body })
         .json<ConfigureTokenResponse>(),
-    onSuccess: (data) => {
-      if (data.data.status === "active") {
-        useAuthStore.getState().setTokenConfigured(true);
-      }
+    onSuccess: () => {
+      // Do NOT set tokenConfigured here — setting it triggers SetupGuard
+      // redirect mid-flow (before Ed token is validated). tokenConfigured
+      // is set in SuccessStep.handleGoToDashboard after both tokens pass.
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
     },
   });

@@ -13,5 +13,5 @@ export function validateCanvasToken(value: string): boolean {
  */
 export function validateEdToken(value: string): boolean {
   const trimmed = value.trim();
-  return /^[a-zA-Z0-9_-]{10,50}$/.test(trimmed);
+  return /^[a-zA-Z0-9._-]{10,80}$/.test(trimmed);
 }
