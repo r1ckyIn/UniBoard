@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Production Ready + AI Core
 status: executing
-stopped_at: Completed 30-01-PLAN.md
-last_updated: "2026-04-06T04:58:25Z"
-last_activity: 2026-04-06
+stopped_at: Phase 29 executing — human checkpoint pending for Sentry project verification
+last_updated: "2026-04-06T04:52:23.234Z"
+last_activity: 2026-04-06 -- Phase 30 execution started
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 17
+  total_plans: 5
+  completed_plans: 2
+  percent: 14
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 30 — BFF Proxy Conversion
+**Current focus:** Phase 30 — bff-proxy-conversion
 
 ## Current Position
 
-Phase: 30 of 35 (bff proxy conversion)
-Plan: 01 of 03 complete
-Status: Executing
-Last activity: 2026-04-06
+Phase: 30 (bff-proxy-conversion) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 30
+Last activity: 2026-04-06 -- Phase 30 execution started
 
-Progress: [██░░░░░░░░] ~17%
+Progress: [█░░░░░░░░░] ~14%
 
 ## Milestones Completed
 
@@ -49,8 +49,6 @@ Progress: [██░░░░░░░░] ~17%
 - [Phase 29]: Used instrumentation-client.ts (not deprecated sentry.client.config.ts) per Sentry SDK v10.x
 - [Phase 29]: replaysSessionSampleRate: 0 + replaysOnErrorSampleRate: 1.0 for cost-effective error debugging
 - [Phase 29]: Dynamic CSP connect-src reads NEXT_PUBLIC_API_URL origin at build time via new URL().origin
-- [Phase 30]: getBackendUrl() function over const for env var resolution at request time (not module load time)
-- [Phase 30]: PROXY_ERROR default code for non-JSON backend error bodies; Content-Type conditionally set only with body
 
 ### Roadmap Evolution
 
@@ -70,5 +68,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T04:58:25Z
-Stopped at: Completed 30-01-PLAN.md
+Last session: 2026-04-06T03:15:13Z
+Stopped at: Phase 29 executing — human checkpoint pending for Sentry project verification
