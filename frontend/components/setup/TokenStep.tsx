@@ -8,6 +8,7 @@ import {
   validateCanvasToken,
   validateEdToken,
 } from "@/lib/validations/token";
+import { useConfigureToken } from "@/hooks/use-user";
 
 function resetField(
   setValue: (v: string) => void,
@@ -27,6 +28,7 @@ interface TokenStepProps {
 export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
   const t = useTranslations("setup.tokens");
   const abortRef = useRef(false);
+  const configureToken = useConfigureToken();
 
   const [canvasValue, setCanvasValue] = useState("");
   const [edValue, setEdValue] = useState("");
@@ -44,31 +46,58 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
     setCanvasError(undefined);
     setEdError(undefined);
 
-    const canvasValid = validateCanvasToken(canvasValue);
-    setCanvasStatus(canvasValid ? "valid" : "invalid");
-    if (!canvasValid) {
-      setCanvasError(t("errors.canvas"));
+    try {
+      // Client-side regex pre-check for Canvas
+      const canvasValid = validateCanvasToken(canvasValue);
+      if (!canvasValid) {
+        setCanvasStatus("invalid");
+        setCanvasError(t("errors.canvas"));
+        return;
+      }
+
+      // Backend validation for Canvas token
+      try {
+        await configureToken.mutateAsync({
+          platform: "canvas",
+          body: { token: canvasValue.trim() },
+        });
+        if (abortRef.current) return;
+        setCanvasStatus("valid");
+      } catch (err) {
+        if (abortRef.current) return;
+        setCanvasStatus("invalid");
+        setCanvasError((err as Error).message || t("errors.canvas"));
+        return;
+      }
+
+      // Client-side regex pre-check for Ed
+      const edValid = validateEdToken(edValue);
+      if (!edValid) {
+        setEdStatus("invalid");
+        setEdError(t("errors.ed"));
+        return;
+      }
+
+      // Backend validation for Ed token
+      try {
+        await configureToken.mutateAsync({
+          platform: "ed",
+          body: { token: edValue.trim() },
+        });
+        if (abortRef.current) return;
+        setEdStatus("valid");
+      } catch (err) {
+        if (abortRef.current) return;
+        setEdStatus("invalid");
+        setEdError((err as Error).message || t("errors.ed"));
+        return;
+      }
+
+      // Both tokens validated successfully
+      onSuccess();
+    } finally {
       setValidating(false);
-      return;
     }
-
-    // Sequential validation: Canvas must pass before Ed is checked
-    await new Promise((r) => setTimeout(r, 800));
-    if (abortRef.current) return;
-
-    const edValid = validateEdToken(edValue);
-    setEdStatus(edValid ? "valid" : "invalid");
-    if (!edValid) {
-      setEdError(t("errors.ed"));
-      setValidating(false);
-      return;
-    }
-
-    await new Promise((r) => setTimeout(r, 500));
-    if (abortRef.current) return;
-
-    setValidating(false);
-    onSuccess();
   };
 
   // Abort in-flight validation if user navigates away
