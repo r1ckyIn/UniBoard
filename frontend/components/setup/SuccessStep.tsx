@@ -3,38 +3,47 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
 import { Check, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/auth/store";
-import { useSyncTrigger } from "@/hooks/use-sync";
-
-const MOCK_COURSES = [
-  "COMP2017",
-  "COMP3221",
-  "STAT2011",
-  "EDGU1003",
-  "MATH2021",
-];
+import { useSyncTrigger, syncOptions } from "@/hooks/use-sync";
+import { useCourses } from "@/hooks/use-courses";
 
 export default function SuccessStep() {
   const t = useTranslations("setup.success");
   const router = useRouter();
   const syncTrigger = useSyncTrigger();
 
-  const [syncStatus, setSyncStatus] = useState<"syncing" | "complete">("syncing");
-  const [courseNames, setCourseNames] = useState<string[]>([]);
+  const [syncStarted, setSyncStarted] = useState(false);
 
+  // Poll sync status every 3 seconds once sync has been triggered
+  const { data: syncData } = useQuery({
+    ...syncOptions.status(),
+    refetchInterval: syncStarted ? 3000 : false,
+    enabled: syncStarted,
+  });
+
+  // Fetch real courses from backend
+  const { data: coursesData } = useCourses();
+  const courses = coursesData?.data ?? [];
+  const courseNames = courses.map((c) => c.code);
+
+  // Determine sync completion from real status
+  const syncStatus = syncData?.data?.last_sync?.status;
+  const syncComplete = syncStarted && (syncStatus === "completed" || syncStatus === "failed");
+
+  // Trigger sync on mount
   useEffect(() => {
-    syncTrigger.mutateAsync({
-      scope: "all",
-    }).catch(() => {});
-
-    const timer = setTimeout(() => {
-      setCourseNames(MOCK_COURSES);
-      setSyncStatus("complete");
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    syncTrigger
+      .mutateAsync({ scope: "all" })
+      .then(() => {
+        setSyncStarted(true);
+      })
+      .catch(() => {
+        // Still poll even if trigger failed (sync may already be running)
+        setSyncStarted(true);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -59,7 +68,7 @@ export default function SuccessStep() {
       </p>
 
       <div className="flex items-center justify-center gap-2 mt-6" aria-live="polite">
-        {syncStatus === "syncing" ? (
+        {!syncComplete ? (
           <>
             <div className="w-3.5 h-3.5 border-2 border-card-border border-t-[#d97757] rounded-full animate-spin [animation-duration:0.8s]" />
             <span className="italic text-text-3">{t("syncing")}</span>
@@ -68,17 +77,17 @@ export default function SuccessStep() {
           <>
             <Check size={16} className="text-[#788c5d]" />
             <span className="text-[#788c5d] font-semibold">
-              {t("synced", { count: courseNames.length })}
+              {t("synced", { count: courses.length })}
             </span>
           </>
         )}
       </div>
 
-      {syncStatus === "complete" && courseNames.length > 0 && (
+      {syncComplete && courseNames.length > 0 && (
         <p className="mt-3 text-sm text-text-2">{courseNames.join(", ")}</p>
       )}
 
-      {syncStatus === "complete" && (
+      {syncComplete && (
         <button
           type="button"
           onClick={handleGoToDashboard}
