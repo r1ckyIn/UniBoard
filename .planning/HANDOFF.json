@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-06T12:55:56Z",
+  "phase": "31",
+  "phase_name": "e2e-verification-ai-config",
+  "phase_dir": ".planning/phases/31-e2e-verification-ai-config",
+  "plan": 2,
+  "task": "UAT",
+  "total_tasks": 5,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "31-01", "name": "Wire setup flow to backend APIs", "status": "done", "commit": "5782481"},
+    {"id": "31-02", "name": "Fix SSE dual-path + AI key guard", "status": "done", "commit": "8bfb461"},
+    {"id": "UAT-1", "name": "Token validation E2E", "status": "done", "notes": "Passed after 10 bug fixes"}
+  ],
+  "remaining_tasks": [
+    {"id": "UAT-2", "name": "Sync status + real courses displayed", "status": "not_started"},
+    {"id": "UAT-3", "name": "AI SSE streaming through BFF proxy", "status": "not_started"},
+    {"id": "UAT-4", "name": "AI 503 graceful degradation", "status": "not_started"},
+    {"id": "UAT-5", "name": "Railway API key production check", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "Sync may be failing silently after token setup", "type": "technical", "workaround": "Check Railway logs or Sentry"},
+    {"description": "Supabase JWT expires in 1hr, long sessions hit 401", "type": "technical", "workaround": "Clear site data and re-login"}
+  ],
+  "human_actions_pending": [],
+  "decisions": [
+    {"decision": "Support ES256+HS256 JWT verification", "rationale": "Supabase rotated to ECC keys", "phase": "31"},
+    {"decision": "Only clearAuth on GET 401", "rationale": "Prevent auth clear during setup mutations", "phase": "31"},
+    {"decision": "30s sync timeout fallback", "rationale": "Sync failure left user stuck", "phase": "31"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Investigate sync failure, continue UAT tests 2-5",
+  "context_notes": "10 production bugs found and fixed during UAT. Core E2E path works (register→setup→token→success). Sync investigation is next priority."
+}
