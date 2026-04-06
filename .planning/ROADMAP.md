@@ -217,7 +217,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 26. CI/CD & Production Deployment | M4 | 3/3 | Complete   | 2026-04-04 |
 | 27. Frontend UX Fixes & Materials Preview | M4 | 0/TBD | Not started | - |
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
-| 30. BFF Proxy Conversion | v3.0 | 1/3 | In Progress | - |
+| 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
