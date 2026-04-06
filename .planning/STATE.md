@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Production Ready + AI Core
-status: planning
-stopped_at: Phase 29 context gathered
-last_updated: "2026-04-06T02:17:46.545Z"
-last_activity: 2026-04-06 — Roadmap created for v3.0 (7 phases, 18 requirements)
+status: executing
+stopped_at: Phase 29 executing (1/2 plans complete)
+last_updated: "2026-04-06T03:15:13Z"
+last_activity: 2026-04-06 — Phase 29 Plan 01+02 executed (Sentry hardening)
 progress:
   total_phases: 7
   completed_phases: 0
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 29 of 35 (Sentry Hardening) — first of 7 v3.0 phases
-Plan: —
-Status: Ready to plan
-Last activity: 2026-04-06 — Roadmap created for v3.0 (7 phases, 18 requirements)
+Plan: 2 of 2 executing (checkpoint pending)
+Status: Executing — human checkpoint pending
+Last activity: 2026-04-06 — Phase 29 Plans 01+02 code tasks complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] ~14%
 
 ## Milestones Completed
 
@@ -46,6 +46,9 @@ Progress: [░░░░░░░░░░] 0%
 - Middleware removed from Next.js (Edge Runtime incompatibility on Vercel)
 - Sentry org: yuan-qin (14-day Business trial started 2026-04-05)
 - v3.0 roadmap: 7 phases (29-35), 18 requirements mapped
+- [Phase 29]: Used instrumentation-client.ts (not deprecated sentry.client.config.ts) per Sentry SDK v10.x
+- [Phase 29]: replaysSessionSampleRate: 0 + replaysOnErrorSampleRate: 1.0 for cost-effective error debugging
+- [Phase 29]: Dynamic CSP connect-src reads NEXT_PUBLIC_API_URL origin at build time via new URL().origin
 
 ### Roadmap Evolution
 
@@ -65,5 +68,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T02:17:46.540Z
-Stopped at: Phase 29 context gathered
+Last session: 2026-04-06T03:15:13Z
+Stopped at: Phase 29 executing — human checkpoint pending for Sentry project verification

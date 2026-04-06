@@ -1,5 +1,6 @@
 'use client';
 
+import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -13,6 +14,7 @@ export default function Error({
   const t = useTranslations('errorBoundary');
 
   useEffect(() => {
+    Sentry.captureException(error);
     console.error('[UniBoard Error]', error.message, error.digest);
   }, [error]);
 
