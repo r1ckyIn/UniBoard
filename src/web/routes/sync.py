@@ -6,6 +6,7 @@ from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
+import structlog
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -14,13 +15,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import Profile
 from src.schemas.common import NotFoundError, RateLimitedError, SuccessResponse
 from src.schemas.sync import (
+    PlatformHealth,
+    PlatformStatus,
+    SyncCount,
+    SyncDetail,
     SyncHistoryEntry,
     SyncHistoryResponse,
-    SyncSourceStatus,
+    SyncResults,
     SyncStatusResponse,
     SyncTriggerResponse,
 )
 from src.web.deps import get_current_user_id, get_request_meta, get_session
+
+logger = structlog.get_logger()
 
 # Manual sync cooldown period
 _SYNC_COOLDOWN = timedelta(minutes=5)
@@ -64,8 +71,11 @@ async def trigger_sync(
                 f"Manual sync rate limited. Next allowed at {next_allowed.isoformat()}"
             )
 
-    # Update throttle timestamp
+    # Update throttle timestamp and set sync status to "syncing"
     profile.last_manual_sync_at = now
+    profile.last_sync_at = now
+    profile.canvas_sync_status = "syncing"
+    profile.ed_sync_status = "syncing"
     await session.flush()
 
     scope = body.scope if body else "all"
@@ -86,10 +96,17 @@ async def trigger_sync(
         "outline": sync_all_outlines,
     }
 
+    def _on_task_done(task: asyncio.Task[None]) -> None:
+        _background_tasks.discard(task)
+        if task.cancelled():
+            logger.warning("background_sync_cancelled")
+        elif exc := task.exception():
+            logger.error("background_sync_failed", exc=str(exc))
+
     def _launch(coro_fn: Callable[[], Coroutine[Any, Any, None]]) -> None:
         task = asyncio.create_task(coro_fn())
         _background_tasks.add(task)
-        task.add_done_callback(_background_tasks.discard)
+        task.add_done_callback(_on_task_done)
 
     if scope == "all":
         for fn in _SCOPE_DISPATCH.values():
@@ -150,40 +167,77 @@ async def get_sync_status(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[SyncStatusResponse]:
-    """Return per-source sync status for the current user."""
+    """Return sync status matching OpenAPI SyncStatusResponse contract."""
     profile = await session.get(Profile, current_user_id)
     if profile is None:
         raise NotFoundError("Profile")
 
-    canvas_status = SyncSourceStatus(
-        platform="canvas",
-        status=profile.canvas_sync_status,
-        last_synced_at=(
-            profile.canvas_last_synced_at.isoformat()
-            if profile.canvas_last_synced_at
-            else None
-        ),
-        token_status=profile.canvas_token_status,
-    )
-    ed_status = SyncSourceStatus(
-        platform="ed",
-        status=profile.ed_sync_status,
-        last_synced_at=(
-            profile.ed_last_synced_at.isoformat()
-            if profile.ed_last_synced_at
-            else None
-        ),
-        token_status=profile.ed_token_status,
+    # Determine overall sync status from per-platform statuses
+    canvas_s = profile.canvas_sync_status
+    ed_s = profile.ed_sync_status
+    is_syncing = canvas_s == "syncing" or ed_s == "syncing"
+
+    if is_syncing:
+        overall_status = "in_progress"
+    elif canvas_s == "failed" or ed_s == "failed":
+        overall_status = "completed"
+    else:
+        overall_status = "completed"
+
+    # Build sync results from recent sync_history entries
+    from src.models.sync_history import SyncHistory
+
+    results = SyncResults()
+    if profile.last_sync_at:
+        hist_stmt = (
+            select(SyncHistory)
+            .where(
+                SyncHistory.user_id == current_user_id,
+                SyncHistory.started_at >= profile.last_sync_at,
+            )
+            .order_by(SyncHistory.started_at.desc())
+        )
+        hist_result = await session.execute(hist_stmt)
+        entries = hist_result.scalars().all()
+        for entry in entries:
+            count = SyncCount(synced=entry.records_updated, new=0, updated=entry.records_updated)
+            if entry.domain == "grades":
+                results.grades = count
+            elif entry.domain == "deadlines":
+                results.deadlines = count
+            elif entry.domain == "discussions":
+                results.discussions = count
+
+    started_at = (profile.last_sync_at or profile.last_manual_sync_at or datetime.utcnow())  # noqa: DTZ003
+    completed_at_val = None if is_syncing else datetime.utcnow().isoformat()  # noqa: DTZ003
+
+    last_sync = SyncDetail(
+        sync_id=f"sync_{current_user_id.hex[:8]}",
+        status=overall_status,
+        started_at=started_at.isoformat(),
+        completed_at=completed_at_val,
+        results=results,
     )
 
-    is_syncing = profile.canvas_sync_status == "syncing" or (
-        profile.ed_sync_status == "syncing"
+    # Build platform health
+    def _platform_health(status: str, last_synced: datetime | None) -> PlatformHealth:
+        if status in ("success", "pending"):
+            health = "healthy"
+        elif status in ("degraded", "syncing"):
+            health = "degraded"
+        else:
+            health = "error"
+        return PlatformHealth(
+            status=health,
+            last_success=(last_synced.isoformat() if last_synced else started_at.isoformat()),
+        )
+
+    platforms = PlatformStatus(
+        canvas=_platform_health(canvas_s, profile.canvas_last_synced_at),
+        ed=_platform_health(ed_s, profile.ed_last_synced_at),
     )
 
     return SuccessResponse(
-        data=SyncStatusResponse(
-            sources=[canvas_status, ed_status],
-            is_syncing=is_syncing,
-        ),
+        data=SyncStatusResponse(last_sync=last_sync, platforms=platforms),
         meta=get_request_meta(request),
     )

@@ -12,11 +12,54 @@ class SyncSourceStatus(BaseModel):
     token_status: str  # "active" | "expired" | "not_configured"
 
 
-class SyncStatusResponse(BaseModel):
-    """Aggregated sync status for all sources."""
+# ── OpenAPI-contract-aligned response models ────────────────────────────────
 
-    sources: list[SyncSourceStatus]
-    is_syncing: bool
+
+class SyncCount(BaseModel):
+    """Counters for a single sync domain."""
+
+    synced: int
+    new: int
+    updated: int
+
+
+class SyncResults(BaseModel):
+    """Aggregated results across sync domains."""
+
+    grades: SyncCount | None = None
+    deadlines: SyncCount | None = None
+    discussions: SyncCount | None = None
+
+
+class SyncDetail(BaseModel):
+    """Last sync session detail matching OpenAPI SyncDetail schema."""
+
+    sync_id: str
+    status: str  # "in_progress" | "completed" | "failed"
+    started_at: str
+    completed_at: str | None = None
+    results: SyncResults
+
+
+class PlatformHealth(BaseModel):
+    """Health status of a single platform."""
+
+    status: str  # "healthy" | "degraded" | "error"
+    last_success: str
+
+
+class PlatformStatus(BaseModel):
+    """Health status of all platforms."""
+
+    canvas: PlatformHealth
+    ed: PlatformHealth
+
+
+class SyncStatusResponse(BaseModel):
+    """Aggregated sync status matching OpenAPI SyncStatusResponse schema."""
+
+    last_sync: SyncDetail
+    platforms: PlatformStatus
 
 
 class SyncTriggerResponse(BaseModel):
