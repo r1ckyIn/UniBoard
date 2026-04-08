@@ -90,10 +90,11 @@ async def test_sync_status_endpoint(test_client: httpx.AsyncClient) -> None:
         resp = await test_client.get("/api/v1/sync/status", headers=headers)
         assert resp.status_code == 200
         data = resp.json()["data"]
-        assert "sources" in data
-        assert len(data["sources"]) == 2
-        assert data["sources"][0]["platform"] in ("canvas", "ed")
-        assert "is_syncing" in data
+        assert "last_sync" in data
+        assert data["last_sync"]["status"] in ("in_progress", "completed", "failed")
+        assert "platforms" in data
+        assert "canvas" in data["platforms"]
+        assert "ed" in data["platforms"]
 
 
 async def test_manual_sync_trigger(test_client: httpx.AsyncClient) -> None:
