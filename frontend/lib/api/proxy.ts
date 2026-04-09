@@ -38,11 +38,20 @@ export async function proxyRequest(
   if (auth) headers["Authorization"] = auth;
   if (body != null) headers["Content-Type"] = "application/json";
 
-  const resp = await fetch(targetUrl, {
-    method: request.method,
-    headers,
-    body: body ?? undefined,
-  });
+  let resp: globalThis.Response;
+  try {
+    resp = await fetch(targetUrl, {
+      method: request.method,
+      headers,
+      body: body ?? undefined,
+    });
+  } catch (err) {
+    console.error("[proxy] fetch failed:", targetUrl, err);
+    return NextResponse.json(
+      { error: { code: "BACKEND_UNREACHABLE", message: "Backend service is temporarily unavailable." } },
+      { status: 502 },
+    );
+  }
 
   if (stream && resp.ok) {
     return new Response(resp.body, {
