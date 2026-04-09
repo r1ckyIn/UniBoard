@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/auth/store";
 import { createClient } from "@/lib/supabase/client";
+import { api } from "@/lib/api/client";
 
 export function DashboardGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -25,8 +26,10 @@ export function DashboardGuard({ children }: { children: React.ReactNode }) {
 
   // Check Supabase session on mount (handles page refresh)
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
       if (session) {
         useAuthStore.getState().setAuth(
           { access: session.access_token, refresh: session.refresh_token },
@@ -36,9 +39,26 @@ export function DashboardGuard({ children }: { children: React.ReactNode }) {
             displayName: session.user.user_metadata?.display_name ?? "",
           },
         );
+
+        // Restore tokenConfigured from backend if not set locally
+        if (!useAuthStore.getState().tokenConfigured) {
+          try {
+            const resp = await api
+              .get("users/me")
+              .json<{ data: { tokens: { canvas: { status: string }; ed: { status: string } } } }>();
+            const { canvas, ed } = resp.data.tokens;
+            if (canvas.status === "active" || ed.status === "active") {
+              useAuthStore.getState().setTokenConfigured(true);
+            }
+          } catch {
+            // Backend unreachable — fall through to redirect
+          }
+        }
       }
+
       setSessionChecked(true);
-    });
+    };
+    checkSession();
   }, []);
 
   useEffect(() => {
