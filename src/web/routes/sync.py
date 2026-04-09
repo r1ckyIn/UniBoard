@@ -81,8 +81,10 @@ async def trigger_sync(
     scope = body.scope if body else "all"
     next_allowed_at = now + _SYNC_COOLDOWN
 
-    # Dispatch actual sync task in background based on scope
+    # Dispatch actual sync task in background based on scope.
+    # Course discovery runs first so other tasks find Course records.
     from src.sync import (
+        sync_all_courses,
         sync_all_deadlines,
         sync_all_grades,
         sync_all_modules,
@@ -108,9 +110,14 @@ async def trigger_sync(
         _background_tasks.add(task)
         task.add_done_callback(_on_task_done)
 
-    if scope == "all":
+    async def _sync_pipeline() -> None:
+        """Run course discovery first, then dispatch remaining sync tasks."""
+        await sync_all_courses()
         for fn in _SCOPE_DISPATCH.values():
             _launch(fn)
+
+    if scope == "all":
+        _launch(_sync_pipeline)
     elif scope in _SCOPE_DISPATCH:
         _launch(_SCOPE_DISPATCH[scope])
 
