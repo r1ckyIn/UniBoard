@@ -1,8 +1,10 @@
 """FastAPI application factory and entry point."""
 
+import os
 import time
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 import sentry_sdk
 import structlog
@@ -63,11 +65,46 @@ def create_app() -> FastAPI:
 
     # Sentry error tracking (conditional -- no-op when DSN is empty)
     if settings.sentry_dsn:
+
+        def _before_send(
+            event: dict[str, Any], hint: dict[str, Any]
+        ) -> dict[str, Any] | None:
+            """Filter and fingerprint Sentry events for noise reduction."""
+            exc_info = hint.get("exc_info")
+            if exc_info and isinstance(exc_info, tuple):
+                exc_type = exc_info[0]
+                exc_value = exc_info[1]
+                exc_type_name = getattr(exc_type, "__name__", "")
+                msg = str(exc_value).lower()
+
+                # Group all DBAPIError/OperationalError by type, not traceback
+                if exc_type_name in ("DBAPIError", "OperationalError", "InterfaceError"):
+                    event["fingerprint"] = ["db-connection-error", exc_type_name]
+                    # Suppress transient connection errors entirely
+                    transient = (
+                        "connection reset",
+                        "server closed the connection",
+                        "ssl connection has been closed",
+                        "broken pipe",
+                        "prepared statement",
+                        "invalidsqlstatementname",
+                    )
+                    if any(p in msg for p in transient):
+                        return None
+
+            return event
+
+        # Use Railway git SHA for deploy-level release tracking
+        git_sha = os.environ.get("RAILWAY_GIT_COMMIT_SHA", "")
+        release = f"uniboard-api@{git_sha[:8]}" if git_sha else None
+
         sentry_sdk.init(
             dsn=settings.sentry_dsn,
             traces_sample_rate=0.1,
             send_default_pii=False,
             environment="production" if not settings.debug else "development",
+            before_send=_before_send,  # type: ignore[arg-type]
+            release=release,
         )
 
     origins = [o.strip() for o in settings.cors_origins.split(",")]

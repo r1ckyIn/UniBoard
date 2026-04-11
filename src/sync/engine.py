@@ -5,10 +5,12 @@ from __future__ import annotations
 import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
 
 import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
 
@@ -139,24 +141,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         ed_discussions_interval_min=settings.sync_deadlines_interval_min,
     )
 
-    # Trigger initial full sync for all users
-    scheduler.add_job(
-        sync_all_grades, id="initial_grades_sync", replace_existing=True
-    )
-    scheduler.add_job(
-        sync_all_deadlines, id="initial_deadlines_sync", replace_existing=True
-    )
-    scheduler.add_job(
-        sync_all_modules, id="initial_modules_sync", replace_existing=True
-    )
-    scheduler.add_job(
-        sync_all_outlines, id="initial_outlines_sync", replace_existing=True
-    )
-    scheduler.add_job(
-        sync_ed_discussions,
-        id="initial_ed_discussions_sync",
-        replace_existing=True,
-    )
+    # Stagger initial sync jobs to prevent connection pool exhaustion.
+    # Each job starts 5 seconds after the previous one.
+    now = datetime.utcnow()  # noqa: DTZ003
+    initial_jobs: list[tuple[str, object]] = [
+        ("initial_grades_sync", sync_all_grades),
+        ("initial_deadlines_sync", sync_all_deadlines),
+        ("initial_modules_sync", sync_all_modules),
+        ("initial_outlines_sync", sync_all_outlines),
+        ("initial_ed_discussions_sync", sync_ed_discussions),
+    ]
+    for i, (job_id, job_fn) in enumerate(initial_jobs):
+        scheduler.add_job(
+            job_fn,
+            DateTrigger(run_date=now + timedelta(seconds=5 * i)),
+            id=job_id,
+            replace_existing=True,
+        )
 
     try:
         yield

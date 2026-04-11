@@ -40,6 +40,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Forward Vercel system env var to the client bundle.
+  // VERCEL_GIT_COMMIT_SHA is exposed server-side automatically, but Next.js
+  // only embeds NEXT_PUBLIC_* into the browser. This mapping runs at build
+  // time so each deployment gets its own immutable SHA string.
+  env: {
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
