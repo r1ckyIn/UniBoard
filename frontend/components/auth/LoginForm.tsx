@@ -10,6 +10,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useLogin } from "@/hooks/use-auth";
 import { useAuthStore } from "@/lib/auth/store";
+import { api } from "@/lib/api/client";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -35,11 +36,30 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     loginMutation.mutate(
       { email: data.email, password: data.password },
       {
-        onSuccess: () => {
-          // onAuthStateChange fires synchronously during signInWithPassword
-          // and updates zustand before this callback runs
-          const { tokenConfigured } = useAuthStore.getState();
-          router.push(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
+        onSuccess: async () => {
+          let configured = useAuthStore.getState().tokenConfigured;
+          if (!configured) {
+            try {
+              const resp = await api
+                .get("users/me")
+                .json<{
+                  data: {
+                    tokens: {
+                      canvas: { status: string };
+                      ed: { status: string };
+                    };
+                  };
+                }>();
+              const { canvas, ed } = resp.data.tokens;
+              if (canvas.status === "active" || ed.status === "active") {
+                useAuthStore.getState().setTokenConfigured(true);
+                configured = true;
+              }
+            } catch {
+              // Backend unreachable — default to setup
+            }
+          }
+          router.push(configured ? `/${locale}` : `/${locale}/setup`);
         },
       },
     );

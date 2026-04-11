@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import type { paths } from "@/lib/api/types.gen";
+import { courseKeys } from "./use-courses";
 
 // ── Response type aliases ───────────────────────────────────────────────────
 type SyncStatusResponse =
@@ -48,6 +49,7 @@ export function useSyncTrigger() {
         .json<SyncTriggerResponse>(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: syncKeys.all });
+      queryClient.invalidateQueries({ queryKey: courseKeys.all });
     },
   });
 }

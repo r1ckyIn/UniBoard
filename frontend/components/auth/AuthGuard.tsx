@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/auth/store";
 import { createClient } from "@/lib/supabase/client";
+import { api } from "@/lib/api/client";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useLocale();
   const { isAuthenticated, tokenConfigured } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
-    // zustand persist hydrates async from localStorage
     const unsub = useAuthStore.persist.onFinishHydration(() => {
       setHydrated(true);
     });
-    // If already hydrated (e.g. not first render)
     if (useAuthStore.persist.hasHydrated()) {
       setHydrated(true);
     }
@@ -25,10 +25,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Check Supabase session on mount (handles page refresh where
-    // zustand may have stale data but Supabase cookie has valid session)
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (session) {
         useAuthStore.getState().setAuth(
           { access: session.access_token, refresh: session.refresh_token },
@@ -38,19 +40,42 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             displayName: session.user.user_metadata?.display_name ?? "",
           },
         );
+
+        if (!useAuthStore.getState().tokenConfigured) {
+          try {
+            const resp = await api
+              .get("users/me")
+              .json<{
+                data: {
+                  tokens: {
+                    canvas: { status: string };
+                    ed: { status: string };
+                  };
+                };
+              }>();
+            const { canvas, ed } = resp.data.tokens;
+            if (canvas.status === "active" || ed.status === "active") {
+              useAuthStore.getState().setTokenConfigured(true);
+            }
+          } catch {
+            // Backend unreachable — fall through to setup redirect
+          }
+        }
       }
-    });
+
+      setSessionChecked(true);
+    };
+    checkSession();
   }, []);
 
   useEffect(() => {
-    if (hydrated && isAuthenticated) {
+    if (!hydrated || !sessionChecked) return;
+    if (isAuthenticated) {
       router.replace(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
     }
-  }, [hydrated, isAuthenticated, tokenConfigured, locale, router]);
+  }, [hydrated, sessionChecked, isAuthenticated, tokenConfigured, locale, router]);
 
-  // Show nothing until hydration completes (prevents flash)
-  if (!hydrated) return null;
-  // Authenticated users see nothing while redirect happens
+  if (!hydrated || !sessionChecked) return null;
   if (isAuthenticated) return null;
   return <>{children}</>;
 }
