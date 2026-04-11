@@ -291,14 +291,7 @@ Wait for collector to complete before proceeding.
 
 ### Step 2: Triage (Main Process — Do Not Spawn)
 
-Classify each Sentry issue using `rules/safety-gates.md`:
-
-| Priority | Criteria | Action |
-|----------|----------|--------|
-| **P1** | >10 events/5min OR affects auth/sync OR level=fatal OR deploy failed | Notify only; do not auto-fix |
-| **P2** | New (<24h) OR regression OR core page OR events>5 (not P1) | → Analyst |
-| **P3** | Known transient + events≤5 + single-file fix | → Analyst |
-| **Noise** | ResizeObserver / ChunkLoadError / bot traffic | Skip, note in report |
+Classify each Sentry issue against `rules/safety-gates.md` — that file is the canonical source for P1/P2/P3/Noise definitions. Additional rules specific to this skill:
 
 **Clustering rule (added 2026-04-11)**: if multiple Sentry issues share the same stack trace root (e.g. all pointing to `_record_sync_history`), treat them as a SINGLE cluster with merged event count for triage. Pass the cluster — not individual issues — to the analyst.
 
@@ -467,12 +460,10 @@ Call `Agent`:
 ```
 Apply the verified fix and open a PR.
 
-## Safety Gates (from rules/safety-gates.md)
-- NEVER commit on main — branch name: `fix/sentry-<cluster-slug>`
-- If final diff touches > 3 files, STOP and report back (do NOT proceed)
-- Tag pre-fix state on main BEFORE branching: `git tag pre-fix-<cluster-slug>`
-- Do NOT modify migrations / auth / security code
-- Commit msg: conventional commits, NO `Co-Authored-By` / Claude Code footer (commit-msg hook rejects it)
+## Safety Gates
+- Read `rules/safety-gates.md` — that file is the canonical source for auto-fix gates (blast-radius cap, branch protection, tag-before-fix, forbidden paths).
+- Branch name for this skill: `fix/sentry-<cluster-slug>`; tag name: `pre-fix-<cluster-slug>`.
+- Commit-msg format MUST omit `Co-Authored-By` / Claude Code footer — the project's commit-msg hook rejects them.
 
 ## BEFORE branching — preflight alignment (added 2026-04-11)
 
