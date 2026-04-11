@@ -270,3 +270,18 @@ Plans:
 Plans:
 - [x] 31-01-PLAN.md — Wire setup flow to real backend APIs (BFF-04)
 - [x] 31-02-PLAN.md — Fix SSE dual-path, AI key guard, Railway config (AICONF-01, AICONF-02)
+
+### Phase 31.1: Observability Pipeline & Sentry Hardening
+**Goal**: Fix DB connection error spam, implement Sentry/Vercel best practices, set up automated monitoring pipeline
+**Depends on**: Phase 31
+**Requirements**: OBS-01, OBS-02, OBS-03
+**Success Criteria** (what must be TRUE):
+  1. Transient DB connection errors (DBAPIError) are retried with backoff and suppressed in Sentry
+  2. Sentry uses release tracking (git SHA), fingerprinting, and noise filtering for both backend and frontend
+  3. Sentry tunnel route bypasses ad blockers for client-side error reporting
+  4. Automated `/check-alerts` skill queries Sentry API + Gmail for triage
+**Plans**: 3 plans
+Plans:
+- [x] 31.1-01 — Fix DBAPIError root cause (pool limits, startup jitter, before_send filter)
+- [x] 31.1-02 — Sentry/Vercel best practices (release tracking, tunnel, fingerprinting)
+- [ ] 31.1-03 — Automated monitoring pipeline (Gmail MCP, /check-alerts skill)

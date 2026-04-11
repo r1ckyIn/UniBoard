@@ -23,9 +23,13 @@ def _get_engine() -> AsyncEngine:
         _engine = create_async_engine(
             settings.database_url,
             pool_size=5,
-            max_overflow=10,
+            max_overflow=5,
+            pool_timeout=30,
             pool_recycle=300,
-            pool_pre_ping=True,
+            # pool_pre_ping disabled: Supavisor transaction pooler causes
+            # InvalidSQLStatementNameError on ping's prepared statement.
+            # pool_recycle=300 handles stale connection recycling instead.
+            pool_pre_ping=False,
             echo=settings.debug,
             # Disable prepared statement cache for Supavisor transaction pooler
             connect_args={"prepared_statement_cache_size": 0},

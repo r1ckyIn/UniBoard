@@ -4,7 +4,7 @@ import asyncio
 import uuid
 from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
-from typing import Any, Literal
+from typing import Any, Final, Literal
 
 import structlog
 from fastapi import APIRouter, Depends, Request
@@ -31,6 +31,9 @@ logger = structlog.get_logger()
 
 # Manual sync cooldown period
 _SYNC_COOLDOWN = timedelta(minutes=5)
+
+# Limit concurrent sync tasks to prevent DB pool exhaustion
+_SYNC_SEMAPHORE: Final = asyncio.Semaphore(2)
 
 router = APIRouter()
 
@@ -111,10 +114,24 @@ async def trigger_sync(
         task.add_done_callback(_on_task_done)
 
     async def _sync_pipeline() -> None:
-        """Run course discovery first, then dispatch remaining sync tasks."""
+        """Run course discovery first, then dispatch remaining sync tasks.
+
+        Uses a semaphore to limit concurrent sync tasks and prevent
+        database connection pool exhaustion on Supavisor.
+        """
         await sync_all_courses()
+
+        async def _limited(fn: Callable[[], Coroutine[Any, Any, None]]) -> None:
+            async with _SYNC_SEMAPHORE:
+                await fn()
+
         for fn in _SCOPE_DISPATCH.values():
-            _launch(fn)
+            bound_fn = fn  # capture loop variable
+
+            async def _run(f: Callable[[], Coroutine[Any, Any, None]] = bound_fn) -> None:
+                await _limited(f)
+
+            _launch(_run)
 
     if scope == "all":
         _launch(_sync_pipeline)
