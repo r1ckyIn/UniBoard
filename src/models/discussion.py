@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Computed, Float, ForeignKey, Index, String, Text
+from sqlalchemy import Computed, DateTime, Float, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,7 +49,9 @@ class DiscussionThread(UUIDMixin, TimestampMixin, Base):
         ),
         nullable=True,
     )
-    synced_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    synced_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     course: Mapped[Course] = relationship(back_populates="discussion_threads")

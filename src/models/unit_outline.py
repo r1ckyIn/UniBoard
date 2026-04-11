@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -29,7 +29,9 @@ class UnitOutline(UUIDMixin, TimestampMixin, Base):
         JSON, nullable=True
     )
     raw_html: Mapped[str | None] = mapped_column(Text, nullable=True)
-    fetched_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    fetched_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     semester: Mapped[str] = mapped_column(String(20))
 
     # Relationships

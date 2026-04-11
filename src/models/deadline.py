@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, String, Text
+from sqlalchemy import DateTime, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -26,7 +26,7 @@ class UnifiedDeadline(UUIDMixin, TimestampMixin, Base):
 
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     title: Mapped[str] = mapped_column(String(255))
-    due_date: Mapped[datetime] = mapped_column()
+    due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     source: Mapped[str] = mapped_column(String(30))
     source_id: Mapped[str] = mapped_column(String(100))
     weight: Mapped[float | None] = mapped_column(nullable=True)

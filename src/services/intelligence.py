@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 import structlog
 from sqlalchemy import or_, select
@@ -30,7 +30,7 @@ def _maybe_reset_daily_counter(profile: Profile) -> None:
     today = date.today()
     if profile.ai_calls_reset_date is None or profile.ai_calls_reset_date.date() < today:
         profile.ai_calls_today = 0
-        profile.ai_calls_reset_date = datetime.combine(today, datetime.min.time())
+        profile.ai_calls_reset_date = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
 
 
 def _derive_relevance_category(thread: DiscussionThread) -> str:

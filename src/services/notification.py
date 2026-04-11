@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 import structlog
 from sqlalchemy import func, select
@@ -73,7 +73,7 @@ class NotificationService:
             content_hash=content_hash,
             source_type=notification_type,
             source_id=str(notification.id),
-            pushed_at=datetime.utcnow(),  # noqa: DTZ003
+            pushed_at=datetime.now(UTC),
             channel=channels[0],
         )
         self._session.add(push_record)
