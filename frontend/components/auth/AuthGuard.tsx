@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/auth/store";
 import { createClient } from "@/lib/supabase/client";
-import { api } from "@/lib/api/client";
+import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -41,26 +41,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           },
         );
 
-        if (!useAuthStore.getState().tokenConfigured) {
-          try {
-            const resp = await api
-              .get("users/me")
-              .json<{
-                data: {
-                  tokens: {
-                    canvas: { status: string };
-                    ed: { status: string };
-                  };
-                };
-              }>();
-            const { canvas, ed } = resp.data.tokens;
-            if (canvas.status === "active" || ed.status === "active") {
-              useAuthStore.getState().setTokenConfigured(true);
-            }
-          } catch {
-            // Backend unreachable — fall through to setup redirect
-          }
-        }
+        await restoreTokenConfiguredIfNeeded();
       }
 
       setSessionChecked(true);

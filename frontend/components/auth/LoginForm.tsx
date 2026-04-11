@@ -9,8 +9,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useLogin } from "@/hooks/use-auth";
-import { useAuthStore } from "@/lib/auth/store";
-import { api } from "@/lib/api/client";
+import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -37,28 +36,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       { email: data.email, password: data.password },
       {
         onSuccess: async () => {
-          let configured = useAuthStore.getState().tokenConfigured;
-          if (!configured) {
-            try {
-              const resp = await api
-                .get("users/me")
-                .json<{
-                  data: {
-                    tokens: {
-                      canvas: { status: string };
-                      ed: { status: string };
-                    };
-                  };
-                }>();
-              const { canvas, ed } = resp.data.tokens;
-              if (canvas.status === "active" || ed.status === "active") {
-                useAuthStore.getState().setTokenConfigured(true);
-                configured = true;
-              }
-            } catch {
-              // Backend unreachable — default to setup
-            }
-          }
+          const configured = await restoreTokenConfiguredIfNeeded();
           router.push(configured ? `/${locale}` : `/${locale}/setup`);
         },
       },
