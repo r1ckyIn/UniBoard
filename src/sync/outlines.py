@@ -69,7 +69,7 @@ async def sync_all_outlines() -> None:
                         ],
                         "learning_outcomes": parse_result.learning_outcomes,
                         "raw_html": parse_result.raw_html,
-                        "fetched_at": datetime.now(UTC).replace(tzinfo=None),
+                        "fetched_at": now,
                         "semester": semester,
                     }
 

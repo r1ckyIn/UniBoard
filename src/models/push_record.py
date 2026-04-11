@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, String
+from sqlalchemy import DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -27,7 +27,7 @@ class PushRecord(UUIDMixin, TimestampMixin, Base):
     content_hash: Mapped[str] = mapped_column(String(64))
     source_type: Mapped[str] = mapped_column(String(30))
     source_id: Mapped[str] = mapped_column(String(100))
-    pushed_at: Mapped[datetime] = mapped_column()
+    pushed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     channel: Mapped[str] = mapped_column(String(20))
 
     # Relationships

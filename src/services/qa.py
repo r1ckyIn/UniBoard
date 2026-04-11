@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 import uuid
 from collections.abc import AsyncGenerator
-from datetime import datetime
+from datetime import UTC, datetime
 
 import structlog
 import tiktoken
@@ -62,7 +62,7 @@ class QAService:
             raise RateLimitedError("User not found")
 
         # Reset daily counter if date changed
-        today = datetime.utcnow()
+        today = datetime.now(UTC)
         if (
             user.ai_calls_reset_date is None
             or user.ai_calls_reset_date.date() < today.date()

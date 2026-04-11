@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -25,7 +25,7 @@ class Digest(UUIDMixin, TimestampMixin, Base):
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
-    digest_date: Mapped[datetime] = mapped_column()
+    digest_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     content_json: Mapped[dict[str, Any]] = mapped_column(JSON)
     ai_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_sent_email: Mapped[bool] = mapped_column(

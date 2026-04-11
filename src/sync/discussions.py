@@ -88,7 +88,7 @@ async def sync_ed_discussions() -> None:
                             )
                             continue
 
-                        now_naive = datetime.now(UTC).replace(tzinfo=None)
+                        now = datetime.now(UTC)
 
                         for t in threads:
                             ed_thread_id = str(t.get("id", ""))
@@ -115,7 +115,7 @@ async def sync_ed_discussions() -> None:
                                 "content": t.get("content"),
                                 "is_endorsed": bool(t.get("is_endorsed", False)),
                                 "is_staff_post": is_staff,
-                                "synced_at": now_naive,
+                                "synced_at": now,
                             }
 
                             insert_stmt = pg_insert(DiscussionThread).values(**values)

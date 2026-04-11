@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Float, String, Text
+from sqlalchemy import DateTime, Float, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -41,26 +41,36 @@ class Profile(TimestampMixin, Base):
     ed_api_token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     gpa_target: Mapped[float | None] = mapped_column(Float, nullable=True)
     gpa_scale: Mapped[str] = mapped_column(String(10), default="wam")
-    last_sync_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    last_sync_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Sync status columns
     canvas_sync_status: Mapped[str] = mapped_column(
         String(20), default="pending", server_default="pending"
     )
-    canvas_last_synced_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    canvas_last_synced_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     ed_sync_status: Mapped[str] = mapped_column(
         String(20), default="pending", server_default="pending"
     )
-    ed_last_synced_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    ed_last_synced_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     canvas_token_status: Mapped[str] = mapped_column(
         String(20), default="not_configured", server_default="not_configured"
     )
     ed_token_status: Mapped[str] = mapped_column(
         String(20), default="not_configured", server_default="not_configured"
     )
-    last_manual_sync_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    last_manual_sync_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     ai_calls_today: Mapped[int] = mapped_column(default=0, server_default="0")
-    ai_calls_reset_date: Mapped[datetime | None] = mapped_column(nullable=True)
+    ai_calls_reset_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     language_preference: Mapped[str] = mapped_column(
         String(5), default="en", server_default="en"
     )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import structlog
 from sqlalchemy import or_, select
@@ -69,7 +69,7 @@ class DigestService:
                         )
 
         # Store digest in database
-        now = datetime.utcnow()  # noqa: DTZ003
+        now = datetime.now(UTC)
         content_data = [item.model_dump() for item in items]
         digest = Digest(
             user_id=user_id,
@@ -94,7 +94,7 @@ class DigestService:
     ) -> list[DigestItemResponse]:
         """Collect items from last 24h: grades, upcoming deadlines, high-value posts."""
         items: list[DigestItemResponse] = []
-        now = datetime.utcnow()  # noqa: DTZ003
+        now = datetime.now(UTC)
         cutoff_24h = now - timedelta(hours=24)
 
         # Get user's courses

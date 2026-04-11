@@ -3,7 +3,7 @@
 import asyncio
 import uuid
 from collections.abc import Callable, Coroutine
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, Final, Literal
 
 import structlog
@@ -63,7 +63,7 @@ async def trigger_sync(
     if profile is None:
         raise NotFoundError("Profile")
 
-    now = datetime.utcnow()  # noqa: DTZ003 -- naive UTC for PostgreSQL TIMESTAMP
+    now = datetime.now(UTC)
 
     # Check throttle
     if profile.last_manual_sync_at is not None:
@@ -232,8 +232,8 @@ async def get_sync_status(
             elif entry.domain == "discussions":
                 results.discussions = count
 
-    started_at = (profile.last_sync_at or profile.last_manual_sync_at or datetime.utcnow())  # noqa: DTZ003
-    completed_at_val = None if is_syncing else datetime.utcnow().isoformat()  # noqa: DTZ003
+    started_at = (profile.last_sync_at or profile.last_manual_sync_at or datetime.now(UTC))
+    completed_at_val = None if is_syncing else datetime.now(UTC).isoformat()
 
     last_sync = SyncDetail(
         sync_id=f"sync_{current_user_id.hex[:8]}",
