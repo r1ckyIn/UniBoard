@@ -177,3 +177,12 @@ async def sync_all_courses() -> None:
             error_message=sync_error,
             started_at=started_at,
         )
+
+        async with session_factory() as session:
+            profile = await session.get(Profile, user.id)
+            if profile:
+                profile.canvas_sync_status = sync_status
+                profile.canvas_last_synced_at = datetime.now(UTC)
+                if sync_status == "success":
+                    profile.canvas_token_status = "active"
+                await session.commit()

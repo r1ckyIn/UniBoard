@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useLogin } from "@/hooks/use-auth";
-import { useAuthStore } from "@/lib/auth/store";
+import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -35,11 +35,9 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     loginMutation.mutate(
       { email: data.email, password: data.password },
       {
-        onSuccess: () => {
-          // onAuthStateChange fires synchronously during signInWithPassword
-          // and updates zustand before this callback runs
-          const { tokenConfigured } = useAuthStore.getState();
-          router.push(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
+        onSuccess: async () => {
+          const configured = await restoreTokenConfiguredIfNeeded();
+          router.push(configured ? `/${locale}` : `/${locale}/setup`);
         },
       },
     );
