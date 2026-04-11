@@ -167,7 +167,7 @@ async def test_sync_history_endpoint(test_client: httpx.AsyncClient) -> None:
         headers = {"Authorization": f"Bearer {token}"}
 
         # Insert a SyncHistory row directly
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = datetime.now(UTC)
         history = SyncHistory(
             user_id=user_id,
             domain="grades",
@@ -200,7 +200,7 @@ async def test_sync_history_filter_by_domain(test_client: httpx.AsyncClient) -> 
         user_id, token = await _create_test_profile_and_jwt(test_session)
         headers = {"Authorization": f"Bearer {token}"}
 
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = datetime.now(UTC)
 
         # Insert rows for different domains
         for domain in ("grades", "deadlines", "modules"):
