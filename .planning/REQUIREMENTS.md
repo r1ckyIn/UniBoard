@@ -34,6 +34,13 @@
 - [ ] **ONBD-01**: 用户引导流程优化（首次登录体验打磨）
 - [ ] **ONBD-02**: Setup 页面异常状态处理（Token 无效、API 不可达、同步失败）
 
+### UX Polish (UXPOL)
+
+- [ ] **UXPOL-01**: AI Chat 输入验证失败时显示友好提示（不是裸露的 "SSE error: 422"）
+- [ ] **UXPOL-02**: AI 请求失败时显示具体原因（不是通用的 "AI request failed"）
+- [ ] **UXPOL-03**: Setup TokenStep 重试时跳过已验证成功的 Token（不重复验证）
+- [ ] **UXPOL-04**: Setup SuccessStep 显示逐域同步进度（不只是 spinner）
+
 ### AI Features (AIFEAT)
 
 - [ ] **AIFEAT-01**: AI 学习建议（基于评估权重的优先级排序，"把精力放在 Final Exam，权重 50%"）
@@ -82,10 +89,14 @@
 | AIFEAT-02 | Phase 34 | Pending |
 | AIFEAT-03 | Phase 34 | Pending |
 | AIFEAT-04 | Phase 35 | Pending |
+| UXPOL-01 | Phase 36 | Pending |
+| UXPOL-02 | Phase 36 | Pending |
+| UXPOL-03 | Phase 36 | Pending |
+| UXPOL-04 | Phase 36 | Pending |
 
 **Coverage:**
-- v3.0 requirements: 18 total
-- Mapped to phases: 18/18
+- v3.0 requirements: 22 total
+- Mapped to phases: 22/22
 - Unmapped: 0
 
 ---
