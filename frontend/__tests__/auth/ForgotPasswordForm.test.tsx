@@ -47,7 +47,7 @@ const mockResetMutation = {
   mutate: mockResetMutate,
   isPending: false,
   isError: false,
-  error: null,
+  error: null as Error | null,
 };
 vi.mock("@/hooks/use-auth", () => ({
   useResetPassword: () => mockResetMutation,
