@@ -168,12 +168,40 @@
       "description": "Welcome to UniBoard. Let's connect your Canvas and Ed accounts to get started.",
       "continueButton": "Continue to Setup"
     },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@uni.sydney.edu.au",
+      "submitButton": "Send Reset Link",
+      "backToLogin": "Back to sign in",
+      "successTitle": "Check your email",
+      "successMessage": "We've sent a password reset link to your email address."
+    },
+    "updatePassword": {
+      "title": "Set new password",
+      "subtitle": "Enter your new password below",
+      "passwordLabel": "New Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmLabel": "Confirm New Password",
+      "confirmPlaceholder": "Re-enter your new password",
+      "submitButton": "Update Password",
+      "successTitle": "Password updated!",
+      "successMessage": "Your password has been updated. You can now sign in.",
+      "backToLogin": "Back to sign in"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "description": "We've sent a confirmation link to your email. Click it to activate your account.",
+      "backToLogin": "Back to sign in"
+    },
     "errors": {
       "loginFailed": "Invalid email or password. Please try again.",
       "registerFailed": "Registration failed. Please try again.",
       "networkError": "Network error. Please check your connection.",
-      "forgotPasswordDemo": "Password reset is not available in demo mode",
-      "forgotPasswordDemoDesc": "This feature will be available in a future update."
+      "resetFailed": "Failed to send reset email. Please try again.",
+      "updatePasswordFailed": "Failed to update password. Please try again.",
+      "confirmationFailed": "Email confirmation failed. The link may have expired. Please try again."
     },
     "brand": {
       "tagline": "Your GPA, Maximized.",

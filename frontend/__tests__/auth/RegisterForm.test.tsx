@@ -25,6 +25,10 @@ vi.mock("next-intl", () => ({
       "auth.passwordStrength.good": "Good",
       "auth.passwordStrength.strong": "Strong",
       "auth.errors.registerFailed": "Registration failed. Please try again.",
+      "auth.checkEmail.title": "Check your email",
+      "auth.checkEmail.description":
+        "We've sent a confirmation link to your email. Click it to activate your account.",
+      "auth.checkEmail.backToLogin": "Back to sign in",
     };
     return map[key] ?? key;
   },
@@ -76,7 +80,6 @@ vi.mock("next/navigation", () => ({
 
 describe("RegisterForm", () => {
   const mockOnSwitchToLogin = vi.fn();
-  const mockOnRegisterSuccess = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -86,12 +89,7 @@ describe("RegisterForm", () => {
   });
 
   it("renders all 4 form fields", () => {
-    render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
-    );
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
 
     expect(screen.getByPlaceholderText("Ricky")).toBeInTheDocument();
     expect(
@@ -106,12 +104,7 @@ describe("RegisterForm", () => {
   });
 
   it("renders Create Account button", () => {
-    render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
-    );
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
 
     expect(
       screen.getByRole("button", { name: "Create Account" }),
@@ -121,10 +114,7 @@ describe("RegisterForm", () => {
   it("shows password strength meter when typing password", async () => {
     const user = userEvent.setup();
     const { container } = render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
+      <RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />,
     );
 
     const passwordInput = screen.getByPlaceholderText("At least 8 characters");
@@ -137,12 +127,7 @@ describe("RegisterForm", () => {
 
   it("shows inline error when passwords don't match", async () => {
     const user = userEvent.setup();
-    render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
-    );
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
 
     const nameInput = screen.getByPlaceholderText("Ricky");
     const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
@@ -162,9 +147,8 @@ describe("RegisterForm", () => {
     });
   });
 
-  it("calls register mutation and onRegisterSuccess on valid submit", async () => {
+  it("shows check-email UI after successful registration", async () => {
     // Make register mutate call onSuccess immediately
-    // (Supabase auto-confirms so signUp also signs in)
     mockRegisterMutate.mockImplementation(
       (
         _body: unknown,
@@ -175,12 +159,7 @@ describe("RegisterForm", () => {
     );
 
     const user = userEvent.setup();
-    render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
-    );
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
 
     const nameInput = screen.getByPlaceholderText("Ricky");
     const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
@@ -206,19 +185,18 @@ describe("RegisterForm", () => {
       );
     });
 
-    // After register success, onRegisterSuccess is called directly
-    // (no nested login needed -- Supabase auto-confirm signs user in)
-    expect(mockOnRegisterSuccess).toHaveBeenCalled();
+    // Should show check-email UI instead of calling onRegisterSuccess
+    expect(screen.getByText("Check your email")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "We've sent a confirmation link to your email. Click it to activate your account.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("calls onSwitchToLogin when 'Sign in' link is clicked", async () => {
     const user = userEvent.setup();
-    render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
-    );
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
 
     const signInLink = screen.getByText("Sign in");
     await user.click(signInLink);
@@ -228,10 +206,7 @@ describe("RegisterForm", () => {
 
   it("renders form with noValidate attribute", () => {
     const { container } = render(
-      <RegisterForm
-        onSwitchToLogin={mockOnSwitchToLogin}
-        onRegisterSuccess={mockOnRegisterSuccess}
-      />,
+      <RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />,
     );
 
     const form = container.querySelector("form");

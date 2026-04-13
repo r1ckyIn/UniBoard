@@ -18,10 +18,6 @@ vi.mock("next-intl", () => ({
       "auth.login.submitButton": "Sign In",
       "auth.login.noAccount": "Don't have an account?",
       "auth.login.createOne": "Create one",
-      "auth.errors.forgotPasswordDemo":
-        "Password reset is not available in demo mode",
-      "auth.errors.forgotPasswordDemoDesc":
-        "This feature will be available in a future update.",
       "auth.errors.loginFailed":
         "Invalid email or password. Please try again.",
     };
@@ -40,12 +36,6 @@ vi.mock("motion/react", () => ({
     ),
   },
   AnimatePresence: ({ children }: React.PropsWithChildren) => <>{children}</>,
-}));
-
-// Mock sonner
-const mockToast = vi.fn();
-vi.mock("sonner", () => ({
-  toast: (...args: unknown[]) => mockToast(...args),
 }));
 
 // Mock useLogin
@@ -88,6 +78,7 @@ vi.mock("@/lib/auth/store", () => ({
 
 describe("LoginForm", () => {
   const mockOnSwitchToRegister = vi.fn();
+  const mockOnSwitchToForgotPassword = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -97,7 +88,12 @@ describe("LoginForm", () => {
   });
 
   it("renders email and password fields with placeholders", () => {
-    render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
 
     expect(
       screen.getByPlaceholderText("you@uni.sydney.edu.au"),
@@ -108,7 +104,12 @@ describe("LoginForm", () => {
   });
 
   it("renders Sign In button", () => {
-    render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
 
     expect(
       screen.getByRole("button", { name: "Sign In" }),
@@ -117,7 +118,12 @@ describe("LoginForm", () => {
 
   it("shows inline error on submit when email is invalid", async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
 
     const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
     await user.type(emailInput, "test@gmail.com");
@@ -134,22 +140,29 @@ describe("LoginForm", () => {
     });
   });
 
-  it("shows forgot password toast on click", async () => {
+  it("calls onSwitchToForgotPassword when forgot password link is clicked", async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
 
     const forgotLink = screen.getByText("Forgot password?");
     await user.click(forgotLink);
 
-    expect(mockToast).toHaveBeenCalledWith(
-      "Password reset is not available in demo mode",
-      expect.objectContaining({ duration: 4000 }),
-    );
+    expect(mockOnSwitchToForgotPassword).toHaveBeenCalled();
   });
 
   it("calls useLogin mutation on valid form submit", async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
 
     const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
     const passwordInput = screen.getByPlaceholderText("Enter your password");
@@ -170,7 +183,12 @@ describe("LoginForm", () => {
 
   it("calls onSwitchToRegister when 'Create one' link is clicked", async () => {
     const user = userEvent.setup();
-    render(<LoginForm onSwitchToRegister={mockOnSwitchToRegister} />);
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
 
     const createOneLink = screen.getByText("Create one");
     await user.click(createOneLink);
@@ -180,7 +198,10 @@ describe("LoginForm", () => {
 
   it("renders form with noValidate attribute", () => {
     const { container } = render(
-      <LoginForm onSwitchToRegister={mockOnSwitchToRegister} />,
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
     );
 
     const form = container.querySelector("form");

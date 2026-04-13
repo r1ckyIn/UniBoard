@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-04-13T06:11:04.052Z"
-last_activity: 2026-04-06
+stopped_at: Completed 32-01-PLAN.md, 32-02-PLAN.md (Wave 1)
+last_updated: "2026-04-13T07:30:00.000Z"
+last_activity: 2026-04-13
 progress:
   total_phases: 15
   completed_phases: 12
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 31 — e2e-verification-ai-config
+**Current focus:** Phase 32 — production-email
 
 ## Current Position
 
-Phase: 31
-Plan: Not started
-Status: Executing Phase 31
-Last activity: 2026-04-06
+Phase: 32
+Plan: Wave 1 complete (32-01, 32-02), Wave 2 pending (32-03)
+Status: Executing Phase 32
+Last activity: 2026-04-13
 
 ## Milestones Completed
 
@@ -135,7 +135,7 @@ Last activity: 2026-04-06
 | Phase 26 P03 | 6min | 2 tasks | 13 files |
 | Phase 30 P03 | 5min | 2 tasks | 13 files |
 | Phase 31 P01 | 5min | 2 tasks | 3 files |
-| Phase 32 P01 | 7min | 2 tasks | 5 files |
+| Phase 32 P02 | 11min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -324,8 +324,8 @@ Recent decisions affecting current work:
 - [Phase 31]: Keep regex as client-side pre-check before backend token API call for instant feedback
 - [Phase 31]: Use last_sync.status from SyncStatusResponse (completed/failed) instead of is_syncing boolean
 - [Phase 31]: Poll sync status every 3s with conditional refetchInterval, enabled only after sync trigger fires
-- [Phase 32]: Route at app/auth/confirm (outside [locale]) since Supabase email links are locale-agnostic
-- [Phase 32]: TokenHash-based PKCE links instead of ConfirmationURL to prevent email prefetcher token consumption
+- [Phase 32]: RegisterForm handles check-email state internally via emailSent useState, removing SuccessOverlay from AuthPage
+- [Phase 32]: AuthPage supports 4 modes via URL search params: login, register, forgot-password, reset-password
 
 ### Roadmap Evolution
 
@@ -343,5 +343,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-13T06:11:04.046Z
-Stopped at: Completed 32-01-PLAN.md
+Last session: 2026-04-13T06:14:24.468Z
+Stopped at: Completed 32-02-PLAN.md
