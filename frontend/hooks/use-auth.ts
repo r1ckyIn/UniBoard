@@ -50,3 +50,27 @@ export function useLogout() {
     },
   });
 }
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/confirm`,
+      });
+      if (error) throw error;
+    },
+  });
+}
+
+export function useUpdatePassword() {
+  return useMutation({
+    mutationFn: async (newPassword: string) => {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) throw error;
+    },
+  });
+}
