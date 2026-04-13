@@ -25,10 +25,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Check for existing session on mount. If found, restore token status
-  // and redirect. This does NOT react to isAuthenticated changes — LoginForm
-  // handles its own navigation after login to avoid a race condition where
-  // this effect would redirect with stale tokenConfigured=false before
-  // restoreTokenConfiguredIfNeeded() completes.
+  // and redirect with the correct tokenConfigured value.
   useEffect(() => {
     const checkSession = async () => {
       const supabase = createClient();
@@ -56,6 +53,19 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     };
     checkSession();
   }, [locale, router]);
+
+  // When user logs in on this page, isAuthenticated flips to true.
+  // TanStack Query v5 kills component-level onSuccess callbacks on unmount,
+  // so LoginForm's router.replace may never fire. This effect catches that
+  // case and redirects to dashboard root — DashboardGuard handles the
+  // tokenConfigured check (it awaits restoreTokenConfiguredIfNeeded before
+  // setting sessionChecked, so no stale-tokenConfigured race).
+  useEffect(() => {
+    if (!hydrated || !sessionChecked) return;
+    if (isAuthenticated) {
+      router.replace(`/${locale}`);
+    }
+  }, [hydrated, sessionChecked, isAuthenticated, locale, router]);
 
   if (!hydrated || !sessionChecked) return null;
   if (isAuthenticated) return null;
