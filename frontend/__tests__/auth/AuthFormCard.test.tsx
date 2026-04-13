@@ -79,6 +79,18 @@ vi.mock("@/hooks/use-auth", () => ({
     isError: false,
     error: null,
   }),
+  useResetPassword: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
+  useUpdatePassword: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
 }));
 
 // Mock auth store
@@ -115,8 +127,7 @@ describe("AuthFormCard", () => {
       <AuthFormCard
         mode="login"
         onSwitchMode={vi.fn()}
-        onRegisterSuccess={vi.fn()}
-      />,
+              />,
     );
 
     expect(screen.getByText("Welcome back")).toBeInTheDocument();
@@ -128,8 +139,7 @@ describe("AuthFormCard", () => {
       <AuthFormCard
         mode="register"
         onSwitchMode={vi.fn()}
-        onRegisterSuccess={vi.fn()}
-      />,
+              />,
     );
 
     expect(screen.getByText("Create your account")).toBeInTheDocument();
@@ -145,8 +155,7 @@ describe("AuthFormCard", () => {
       <AuthFormCard
         mode="login"
         onSwitchMode={mockOnSwitchMode}
-        onRegisterSuccess={vi.fn()}
-      />,
+              />,
     );
 
     const createOneLink = screen.getByText("Create one");
@@ -162,8 +171,7 @@ describe("AuthFormCard", () => {
       <AuthFormCard
         mode="register"
         onSwitchMode={mockOnSwitchMode}
-        onRegisterSuccess={vi.fn()}
-      />,
+              />,
     );
 
     const signInLink = screen.getByText("Sign in");

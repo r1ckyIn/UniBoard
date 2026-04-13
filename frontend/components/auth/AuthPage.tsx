@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { motion } from "motion/react";
 import BrandPanel from "./BrandPanel";
 import AuthFormCard from "./AuthFormCard";
-import SuccessOverlay from "./SuccessOverlay";
+
+type AuthMode = "login" | "register" | "forgot-password" | "reset-password";
 
 // 3D book-opening animation: the auth page opens like a book
 // Left panel (brand) swings from its right edge, right panel (form) from its left edge
@@ -32,23 +35,37 @@ const pageVariants = (initialRotateY: number) => ({
 const leftPageVariants = pageVariants(-90);
 const rightPageVariants = pageVariants(90);
 
+function getInitialMode(searchParams: URLSearchParams): AuthMode {
+  const modeParam = searchParams.get("mode");
+  if (modeParam === "register") return "register";
+  if (modeParam === "forgot-password") return "forgot-password";
+  if (modeParam === "reset-password") return "reset-password";
+  return "login";
+}
+
 export default function AuthPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [mode, setMode] = useState<"login" | "register">(
-    () => (searchParams.get("mode") === "register" ? "register" : "login"),
+  const t = useTranslations();
+  const [mode, setMode] = useState<AuthMode>(
+    () => getInitialMode(searchParams),
   );
-  const [showSuccess, setShowSuccess] = useState(false);
-  const router = useRouter();
+
+  // Show error toast if email confirmation failed
+  useEffect(() => {
+    if (searchParams.get("error") === "confirmation_failed") {
+      toast.error(t("auth.errors.confirmationFailed"));
+    }
+  }, [searchParams, t]);
 
   const handleSwitchMode = useCallback(
-    (newMode: "login" | "register") => {
+    (newMode: AuthMode) => {
       setMode(newMode);
       const params = new URLSearchParams(searchParams.toString());
-      if (newMode === "register") {
-        params.set("mode", "register");
-      } else {
+      if (newMode === "login") {
         params.delete("mode");
+      } else {
+        params.set("mode", newMode);
       }
       const query = params.toString();
       window.history.replaceState(null, "", query ? `${pathname}?${query}` : pathname);
@@ -83,14 +100,6 @@ export default function AuthPage() {
           <AuthFormCard
             mode={mode}
             onSwitchMode={handleSwitchMode}
-            onRegisterSuccess={() => setShowSuccess(true)}
-          />
-          <SuccessOverlay
-            visible={showSuccess}
-            onContinue={() => {
-              const locale = pathname.split("/")[1] || "en";
-              router.push(`/${locale}/setup`);
-            }}
           />
         </div>
       </motion.div>

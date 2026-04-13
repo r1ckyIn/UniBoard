@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useLogin } from "@/hooks/use-auth";
@@ -13,9 +12,13 @@ import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status"
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword: () => void;
 }
 
-export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+export default function LoginForm({
+  onSwitchToRegister,
+  onSwitchToForgotPassword,
+}: LoginFormProps) {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
@@ -89,12 +92,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             <button
               type="button"
               className="text-[0.72rem] text-[#d97757] font-medium hover:opacity-80 transition-opacity"
-              onClick={() =>
-                toast(t("auth.errors.forgotPasswordDemo"), {
-                  description: t("auth.errors.forgotPasswordDemoDesc"),
-                  duration: 4000,
-                })
-              }
+              onClick={onSwitchToForgotPassword}
             >
               {t("auth.login.forgotPassword")}
             </button>
