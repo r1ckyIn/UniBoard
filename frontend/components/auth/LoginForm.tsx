@@ -37,7 +37,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       {
         onSuccess: async () => {
           const configured = await restoreTokenConfiguredIfNeeded();
-          router.push(configured ? `/${locale}` : `/${locale}/setup`);
+          router.replace(configured ? `/${locale}` : `/${locale}/setup`);
         },
       },
     );

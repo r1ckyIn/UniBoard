@@ -10,7 +10,7 @@ import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status"
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useLocale();
-  const { isAuthenticated, tokenConfigured } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
 
@@ -24,6 +24,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return unsub;
   }, []);
 
+  // Check for existing session on mount. If found, restore token status
+  // and redirect with the correct tokenConfigured value.
   useEffect(() => {
     const checkSession = async () => {
       const supabase = createClient();
@@ -42,19 +44,28 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         );
 
         await restoreTokenConfiguredIfNeeded();
+        const configured = useAuthStore.getState().tokenConfigured;
+        router.replace(configured ? `/${locale}` : `/${locale}/setup`);
+        return;
       }
 
       setSessionChecked(true);
     };
     checkSession();
-  }, []);
+  }, [locale, router]);
 
+  // When user logs in on this page, isAuthenticated flips to true.
+  // TanStack Query v5 kills component-level onSuccess callbacks on unmount,
+  // so LoginForm's router.replace may never fire. This effect catches that
+  // case and redirects to dashboard root — DashboardGuard handles the
+  // tokenConfigured check (it awaits restoreTokenConfiguredIfNeeded before
+  // setting sessionChecked, so no stale-tokenConfigured race).
   useEffect(() => {
     if (!hydrated || !sessionChecked) return;
     if (isAuthenticated) {
-      router.replace(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
+      router.replace(`/${locale}`);
     }
-  }, [hydrated, sessionChecked, isAuthenticated, tokenConfigured, locale, router]);
+  }, [hydrated, sessionChecked, isAuthenticated, locale, router]);
 
   if (!hydrated || !sessionChecked) return null;
   if (isAuthenticated) return null;

@@ -5,6 +5,7 @@ import AuthFormCard from "@/components/auth/AuthFormCard";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string) => {
     const map: Record<string, string> = {
       "auth.login.title": "Welcome back",

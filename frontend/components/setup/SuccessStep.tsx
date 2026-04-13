@@ -60,7 +60,7 @@ export default function SuccessStep() {
   const handleGoToDashboard = () => {
     toast.success(t("toast"));
     useAuthStore.getState().setTokenConfigured(true);
-    router.push(`/${locale}`);
+    router.replace(`/${locale}`);
   };
 
   return (
