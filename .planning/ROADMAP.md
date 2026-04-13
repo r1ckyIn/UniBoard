@@ -219,6 +219,10 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 | 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
 | 31. E2E Verification & AI Config | v3.0 | 3/3 | Complete    | 2026-04-13 |
+| 32. Production Email | v3.0 | 0/3 | Planned | - |
+| 33. Token Lifecycle & Onboarding | v3.0 | 0/TBD | Not started | - |
+| 34. AI Features Live | v3.0 | 0/TBD | Not started | - |
+| 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
@@ -286,6 +290,52 @@ Plans:
 - [x] 31.1-01 — Fix DBAPIError root cause (pool limits, startup jitter, before_send filter)
 - [x] 31.1-02 — Sentry/Vercel best practices (release tracking, tunnel, fingerprinting)
 - [ ] 31.1-03 — Automated monitoring pipeline (Gmail MCP, /check-alerts skill)
+
+### Phase 32: Production Email
+**Goal**: Replace Supabase built-in email with custom SMTP (Resend) and branded email templates for signup confirmation and password reset
+**Depends on**: Phase 31
+**Requirements**: EMAIL-01, EMAIL-02
+**Success Criteria** (what must be TRUE):
+  1. Supabase Auth sends emails via custom SMTP (Resend) instead of built-in service
+  2. Signup confirmation email uses branded HTML template with UniBoard logo, styling, and clear CTA button
+  3. Password reset email uses branded HTML template with secure reset link and expiry notice
+  4. Email deliverability verified (SPF/DKIM pass, emails land in inbox not spam)
+**Plans**: 3 plans
+
+Plans:
+- [ ] 32-01-PLAN.md — Email templates, config.toml, auth/confirm route (EMAIL-01, EMAIL-02)
+- [ ] 32-02-PLAN.md — Frontend auth flow changes: ForgotPassword, UpdatePassword, RegisterForm update (EMAIL-02)
+- [ ] 32-03-PLAN.md — Manual Resend/Supabase Dashboard config + E2E verification (EMAIL-01, EMAIL-02)
+
+### Phase 33: Token Lifecycle & Onboarding
+**Goal**: Automated token expiry reminders and polished first-login onboarding experience
+**Depends on**: Phase 32
+**Requirements**: EMAIL-03, ONBD-01, ONBD-02
+**Success Criteria** (what must be TRUE):
+  1. System detects expiring/expired Canvas/Ed tokens and sends reminder email with re-authorization guide
+  2. First-login onboarding flow is polished with clear guidance and progress indicators
+  3. Setup page handles edge cases gracefully (invalid token, API unreachable, sync failure)
+**Plans**: TBD
+
+### Phase 34: AI Features Live
+**Goal**: AI-powered study recommendations, course material QA with real data, and GPA path planning
+**Depends on**: Phase 33
+**Requirements**: AIFEAT-01, AIFEAT-02, AIFEAT-03
+**Success Criteria** (what must be TRUE):
+  1. AI study recommendations prioritize assessments by weight ("Focus on Final Exam, worth 50%")
+  2. Course material QA uses RAG on Ed Lessons with cited sources, verified with real data
+  3. GPA path planner calculates required average for remaining subjects to reach target distinction
+**Plans**: TBD
+
+### Phase 35: Push Notifications
+**Goal**: Browser push notifications or email notifications for deadline reminders
+**Depends on**: Phase 34
+**Requirements**: AIFEAT-04
+**Success Criteria** (what must be TRUE):
+  1. Users can opt-in to deadline reminder notifications via browser Push API or email
+  2. Notifications fire at configurable intervals before deadline (24h, 6h, 1h)
+  3. Notification preferences persist across sessions and sync cycles
+**Plans**: TBD
 
 ### Phase 36: UX Polish
 **Goal**: Fix all accumulated UX rough edges across AI chat, setup flow, and error handling
