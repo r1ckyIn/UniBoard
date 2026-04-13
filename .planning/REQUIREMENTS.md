@@ -25,8 +25,8 @@
 
 ### Email & Auth (EMAIL)
 
-- [ ] **EMAIL-01**: 自定义 SMTP（Resend）替换 Supabase 内置邮件服务
-- [ ] **EMAIL-02**: 品牌化邮件模板（注册确认、密码重置）
+- [x] **EMAIL-01**: 自定义 SMTP（Resend）替换 Supabase 内置邮件服务
+- [x] **EMAIL-02**: 品牌化邮件模板（注册确认、密码重置）
 - [ ] **EMAIL-03**: Token 过期自动提醒 + 重新授权引导流程
 
 ### Onboarding (ONBD)
@@ -80,8 +80,8 @@
 | BFF-04 | Phase 31 | Complete |
 | AICONF-01 | Phase 31 | Pending |
 | AICONF-02 | Phase 31 | Pending |
-| EMAIL-01 | Phase 32 | Pending |
-| EMAIL-02 | Phase 32 | Pending |
+| EMAIL-01 | Phase 32 | Complete |
+| EMAIL-02 | Phase 32 | Complete |
 | EMAIL-03 | Phase 33 | Pending |
 | ONBD-01 | Phase 33 | Pending |
 | ONBD-02 | Phase 33 | Pending |

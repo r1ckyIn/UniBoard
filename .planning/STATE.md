@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 31-01-PLAN.md
-last_updated: "2026-04-06T09:21:33.410Z"
+stopped_at: Completed 32-01-PLAN.md
+last_updated: "2026-04-13T06:11:04.052Z"
 last_activity: 2026-04-06
 progress:
-  total_phases: 13
-  completed_phases: 13
-  total_plans: 40
-  completed_plans: 40
+  total_phases: 15
+  completed_phases: 12
+  total_plans: 38
+  completed_plans: 41
 ---
 
 # Project State
@@ -135,6 +135,7 @@ Last activity: 2026-04-06
 | Phase 26 P03 | 6min | 2 tasks | 13 files |
 | Phase 30 P03 | 5min | 2 tasks | 13 files |
 | Phase 31 P01 | 5min | 2 tasks | 3 files |
+| Phase 32 P01 | 7min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -323,6 +324,8 @@ Recent decisions affecting current work:
 - [Phase 31]: Keep regex as client-side pre-check before backend token API call for instant feedback
 - [Phase 31]: Use last_sync.status from SyncStatusResponse (completed/failed) instead of is_syncing boolean
 - [Phase 31]: Poll sync status every 3s with conditional refetchInterval, enabled only after sync trigger fires
+- [Phase 32]: Route at app/auth/confirm (outside [locale]) since Supabase email links are locale-agnostic
+- [Phase 32]: TokenHash-based PKCE links instead of ConfirmationURL to prevent email prefetcher token consumption
 
 ### Roadmap Evolution
 
@@ -340,5 +343,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-06T06:37:00.250Z
-Stopped at: Completed 31-01-PLAN.md
+Last session: 2026-04-13T06:11:04.046Z
+Stopped at: Completed 32-01-PLAN.md
