@@ -10,7 +10,7 @@ import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status"
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useLocale();
-  const { isAuthenticated, tokenConfigured } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [hydrated, setHydrated] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
 
@@ -24,6 +24,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return unsub;
   }, []);
 
+  // Check for existing session on mount. If found, restore token status
+  // and redirect. This does NOT react to isAuthenticated changes — LoginForm
+  // handles its own navigation after login to avoid a race condition where
+  // this effect would redirect with stale tokenConfigured=false before
+  // restoreTokenConfiguredIfNeeded() completes.
   useEffect(() => {
     const checkSession = async () => {
       const supabase = createClient();
@@ -42,19 +47,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         );
 
         await restoreTokenConfiguredIfNeeded();
+        const configured = useAuthStore.getState().tokenConfigured;
+        router.replace(configured ? `/${locale}` : `/${locale}/setup`);
+        return;
       }
 
       setSessionChecked(true);
     };
     checkSession();
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated || !sessionChecked) return;
-    if (isAuthenticated) {
-      router.replace(tokenConfigured ? `/${locale}` : `/${locale}/setup`);
-    }
-  }, [hydrated, sessionChecked, isAuthenticated, tokenConfigured, locale, router]);
+  }, [locale, router]);
 
   if (!hydrated || !sessionChecked) return null;
   if (isAuthenticated) return null;
