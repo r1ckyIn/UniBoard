@@ -8,7 +8,7 @@ import { Search, Bell } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { getInitials } from "@/lib/utils/initials";
 import { useAuthStore } from "@/lib/auth/store";
-import { createClient } from "@/lib/supabase/client";
+import { useLogout } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
 import NotificationPanel from "./NotificationPanel";
 import AvatarMenu from "./AvatarMenu";
@@ -24,6 +24,7 @@ export default function Header() {
 
   // Data sources
   const user = useAuthStore((s) => s.user);
+  const logoutMutation = useLogout();
   const notifications = useNotifications();
 
   const initials = useMemo(
@@ -151,10 +152,10 @@ export default function Header() {
               }}
               onLogout={() => {
                 setAvatarOpen(false);
-                // Sign out from Supabase; onAuthStateChange clears zustand
-                const supabase = createClient();
-                supabase.auth.signOut().then(() => {
-                  router.push(`/${locale}/auth`);
+                logoutMutation.mutate(undefined, {
+                  onSuccess: () => {
+                    router.replace(`/${locale}/auth`);
+                  },
                 });
               }}
             />
