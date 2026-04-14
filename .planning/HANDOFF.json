@@ -1,35 +1,35 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-06T12:55:56Z",
-  "phase": "31",
-  "phase_name": "e2e-verification-ai-config",
-  "phase_dir": ".planning/phases/31-e2e-verification-ai-config",
-  "plan": 2,
-  "task": "UAT",
-  "total_tasks": 5,
+  "timestamp": "2026-04-14T11:04:47.170Z",
+  "phase": "33",
+  "phase_name": "token-lifecycle-onboarding",
+  "phase_dir": ".planning/phases/33-token-lifecycle-onboarding",
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
   "status": "paused",
   "completed_tasks": [
-    {"id": "31-01", "name": "Wire setup flow to backend APIs", "status": "done", "commit": "5782481"},
-    {"id": "31-02", "name": "Fix SSE dual-path + AI key guard", "status": "done", "commit": "8bfb461"},
-    {"id": "UAT-1", "name": "Token validation E2E", "status": "done", "notes": "Passed after 10 bug fixes"}
+    {"id": "discuss-prep", "name": "Loaded prior context, scouted codebase, identified 6 gray areas (A-F)", "status": "done"}
   ],
   "remaining_tasks": [
-    {"id": "UAT-2", "name": "Sync status + real courses displayed", "status": "not_started"},
-    {"id": "UAT-3", "name": "AI SSE streaming through BFF proxy", "status": "not_started"},
-    {"id": "UAT-4", "name": "AI 503 graceful degradation", "status": "not_started"},
-    {"id": "UAT-5", "name": "Railway API key production check", "status": "not_started"}
+    {"id": "discuss-pick", "name": "User selects which of A-F to deep-dive", "status": "not_started"},
+    {"id": "discuss-deep", "name": "Conduct discussion for selected areas", "status": "not_started"},
+    {"id": "context-write", "name": "Create 33-CONTEXT.md", "status": "not_started"},
+    {"id": "research-plan", "name": "/gsd:plan-phase 33 (includes research)", "status": "not_started"}
   ],
-  "blockers": [
-    {"description": "Sync may be failing silently after token setup", "type": "technical", "workaround": "Check Railway logs or Sentry"},
-    {"description": "Supabase JWT expires in 1hr, long sessions hit 401", "type": "technical", "workaround": "Clear site data and re-login"}
+  "blockers": [],
+  "human_actions_pending": [
+    {
+      "action": "Resolve Phase 32-03 email confirmation blocker",
+      "context": "Supabase email confirmation OFF because Microsoft 365 / Mimecast quarantines uniboard.uk emails (held, not rejected). User paused Phase 33 to address this before continuing.",
+      "blocking": false
+    }
   ],
-  "human_actions_pending": [],
   "decisions": [
-    {"decision": "Support ES256+HS256 JWT verification", "rationale": "Supabase rotated to ECC keys", "phase": "31"},
-    {"decision": "Only clearAuth on GET 401", "rationale": "Prevent auth clear during setup mutations", "phase": "31"},
-    {"decision": "30s sync timeout fallback", "rationale": "Sync failure left user stuck", "phase": "31"}
+    {"decision": "Phase 33 branch is feature/gsd-33-token-lifecycle-onboarding off main 2a38e62", "rationale": "Phase 32 docs reconcile (PR #72) merged first; Phase 33 starts clean", "phase": "33"},
+    {"decision": "Phase 33 has 3 sub-domains (EMAIL-03, ONBD-01, ONBD-02); surfaced 6 gray areas: A trigger timing, B email content, C onboarding flow, D tone, E token invalid UX, F API failure UX", "rationale": "Mapped from ROADMAP success criteria, memory backlog items, and existing assets (check_token_health from Phase 17, setup components, Resend SMTP)", "phase": "33"}
   ],
   "uncommitted_files": [],
-  "next_action": "Investigate sync failure, continue UAT tests 2-5",
-  "context_notes": "10 production bugs found and fixed during UAT. Core E2E path works (register→setup→token→success). Sync investigation is next priority."
+  "next_action": "Resume to Phase 33 discuss: re-present 6 gray areas (A-F), wait for user pick, then deep-dive each. Branch is already set up; CONTEXT.md not yet written.",
+  "context_notes": "User paused mid-discuss to handle Phase 32-03 email blocker. Phase 32-03 retest trigger recorded in memory project_phase32_email_retest.md (>= 2026-04-16). Existing assets: src/sync/scheduled.py::check_token_health (in-app only, needs email), 8 setup components in frontend/components/setup/, Phase 17 token status fields in profiles table. Memory items applicable: project_sync_progress_ux.md (per-domain progress), project_ux_improvements_backlog.md (TokenStep skip re-validate)."
 }
