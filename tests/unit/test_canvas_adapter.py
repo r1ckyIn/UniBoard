@@ -116,6 +116,84 @@ class TestCanvasAdapterSuccess:
         finally:
             await adapter.close()
 
+    # --- SYNC-FIX-02: include kwarg tests ---
+
+    async def test_get_assignments_with_include_submission(self) -> None:
+        """include=['submission'] sends include[]=submission in query string."""
+        captured_url: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            captured_url.append(str(request.url))
+            return _json_response([])
+
+        adapter = _make_adapter(handler)
+        try:
+            await adapter.get_assignments("course-1", include=["submission"])
+            assert len(captured_url) == 1
+            url = captured_url[0]
+            # httpx may URL-encode [] as %5B%5D; accept either form
+            assert (
+                "include%5B%5D=submission" in url
+                or "include[]=submission" in url
+            )
+        finally:
+            await adapter.close()
+
+    async def test_get_assignments_without_include_backwards_compatible(self) -> None:
+        """Omitting include kwarg sends NO include[] param (legacy behavior)."""
+        captured_url: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            captured_url.append(str(request.url))
+            return _json_response([])
+
+        adapter = _make_adapter(handler)
+        try:
+            await adapter.get_assignments("course-1")
+            assert len(captured_url) == 1
+            url = captured_url[0]
+            assert "include" not in url
+        finally:
+            await adapter.close()
+
+    async def test_get_assignments_include_none_equivalent_to_omitted(self) -> None:
+        """include=None behaves identically to no kwarg (no include[] param sent)."""
+        captured_url: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            captured_url.append(str(request.url))
+            return _json_response([])
+
+        adapter = _make_adapter(handler)
+        try:
+            await adapter.get_assignments("course-1", include=None)
+            assert len(captured_url) == 1
+            url = captured_url[0]
+            assert "include" not in url
+        finally:
+            await adapter.close()
+
+    async def test_get_assignments_multiple_include_values(self) -> None:
+        """include=['submission', 'all_dates'] sends both values as include[] params."""
+        captured_url: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            captured_url.append(str(request.url))
+            return _json_response([])
+
+        adapter = _make_adapter(handler)
+        try:
+            await adapter.get_assignments(
+                "course-1", include=["submission", "all_dates"]
+            )
+            assert len(captured_url) == 1
+            url = captured_url[0]
+            # Both values must appear in the query string
+            assert "submission" in url
+            assert "all_dates" in url
+        finally:
+            await adapter.close()
+
     async def test_get_modules_success(self) -> None:
         """get_modules returns modules with inline items (include[]=items)."""
         modules = [
