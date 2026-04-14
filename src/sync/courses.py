@@ -123,9 +123,9 @@ async def _upsert_courses(
             session.add(course)
             count += 1
 
-        # SYNC-FIX-01: Populate unit_outline_url on first discovery.
-        # Gate on adapter being supplied AND existing row's URL being NULL so
-        # we do not make redundant Canvas API calls on every sync tick.
+        # Populate unit_outline_url only on first discovery. Gate on adapter
+        # being supplied AND existing row's URL being NULL so we do not make
+        # redundant Canvas API calls on every sync tick.
         if (
             adapter is not None
             and lc.canvas_course_id
@@ -216,8 +216,6 @@ async def sync_all_courses() -> None:
                         total=len(linked),
                     )
 
-                    # Upsert to database — pass adapter so SYNC-FIX-01 helper
-                    # can resolve unit_outline_url on first discovery.
                     async with session_factory() as session:
                         records_updated = await _upsert_courses(
                             session, user.id, linked, adapter=canvas_adapter

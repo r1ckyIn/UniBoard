@@ -108,8 +108,6 @@ class CanvasAdapter(LMSAdapter):
 
         raise UpstreamAPIError("Canvas", "request failed after retries")
 
-    # SYNC-FIX-02: params already accepts list[str] values (via dict[str, Any])
-    # for include[] repeats. httpx natively serializes list values as repeated query keys.
     async def _paginate(
         self,
         path: str,
@@ -209,7 +207,7 @@ class CanvasAdapter(LMSAdapter):
             course_id: Canvas course ID.
             include: Optional list of ``include[]`` query parameter values.
                 Common values: ``["submission"]`` to embed per-user submission data
-                (required for SYNC-FIX-02 -- grades sync reads ``submission.score``).
+                (Canvas omits ``submission`` from the default response).
                 Default ``None`` means no ``include[]`` param is sent.
         """
         params: dict[str, Any] = {"per_page": 100}

@@ -10,11 +10,10 @@ logger = structlog.get_logger()
 # Course code pattern: 4 uppercase letters + 4 digits (e.g. COMP2017)
 _COURSE_CODE_RE = re.compile(r"[A-Z]{4}\d{4}")
 
-# SYNC-FIX-05: Canvas concession-shell course patterns.
-# Canvas creates placeholder courses for final-exam re-sits, concession assessments
-# and supplementary exams that duplicate the parent course. These shells pollute
-# the user's course list and downstream grade/deadline/outline syncs, so we drop
-# them at the `link_courses` entry point before any matching logic runs.
+# Canvas creates placeholder courses for final-exam re-sits, concession
+# assessments and supplementary exams that duplicate the parent course. These
+# shells pollute the user's course list and downstream grade/deadline/outline
+# syncs, so drop them before any matching logic runs.
 _SHELL_COURSE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"^final\s+exam\s+for:", re.IGNORECASE),
     re.compile(r"concession", re.IGNORECASE),
@@ -90,12 +89,7 @@ def link_courses(
     - Matched courses have both IDs populated and is_linked=True
     - Unmatched Canvas courses: ed_course_id=None, is_linked=False
     - Unmatched Ed courses: canvas_course_id=None, is_linked=False
-
-    SYNC-FIX-05: Canvas concession-shell courses (Final Exam for:/Concession/
-    Supplementary) are dropped up front so they never enter the matching index
-    or appear in the user's course list.
     """
-    # SYNC-FIX-05: Filter out Canvas concession shell courses.
     filtered_canvas: list[dict[str, object]] = []
     for c in canvas_courses:
         name = str(c.get("name", ""))
@@ -113,9 +107,9 @@ def link_courses(
     ed_index: dict[tuple[str, str], dict[str, object]] = {}
     ed_unmatched: dict[tuple[str, str], dict[str, object]] = {}
 
-    # SYNC-FIX-03: Build a code-only fallback index for Ed courses that omit
-    # the semester in their name. Used only when the primary (code, semester)
-    # match misses and exactly one candidate exists.
+    # Fallback index for Ed courses that omit the semester in their name.
+    # Used only when the primary (code, semester) match misses and exactly
+    # one candidate exists for the code.
     ed_code_only: dict[str, list[dict[str, object]]] = {}
 
     for ec in ed_courses:
@@ -142,10 +136,9 @@ def link_courses(
             key = (code, semester)
             ed_match = ed_index.get(key)
 
-            # SYNC-FIX-03: Primary match missed -- try single-candidate
-            # fallback on the code-only index. Only fires when exactly ONE
-            # Ed course exists for this code without a semester tag; more
-            # than one candidate is ambiguous and logged-and-skipped.
+            # Primary match missed: fall back to the code-only index when
+            # exactly one Ed course exists for this code without a semester
+            # tag. More than one candidate is ambiguous (logged and skipped).
             if ed_match is None:
                 candidates = ed_code_only.get(code, [])
                 if len(candidates) == 1:

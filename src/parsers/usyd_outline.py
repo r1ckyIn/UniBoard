@@ -116,12 +116,23 @@ class UnitOutlineParser:
 
     @staticmethod
     def _extract_headers(table: Tag) -> list[str]:
-        """Return the list of <th> text values from the first header row."""
-        headers: list[str] = []
-        for th in table.find_all("th"):
-            if isinstance(th, Tag):
-                headers.append(th.get_text(strip=True))
-        return headers
+        """Return the list of <th> text values from the first header row.
+
+        Scoped to the first <tr> (preferred inside <thead>) so row-header <th>
+        cells in the body do not inflate the header list and misalign index
+        lookups in ``_extract_by_header_index``.
+        """
+        thead = table.find("thead")
+        header_row = (
+            thead.find("tr") if isinstance(thead, Tag) else table.find("tr")
+        )
+        if not isinstance(header_row, Tag):
+            return []
+        return [
+            th.get_text(strip=True)
+            for th in header_row.find_all("th")
+            if isinstance(th, Tag)
+        ]
 
     @staticmethod
     def _extract_by_header_index(
