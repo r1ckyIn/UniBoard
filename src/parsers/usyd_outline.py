@@ -83,6 +83,11 @@ class UnitOutlineParser:
         if not isinstance(table, Tag):
             return []
 
+        # Collect <th> text values from the thead (or first header row) so
+        # _parse_row can fall back on positional header-index matching when
+        # CSS-class selectors return empty (USYD HTML drift guard).
+        headers = self._extract_headers(table)
+
         items: list[AssessmentItem] = []
         rows = table.find_all("tr")
 
@@ -98,7 +103,7 @@ class UnitOutlineParser:
                 continue
 
             try:
-                item = self._parse_row(row, cells)
+                item = self._parse_row(row, cells, headers)
                 if item is not None:
                     items.append(item)
             except Exception:
@@ -109,10 +114,42 @@ class UnitOutlineParser:
 
         return items
 
+    @staticmethod
+    def _extract_headers(table: Tag) -> list[str]:
+        """Return the list of <th> text values from the first header row."""
+        headers: list[str] = []
+        for th in table.find_all("th"):
+            if isinstance(th, Tag):
+                headers.append(th.get_text(strip=True))
+        return headers
+
+    @staticmethod
+    def _extract_by_header_index(
+        cells: list[Tag], headers: list[str], header_keywords: list[str]
+    ) -> str:
+        """Return the text of the cell whose column header matches any keyword.
+
+        `headers` is the list of <th> text values extracted from the header row.
+        `header_keywords` is a list of case-insensitive substrings to match
+        (e.g. ["due", "deadline"] or ["length", "word", "duration"]).
+
+        Returns empty string when no matching header or the cell is missing.
+        """
+        for idx, header in enumerate(headers):
+            header_lower = header.lower()
+            if any(kw.lower() in header_lower for kw in header_keywords):
+                if idx < len(cells):
+                    return cells[idx].get_text(strip=True)
+                return ""
+        return ""
+
     def _parse_row(
-        self, row: Tag, cells: list[Tag]
+        self, row: Tag, cells: list[Tag], headers: list[str] | None = None
     ) -> AssessmentItem | None:
         """Parse a single assessment table row."""
+        if headers is None:
+            headers = []
+
         # Try CSS class selectors first, then fall back to positional
         name_el = row.find(class_="assessment-type")
         weight_el = row.find(class_="assessment-weight")
@@ -146,17 +183,33 @@ class UnitOutlineParser:
 
         weight = self._parse_weight(weight_text)
 
-        due_date: str | None = None
+        # Due date: CSS class first, then positional header-index fallback.
+        due_text = ""
         if due_el and isinstance(due_el, Tag):
-            due_date = due_el.get_text(strip=True) or None
+            due_text = due_el.get_text(strip=True)
+        if not due_text:
+            due_text = self._extract_by_header_index(
+                cells, headers, ["due", "deadline"]
+            )
+        due_date: str | None = due_text or None
 
+        # Length: CSS class first, then positional header-index fallback.
         length = ""
         if length_el and isinstance(length_el, Tag):
             length = length_el.get_text(strip=True)
+        if not length:
+            length = self._extract_by_header_index(
+                cells, headers, ["length", "word", "duration"]
+            )
 
+        # Description: CSS class first, then positional header-index fallback.
         description = ""
         if desc_el and isinstance(desc_el, Tag):
             description = desc_el.get_text(strip=True)
+        if not description:
+            description = self._extract_by_header_index(
+                cells, headers, ["description", "details"]
+            )
 
         ai_policy = ""
         if ai_el and isinstance(ai_el, Tag):
