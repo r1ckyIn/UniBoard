@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 32.1-04-PLAN.md (SYNC-FIX-04 null-safe due_at handling)
-last_updated: "2026-04-14T04:58:42.738Z"
+stopped_at: Completed 32.1-05-PLAN.md (SYNC-FIX-03 Ed link fallback + real-data harness)
+last_updated: "2026-04-14T05:09:54.691Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 20
-  completed_phases: 14
+  completed_phases: 15
   total_plans: 50
-  completed_plans: 49
+  completed_plans: 50
 ---
 
 # Project State
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 32.1
-Plan: Waves 0-1 complete + Wave 2 half done (32.1-02 SYNC-FIX-01, 32.1-03 SYNC-FIX-02 landed); Wave 2 remaining (32.1-04 SYNC-FIX-04); Wave 3 pending (32.1-05 SYNC-FIX-03)
-Status: Executing Phase 32.1
+Plan: All 6 plans complete (Wave 0 scaffolding + Wave 1 SYNC-FIX-05 + Wave 2 SYNC-FIX-01/02/04 + Wave 3 SYNC-FIX-03 + real-data harness). All 5 SYNC-FIX requirements closed.
+Status: Phase 32.1 complete -- ready for /gsd:verify-work 32.1
 Last activity: 2026-04-14
 
 ## Milestones Completed
@@ -141,6 +141,7 @@ Last activity: 2026-04-14
 | Phase 32.1 P02 | 8min | 2 tasks | 4 files |
 | Phase 32.1 P03 | 6min | 2 tasks | 4 files |
 | Phase 32.1 P04 | 4min | 1 tasks | 2 files |
+| Phase 32.1 P05 | 6min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -337,6 +338,7 @@ Recent decisions affecting current work:
 - [Phase 32.1]: [Phase 32.1-02]: SYNC-FIX-01 Unit Outline URL resolver wired at _upsert_courses with NULL-guard; CanvasAdapter lifecycle spans upsert so two-step tabs->external_tool GETs share httpx client; parser gets _extract_by_header_index positional fallback for due/length/description when .assessment-* CSS classes drift
 - [Phase 32.1-03]: SYNC-FIX-02 Canvas get_assignments gets optional keyword-only include: list[str] | None kwarg; _sync_user_grades passes include=['submission'] to populate Grade.score. Empty-truthy guard keeps deadlines.py no-kwarg call path intact. httpx natively serializes list values as repeated include[]= query params.
 - [Phase 32.1]: [Phase 32.1-04]: SYNC-FIX-04 null-safe due_at handling via isinstance(due_raw, str) guard in both Canvas and Ed Lessons phases of aggregate_and_dedup. Replaces str(None)=="None" truthy check that was polluting compute_dedup_key with sentinel "None" date before try/except ValueError swallowed the error. Two SYNC-FIX-04 audit markers added for code-review visibility.
+- [Phase 32.1]: [Phase 32.1-05]: SYNC-FIX-03 closed via single-candidate semester fallback in link_courses. ed_code_only dict indexes Ed courses with no extractable semester; when primary (code, semester) match misses and exactly 1 candidate exists, link them with course_linking_ambiguous_semester_fallback log. Multiple candidates: log _skipped with reason=multiple_candidates, no auto-link. Primary match always wins. Real-data harness populated: 5 env-gated tests (one per SYNC-FIX-NN), skip cleanly when SYNC_REAL_DATA_CANVAS_TOKEN unset. Phase 32.1 as a whole: all 5 SYNC-FIX requirements have automated regression tests.
 
 ### Roadmap Evolution
 
@@ -354,5 +356,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T04:58:42.730Z
-Stopped at: Completed 32.1-04-PLAN.md (SYNC-FIX-04 null-safe due_at handling)
+Last session: 2026-04-14T05:09:45.401Z
+Stopped at: Completed 32.1-05-PLAN.md (SYNC-FIX-03 Ed link fallback + real-data harness)

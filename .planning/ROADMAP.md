@@ -326,7 +326,7 @@ Plans:
 - [x] 32.1-02-PLAN.md — SYNC-FIX-01: Wire Canvas tabs -> external_tool URL resolution + USYD parser positional fallbacks
 - [x] 32.1-03-PLAN.md — SYNC-FIX-02: Canvas grades sync passes include=[submission] for populated score data
 - [x] 32.1-04-PLAN.md — SYNC-FIX-04: Null-safe due_at handling in DeadlineService.aggregate_and_dedup
-- [ ] 32.1-05-PLAN.md — SYNC-FIX-03: Ed single-candidate semester fallback + real-data integration harness
+- [x] 32.1-05-PLAN.md — SYNC-FIX-03: Ed single-candidate semester fallback + real-data integration harness
 
 ### Phase 33: Token Lifecycle & Onboarding
 **Goal**: Automated token expiry reminders and polished first-login onboarding experience
