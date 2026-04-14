@@ -3,8 +3,33 @@
 import re
 from dataclasses import dataclass
 
+import structlog
+
+logger = structlog.get_logger()
+
 # Course code pattern: 4 uppercase letters + 4 digits (e.g. COMP2017)
 _COURSE_CODE_RE = re.compile(r"[A-Z]{4}\d{4}")
+
+# SYNC-FIX-05: Canvas concession-shell course patterns.
+# Canvas creates placeholder courses for final-exam re-sits, concession assessments
+# and supplementary exams that duplicate the parent course. These shells pollute
+# the user's course list and downstream grade/deadline/outline syncs, so we drop
+# them at the `link_courses` entry point before any matching logic runs.
+_SHELL_COURSE_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(r"^final\s+exam\s+for:", re.IGNORECASE),
+    re.compile(r"concession", re.IGNORECASE),
+    re.compile(r"^supplementary", re.IGNORECASE),
+]
+
+
+def _is_shell_course(name: str) -> bool:
+    """Return True if Canvas course name matches a known Canvas concession-shell pattern.
+
+    Shell courses are Canvas-side placeholders for final-exam re-sits, concession
+    assessments and supplementary exams that duplicate the parent course. They
+    must be excluded from the user's course list.
+    """
+    return any(p.search(name) for p in _SHELL_COURSE_PATTERNS)
 
 # Semester patterns used by Canvas/Ed course names
 _SEMESTER_PATTERNS: list[re.Pattern[str]] = [
@@ -65,7 +90,25 @@ def link_courses(
     - Matched courses have both IDs populated and is_linked=True
     - Unmatched Canvas courses: ed_course_id=None, is_linked=False
     - Unmatched Ed courses: canvas_course_id=None, is_linked=False
+
+    SYNC-FIX-05: Canvas concession-shell courses (Final Exam for:/Concession/
+    Supplementary) are dropped up front so they never enter the matching index
+    or appear in the user's course list.
     """
+    # SYNC-FIX-05: Filter out Canvas concession shell courses.
+    filtered_canvas: list[dict[str, object]] = []
+    for c in canvas_courses:
+        name = str(c.get("name", ""))
+        if _is_shell_course(name):
+            logger.info(
+                "course_filtered_shell",
+                canvas_course_id=str(c.get("id", "")),
+                name=name,
+            )
+            continue
+        filtered_canvas.append(c)
+    canvas_courses = filtered_canvas
+
     # Index Ed courses by (code, semester)
     ed_index: dict[tuple[str, str], dict[str, object]] = {}
     ed_unmatched: dict[tuple[str, str], dict[str, object]] = {}

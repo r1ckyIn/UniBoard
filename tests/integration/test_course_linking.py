@@ -4,12 +4,17 @@ These tests work entirely offline -- no API tokens required.
 Tests the regex-based course code extraction and cross-platform matching.
 """
 
+import json
+from pathlib import Path
+
 from src.services.course_linking import (
     LinkedCourse,
     extract_course_code,
     extract_semester,
     link_courses,
 )
+
+FIXTURES = Path(__file__).parent.parent / "fixtures" / "canvas"
 
 
 async def test_extract_course_code_standard() -> None:
@@ -139,3 +144,24 @@ async def test_linked_course_dataclass() -> None:
     assert lc.canvas_name == ""
     assert lc.ed_name is None
     assert lc.is_linked is False
+
+
+async def test_shell_courses_filtered_integration() -> None:
+    """SYNC-FIX-05: end-to-end check that shell courses from the Wave 0 fixture
+    are filtered by ``link_courses`` before any matching logic runs."""
+    canvas_courses = json.loads(
+        (FIXTURES / "courses_with_shell.json").read_text()
+    )
+    ed_courses: list[dict[str, object]] = [
+        {"id": 31567, "name": "COMP2017 (2026 Semester 1)"},
+    ]
+
+    results = link_courses(canvas_courses, ed_courses)
+
+    # Only real COMP2017 canvas course + one ed-only entry for unmatched semester.
+    canvas_names = [r.canvas_name for r in results if r.canvas_name]
+    assert all("Final Exam for:" not in n for n in canvas_names)
+    assert all("Concession" not in n for n in canvas_names)
+    # Exactly one canvas-origin entry survives the filter.
+    assert len(canvas_names) == 1
+    assert canvas_names[0] == "COMP2017 Systems Programming"
