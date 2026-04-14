@@ -33,14 +33,21 @@
 
 ### Email & Auth (EMAIL)
 
-- [ ] **EMAIL-01**: 自定义 SMTP（Resend）替换 Supabase 内置邮件服务
+- [x] **EMAIL-01**: 自定义 SMTP（Resend）替换 Supabase 内置邮件服务
 - [x] **EMAIL-02**: 品牌化邮件模板（注册确认、密码重置）
-- [ ] **EMAIL-03**: Token 过期自动提醒 + 重新授权引导流程
+- [ ] **EMAIL-03**: Token 过期 in-app 提醒 + 14 天兜底召回邮件（in-app first 策略，邮件作为 fallback channel）
+
+### Auth Hardening (AUTH-HARDEN)
+
+- [ ] **AUTH-HARDEN-01**: Sign in with Google OAuth（USYD Google Workspace），绕开 USYD 邮箱 Mimecast quarantine 问题
+- [ ] **AUTH-HARDEN-02**: 注册页 USYD 用户提示 banner（解释 Junk/Held Messages 可能性 + 推荐用 Google OAuth）
+- [ ] **AUTH-HARDEN-03**: RegisterForm check-email 状态加 "Resend 邮件" 按钮 + 60s cooldown
+- [ ] **AUTH-HARDEN-04**: 永久关闭 Supabase email confirmation（Phase 32-03 战略关闭，依赖 Mimecast 不可行）
 
 ### Onboarding (ONBD)
 
-- [ ] **ONBD-01**: 用户引导流程优化（首次登录体验打磨）
-- [ ] **ONBD-02**: Setup 页面异常状态处理（Token 无效、API 不可达、同步失败）
+- [ ] **ONBD-01**: 用户引导流程优化（首次登录体验打磨 + per-domain sync progress）
+- [ ] **ONBD-02**: Setup 页面异常状态处理（Token 无效、API 不可达、同步失败、TokenStep skip re-validate）
 
 ### UX Polish (UXPOL)
 
@@ -88,7 +95,7 @@
 | BFF-04 | Phase 31 | Complete |
 | AICONF-01 | Phase 31 | Pending |
 | AICONF-02 | Phase 31 | Pending |
-| EMAIL-01 | Phase 32 | Pending |
+| EMAIL-01 | Phase 32 | Complete |
 | EMAIL-02 | Phase 32 | Complete |
 | SYNC-FIX-01 | Phase 32.1 | Complete |
 | SYNC-FIX-02 | Phase 32.1 | Complete |
@@ -96,6 +103,10 @@
 | SYNC-FIX-04 | Phase 32.1 | Complete |
 | SYNC-FIX-05 | Phase 32.1 | Complete |
 | EMAIL-03 | Phase 33 | Pending |
+| AUTH-HARDEN-01 | Phase 33 | Pending |
+| AUTH-HARDEN-02 | Phase 33 | Pending |
+| AUTH-HARDEN-03 | Phase 33 | Pending |
+| AUTH-HARDEN-04 | Phase 33 | Pending |
 | ONBD-01 | Phase 33 | Pending |
 | ONBD-02 | Phase 33 | Pending |
 | AIFEAT-01 | Phase 34 | Pending |
