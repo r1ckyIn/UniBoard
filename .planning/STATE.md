@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 32.1-02-PLAN.md (SYNC-FIX-01 Unit Outline URL resolver + parser positional fallback)
-last_updated: "2026-04-14T04:45:15.845Z"
+stopped_at: Completed 32.1-03-PLAN.md (SYNC-FIX-02 grades submission.score via include kwarg)
+last_updated: "2026-04-14T04:52:36.693Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 20
   completed_phases: 14
   total_plans: 50
-  completed_plans: 47
+  completed_plans: 48
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 32.1
-Plan: Waves 0-1 complete + 32.1-02 (SYNC-FIX-01) landed; Wave 2 remaining (32.1-03, 32.1-04); Wave 3 pending (32.1-05)
+Plan: Waves 0-1 complete + Wave 2 half done (32.1-02 SYNC-FIX-01, 32.1-03 SYNC-FIX-02 landed); Wave 2 remaining (32.1-04 SYNC-FIX-04); Wave 3 pending (32.1-05 SYNC-FIX-03)
 Status: Executing Phase 32.1
 Last activity: 2026-04-14
 
@@ -139,6 +139,7 @@ Last activity: 2026-04-14
 | Phase 32.1 P00 | 4min | 2 tasks | 17 files |
 | Phase 32.1 P01 | 3min | 2 tasks | 4 files |
 | Phase 32.1 P02 | 8min | 2 tasks | 4 files |
+| Phase 32.1 P03 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -333,6 +334,7 @@ Recent decisions affecting current work:
 - [Phase 32.1]: test_sync_grades.py body is a single pytest.xfail() call (no half-built mock rig) so Plan 32.1-03 Task 2 can author a clean TDD test body without reconciling contradictory assertions
 - [Phase 32.1-01]: Wave 1 SYNC-FIX-05 shell-course filter at link_courses entry; 3 regex patterns (Final Exam for:, Concession, Supplementary) with course_filtered_shell structlog event; LinkedCourse canvas_name field used (not 'name'); structlog.get_logger() no-arg matches project convention
 - [Phase 32.1]: [Phase 32.1-02]: SYNC-FIX-01 Unit Outline URL resolver wired at _upsert_courses with NULL-guard; CanvasAdapter lifecycle spans upsert so two-step tabs->external_tool GETs share httpx client; parser gets _extract_by_header_index positional fallback for due/length/description when .assessment-* CSS classes drift
+- [Phase 32.1-03]: SYNC-FIX-02 Canvas get_assignments gets optional keyword-only include: list[str] | None kwarg; _sync_user_grades passes include=['submission'] to populate Grade.score. Empty-truthy guard keeps deadlines.py no-kwarg call path intact. httpx natively serializes list values as repeated include[]= query params.
 
 ### Roadmap Evolution
 
@@ -350,5 +352,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T04:45:15.837Z
-Stopped at: Completed 32.1-02-PLAN.md (SYNC-FIX-01 Unit Outline URL resolver + parser positional fallback)
+Last session: 2026-04-14T04:52:17.297Z
+Stopped at: Completed 32.1-03-PLAN.md (SYNC-FIX-02 grades submission.score via include kwarg)

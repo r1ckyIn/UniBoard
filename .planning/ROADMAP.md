@@ -324,7 +324,7 @@ Plans:
 - [x] 32.1-00-PLAN.md — Wave 0 test infrastructure: unit test stubs + Canvas/Ed/USYD fixtures + real-data env gate
 - [x] 32.1-01-PLAN.md — SYNC-FIX-05: Filter "Final Exam for:" / Concession / Supplementary shell courses
 - [x] 32.1-02-PLAN.md — SYNC-FIX-01: Wire Canvas tabs -> external_tool URL resolution + USYD parser positional fallbacks
-- [ ] 32.1-03-PLAN.md — SYNC-FIX-02: Canvas grades sync passes include=[submission] for populated score data
+- [x] 32.1-03-PLAN.md — SYNC-FIX-02: Canvas grades sync passes include=[submission] for populated score data
 - [ ] 32.1-04-PLAN.md — SYNC-FIX-04: Null-safe due_at handling in DeadlineService.aggregate_and_dedup
 - [ ] 32.1-05-PLAN.md — SYNC-FIX-03: Ed single-candidate semester fallback + real-data integration harness
 
