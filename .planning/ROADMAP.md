@@ -219,7 +219,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 | 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
 | 31. E2E Verification & AI Config | v3.0 | 3/3 | Complete    | 2026-04-13 |
-| 32. Production Email | v3.0 | 2/3 | Partial (32-03 awaits uniboard.uk reputation 2026-04-16+) | - |
+| 32. Production Email | v3.0 | 3/3 | Complete (32-03 strategically resolved — confirmation OFF; recipient placement deferred to Phase 33 AUTH-HARDEN) | 2026-04-14 |
 | 32.1. Sync Integration Fixes | v3.0 | 6/6 | Complete | 2026-04-14 |
 | 33. Token Lifecycle & Onboarding | v3.0 | 0/TBD | Not started | - |
 | 34. AI Features Live | v3.0 | 0/TBD | Not started | - |
@@ -300,13 +300,13 @@ Plans:
   1. Supabase Auth sends emails via custom SMTP (Resend) instead of built-in service
   2. Signup confirmation email uses branded HTML template with UniBoard logo, styling, and clear CTA button
   3. Password reset email uses branded HTML template with secure reset link and expiry notice
-  4. Email deliverability verified (SPF/DKIM pass, emails land in inbox not spam)
+  4. Email deliverability verified end-to-end on the sender side: SPF/DKIM/DMARC all pass; Resend dashboard shows 100% Delivered for non-bounced addresses. Recipient-side mailbox placement (inbox vs Junk vs Mimecast quarantine) is governed by recipient policy and is NOT a Phase 32 acceptance criterion — handled by Phase 33 AUTH-HARDEN strategy (Google OAuth + permanent confirmation OFF).
 **Plans**: 3 plans
 
 Plans:
 - [x] 32-01-PLAN.md — Email templates, config.toml, auth/confirm route (EMAIL-01, EMAIL-02)
 - [x] 32-02-PLAN.md — Frontend auth flow changes: ForgotPassword, UpdatePassword, RegisterForm update (EMAIL-02)
-- [~] 32-03-PLAN.md — Manual Resend/Supabase Dashboard config + E2E verification (EMAIL-01, EMAIL-02) — partial: SMTP+Resend live, but Supabase email confirmation disabled until uniboard.uk reputation matures (retest 2026-04-16+; see 32-03-SUMMARY.md "Reputation cultivation strategy")
+- [x] 32-03-PLAN.md — Manual Resend/Supabase Dashboard config + E2E verification (EMAIL-01, EMAIL-02) — strategically resolved: Resend SMTP live and 100% Delivered; Supabase email confirmation permanently OFF because Mimecast quarantines new-domain emails for USYD recipients with a 3-hour digest delay (untenable signup UX). Recipient placement issue handed to Phase 33 AUTH-HARDEN (Google OAuth bypass + USYD-aware UI). See 32-03-SUMMARY.md "Strategy shift 2026-04-14".
 
 ### Phase 32.1: Sync Integration Fixes
 **Goal**: All platform data syncs correctly — Unit Outline scraping, grades, Ed matching, Canvas deadlines, and Canvas course filtering all produce real data
@@ -329,14 +329,18 @@ Plans:
 - [x] 32.1-04-PLAN.md — SYNC-FIX-04: Null-safe due_at handling in DeadlineService.aggregate_and_dedup
 - [x] 32.1-05-PLAN.md — SYNC-FIX-03: Ed single-candidate semester fallback + real-data integration harness
 
-### Phase 33: Token Lifecycle & Onboarding
-**Goal**: Automated token expiry reminders and polished first-login onboarding experience
+### Phase 33: Token Lifecycle & Onboarding (with Auth Hardening)
+**Goal**: Automated token expiry handling, polished onboarding, and auth UX hardening to bypass Mimecast email-quarantine for USYD users
 **Depends on**: Phase 32
-**Requirements**: EMAIL-03, ONBD-01, ONBD-02
+**Requirements**: EMAIL-03, AUTH-HARDEN-01, AUTH-HARDEN-02, AUTH-HARDEN-03, AUTH-HARDEN-04, ONBD-01, ONBD-02
 **Success Criteria** (what must be TRUE):
-  1. System detects expiring/expired Canvas/Ed tokens and sends reminder email with re-authorization guide
-  2. First-login onboarding flow is polished with clear guidance and progress indicators
-  3. Setup page handles edge cases gracefully (invalid token, API unreachable, sync failure)
+  1. Token expiry uses in-app first strategy: in-app notification + Settings/Dashboard banner immediately on expiry; backup recall email only fires when the user has been absent (>= 14 days) — no dependence on email reaching the inbox
+  2. First-login onboarding flow is polished with clear guidance, per-domain sync progress indicator, and consistent tone
+  3. Setup page handles edge cases gracefully (invalid token, API unreachable, sync failure, TokenStep skip re-validate)
+  4. Sign in with Google OAuth (USYD Google Workspace) works end-to-end as the primary auth path — bypasses email entirely
+  5. RegisterForm check-email state has a "Resend email" button with 60s cooldown to prevent reputation-damaging duplicate sends
+  6. Registration page surfaces a USYD-specific notice explaining Junk/Held Messages and recommending Google OAuth
+  7. Supabase email confirmation is permanently OFF (documented decision; Phase 32-03 strategically resolved)
 **Plans**: TBD
 
 ### Phase 34: AI Features Live

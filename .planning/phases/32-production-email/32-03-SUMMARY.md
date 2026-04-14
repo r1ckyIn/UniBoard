@@ -1,7 +1,7 @@
 ---
 phase: 32
 plan: 03
-status: partial
+status: resolved_strategically
 completed: 2026-04-14
 ---
 
@@ -108,6 +108,71 @@ After **48-72h** with at least 5 Permit votes from distinct USYD users:
 - Add `hello@uniboard.uk` (replyable) alongside `noreply@uniboard.uk` —
   bidirectional addresses earn faster trust
 - Last resort: secondary domain (`uniboard.app` or `.io`) with longer history
+
+## Strategy shift 2026-04-14 — confirmation OFF is permanent
+
+After live testing, the "wait for reputation" plan is abandoned in favour of
+a structural fix. Two pieces of evidence forced the change:
+
+### Evidence 1 — Permit list does NOT prevent re-quarantine
+
+After clicking "Permit all" for `noreply@uniboard.uk` and re-triggering a
+signup, Resend reported the new email as `Delivered`, but the message did
+not appear in the USYD inbox. Held by Mimecast again.
+
+Mimecast's user-level allow list cannot override organization-level Targeted
+Threat Protection for domains under ~24h old. Personal Permit only releases
+emails AFTER they appear in a digest; it does not pre-clear new arrivals.
+
+### Evidence 2 — Spam digest delay is ~3 hours
+
+The "Blocked Spam Notification" digest itself only reaches the user about
+**3 hours** after the original quarantine event. So the real signup UX is:
+
+```
+T+0    User signs up
+T+5s   Email Delivered to USYD MX → quarantined
+T+0~3h User's inbox is empty → most users abandon
+T+3h   Spam digest arrives → user has to find it
+T+3h+  User clicks Release/Permit → opens email → clicks confirm link
+       → expected completion rate < 10%
+```
+
+This UX is unacceptable for a signup gate. No amount of reputation
+cultivation eliminates the digest delay — it is a property of Mimecast's
+batching, not our domain age.
+
+### Decision
+
+1. **Supabase email confirmation permanently OFF.** USYD email is itself a
+   verified-identity signal (institution-issued, not user-registered).
+2. **Email is downgraded from primary to fallback channel.** In-app
+   notifications + (Phase 35) push are the primary notification channels.
+3. **Phase 33 absorbs the auth UX hardening work**:
+   - Sign in with Google OAuth (USYD Google Workspace) as the primary path
+   - USYD-specific banner on registration page
+   - `Resend email` button + 60s cooldown on RegisterForm check-email state
+   - EMAIL-03 redesigned: in-app first, with a 14-day absence-triggered
+     recall email as backup (high open-rate content rather than bare
+     "token expired" — engagement-positive for sender reputation)
+
+### Phase 32 closure
+
+Phase 32 is now marked **Complete (3/3)**. The ROADMAP success criterion #4
+is rewritten to scope deliverability to the sender side only; recipient
+mailbox placement is explicitly out of Phase 32 scope and handed to the
+Phase 33 AUTH-HARDEN strategy.
+
+The Resend SMTP infrastructure remains in place — it works correctly and
+will be used by the Phase 33 recall emails and any future opt-in mailers.
+The branded templates also stay (no longer wired to confirmation, but
+ready for future transactional uses).
+
+### Resend Dashboard evidence (2026-04-14)
+
+All emails to `yqin0800@uni.sydney.edu.au`: `Delivered` (5 msgs across 12h)
+Only failure: `test-smtp-debug2@gmail.com` `Bounced` (intentionally invalid
+test address). Sender side has 100% deliverability.
 
 ## Debugging notes captured
 

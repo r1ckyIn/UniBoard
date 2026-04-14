@@ -18,18 +18,14 @@
     {"id": "research-plan", "name": "/gsd:plan-phase 33 (includes research)", "status": "not_started"}
   ],
   "blockers": [],
-  "human_actions_pending": [
-    {
-      "action": "Resolve Phase 32-03 email confirmation blocker",
-      "context": "Supabase email confirmation OFF because Microsoft 365 / Mimecast quarantines uniboard.uk emails (held, not rejected). User paused Phase 33 to address this before continuing.",
-      "blocking": false
-    }
-  ],
+  "human_actions_pending": [],
   "decisions": [
     {"decision": "Phase 33 branch is feature/gsd-33-token-lifecycle-onboarding off main 2a38e62", "rationale": "Phase 32 docs reconcile (PR #72) merged first; Phase 33 starts clean", "phase": "33"},
-    {"decision": "Phase 33 has 3 sub-domains (EMAIL-03, ONBD-01, ONBD-02); surfaced 6 gray areas: A trigger timing, B email content, C onboarding flow, D tone, E token invalid UX, F API failure UX", "rationale": "Mapped from ROADMAP success criteria, memory backlog items, and existing assets (check_token_health from Phase 17, setup components, Resend SMTP)", "phase": "33"}
+    {"decision": "Phase 32 closed Complete (3/3) strategically — Supabase email confirmation permanently OFF", "rationale": "Mimecast user-level Permit list does not pre-clear new emails; spam digest ~3h delay makes signup UX untenable. Email is now fallback channel.", "phase": "32"},
+    {"decision": "Phase 33 scope expanded with AUTH-HARDEN-01..04 (Google OAuth, USYD banner, Resend button, document confirmation OFF)", "rationale": "Recipient-side mailbox placement issue handed to Phase 33 from Phase 32. Google OAuth bypasses Mimecast entirely.", "phase": "33"},
+    {"decision": "EMAIL-03 redesigned — in-app first; 14-day absence-triggered recall email", "rationale": "Email reputation cannot be relied on for time-critical notifications. Recall emails to absent users are reputation-positive (high open rate) and not time-critical.", "phase": "33"}
   ],
   "uncommitted_files": [],
-  "next_action": "Resume to Phase 33 discuss: re-present 6 gray areas (A-F), wait for user pick, then deep-dive each. Branch is already set up; CONTEXT.md not yet written.",
-  "context_notes": "User paused mid-discuss to handle Phase 32-03 email blocker. Phase 32-03 retest trigger recorded in memory project_phase32_email_retest.md (>= 2026-04-16). Existing assets: src/sync/scheduled.py::check_token_health (in-app only, needs email), 8 setup components in frontend/components/setup/, Phase 17 token status fields in profiles table. Memory items applicable: project_sync_progress_ux.md (per-domain progress), project_ux_improvements_backlog.md (TokenStep skip re-validate)."
+  "next_action": "Resume to Phase 33 discuss: present REVISED 6 gray areas (A-F revised — see .continue-here.md updated_scope). Several are now low-ambiguity locked decisions, only need confirmation.",
+  "context_notes": "Phase 32 fully closed. Phase 33 scope expanded with 4 new AUTH-HARDEN requirements. Locked decisions documented in updated_scope of .continue-here.md. Existing assets: src/sync/scheduled.py::check_token_health (in-app only, EMAIL-03 will extend with absence-triggered email), 8 setup components in frontend/components/setup/, frontend/components/auth/RegisterForm.tsx:78-84 (check-email state, missing Resend button), Resend SMTP healthy (100% Delivered)."
 }
