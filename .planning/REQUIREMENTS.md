@@ -25,7 +25,7 @@
 
 ### Sync Integration Fixes (SYNC-FIX)
 
-- [ ] **SYNC-FIX-01**: Unit Outline 抓取修复（从 USYD 官网正确提取 assessment weights）
+- [x] **SYNC-FIX-01**: Unit Outline 抓取修复（从 USYD 官网正确提取 assessment weights）
 - [ ] **SYNC-FIX-02**: Canvas 成绩同步修复（current_mark 和 grade_letter 正确写入）
 - [ ] **SYNC-FIX-03**: Ed Discussion 课程匹配修复（ed_course_id 正确关联 Canvas 课程）
 - [ ] **SYNC-FIX-04**: Canvas 作业/截止日期同步完整性（不只抓到 1 条）
@@ -90,7 +90,7 @@
 | AICONF-02 | Phase 31 | Pending |
 | EMAIL-01 | Phase 32 | Pending |
 | EMAIL-02 | Phase 32 | Complete |
-| SYNC-FIX-01 | Phase 32.1 | Pending |
+| SYNC-FIX-01 | Phase 32.1 | Complete |
 | SYNC-FIX-02 | Phase 32.1 | Pending |
 | SYNC-FIX-03 | Phase 32.1 | Pending |
 | SYNC-FIX-04 | Phase 32.1 | Pending |

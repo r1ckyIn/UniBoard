@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 32.1-01-PLAN.md (SYNC-FIX-05 shell-course filter)
-last_updated: "2026-04-14T04:37:04.078Z"
+stopped_at: Completed 32.1-02-PLAN.md (SYNC-FIX-01 Unit Outline URL resolver + parser positional fallback)
+last_updated: "2026-04-14T04:45:15.845Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 20
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 32.1
-Plan: Waves 0-1 complete (32.1-00, 32.1-01); Wave 2 pending (32.1-02, 32.1-03, 32.1-04)
+Plan: Waves 0-1 complete + 32.1-02 (SYNC-FIX-01) landed; Wave 2 remaining (32.1-03, 32.1-04); Wave 3 pending (32.1-05)
 Status: Executing Phase 32.1
 Last activity: 2026-04-14
 
@@ -138,6 +138,7 @@ Last activity: 2026-04-14
 | Phase 32 P02 | 11min | 2 tasks | 14 files |
 | Phase 32.1 P00 | 4min | 2 tasks | 17 files |
 | Phase 32.1 P01 | 3min | 2 tasks | 4 files |
+| Phase 32.1 P02 | 8min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -331,6 +332,7 @@ Recent decisions affecting current work:
 - [Phase 32.1]: Wave 0 RED-state pattern: xfail(strict=False) stubs let collection pass green; Waves 1-3 flip to strict=True once implementation lands
 - [Phase 32.1]: test_sync_grades.py body is a single pytest.xfail() call (no half-built mock rig) so Plan 32.1-03 Task 2 can author a clean TDD test body without reconciling contradictory assertions
 - [Phase 32.1-01]: Wave 1 SYNC-FIX-05 shell-course filter at link_courses entry; 3 regex patterns (Final Exam for:, Concession, Supplementary) with course_filtered_shell structlog event; LinkedCourse canvas_name field used (not 'name'); structlog.get_logger() no-arg matches project convention
+- [Phase 32.1]: [Phase 32.1-02]: SYNC-FIX-01 Unit Outline URL resolver wired at _upsert_courses with NULL-guard; CanvasAdapter lifecycle spans upsert so two-step tabs->external_tool GETs share httpx client; parser gets _extract_by_header_index positional fallback for due/length/description when .assessment-* CSS classes drift
 
 ### Roadmap Evolution
 
@@ -348,5 +350,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T04:36:58.509Z
-Stopped at: Completed 32.1-01-PLAN.md (SYNC-FIX-05 shell-course filter)
+Last session: 2026-04-14T04:45:15.837Z
+Stopped at: Completed 32.1-02-PLAN.md (SYNC-FIX-01 Unit Outline URL resolver + parser positional fallback)
