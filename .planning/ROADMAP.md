@@ -307,6 +307,19 @@ Plans:
 - [ ] 32-02-PLAN.md — Frontend auth flow changes: ForgotPassword, UpdatePassword, RegisterForm update (EMAIL-02)
 - [ ] 32-03-PLAN.md — Manual Resend/Supabase Dashboard config + E2E verification (EMAIL-01, EMAIL-02)
 
+### Phase 32.1: Sync Integration Fixes
+**Goal**: All platform data syncs correctly — Unit Outline scraping, grades, Ed matching, Canvas deadlines, and Canvas course filtering all produce real data
+**Depends on**: Phase 32
+**Requirements**: SYNC-FIX-01, SYNC-FIX-02, SYNC-FIX-03, SYNC-FIX-04, SYNC-FIX-05
+**Success Criteria** (what must be TRUE):
+  1. Unit Outline scraping successfully extracts assessment weights from USYD official site for all real courses (has_unit_outline=true)
+  2. Canvas grades sync populates current_mark and grade_letter for graded assessments
+  3. Ed Discussion course matching correctly links ed_course_id for each Canvas course
+  4. Canvas assignments/deadlines sync captures all due items (not just 1 per course)
+  5. Canvas "Final Exam for: X" concession-shell courses are filtered out of the courses list
+  6. Dashboard shows assessment weights donut chart with real data (no empty states after full sync)
+**Plans**: TBD
+
 ### Phase 33: Token Lifecycle & Onboarding
 **Goal**: Automated token expiry reminders and polished first-login onboarding experience
 **Depends on**: Phase 32

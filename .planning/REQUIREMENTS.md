@@ -23,6 +23,14 @@
 - [ ] **AICONF-01**: ANTHROPIC_API_KEY 配置到 Railway 环境变量
 - [ ] **AICONF-02**: AI 功能端到端验证（Deadline Chat、Course QA、Unit Review 返回真实结果）
 
+### Sync Integration Fixes (SYNC-FIX)
+
+- [ ] **SYNC-FIX-01**: Unit Outline 抓取修复（从 USYD 官网正确提取 assessment weights）
+- [ ] **SYNC-FIX-02**: Canvas 成绩同步修复（current_mark 和 grade_letter 正确写入）
+- [ ] **SYNC-FIX-03**: Ed Discussion 课程匹配修复（ed_course_id 正确关联 Canvas 课程）
+- [ ] **SYNC-FIX-04**: Canvas 作业/截止日期同步完整性（不只抓到 1 条）
+- [ ] **SYNC-FIX-05**: Canvas 异常课程过滤（"Final Exam for: X" 补考 shell 不显示为课程）
+
 ### Email & Auth (EMAIL)
 
 - [ ] **EMAIL-01**: 自定义 SMTP（Resend）替换 Supabase 内置邮件服务
@@ -82,6 +90,11 @@
 | AICONF-02 | Phase 31 | Pending |
 | EMAIL-01 | Phase 32 | Pending |
 | EMAIL-02 | Phase 32 | Complete |
+| SYNC-FIX-01 | Phase 32.1 | Pending |
+| SYNC-FIX-02 | Phase 32.1 | Pending |
+| SYNC-FIX-03 | Phase 32.1 | Pending |
+| SYNC-FIX-04 | Phase 32.1 | Pending |
+| SYNC-FIX-05 | Phase 32.1 | Pending |
 | EMAIL-03 | Phase 33 | Pending |
 | ONBD-01 | Phase 33 | Pending |
 | ONBD-02 | Phase 33 | Pending |
