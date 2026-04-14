@@ -1,6 +1,6 @@
 """Unit tests for course_linking single-candidate fallback — SYNC-FIX-03.
 
-Wave 3 (Plan 32.1-05) flips the Wave 0 xfail stub and adds edge-case coverage
+Wave 3 (Plan 32.1-05) flips the Wave 0 expected-fail stub and adds edge-case coverage
 around the single-candidate semester fallback in ``link_courses``.
 """
 from __future__ import annotations

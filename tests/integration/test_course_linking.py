@@ -146,6 +146,29 @@ async def test_linked_course_dataclass() -> None:
     assert lc.is_linked is False
 
 
+async def test_semester_fallback_integration() -> None:
+    """SYNC-FIX-03: end-to-end check that a Canvas course with semester gets
+    linked to an Ed course without extractable semester when the Ed course is
+    the sole candidate for that course code (single-candidate fallback).
+    """
+    canvas_courses: list[dict[str, object]] = [
+        {
+            "id": 69855,
+            "name": "COMP2017 Systems Programming (2026 Semester 1)",
+        },
+    ]
+    # Ed course lacks semester in the name -> falls back via ed_code_only.
+    ed_courses = json.loads(
+        (Path(__file__).parent.parent / "fixtures" / "ed" / "courses_no_semester.json").read_text()
+    )
+
+    results = link_courses(canvas_courses, ed_courses)
+    by_canvas = [r for r in results if r.canvas_course_id == "69855"]
+    assert len(by_canvas) == 1
+    assert by_canvas[0].ed_course_id == "50001"
+    assert by_canvas[0].is_linked is True
+
+
 async def test_shell_courses_filtered_integration() -> None:
     """SYNC-FIX-05: end-to-end check that shell courses from the Wave 0 fixture
     are filtered by ``link_courses`` before any matching logic runs."""

@@ -113,6 +113,11 @@ def link_courses(
     ed_index: dict[tuple[str, str], dict[str, object]] = {}
     ed_unmatched: dict[tuple[str, str], dict[str, object]] = {}
 
+    # SYNC-FIX-03: Build a code-only fallback index for Ed courses that omit
+    # the semester in their name. Used only when the primary (code, semester)
+    # match misses and exactly one candidate exists.
+    ed_code_only: dict[str, list[dict[str, object]]] = {}
+
     for ec in ed_courses:
         ed_name = str(ec.get("name", ""))
         code = extract_course_code(ed_name)
@@ -121,6 +126,8 @@ def link_courses(
             key = (code, semester)
             ed_index[key] = ec
             ed_unmatched[key] = ec
+        elif code and not semester:
+            ed_code_only.setdefault(code, []).append(ec)
 
     results: list[LinkedCourse] = []
     matched_ed_keys: set[tuple[str, str]] = set()
@@ -134,6 +141,28 @@ def link_courses(
         if code and semester:
             key = (code, semester)
             ed_match = ed_index.get(key)
+
+            # SYNC-FIX-03: Primary match missed -- try single-candidate
+            # fallback on the code-only index. Only fires when exactly ONE
+            # Ed course exists for this code without a semester tag; more
+            # than one candidate is ambiguous and logged-and-skipped.
+            if ed_match is None:
+                candidates = ed_code_only.get(code, [])
+                if len(candidates) == 1:
+                    ed_match = candidates[0]
+                    logger.info(
+                        "course_linking_ambiguous_semester_fallback",
+                        canvas_code=code,
+                        ed_course_id=str(ed_match.get("id", "")),
+                    )
+                elif len(candidates) > 1:
+                    logger.info(
+                        "course_linking_ambiguous_semester_fallback_skipped",
+                        canvas_code=code,
+                        reason="multiple_candidates",
+                        count=len(candidates),
+                    )
+
             if ed_match is not None:
                 results.append(
                     LinkedCourse(
