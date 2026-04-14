@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 32.1-03-PLAN.md (SYNC-FIX-02 grades submission.score via include kwarg)
-last_updated: "2026-04-14T04:52:36.693Z"
+stopped_at: Completed 32.1-04-PLAN.md (SYNC-FIX-04 null-safe due_at handling)
+last_updated: "2026-04-14T04:58:42.738Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 20
   completed_phases: 14
   total_plans: 50
-  completed_plans: 48
+  completed_plans: 49
 ---
 
 # Project State
@@ -140,6 +140,7 @@ Last activity: 2026-04-14
 | Phase 32.1 P01 | 3min | 2 tasks | 4 files |
 | Phase 32.1 P02 | 8min | 2 tasks | 4 files |
 | Phase 32.1 P03 | 6min | 2 tasks | 4 files |
+| Phase 32.1 P04 | 4min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -335,6 +336,7 @@ Recent decisions affecting current work:
 - [Phase 32.1-01]: Wave 1 SYNC-FIX-05 shell-course filter at link_courses entry; 3 regex patterns (Final Exam for:, Concession, Supplementary) with course_filtered_shell structlog event; LinkedCourse canvas_name field used (not 'name'); structlog.get_logger() no-arg matches project convention
 - [Phase 32.1]: [Phase 32.1-02]: SYNC-FIX-01 Unit Outline URL resolver wired at _upsert_courses with NULL-guard; CanvasAdapter lifecycle spans upsert so two-step tabs->external_tool GETs share httpx client; parser gets _extract_by_header_index positional fallback for due/length/description when .assessment-* CSS classes drift
 - [Phase 32.1-03]: SYNC-FIX-02 Canvas get_assignments gets optional keyword-only include: list[str] | None kwarg; _sync_user_grades passes include=['submission'] to populate Grade.score. Empty-truthy guard keeps deadlines.py no-kwarg call path intact. httpx natively serializes list values as repeated include[]= query params.
+- [Phase 32.1]: [Phase 32.1-04]: SYNC-FIX-04 null-safe due_at handling via isinstance(due_raw, str) guard in both Canvas and Ed Lessons phases of aggregate_and_dedup. Replaces str(None)=="None" truthy check that was polluting compute_dedup_key with sentinel "None" date before try/except ValueError swallowed the error. Two SYNC-FIX-04 audit markers added for code-review visibility.
 
 ### Roadmap Evolution
 
@@ -352,5 +354,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T04:52:17.297Z
-Stopped at: Completed 32.1-03-PLAN.md (SYNC-FIX-02 grades submission.score via include kwarg)
+Last session: 2026-04-14T04:58:42.730Z
+Stopped at: Completed 32.1-04-PLAN.md (SYNC-FIX-04 null-safe due_at handling)
