@@ -45,6 +45,70 @@ Users can register with USYD email without confirmation while domain reputation 
 2. Re-enable "Confirm email" toggle in Supabase Dashboard
 3. Remove any test users created during bypass period
 
+## Update 2026-04-14 — Mimecast quarantine confirmed (NOT reject)
+
+Inspection of a USYD inbox revealed that confirmation emails are being **held**
+by Microsoft 365 / Mimecast spam quarantine, not rejected. The "Blocked Spam
+Notification" digest exposes a per-user "Permit / Release / Block" workflow.
+
+Implications:
+- DNS (SPF/DKIM/DMARC) is correct — emails reach USYD MX servers
+- Resend → MX path works
+- Quarantine is purely a sender-reputation issue against the < 24h-old
+  `uniboard.uk` domain
+- Resolution is **time + cumulative trust signals**, not a code/config fix
+
+## Reputation cultivation strategy
+
+**Goal:** Move `uniboard.uk` from "unknown sender → quarantine" to
+"trusted sender → inbox" in Mimecast's collective reputation graph.
+
+### Pace
+
+- 24-48h: still expect quarantine for new USYD recipients (today's domain age)
+- 3-7 days: cumulative Permit signals start unlocking some recipient subgroups
+- 2 weeks+: sustained low-bounce + low-complaint usage typically clears
+  default quarantine, barring negative signals
+
+### Required user behaviour (early-alpha protocol)
+
+Brief every alpha tester verbally or in onboarding copy:
+
+1. **Always click "Permit"** in the Held Messages digest. This is the strongest
+   per-user trust signal.
+2. **Never click "Block"** or "Mark as Spam" — a single Block can poison the
+   reputation across the recipient's department/faculty subgroup.
+3. If an email lands in inbox but looks suspicious, click "Not Spam" rather
+   than ignoring it.
+4. Open the email if curious — open events feed Mimecast engagement signals.
+
+### Sender-side hygiene (already met, must stay met)
+
+- Bounce rate < 2% (Resend dashboard tracks this; do not blast invalid addresses)
+- Complaint rate near 0%
+- Single confirmation email per signup attempt; the existing 32-02 frontend
+  must not retry-send within a short window. (Note: the 3 emails seen at
+  09:19 / 09:22 / 09:23 were caused by manual re-clicks during testing, not
+  a system retry loop — confirmed 2026-04-14.)
+- Keep email body clean: no link shorteners, no excessive images, no all-caps subject
+
+### When to retest
+
+After **48-72h** with at least 5 Permit votes from distinct USYD users:
+
+1. Pick a **fresh** USYD address that has **never** Permit'd `noreply@uniboard.uk`
+2. Trigger signup
+3. If it lands in inbox → flip Supabase confirmation back ON
+4. If still held → wait another 48h, do not change strategy
+
+### Escalation triggers (only if 2-week mark fails)
+
+- Switch to OTP 6-digit code via Supabase Auth (Mimecast is more lenient with
+  short code emails than magic-link URLs)
+- Add `hello@uniboard.uk` (replyable) alongside `noreply@uniboard.uk` —
+  bidirectional addresses earn faster trust
+- Last resort: secondary domain (`uniboard.app` or `.io`) with longer history
+
 ## Debugging notes captured
 
 - Initial 500 on signup was due to SMTP password not being re-saved after username change

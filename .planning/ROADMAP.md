@@ -219,7 +219,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 28. Deadlines Page Enhancement | M4 | 3/3 | Complete    | 2026-04-04 |
 | 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
 | 31. E2E Verification & AI Config | v3.0 | 3/3 | Complete    | 2026-04-13 |
-| 32. Production Email | v3.0 | 0/3 | Planned | - |
+| 32. Production Email | v3.0 | 2/3 | Partial (32-03 awaits uniboard.uk reputation 2026-04-16+) | - |
 | 32.1. Sync Integration Fixes | v3.0 | 6/6 | Complete | 2026-04-14 |
 | 33. Token Lifecycle & Onboarding | v3.0 | 0/TBD | Not started | - |
 | 34. AI Features Live | v3.0 | 0/TBD | Not started | - |
@@ -304,9 +304,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 32-01-PLAN.md — Email templates, config.toml, auth/confirm route (EMAIL-01, EMAIL-02)
-- [ ] 32-02-PLAN.md — Frontend auth flow changes: ForgotPassword, UpdatePassword, RegisterForm update (EMAIL-02)
-- [ ] 32-03-PLAN.md — Manual Resend/Supabase Dashboard config + E2E verification (EMAIL-01, EMAIL-02)
+- [x] 32-01-PLAN.md — Email templates, config.toml, auth/confirm route (EMAIL-01, EMAIL-02)
+- [x] 32-02-PLAN.md — Frontend auth flow changes: ForgotPassword, UpdatePassword, RegisterForm update (EMAIL-02)
+- [~] 32-03-PLAN.md — Manual Resend/Supabase Dashboard config + E2E verification (EMAIL-01, EMAIL-02) — partial: SMTP+Resend live, but Supabase email confirmation disabled until uniboard.uk reputation matures (retest 2026-04-16+; see 32-03-SUMMARY.md "Reputation cultivation strategy")
 
 ### Phase 32.1: Sync Integration Fixes
 **Goal**: All platform data syncs correctly — Unit Outline scraping, grades, Ed matching, Canvas deadlines, and Canvas course filtering all produce real data
