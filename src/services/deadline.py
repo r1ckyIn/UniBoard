@@ -236,9 +236,15 @@ class DeadlineService:
         # Phase 1: Process Canvas assignments
         for assignment in canvas_assignments:
             title = str(assignment.get("name", ""))
-            due_str = str(assignment.get("due_at", ""))
-            if not title or not due_str:
+            # SYNC-FIX-04: Canvas may return due_at as JSON null (Python None) or
+            # non-string types. Prior code did str(None) -> "None", passed the
+            # truthy guard, then fed "None" to datetime.fromisoformat which raised
+            # ValueError and was swallowed by the try/except below. Skip here
+            # explicitly so the dedup key path is never reached with a bogus date.
+            due_raw = assignment.get("due_at")
+            if not title or not isinstance(due_raw, str) or not due_raw:
                 continue
+            due_str = due_raw
 
             due_date_str = due_str[:10]
             key = compute_dedup_key(course.code, title, due_date_str)
@@ -283,11 +289,15 @@ class DeadlineService:
             new_count += 1
 
         # Phase 2: Process Ed Lessons deadlines
+        # SYNC-FIX-04: Same null-and-type guard as Canvas phase; Ed Lessons
+        # payloads can also carry due_at as None or non-string types when a
+        # lesson has no scheduled deadline. Guard explicitly before fromisoformat.
         for lesson_data in ed_lessons_data:
             title = str(lesson_data.get("title", ""))
-            due_str = str(lesson_data.get("due_at", ""))
-            if not title or not due_str:
+            due_raw = lesson_data.get("due_at")
+            if not title or not isinstance(due_raw, str) or not due_raw:
                 continue
+            due_str = due_raw
 
             due_date_str = due_str[:10]
             key = compute_dedup_key(course.code, title, due_date_str)
