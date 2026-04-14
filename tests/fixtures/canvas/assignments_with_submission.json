@@ -1,0 +1,5 @@
+[
+  {"id": 1, "name": "Assignment 1", "due_at": "2026-03-15T23:59:00Z", "points_possible": 20, "submission": {"score": 17.5, "grade": "HD", "submitted_at": "2026-03-14T20:00:00Z", "workflow_state": "graded"}},
+  {"id": 2, "name": "Assignment 2", "due_at": "2026-04-01T23:59:00Z", "points_possible": 20, "submission": {"score": 15.0, "grade": "D", "submitted_at": "2026-03-30T18:00:00Z", "workflow_state": "graded"}},
+  {"id": 3, "name": "Assignment 3", "due_at": "2026-05-01T23:59:00Z", "points_possible": 30, "submission": {"score": null, "grade": null, "submitted_at": null, "workflow_state": "unsubmitted"}}
+]

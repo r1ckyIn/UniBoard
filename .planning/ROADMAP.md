@@ -220,6 +220,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 30. BFF Proxy Conversion | v3.0 | 1/3 | Complete    | 2026-04-06 |
 | 31. E2E Verification & AI Config | v3.0 | 3/3 | Complete    | 2026-04-13 |
 | 32. Production Email | v3.0 | 0/3 | Planned | - |
+| 32.1. Sync Integration Fixes | v3.0 | 6/6 | Complete | 2026-04-14 |
 | 33. Token Lifecycle & Onboarding | v3.0 | 0/TBD | Not started | - |
 | 34. AI Features Live | v3.0 | 0/TBD | Not started | - |
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
@@ -318,7 +319,15 @@ Plans:
   4. Canvas assignments/deadlines sync captures all due items (not just 1 per course)
   5. Canvas "Final Exam for: X" concession-shell courses are filtered out of the courses list
   6. Dashboard shows assessment weights donut chart with real data (no empty states after full sync)
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [x] 32.1-00-PLAN.md — Wave 0 test infrastructure: unit test stubs + Canvas/Ed/USYD fixtures + real-data env gate
+- [x] 32.1-01-PLAN.md — SYNC-FIX-05: Filter "Final Exam for:" / Concession / Supplementary shell courses
+- [x] 32.1-02-PLAN.md — SYNC-FIX-01: Wire Canvas tabs -> external_tool URL resolution + USYD parser positional fallbacks
+- [x] 32.1-03-PLAN.md — SYNC-FIX-02: Canvas grades sync passes include=[submission] for populated score data
+- [x] 32.1-04-PLAN.md — SYNC-FIX-04: Null-safe due_at handling in DeadlineService.aggregate_and_dedup
+- [x] 32.1-05-PLAN.md — SYNC-FIX-03: Ed single-candidate semester fallback + real-data integration harness
 
 ### Phase 33: Token Lifecycle & Onboarding
 **Goal**: Automated token expiry reminders and polished first-login onboarding experience

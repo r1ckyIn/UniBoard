@@ -1,0 +1,5 @@
+[
+  {"id": "home", "label": "Home", "type": "internal"},
+  {"id": "context_external_tool_98765", "label": "Unit Outline", "type": "external"},
+  {"id": "assignments", "label": "Assignments", "type": "internal"}
+]

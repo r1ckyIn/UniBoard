@@ -1,0 +1,7 @@
+[
+  {"id": 1, "name": "Assignment 1", "due_at": "2026-03-15T23:59:00Z", "points_possible": 20},
+  {"id": 2, "name": "Assignment 2", "due_at": null, "points_possible": 20},
+  {"id": 3, "name": "Assignment 3", "due_at": "2026-04-20T23:59:00Z", "points_possible": 30},
+  {"id": 4, "name": "Assignment 4", "due_at": null, "points_possible": 10},
+  {"id": 5, "name": "Final Exam", "due_at": "2026-06-10T09:00:00Z", "points_possible": 40}
+]

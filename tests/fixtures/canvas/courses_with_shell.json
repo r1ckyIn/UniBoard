@@ -1,0 +1,5 @@
+[
+  {"id": 111111, "name": "COMP2017 Systems Programming", "course_code": "COMP2017", "enrollment_term_id": 42},
+  {"id": 111112, "name": "Final Exam for: COMP2017 Systems Programming", "course_code": "COMP2017_FE", "enrollment_term_id": 42},
+  {"id": 111113, "name": "Concession Assessment for COMP3221", "course_code": "COMP3221_CONC", "enrollment_term_id": 42}
+]

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 32-01-PLAN.md, 32-02-PLAN.md (Wave 1)
-last_updated: "2026-04-13T07:30:00.000Z"
-last_activity: 2026-04-13
+status: phase_complete
+stopped_at: Phase 32.1 complete and verified (passed) -- all 5 SYNC-FIX requirements closed
+last_updated: "2026-04-14T05:09:54.691Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 15
-  completed_phases: 12
-  total_plans: 38
-  completed_plans: 41
+  total_phases: 20
+  completed_phases: 15
+  total_plans: 50
+  completed_plans: 50
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 
 ## Current Position
 
-Phase: 32
-Plan: Wave 1 complete (32-01, 32-02), Wave 2 pending (32-03)
-Status: Executing Phase 32
-Last activity: 2026-04-13
+Phase: 32.1
+Plan: All 6 plans complete (Wave 0 scaffolding + Wave 1 SYNC-FIX-05 + Wave 2 SYNC-FIX-01/02/04 + Wave 3 SYNC-FIX-03 + real-data harness). All 5 SYNC-FIX requirements closed.
+Status: Phase 32.1 complete -- ready for /gsd:verify-work 32.1
+Last activity: 2026-04-14
 
 ## Milestones Completed
 
@@ -136,6 +136,12 @@ Last activity: 2026-04-13
 | Phase 30 P03 | 5min | 2 tasks | 13 files |
 | Phase 31 P01 | 5min | 2 tasks | 3 files |
 | Phase 32 P02 | 11min | 2 tasks | 14 files |
+| Phase 32.1 P00 | 4min | 2 tasks | 17 files |
+| Phase 32.1 P01 | 3min | 2 tasks | 4 files |
+| Phase 32.1 P02 | 8min | 2 tasks | 4 files |
+| Phase 32.1 P03 | 6min | 2 tasks | 4 files |
+| Phase 32.1 P04 | 4min | 1 tasks | 2 files |
+| Phase 32.1 P05 | 6min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -326,6 +332,13 @@ Recent decisions affecting current work:
 - [Phase 31]: Poll sync status every 3s with conditional refetchInterval, enabled only after sync trigger fires
 - [Phase 32]: RegisterForm handles check-email state internally via emailSent useState, removing SuccessOverlay from AuthPage
 - [Phase 32]: AuthPage supports 4 modes via URL search params: login, register, forgot-password, reset-password
+- [Phase 32.1]: Wave 0 RED-state pattern: xfail(strict=False) stubs let collection pass green; Waves 1-3 flip to strict=True once implementation lands
+- [Phase 32.1]: test_sync_grades.py body is a single pytest.xfail() call (no half-built mock rig) so Plan 32.1-03 Task 2 can author a clean TDD test body without reconciling contradictory assertions
+- [Phase 32.1-01]: Wave 1 SYNC-FIX-05 shell-course filter at link_courses entry; 3 regex patterns (Final Exam for:, Concession, Supplementary) with course_filtered_shell structlog event; LinkedCourse canvas_name field used (not 'name'); structlog.get_logger() no-arg matches project convention
+- [Phase 32.1]: [Phase 32.1-02]: SYNC-FIX-01 Unit Outline URL resolver wired at _upsert_courses with NULL-guard; CanvasAdapter lifecycle spans upsert so two-step tabs->external_tool GETs share httpx client; parser gets _extract_by_header_index positional fallback for due/length/description when .assessment-* CSS classes drift
+- [Phase 32.1-03]: SYNC-FIX-02 Canvas get_assignments gets optional keyword-only include: list[str] | None kwarg; _sync_user_grades passes include=['submission'] to populate Grade.score. Empty-truthy guard keeps deadlines.py no-kwarg call path intact. httpx natively serializes list values as repeated include[]= query params.
+- [Phase 32.1]: [Phase 32.1-04]: SYNC-FIX-04 null-safe due_at handling via isinstance(due_raw, str) guard in both Canvas and Ed Lessons phases of aggregate_and_dedup. Replaces str(None)=="None" truthy check that was polluting compute_dedup_key with sentinel "None" date before try/except ValueError swallowed the error. Two SYNC-FIX-04 audit markers added for code-review visibility.
+- [Phase 32.1]: [Phase 32.1-05]: SYNC-FIX-03 closed via single-candidate semester fallback in link_courses. ed_code_only dict indexes Ed courses with no extractable semester; when primary (code, semester) match misses and exactly 1 candidate exists, link them with course_linking_ambiguous_semester_fallback log. Multiple candidates: log _skipped with reason=multiple_candidates, no auto-link. Primary match always wins. Real-data harness populated: 5 env-gated tests (one per SYNC-FIX-NN), skip cleanly when SYNC_REAL_DATA_CANVAS_TOKEN unset. Phase 32.1 as a whole: all 5 SYNC-FIX requirements have automated regression tests.
 
 ### Roadmap Evolution
 
@@ -343,5 +356,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-13T06:14:24.468Z
-Stopped at: Completed 32-02-PLAN.md
+Last session: 2026-04-14T05:09:45.401Z
+Stopped at: Phase 32.1 verified (passed) -- all 5 SYNC-FIX requirements closed; ready for next phase

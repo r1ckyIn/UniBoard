@@ -195,11 +195,27 @@ class CanvasAdapter(LMSAdapter):
             params={"user_id": "self", "include[]": "current_points"},
         )
 
-    async def get_assignments(self, course_id: str) -> list[dict[str, object]]:
-        """Fetch assignments for a course."""
+    async def get_assignments(
+        self,
+        course_id: str,
+        *,
+        include: list[str] | None = None,
+    ) -> list[dict[str, object]]:
+        """Fetch assignments for a course.
+
+        Args:
+            course_id: Canvas course ID.
+            include: Optional list of ``include[]`` query parameter values.
+                Common values: ``["submission"]`` to embed per-user submission data
+                (Canvas omits ``submission`` from the default response).
+                Default ``None`` means no ``include[]`` param is sent.
+        """
+        params: dict[str, Any] = {"per_page": 100}
+        if include:
+            params["include[]"] = include
         return await self._paginate(
             f"/courses/{course_id}/assignments",
-            params={"per_page": 100},
+            params=params,
         )
 
     async def get_modules(self, course_id: str) -> list[dict[str, object]]:

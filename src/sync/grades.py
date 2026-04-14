@@ -47,7 +47,8 @@ async def _sync_user_grades(
                 continue
 
             local_course = user_courses[course_id]
-            assignments = await adapter.get_assignments(course_id)
+            # include[] submission to get per-user score and grade letter.
+            assignments = await adapter.get_assignments(course_id, include=["submission"])
 
             for assignment in assignments:
                 name = str(assignment.get("name", ""))

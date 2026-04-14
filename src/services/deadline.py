@@ -236,9 +236,13 @@ class DeadlineService:
         # Phase 1: Process Canvas assignments
         for assignment in canvas_assignments:
             title = str(assignment.get("name", ""))
-            due_str = str(assignment.get("due_at", ""))
-            if not title or not due_str:
+            # Canvas may return due_at as JSON null or a non-string; skip
+            # before it reaches compute_dedup_key or fromisoformat, otherwise
+            # stringifying None yields "None" which pollutes the dedup key.
+            due_raw = assignment.get("due_at")
+            if not title or not isinstance(due_raw, str) or not due_raw:
                 continue
+            due_str = due_raw
 
             due_date_str = due_str[:10]
             key = compute_dedup_key(course.code, title, due_date_str)
@@ -282,12 +286,14 @@ class DeadlineService:
             existing_keys.add(key)
             new_count += 1
 
-        # Phase 2: Process Ed Lessons deadlines
+        # Phase 2: Process Ed Lessons deadlines. Ed payloads can also carry
+        # due_at as None or non-string when a lesson has no scheduled deadline.
         for lesson_data in ed_lessons_data:
             title = str(lesson_data.get("title", ""))
-            due_str = str(lesson_data.get("due_at", ""))
-            if not title or not due_str:
+            due_raw = lesson_data.get("due_at")
+            if not title or not isinstance(due_raw, str) or not due_raw:
                 continue
+            due_str = due_raw
 
             due_date_str = due_str[:10]
             key = compute_dedup_key(course.code, title, due_date_str)

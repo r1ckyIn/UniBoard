@@ -4,12 +4,17 @@ These tests work entirely offline -- no API tokens required.
 Tests the regex-based course code extraction and cross-platform matching.
 """
 
+import json
+from pathlib import Path
+
 from src.services.course_linking import (
     LinkedCourse,
     extract_course_code,
     extract_semester,
     link_courses,
 )
+
+FIXTURES = Path(__file__).parent.parent / "fixtures" / "canvas"
 
 
 async def test_extract_course_code_standard() -> None:
@@ -139,3 +144,47 @@ async def test_linked_course_dataclass() -> None:
     assert lc.canvas_name == ""
     assert lc.ed_name is None
     assert lc.is_linked is False
+
+
+async def test_semester_fallback_integration() -> None:
+    """SYNC-FIX-03: end-to-end check that a Canvas course with semester gets
+    linked to an Ed course without extractable semester when the Ed course is
+    the sole candidate for that course code (single-candidate fallback).
+    """
+    canvas_courses: list[dict[str, object]] = [
+        {
+            "id": 69855,
+            "name": "COMP2017 Systems Programming (2026 Semester 1)",
+        },
+    ]
+    # Ed course lacks semester in the name -> falls back via ed_code_only.
+    ed_courses = json.loads(
+        (Path(__file__).parent.parent / "fixtures" / "ed" / "courses_no_semester.json").read_text()
+    )
+
+    results = link_courses(canvas_courses, ed_courses)
+    by_canvas = [r for r in results if r.canvas_course_id == "69855"]
+    assert len(by_canvas) == 1
+    assert by_canvas[0].ed_course_id == "50001"
+    assert by_canvas[0].is_linked is True
+
+
+async def test_shell_courses_filtered_integration() -> None:
+    """SYNC-FIX-05: end-to-end check that shell courses from the Wave 0 fixture
+    are filtered by ``link_courses`` before any matching logic runs."""
+    canvas_courses = json.loads(
+        (FIXTURES / "courses_with_shell.json").read_text()
+    )
+    ed_courses: list[dict[str, object]] = [
+        {"id": 31567, "name": "COMP2017 (2026 Semester 1)"},
+    ]
+
+    results = link_courses(canvas_courses, ed_courses)
+
+    # Only real COMP2017 canvas course + one ed-only entry for unmatched semester.
+    canvas_names = [r.canvas_name for r in results if r.canvas_name]
+    assert all("Final Exam for:" not in n for n in canvas_names)
+    assert all("Concession" not in n for n in canvas_names)
+    # Exactly one canvas-origin entry survives the filter.
+    assert len(canvas_names) == 1
+    assert canvas_names[0] == "COMP2017 Systems Programming"
