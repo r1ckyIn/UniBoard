@@ -1,6 +1,6 @@
 """Unit tests for _sync_user_grades -- SYNC-FIX-02 submission include.
 
-Waves 0 laid a xfail stub. Plan 32.1-03 Task 2 flips it to strict-green with
+Wave 0 laid a RED-state stub. Plan 32.1-03 Task 2 flips it to strict-green with
 realistic tests: the fix is a one-liner (add include=['submission'] kwarg) so the
 tests verify (1) the kwarg is passed through, and (2) fixture score values flow
 into Grade row upserts.
