@@ -29,7 +29,7 @@
 - [ ] **SYNC-FIX-02**: Canvas 成绩同步修复（current_mark 和 grade_letter 正确写入）
 - [ ] **SYNC-FIX-03**: Ed Discussion 课程匹配修复（ed_course_id 正确关联 Canvas 课程）
 - [ ] **SYNC-FIX-04**: Canvas 作业/截止日期同步完整性（不只抓到 1 条）
-- [ ] **SYNC-FIX-05**: Canvas 异常课程过滤（"Final Exam for: X" 补考 shell 不显示为课程）
+- [x] **SYNC-FIX-05**: Canvas 异常课程过滤（"Final Exam for: X" 补考 shell 不显示为课程）
 
 ### Email & Auth (EMAIL)
 
@@ -94,7 +94,7 @@
 | SYNC-FIX-02 | Phase 32.1 | Pending |
 | SYNC-FIX-03 | Phase 32.1 | Pending |
 | SYNC-FIX-04 | Phase 32.1 | Pending |
-| SYNC-FIX-05 | Phase 32.1 | Pending |
+| SYNC-FIX-05 | Phase 32.1 | Complete |
 | EMAIL-03 | Phase 33 | Pending |
 | ONBD-01 | Phase 33 | Pending |
 | ONBD-02 | Phase 33 | Pending |
