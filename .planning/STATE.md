@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 33-03-PLAN.md (per-platform sync counts)
-last_updated: "2026-04-15T07:40:17.141Z"
+stopped_at: Completed 33-06-PLAN.md (Resend button + 60s cooldown)
+last_updated: "2026-04-15T07:42:33.013Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 15
   total_plans: 58
-  completed_plans: 53
+  completed_plans: 54
 ---
 
 # Project State
@@ -145,6 +145,7 @@ Last activity: 2026-04-15
 | Phase 33 P01 | 2min | 2 tasks | 2 files |
 | Phase 33 P08 | 2 | 2 tasks | 3 files |
 | Phase 33 P03 | 6min | 2 tasks | 5 files |
+| Phase 33 P06 | 7min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -348,6 +349,9 @@ Recent decisions affecting current work:
 - [Phase 33]: [Phase 33-08]: Email confirmation permanently OFF documented in TRD §7.5/§16.9, PROJECT.md Key Decisions, and supabase/config.toml inline comment
 - [Phase 33]: [Phase 33-03]: aggregate_per_platform_counts extracted as pure function (no DB/auth deps) for unit testability — Pydantic helper pattern
 - [Phase 33]: [Phase 33-03]: openapi.yaml is single source of truth for types.gen.d.ts — regenerate via pnpm generate:types, never hand-edit the generated file
+- [Phase 33]: [Phase 33-06]: Cooldown starts on initial reset success (not only after first resend) to prevent inbox flooding via rapid form re-submission
+- [Phase 33]: [Phase 33-06]: Failed resend does NOT restart cooldown — UX tradeoff favoring immediate retry on transient errors
+- [Phase 33]: [Phase 33-06]: Test strategy — install vi.useFakeTimers() BEFORE render + use fireEvent (not userEvent) to avoid wall-clock delays hanging under fake timers; flush react-hook-form async resolver with await Promise.resolve() twice inside act()
 
 ### Roadmap Evolution
 
@@ -365,5 +369,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T07:40:17.130Z
-Stopped at: Completed 33-03-PLAN.md (per-platform sync counts)
+Last session: 2026-04-15T07:42:33.004Z
+Stopped at: Completed 33-06-PLAN.md (Resend button + 60s cooldown)
