@@ -46,7 +46,7 @@
 
 ### Onboarding (ONBD)
 
-- [ ] **ONBD-01**: 用户引导流程优化（首次登录体验打磨 + per-domain sync progress）
+- [x] **ONBD-01**: 用户引导流程优化（首次登录体验打磨 + per-domain sync progress）
 - [ ] **ONBD-02**: Setup 页面异常状态处理（Token 无效、API 不可达、同步失败、TokenStep skip re-validate）
 
 ### UX Polish (UXPOL)
@@ -107,7 +107,7 @@
 | AUTH-HARDEN-02 | Phase 33 | Pending |
 | AUTH-HARDEN-03 | Phase 33 | Pending |
 | AUTH-HARDEN-04 | Phase 33 | Complete |
-| ONBD-01 | Phase 33 | Pending |
+| ONBD-01 | Phase 33 | Complete |
 | ONBD-02 | Phase 33 | Pending |
 | AIFEAT-01 | Phase 34 | Pending |
 | AIFEAT-02 | Phase 34 | Pending |
