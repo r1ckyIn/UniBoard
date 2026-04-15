@@ -199,6 +199,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Unit Outline from USYD HTML | Canvas may not have complete data | ✓ Good — CSS + positional fallback parser with weight-sum validation |
 | Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending (M3) |
 | i18n English + Chinese | Target Chinese international student community at USYD | ✓ Good — all 10 pages fully bilingual |
+| **Supabase email confirmation: permanently OFF** | USYD's Mimecast Secure Email Gateway quarantines `uniboard.uk` sender mail with 3-hour digest delays, making signup-time confirmation untenable. Mitigated by Google OAuth as primary auth path (AUTH-HARDEN-01), USYD-aware registration banner (AUTH-HARDEN-02), password-reset resend button with 60s cooldown (AUTH-HARDEN-03). Local dev keeps confirmations ON for parity testing (`supabase/config.toml`); production keeps them OFF in Supabase Studio. See `docs/UniBoard_TRD_v2.md` §7.5 and §16.9 for full rationale. | ✓ Decision documented (Phase 32-03 strategic resolution + Phase 33 AUTH-HARDEN-04) |
 
 ## Current Milestone: v3.0 Production Ready + AI Core
 
