@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: phase_complete
-stopped_at: Phase 32.1 complete and verified (passed) -- all 5 SYNC-FIX requirements closed
-last_updated: "2026-04-14T05:09:54.691Z"
-last_activity: 2026-04-14
+status: executing
+stopped_at: Completed 33-01-PLAN.md
+last_updated: "2026-04-15T07:35:30.370Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 15
-  total_plans: 50
-  completed_plans: 50
+  total_plans: 58
+  completed_plans: 51
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 32 — production-email
+**Current focus:** Phase 33 — token-lifecycle-onboarding
 
 ## Current Position
 
-Phase: 32.1
-Plan: All 6 plans complete (Wave 0 scaffolding + Wave 1 SYNC-FIX-05 + Wave 2 SYNC-FIX-01/02/04 + Wave 3 SYNC-FIX-03 + real-data harness). All 5 SYNC-FIX requirements closed.
-Status: Phase 32.1 complete -- ready for /gsd:verify-work 32.1
-Last activity: 2026-04-14
+Phase: 33 (token-lifecycle-onboarding) — EXECUTING
+Plan: 2 of 8
+Status: Ready to execute
+Last activity: 2026-04-15
 
 ## Milestones Completed
 
@@ -142,6 +142,7 @@ Last activity: 2026-04-14
 | Phase 32.1 P03 | 6min | 2 tasks | 4 files |
 | Phase 32.1 P04 | 4min | 1 tasks | 2 files |
 | Phase 32.1 P05 | 6min | 3 tasks | 5 files |
+| Phase 33 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -339,6 +340,9 @@ Recent decisions affecting current work:
 - [Phase 32.1-03]: SYNC-FIX-02 Canvas get_assignments gets optional keyword-only include: list[str] | None kwarg; _sync_user_grades passes include=['submission'] to populate Grade.score. Empty-truthy guard keeps deadlines.py no-kwarg call path intact. httpx natively serializes list values as repeated include[]= query params.
 - [Phase 32.1]: [Phase 32.1-04]: SYNC-FIX-04 null-safe due_at handling via isinstance(due_raw, str) guard in both Canvas and Ed Lessons phases of aggregate_and_dedup. Replaces str(None)=="None" truthy check that was polluting compute_dedup_key with sentinel "None" date before try/except ValueError swallowed the error. Two SYNC-FIX-04 audit markers added for code-review visibility.
 - [Phase 32.1]: [Phase 32.1-05]: SYNC-FIX-03 closed via single-candidate semester fallback in link_courses. ed_code_only dict indexes Ed courses with no extractable semester; when primary (code, semester) match misses and exactly 1 candidate exists, link them with course_linking_ambiguous_semester_fallback log. Multiple candidates: log _skipped with reason=multiple_candidates, no auto-link. Primary match always wins. Real-data harness populated: 5 env-gated tests (one per SYNC-FIX-NN), skip cleanly when SYNC_REAL_DATA_CANVAS_TOKEN unset. Phase 32.1 as a whole: all 5 SYNC-FIX requirements have automated regression tests.
+- [Phase 33]: Plan 33-01: No index on recall_email_sent_at (partial index not justified at <10k users)
+- [Phase 33]: Plan 33-01: handle_new_user() uses COALESCE(display_name, full_name, name, '') for Google OAuth fallback
+- [Phase 33]: Plan 33-01: recall_email_sent_at excluded from Pydantic response schemas (internal-only)
 
 ### Roadmap Evolution
 
@@ -356,5 +360,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T05:09:45.401Z
-Stopped at: Phase 32.1 verified (passed) -- all 5 SYNC-FIX requirements closed; ready for next phase
+Last session: 2026-04-15T07:35:25.352Z
+Stopped at: Completed 33-01-PLAN.md
