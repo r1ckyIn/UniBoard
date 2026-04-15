@@ -824,7 +824,21 @@ export interface components {
         };
         SyncStatusResponse: {
             last_sync: components["schemas"]["SyncDetail"];
+            per_platform_counts?: components["schemas"]["PerPlatformCounts"] | null;
             platforms: components["schemas"]["PlatformStatus"];
+        };
+        PerPlatformCounts: {
+            canvas: components["schemas"]["CanvasPlatformCounts"];
+            ed: components["schemas"]["EdPlatformCounts"];
+        };
+        CanvasPlatformCounts: {
+            grades: number;
+            deadlines: number;
+            total: number;
+        };
+        EdPlatformCounts: {
+            discussions: number;
+            total: number;
         };
         SyncDetail: {
             sync_id: string;
