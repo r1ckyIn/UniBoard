@@ -44,6 +44,16 @@ class Profile(TimestampMixin, Base):
     last_sync_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    recall_email_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+        comment=(
+            "Timestamp of the most recent recall (re-engagement) email sent to "
+            "this user. Used by check_token_health() to enforce a 30-day "
+            "re-send cap."
+        ),
+    )
 
     # Sync status columns
     canvas_sync_status: Mapped[str] = mapped_column(
