@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   registerSchema,
   type RegisterInput,
   getPasswordStrength,
 } from "@/lib/validations/auth";
-import { useRegister } from "@/hooks/use-auth";
+import { useRegister, useGoogleLogin } from "@/hooks/use-auth";
 import PasswordStrengthMeter from "./PasswordStrengthMeter";
+import { UsydBanner } from "./UsydBanner";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
@@ -23,9 +26,16 @@ export default function RegisterForm({
 }: RegisterFormProps) {
   const t = useTranslations();
   const registerMutation = useRegister();
+  const googleLogin = useGoogleLogin();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+
+  useEffect(() => {
+    if (googleLogin.error) {
+      toast.error(t("auth.google.errorGeneric"));
+    }
+  }, [googleLogin.error, t]);
 
   const {
     register,
@@ -49,7 +59,7 @@ export default function RegisterForm({
       },
       {
         onSuccess: () => {
-          // Email confirmation enabled -- show check-email UI instead of auto-redirect
+          // Email confirmation is OFF -- show "account created, sign in now" UI
           setEmailSent(true);
         },
       },
@@ -62,12 +72,12 @@ export default function RegisterForm({
     "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";
   const inputErrorClass = "border-[#cc4455]";
 
-  // Check-email success state after registration
+  // Post-registration "account created" state (email confirmation is OFF)
   if (emailSent) {
     return (
       <div className="flex flex-col items-center text-center py-4">
         <div className="w-14 h-14 rounded-full bg-[rgba(120,140,93,0.11)] grid place-items-center text-[#788c5d] mb-4">
-          <Mail size={28} />
+          <CheckCircle size={28} />
         </div>
         <h2 className="font-serif text-[1.3rem] font-semibold mb-2">
           {t("auth.checkEmail.title")}
@@ -78,9 +88,9 @@ export default function RegisterForm({
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-[0.84rem] text-[#d97757] font-semibold hover:opacity-80 transition-opacity"
+          className="w-full max-w-[240px] h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] transition-[background] duration-150"
         >
-          {t("auth.checkEmail.backToLogin")}
+          {t("auth.checkEmail.goToLogin")}
         </button>
       </div>
     );
@@ -95,6 +105,28 @@ export default function RegisterForm({
       <p className="text-[0.84rem] text-text-2 mb-6">
         {t("auth.register.subtitle")}
       </p>
+
+      {/* USYD info banner (dismissible, re-shows after 30 days) */}
+      <UsydBanner />
+
+      {/* Google OAuth button */}
+      <button
+        type="button"
+        onClick={() => googleLogin.mutate()}
+        disabled={googleLogin.isPending}
+        className="w-full h-[44px] flex items-center justify-center gap-2.5 bg-white border-[1.5px] border-card-border rounded-lg text-text-1 text-[0.86rem] font-semibold hover:bg-cream-2 disabled:opacity-60 transition-colors duration-150"
+        aria-label={t("auth.google.continueWith")}
+      >
+        <GoogleIcon className="h-4 w-4" aria-hidden />
+        {t("auth.google.continueWith")}
+      </button>
+
+      {/* "or" divider */}
+      <div className="flex items-center gap-3 text-[0.78rem] text-text-3 my-4">
+        <div className="h-px flex-1 bg-card-border" />
+        <span>{t("auth.google.or")}</span>
+        <div className="h-px flex-1 bg-card-border" />
+      </div>
 
       <form
         noValidate

@@ -3,9 +3,16 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RegisterForm from "@/components/auth/RegisterForm";
 
-// Mock next-intl
+// Mock next-intl (RegisterForm uses top-level useTranslations; UsydBanner scopes to 'auth.usydBanner')
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => {
+  useTranslations: (namespace?: string) => (key: string) => {
+    if (namespace === "auth.usydBanner") {
+      const scoped: Record<string, string> = {
+        body: "USYD banner body text",
+        dismiss: "Dismiss",
+      };
+      return scoped[key] ?? key;
+    }
     const map: Record<string, string> = {
       "auth.register.title": "Create your account",
       "auth.register.subtitle": "Start maximizing your GPA today",
@@ -25,13 +32,23 @@ vi.mock("next-intl", () => ({
       "auth.passwordStrength.good": "Good",
       "auth.passwordStrength.strong": "Strong",
       "auth.errors.registerFailed": "Registration failed. Please try again.",
-      "auth.checkEmail.title": "Check your email",
+      "auth.checkEmail.title": "Account created — sign in now",
       "auth.checkEmail.description":
-        "We've sent a confirmation link to your email. Click it to activate your account.",
+        "Email confirmation is disabled. You can sign in immediately with the credentials you just created.",
+      "auth.checkEmail.goToLogin": "Go to sign in",
       "auth.checkEmail.backToLogin": "Back to sign in",
+      "auth.google.continueWith": "Continue with Google",
+      "auth.google.or": "or",
+      "auth.google.errorGeneric":
+        "Sign-in failed — please try again or contact support.",
     };
     return map[key] ?? key;
   },
+}));
+
+// Mock sonner
+vi.mock("sonner", () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
 }));
 
 // Mock motion/react
@@ -47,7 +64,7 @@ vi.mock("motion/react", () => ({
   AnimatePresence: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
 
-// Mock useRegister (useLogin no longer imported by RegisterForm)
+// Mock useRegister + useGoogleLogin
 const mockRegisterMutate = vi.fn();
 const mockRegisterMutation = {
   mutate: mockRegisterMutate,
@@ -55,8 +72,16 @@ const mockRegisterMutation = {
   isError: false,
   error: null,
 };
+const mockGoogleLoginMutate = vi.fn();
+const mockGoogleLoginMutation = {
+  mutate: mockGoogleLoginMutate,
+  isPending: false,
+  isError: false,
+  error: null as unknown,
+};
 vi.mock("@/hooks/use-auth", () => ({
   useRegister: () => mockRegisterMutation,
+  useGoogleLogin: () => mockGoogleLoginMutation,
 }));
 
 // Mock auth store
@@ -83,9 +108,13 @@ describe("RegisterForm", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
     mockRegisterMutation.isPending = false;
     mockRegisterMutation.isError = false;
     mockRegisterMutation.error = null;
+    mockGoogleLoginMutation.isPending = false;
+    mockGoogleLoginMutation.isError = false;
+    mockGoogleLoginMutation.error = null;
   });
 
   it("renders all 4 form fields", () => {
@@ -147,7 +176,7 @@ describe("RegisterForm", () => {
     });
   });
 
-  it("shows check-email UI after successful registration", async () => {
+  it("shows account-created UI after successful registration with 'Go to sign in' CTA", async () => {
     // Make register mutate call onSuccess immediately
     mockRegisterMutate.mockImplementation(
       (
@@ -185,13 +214,51 @@ describe("RegisterForm", () => {
       );
     });
 
-    // Should show check-email UI instead of calling onRegisterSuccess
-    expect(screen.getByText("Check your email")).toBeInTheDocument();
+    // Should show new "Account created" UI (email confirmation is OFF)
+    expect(
+      screen.getByText("Account created — sign in now"),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "We've sent a confirmation link to your email. Click it to activate your account.",
+        "Email confirmation is disabled. You can sign in immediately with the credentials you just created.",
       ),
     ).toBeInTheDocument();
+
+    // Should NOT show Phase 32 "we've sent a confirmation link" copy
+    expect(
+      screen.queryByText(/We've sent a confirmation link/),
+    ).not.toBeInTheDocument();
+
+    // Clicking "Go to sign in" triggers onSwitchToLogin
+    const goToLoginBtn = screen.getByRole("button", { name: "Go to sign in" });
+    await user.click(goToLoginBtn);
+    expect(mockOnSwitchToLogin).toHaveBeenCalled();
+  });
+
+  it("renders Continue with Google button", () => {
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
+
+    expect(
+      screen.getByRole("button", { name: "Continue with Google" }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders USYD banner", () => {
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
+
+    expect(screen.getByText("USYD banner body text")).toBeInTheDocument();
+  });
+
+  it("calls googleLogin.mutate when Google button clicked", async () => {
+    const user = userEvent.setup();
+    render(<RegisterForm onSwitchToLogin={mockOnSwitchToLogin} />);
+
+    const googleBtn = screen.getByRole("button", {
+      name: "Continue with Google",
+    });
+    await user.click(googleBtn);
+
+    expect(mockGoogleLoginMutate).toHaveBeenCalled();
   });
 
   it("calls onSwitchToLogin when 'Sign in' link is clicked", async () => {
