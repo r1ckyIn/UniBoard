@@ -42,7 +42,7 @@
 - [x] **AUTH-HARDEN-01**: Sign in with Google OAuth（USYD Google Workspace），绕开 USYD 邮箱 Mimecast quarantine 问题
 - [ ] **AUTH-HARDEN-02**: 注册页 USYD 用户提示 banner（解释 Junk/Held Messages 可能性 + 推荐用 Google OAuth）
 - [ ] **AUTH-HARDEN-03**: RegisterForm check-email 状态加 "Resend 邮件" 按钮 + 60s cooldown
-- [ ] **AUTH-HARDEN-04**: 永久关闭 Supabase email confirmation（Phase 32-03 战略关闭，依赖 Mimecast 不可行）
+- [x] **AUTH-HARDEN-04**: 永久关闭 Supabase email confirmation（Phase 32-03 战略关闭，依赖 Mimecast 不可行）
 
 ### Onboarding (ONBD)
 
@@ -106,7 +106,7 @@
 | AUTH-HARDEN-01 | Phase 33 | Complete |
 | AUTH-HARDEN-02 | Phase 33 | Pending |
 | AUTH-HARDEN-03 | Phase 33 | Pending |
-| AUTH-HARDEN-04 | Phase 33 | Pending |
+| AUTH-HARDEN-04 | Phase 33 | Complete |
 | ONBD-01 | Phase 33 | Pending |
 | ONBD-02 | Phase 33 | Pending |
 | AIFEAT-01 | Phase 34 | Pending |

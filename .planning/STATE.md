@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 33-01-PLAN.md
-last_updated: "2026-04-15T07:35:30.370Z"
+stopped_at: Completed 33-08-PLAN.md (AUTH-HARDEN-04 documentation)
+last_updated: "2026-04-15T07:35:52.087Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 15
   total_plans: 58
-  completed_plans: 51
+  completed_plans: 52
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 33 (token-lifecycle-onboarding) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -143,6 +143,7 @@ Last activity: 2026-04-15
 | Phase 32.1 P04 | 4min | 1 tasks | 2 files |
 | Phase 32.1 P05 | 6min | 3 tasks | 5 files |
 | Phase 33 P01 | 2min | 2 tasks | 2 files |
+| Phase 33 P08 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -343,6 +344,7 @@ Recent decisions affecting current work:
 - [Phase 33]: Plan 33-01: No index on recall_email_sent_at (partial index not justified at <10k users)
 - [Phase 33]: Plan 33-01: handle_new_user() uses COALESCE(display_name, full_name, name, '') for Google OAuth fallback
 - [Phase 33]: Plan 33-01: recall_email_sent_at excluded from Pydantic response schemas (internal-only)
+- [Phase 33]: [Phase 33-08]: Email confirmation permanently OFF documented in TRD §7.5/§16.9, PROJECT.md Key Decisions, and supabase/config.toml inline comment
 
 ### Roadmap Evolution
 
@@ -360,5 +362,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T07:35:25.352Z
-Stopped at: Completed 33-01-PLAN.md
+Last session: 2026-04-15T07:35:52.079Z
+Stopped at: Completed 33-08-PLAN.md (AUTH-HARDEN-04 documentation)
