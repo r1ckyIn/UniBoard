@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
-import { useLogin } from "@/hooks/use-auth";
+import { useLogin, useGoogleLogin } from "@/hooks/use-auth";
 import { restoreTokenConfiguredIfNeeded } from "@/lib/auth/restore-token-status";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -23,7 +25,14 @@ export default function LoginForm({
   const router = useRouter();
   const locale = useLocale();
   const loginMutation = useLogin();
+  const googleLogin = useGoogleLogin();
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (googleLogin.error) {
+      toast.error(t("auth.google.errorGeneric"));
+    }
+  }, [googleLogin.error, t]);
 
   const {
     register,
@@ -59,6 +68,25 @@ export default function LoginForm({
       <p className="text-[0.84rem] text-text-2 mb-6">
         {t("auth.login.subtitle")}
       </p>
+
+      {/* Google OAuth button */}
+      <button
+        type="button"
+        onClick={() => googleLogin.mutate()}
+        disabled={googleLogin.isPending}
+        className="w-full h-[44px] flex items-center justify-center gap-2.5 bg-white border-[1.5px] border-card-border rounded-lg text-text-1 text-[0.86rem] font-semibold hover:bg-cream-2 disabled:opacity-60 transition-colors duration-150"
+        aria-label={t("auth.google.continueWith")}
+      >
+        <GoogleIcon className="h-4 w-4" aria-hidden />
+        {t("auth.google.continueWith")}
+      </button>
+
+      {/* "or" divider */}
+      <div className="flex items-center gap-3 text-[0.78rem] text-text-3 my-4">
+        <div className="h-px flex-1 bg-card-border" />
+        <span>{t("auth.google.or")}</span>
+        <div className="h-px flex-1 bg-card-border" />
+      </div>
 
       <form
         noValidate
