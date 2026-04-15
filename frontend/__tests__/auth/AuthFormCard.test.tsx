@@ -6,8 +6,18 @@ import AuthFormCard from "@/components/auth/AuthFormCard";
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
-  useTranslations: () => (key: string) => {
+  useTranslations: (namespace?: string) => (key: string) => {
+    if (namespace === "auth.usydBanner") {
+      const scoped: Record<string, string> = {
+        body: "USYD banner body",
+        dismiss: "Dismiss",
+      };
+      return scoped[key] ?? key;
+    }
     const map: Record<string, string> = {
+      "auth.google.continueWith": "Continue with Google",
+      "auth.google.or": "or",
+      "auth.google.errorGeneric": "Sign-in failed",
       "auth.login.title": "Welcome back",
       "auth.login.subtitle": "Sign in to continue to your dashboard",
       "auth.login.emailLabel": "Email",
@@ -62,7 +72,11 @@ vi.mock("motion/react", () => ({
 
 // Mock sonner
 vi.mock("sonner", () => ({
-  toast: vi.fn(),
+  toast: Object.assign(vi.fn(), {
+    error: vi.fn(),
+    success: vi.fn(),
+    info: vi.fn(),
+  }),
 }));
 
 // Mock auth hooks
@@ -86,6 +100,12 @@ vi.mock("@/hooks/use-auth", () => ({
     error: null,
   }),
   useUpdatePassword: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
+  useGoogleLogin: () => ({
     mutate: vi.fn(),
     isPending: false,
     isError: false,
