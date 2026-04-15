@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 33-06-PLAN.md (Resend button + 60s cooldown)
-last_updated: "2026-04-15T07:42:33.013Z"
+stopped_at: Completed 33-02-PLAN.md (RecallEmailService + SES + check_token_health wiring)
+last_updated: "2026-04-15T07:51:44.945Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 15
   total_plans: 58
-  completed_plans: 54
+  completed_plans: 55
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 33 (token-lifecycle-onboarding) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -146,6 +146,7 @@ Last activity: 2026-04-15
 | Phase 33 P08 | 2 | 2 tasks | 3 files |
 | Phase 33 P03 | 6min | 2 tasks | 5 files |
 | Phase 33 P06 | 7min | 1 tasks | 4 files |
+| Phase 33 P02 | 15min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -352,6 +353,9 @@ Recent decisions affecting current work:
 - [Phase 33]: [Phase 33-06]: Cooldown starts on initial reset success (not only after first resend) to prevent inbox flooding via rapid form re-submission
 - [Phase 33]: [Phase 33-06]: Failed resend does NOT restart cooldown — UX tradeoff favoring immediate retry on transient errors
 - [Phase 33]: [Phase 33-06]: Test strategy — install vi.useFakeTimers() BEFORE render + use fireEvent (not userEvent) to avoid wall-clock delays hanging under fake timers; flush react-hook-form async resolver with await Promise.resolve() twice inside act()
+- [Phase 33]: [Phase 33-02]: SES (existing) over Resend — no new dependencies; str.format templates over Jinja
+- [Phase 33]: [Phase 33-02]: Pure-function gating (should_send_recall_email) + injected now kwarg on check_token_health and DeadlineService.list_upcoming enable freezegun-free deterministic tests
+- [Phase 33]: [Phase 33-02]: Recall branch isolated in its own session + try/except with Sentry phase=33 tag so SES failures cannot block PLAT-04 in-app notifications
 
 ### Roadmap Evolution
 
@@ -369,5 +373,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T07:42:33.004Z
-Stopped at: Completed 33-06-PLAN.md (Resend button + 60s cooldown)
+Last session: 2026-04-15T07:51:44.935Z
+Stopped at: Completed 33-02-PLAN.md (RecallEmailService + SES + check_token_health wiring)
