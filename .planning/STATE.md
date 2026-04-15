@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 33-02-PLAN.md (RecallEmailService + SES + check_token_health wiring)
-last_updated: "2026-04-15T07:51:44.945Z"
+stopped_at: Completed 33-05-PLAN.md (Google OAuth UI + USYD banner + check-email copy fix)
+last_updated: "2026-04-15T09:16:06.415Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 15
   total_plans: 58
-  completed_plans: 55
+  completed_plans: 56
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 33 (token-lifecycle-onboarding) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -147,6 +147,7 @@ Last activity: 2026-04-15
 | Phase 33 P03 | 6min | 2 tasks | 5 files |
 | Phase 33 P06 | 7min | 1 tasks | 4 files |
 | Phase 33 P02 | 15min | 3 tasks | 8 files |
+| Phase 33 P05 | 9min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -356,6 +357,9 @@ Recent decisions affecting current work:
 - [Phase 33]: [Phase 33-02]: SES (existing) over Resend — no new dependencies; str.format templates over Jinja
 - [Phase 33]: [Phase 33-02]: Pure-function gating (should_send_recall_email) + injected now kwarg on check_token_health and DeadlineService.list_upcoming enable freezegun-free deterministic tests
 - [Phase 33]: [Phase 33-02]: Recall branch isolated in its own session + try/except with Sentry phase=33 tag so SES failures cannot block PLAT-04 in-app notifications
+- [Phase 33]: [33-05]: UsydBanner scoped useTranslations('auth.usydBanner') + 30-day localStorage re-show via Date.parse timestamp comparison
+- [Phase 33]: [33-05]: Removed 'Check your email' post-register copy (confirmation OFF); new copy 'Account created — sign in now' with primary 'Go to sign in' CTA
+- [Phase 33]: [33-05]: Inline SVG GoogleIcon (no next/image, SSR-safe) placed above email/password with white-bg 1.5px border vocabulary
 
 ### Roadmap Evolution
 
@@ -373,5 +377,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T07:51:44.935Z
-Stopped at: Completed 33-02-PLAN.md (RecallEmailService + SES + check_token_health wiring)
+Last session: 2026-04-15T09:15:55.919Z
+Stopped at: Completed 33-05-PLAN.md (Google OAuth UI + USYD banner + check-email copy fix)

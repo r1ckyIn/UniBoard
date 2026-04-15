@@ -351,6 +351,8 @@
       "title": "欢迎来到 UniBoard",
       "description": "让我们连接你的 Canvas LMS 和 Ed Discussion 账户，一站式追踪你的成绩、截止日期和课程资料。",
       "subtitle": "大约需要 2 分钟。你需要先登录 Canvas 和 Ed。",
+      "signedInAs": "你已以 {email} 登录。",
+      "firstTimeNote": "初次使用也可以选择 Google 登录。",
       "features": {
         "readonly": "只读访问",
         "encrypted": "AES-256 加密",
@@ -429,7 +431,15 @@
       "synced": "已成功同步 {count} 门课程",
       "syncSlow": "同步时间较长，你可以先进入仪表盘——数据会在后台继续同步。",
       "cta": "前往仪表盘",
-      "toast": "欢迎！你的账户已连接。"
+      "toast": "欢迎！你的账户已连接。",
+      "canvasLabel": "Canvas",
+      "edLabel": "Ed Discussion",
+      "canvasCounts": "已同步 {courses} 门课程、{deadlines} 个截止日期",
+      "edCounts": "已同步 {discussions} 条讨论",
+      "retryFailed": "仅重试失败项",
+      "pending": "等待同步",
+      "inProgress": "同步中...",
+      "failed": "同步失败"
     }
   },
   "predict": {

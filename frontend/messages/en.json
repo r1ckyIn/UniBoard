@@ -351,6 +351,8 @@
       "title": "Welcome to UniBoard",
       "description": "Let's connect your Canvas LMS and Ed Discussion accounts so we can start tracking your grades, deadlines, and course materials in one place.",
       "subtitle": "This takes about 2 minutes. You'll need access to Canvas and Ed.",
+      "signedInAs": "You're signed in as {email}.",
+      "firstTimeNote": "First-time users can also sign in with Google.",
       "features": {
         "readonly": "Read-only access",
         "encrypted": "AES-256 encrypted",
@@ -429,7 +431,15 @@
       "synced": "{count} courses synced successfully",
       "syncSlow": "Sync is taking longer than expected. You can continue to the dashboard — data will appear as it syncs.",
       "cta": "Go to Dashboard",
-      "toast": "Welcome! Your accounts are connected."
+      "toast": "Welcome! Your accounts are connected.",
+      "canvasLabel": "Canvas",
+      "edLabel": "Ed Discussion",
+      "canvasCounts": "{courses} courses, {deadlines} deadlines synced",
+      "edCounts": "{discussions} discussions synced",
+      "retryFailed": "Retry failed only",
+      "pending": "Waiting to sync",
+      "inProgress": "Syncing...",
+      "failed": "Sync failed"
     }
   },
   "predict": {
