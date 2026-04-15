@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 
-// Mock next-intl
+// Mock next-intl (supports ICU-style param interpolation for {seconds})
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => {
+  useTranslations: () => (key: string, params?: Record<string, string>) => {
     const map: Record<string, string> = {
       "auth.forgotPassword.title": "Reset your password",
       "auth.forgotPassword.subtitle":
@@ -17,6 +17,10 @@ vi.mock("next-intl", () => ({
       "auth.forgotPassword.successTitle": "Check your email",
       "auth.forgotPassword.successMessage":
         "We've sent a password reset link to your email address.",
+      "auth.forgotPassword.resend": "Resend email",
+      "auth.forgotPassword.resendCooldown": "Resend in 00:{seconds}",
+      "auth.forgotPassword.resendSuccess": "Reset email resent",
+      "auth.forgotPassword.resendFailed": "Failed to resend. Please try again.",
       "auth.errors.resetFailed":
         "Failed to send reset email. Please try again.",
       "auth.validation.emailRequired": "Email is required",
@@ -24,7 +28,13 @@ vi.mock("next-intl", () => ({
       "auth.validation.emailDomain":
         "Please use your USYD student email (@uni.sydney.edu.au)",
     };
-    return map[key] ?? key;
+    let out = map[key] ?? key;
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        out = out.replace(`{${k}}`, String(v));
+      }
+    }
+    return out;
   },
 }));
 
@@ -59,6 +69,16 @@ vi.mock("next/navigation", () => ({
     push: vi.fn(),
     replace: vi.fn(),
   }),
+}));
+
+// Mock sonner for toast assertions
+const toastSuccess = vi.fn();
+const toastError = vi.fn();
+vi.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => toastSuccess(...args),
+    error: (...args: unknown[]) => toastError(...args),
+  },
 }));
 
 describe("ForgotPasswordForm", () => {
@@ -156,5 +176,191 @@ describe("ForgotPasswordForm", () => {
     expect(
       screen.getByText("Failed to send reset email. Please try again."),
     ).toBeInTheDocument();
+  });
+
+  // --- Resend + cooldown tests (Plan 33-06) ---
+
+  describe("Resend button with 60s cooldown", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const submitInitialReset = async (
+      email = "student@uni.sydney.edu.au",
+    ) => {
+      // Trigger initial reset (synchronous onSuccess via mock)
+      mockResetMutate.mockImplementation(
+        (
+          _email: unknown,
+          opts: { onSuccess?: () => void; onError?: () => void },
+        ) => {
+          opts?.onSuccess?.();
+        },
+      );
+
+      const user = userEvent.setup();
+      render(<ForgotPasswordForm onSwitchToLogin={mockOnSwitchToLogin} />);
+
+      const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
+      await user.type(emailInput, email);
+
+      const submitBtn = screen.getByRole("button", { name: "Send Reset Link" });
+      await user.click(submitBtn);
+
+      // Wait for success state to render
+      await waitFor(() => {
+        expect(screen.getByText("Check your email")).toBeInTheDocument();
+      });
+    };
+
+    it("Test 1: shows Resend button disabled with 'Resend in 00:60' label right after initial success", async () => {
+      await submitInitialReset();
+
+      const resendBtn = await screen.findByRole("button", {
+        name: /Resend in 00:60/,
+      });
+      expect(resendBtn).toBeInTheDocument();
+      expect(resendBtn).toBeDisabled();
+    });
+
+    it("Test 2: after 30s the label updates to 'Resend in 00:30'", async () => {
+      await submitInitialReset();
+
+      // Now switch to fake timers for the cooldown tick
+      vi.useFakeTimers({ shouldAdvanceTime: false });
+
+      await act(async () => {
+        vi.advanceTimersByTime(30_000);
+      });
+
+      const resendBtn = screen.getByRole("button", {
+        name: /Resend in 00:30/,
+      });
+      expect(resendBtn).toBeInTheDocument();
+      expect(resendBtn).toBeDisabled();
+    });
+
+    it("Test 3: after 60s the button is enabled with label 'Resend email'", async () => {
+      await submitInitialReset();
+
+      vi.useFakeTimers({ shouldAdvanceTime: false });
+
+      await act(async () => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      const resendBtn = screen.getByRole("button", { name: "Resend email" });
+      expect(resendBtn).toBeInTheDocument();
+      expect(resendBtn).not.toBeDisabled();
+    });
+
+    it("Test 4: clicking enabled Resend calls useResetPassword().mutate with same email, shows success toast, restarts cooldown", async () => {
+      await submitInitialReset("student@uni.sydney.edu.au");
+
+      // Reset call tracker after initial submit
+      mockResetMutate.mockClear();
+
+      vi.useFakeTimers({ shouldAdvanceTime: false });
+
+      await act(async () => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      // Wire resend to call onSuccess
+      mockResetMutate.mockImplementation(
+        (
+          _email: unknown,
+          opts: { onSuccess?: () => void; onError?: () => void },
+        ) => {
+          opts?.onSuccess?.();
+        },
+      );
+
+      const resendBtn = screen.getByRole("button", { name: "Resend email" });
+
+      await act(async () => {
+        resendBtn.click();
+      });
+
+      // Same email reused (no re-prompt)
+      expect(mockResetMutate).toHaveBeenCalledTimes(1);
+      expect(mockResetMutate).toHaveBeenCalledWith(
+        "student@uni.sydney.edu.au",
+        expect.any(Object),
+      );
+
+      // Success toast fired
+      expect(toastSuccess).toHaveBeenCalledWith("Reset email resent");
+
+      // Cooldown restarted at 60s
+      const cooldownBtn = screen.getByRole("button", {
+        name: /Resend in 00:60/,
+      });
+      expect(cooldownBtn).toBeDisabled();
+    });
+
+    it("Test 5: failed resend fires error toast and does NOT restart cooldown (allow immediate retry)", async () => {
+      await submitInitialReset("student@uni.sydney.edu.au");
+
+      mockResetMutate.mockClear();
+
+      vi.useFakeTimers({ shouldAdvanceTime: false });
+      await act(async () => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      // Wire resend to call onError with a specific Error
+      mockResetMutate.mockImplementation(
+        (
+          _email: unknown,
+          opts: { onSuccess?: () => void; onError?: (err: Error) => void },
+        ) => {
+          opts?.onError?.(new Error("Network down"));
+        },
+      );
+
+      const resendBtn = screen.getByRole("button", { name: "Resend email" });
+
+      await act(async () => {
+        resendBtn.click();
+      });
+
+      expect(mockResetMutate).toHaveBeenCalledTimes(1);
+      expect(toastError).toHaveBeenCalledWith("Network down");
+
+      // Cooldown NOT restarted -- button should still read "Resend email" and be enabled
+      const stillEnabled = screen.getByRole("button", { name: "Resend email" });
+      expect(stillEnabled).not.toBeDisabled();
+    });
+
+    it("Test 6: the same email used in initial request is reused on resend (no re-prompt)", async () => {
+      await submitInitialReset("alice@uni.sydney.edu.au");
+
+      mockResetMutate.mockClear();
+
+      vi.useFakeTimers({ shouldAdvanceTime: false });
+      await act(async () => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      mockResetMutate.mockImplementation(
+        (
+          _email: unknown,
+          opts: { onSuccess?: () => void; onError?: () => void },
+        ) => {
+          opts?.onSuccess?.();
+        },
+      );
+
+      const resendBtn = screen.getByRole("button", { name: "Resend email" });
+      await act(async () => {
+        resendBtn.click();
+      });
+
+      expect(mockResetMutate).toHaveBeenCalledWith(
+        "alice@uni.sydney.edu.au",
+        expect.any(Object),
+      );
+    });
   });
 });
