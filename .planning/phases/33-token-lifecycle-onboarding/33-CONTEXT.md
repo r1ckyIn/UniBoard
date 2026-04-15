@@ -41,18 +41,18 @@ This phase delivers three coordinated outcomes:
 - **Content template (HTML + text fallback):**
   - Subject: `Your UniBoard sync has paused — N deadlines waiting`
   - Body highlights: (a) how many upcoming deadlines exist in next 14 days; (b) one-click deep link to `/setup?step=token`; (c) single P.S. line recommending Google OAuth to avoid future email issues.
-  - Deadline count comes from existing `DeadlineService.list_upcoming(user_id, horizon_days=14)`. If zero deadlines, subject degrades to `Your UniBoard sync has paused — reconnect when you're back`.
-- **Transport:** add `resend` Python SDK (~1 dep) and send via Resend API from `src/services/email.py` (new file). Do NOT reuse Supabase Auth's SMTP — that path is for auth emails only and has different rate-limiting.
+  - Deadline count comes from `DeadlineService.get_deadlines(user_id, start_date=now, end_date=now + 14d)` (existing method — no new public API needed). If zero deadlines, subject degrades to `Your UniBoard sync has paused — reconnect when you're back`.
+- **Transport (CORRECTED after research):** use the **existing AWS SES sender at `src/email/ses.py`** which is already wired and battle-tested for notifications. Do NOT add Resend SDK — single transport is simpler. Recall-email module lives at `src/services/recall_email.py` and composes the SES sender.
 - **Rate limit:** max 1 recall email per user per 30 days, enforced by the `recall_email_sent_at` column logic above. Hard cap at Resend side is high enough we don't need additional app-level throttling.
 
 ### ONBD-01 — Onboarding polish (area B resolved)
 
 - **Keep 5 steps.** Do not reshape the flow.
 - **WelcomeStep gets a "Sign in with Google" shortcut** only when the user is NOT yet authenticated. Since setup runs post-login, in practice WelcomeStep just surfaces a brief note: "You're signed in as {email}. First-time users can also sign in with Google." — no dual-button CTA.
-- **Per-domain sync progress on SuccessStep:**
-  - Render two rows: Canvas, Ed Discussion. Each row shows a spinner → checkmark + counts (e.g., "Canvas: 8 courses, 124 deadlines, 92 announcements synced").
-  - Backend: existing sync engine already reports per-adapter counts in logs; expose them via a new `GET /sync/status` endpoint that returns `{canvas: {status, counts}, ed: {status, counts}}` or extend an existing status endpoint if one covers this.
-  - Frontend: poll `/sync/status` every 2s during the sync step; stop polling once both domains are `done` or `error`.
+- **Per-domain sync progress on SuccessStep (CORRECTED after research):**
+  - `GET /sync/status` + TanStack polling are already built. This is **display-only work**, no new API route.
+  - Current response groups counts by DOMAIN (grades / deadlines / discussions). UX needs grouping by PLATFORM (Canvas / Ed). Extend the response schema by tagging each domain with its source platform (`canvas` or `ed`); frontend aggregates by platform for display.
+  - Render two platform rows: Canvas, Ed. Each row shows a spinner → checkmark + aggregated counts (e.g., "Canvas: 8 courses, 124 deadlines, 92 announcements synced").
 - **Tone/consistency:** adopt the existing brand voice (friendly-precise, no emoji, serif titles) already used in `AuthFormCard.tsx` and `SuccessOverlay.tsx`. No new illustrations.
 
 ### ONBD-02 — Setup edge cases (area C resolved)
@@ -69,23 +69,24 @@ This phase delivers three coordinated outcomes:
 - **Account merge policy (architectural decision — single-user context):**
   - Rely on **Supabase's default identity-linking**: when a user signs in with Google using an email that already exists as a password-based account, Supabase links the Google identity to the existing `auth.users` row automatically (because our SMTP confirmation is off, we'll explicitly verify the Google email path is still treated as verified — Google guarantees this).
   - **We do NOT build a custom merge flow.** If default linking surfaces a conflict (e.g., two distinct rows), the error is logged to Sentry and the user sees a generic "Sign-in failed — contact support" message. Acceptable because the only real-world case is the developer's own account, which is recoverable manually.
-  - **Post-OAuth profile creation:** the existing `ensure_profile()` trigger (or equivalent) must create a `profiles` row for new Google-authenticated `auth.users`. Verify the existing trigger fires for OAuth sign-ups; add one if missing.
-- **Redirect handling:** Supabase redirects to `/auth/callback` (existing route) on success. Callback routes to `/setup` if no tokens configured, else `/dashboard`. Reuse existing logic — no new routing.
+  - **Post-OAuth profile creation (CORRECTED after research):** existing `handle_new_user()` trigger already fires on OAuth signups and creates the `profiles` row — BUT it reads `raw_user_meta_data->>'display_name'`, while Google OAuth populates `full_name`. One-line migration adds a fallback: `COALESCE(raw_user_meta_data->>'display_name', raw_user_meta_data->>'full_name', email)` so Google users get a real display name not their email.
+- **Redirect handling (CORRECTED after research):** `/auth/callback` does NOT exist yet. Mirror the existing `/auth/confirm` route pattern to create a new `/auth/callback/page.tsx` that exchanges the OAuth code via `supabase.auth.exchangeCodeForSession()` then redirects to `/setup` if no tokens configured, else `/dashboard`.
 
 ### AUTH-HARDEN-02 — USYD banner (area E resolved)
 
 - **Placement:** RegisterForm only (not LoginForm — users who already have accounts don't need the onboarding-style nudge). Show as a dismissible info banner above the form fields.
 - **Trigger:** always shown (not conditional on email input) because registration forms don't know the email domain until the user types. Copy frames USYD users as the primary audience.
-- **Copy (EN):** "USYD student? To avoid sign-up emails landing in Junk or Mimecast Held Messages, sign in with Google below. You can still use email + password — just check your Held Messages if you don't see the verification email."
+- **Copy (EN) — CORRECTED after research (confirmations are OFF so signup itself sends no email; the Mimecast concern applies to later password-reset and recall emails):** "USYD student? Password-reset and account emails from UniBoard (sender `noreply@uniboard.uk`) often land in Mimecast Held Messages. **Sign in with Google is recommended** to bypass the issue entirely."
 - **Copy (CN):** matching translation in `frontend/i18n/locales/zh/auth.json`.
 - **Dismiss state:** persist dismissal in `localStorage` under `uniboard.banner.usydRegister`. Re-show after 30 days.
 
 ### AUTH-HARDEN-03 — Resend email button (area F resolved)
 
-- **Applies to RegisterForm `emailSent` check-email state** (lines 66–87 of `RegisterForm.tsx`) AND to the password-reset check-email state if one exists.
-- **Button UI:** below the "Back to login" link. Label: "Resend email". While in cooldown: label becomes "Resend in 00:{seconds}" and button is disabled.
-- **Cooldown logic:** 60s countdown, tracked in component state (no server round-trip). Counter starts on initial registration submit AND on every subsequent resend click.
-- **Resend action:** calls Supabase Auth `resend()` API with the same email. On success → toast "Confirmation email resent". On failure → toast with error message + allow immediate retry (no cooldown on failed send).
+- **Scope (CORRECTED after research):** signup confirmation is permanently OFF, so there is no "resend signup confirmation" to surface. **Apply the Resend button to the password-reset check-email flow only** (`ForgotPasswordForm.tsx` success state). That flow IS live post-Phase-32 and is the legitimate use case.
+- **Also:** the post-registration "check your email" state in `RegisterForm.tsx` (lines 66–87) is currently showing a confusing message given confirmations are off. Update its copy to say "Account created — sign in now" with a direct "Go to login" CTA. No resend button there (nothing to resend).
+- **Button UI (password-reset state):** below the "Back to login" link. Label: "Resend email". While in cooldown: label becomes "Resend in 00:{seconds}" and button is disabled.
+- **Cooldown logic:** 60s countdown, tracked in component state (no server round-trip). Counter starts on initial password-reset request AND on every subsequent resend click.
+- **Resend action:** calls `supabase.auth.resetPasswordForEmail(email, { redirectTo })` again. On success → toast "Reset email resent". On failure → toast with error message + allow immediate retry (no cooldown on failed send).
 - **Reputation guard:** since cooldown is client-only, a determined user could refresh the page to bypass. Acceptable because (a) Supabase enforces server-side `max_frequency = "1s"` already, and (b) the 60s UX friction is the primary goal, not hard-enforcement.
 
 ### AUTH-HARDEN-04 — Document confirmation OFF
@@ -122,9 +123,12 @@ This phase delivers three coordinated outcomes:
 - `.planning/phases/31-e2e-verification-ai-config/31-VALIDATION.md` — UAT style to mirror
 
 ### Codebase touchpoints (do not re-discover — these are the extension surfaces)
-- `src/sync/scheduled.py:124` — `check_token_health()`: extend with recall-email branch
+- `src/sync/scheduled.py:124` — `check_token_health()`: extend with recall-email branch (inject `now: datetime | None = None` for testability, no freezegun)
 - `src/models/user.py` — `Profile` model: add `recall_email_sent_at` column (migration required)
-- `src/services/` — new `email.py` service (Resend transport)
+- `src/email/ses.py` — existing SES sender to reuse
+- `src/services/recall_email.py` — NEW module composing SES sender + DeadlineService
+- `src/services/deadline.py` — existing `get_deadlines(user_id, start_date, end_date)` is the query to use
+- `supabase/migrations/` — migration to (1) add `recall_email_sent_at`, (2) patch `handle_new_user()` trigger to COALESCE `display_name` with `full_name`
 - `frontend/components/setup/WelcomeStep.tsx` — small copy touch
 - `frontend/components/setup/TokenStep.tsx` — skip re-validate + edge case copy
 - `frontend/components/setup/SuccessStep.tsx` — per-domain progress + retry-failed-only button
