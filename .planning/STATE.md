@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 33-05-PLAN.md (Google OAuth UI + USYD banner + check-email copy fix)
-last_updated: "2026-04-15T09:16:06.415Z"
+stopped_at: "Completed 33-07-PLAN.md (setup polish: skip-revalidate + per-platform SuccessStep + Retry failed only)"
+last_updated: "2026-04-15T09:19:26.557Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 15
   total_plans: 58
-  completed_plans: 56
+  completed_plans: 57
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 ## Current Position
 
 Phase: 33 (token-lifecycle-onboarding) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -148,6 +148,7 @@ Last activity: 2026-04-15
 | Phase 33 P06 | 7min | 1 tasks | 4 files |
 | Phase 33 P02 | 15min | 3 tasks | 8 files |
 | Phase 33 P05 | 9min | 3 tasks | 11 files |
+| Phase 33 P07 | 25min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -360,6 +361,11 @@ Recent decisions affecting current work:
 - [Phase 33]: [33-05]: UsydBanner scoped useTranslations('auth.usydBanner') + 30-day localStorage re-show via Date.parse timestamp comparison
 - [Phase 33]: [33-05]: Removed 'Check your email' post-register copy (confirmation OFF); new copy 'Account created — sign in now' with primary 'Go to sign in' CTA
 - [Phase 33]: [33-05]: Inline SVG GoogleIcon (no next/image, SSR-safe) placed above email/password with white-bg 1.5px border vocabulary
+- [Phase 33]: 33-07: Used SHA-256 sessionStorage cache for token skip-revalidate (5-min TTL, hash-only storage)
+- [Phase 33]: 33-07: Exp-backoff helper classifies retryable as no-status OR status>=500; 401/422 immediately invalid
+- [Phase 33]: 33-07: Backend SyncTriggerRequest extended additively with platforms filter; takes precedence over scope
+- [Phase 33]: 33-07: Reused configureToken for Test connection (Option A) — no separate validate-only endpoint
+- [Phase 33]: 33-07: Canvas SuccessStep row counts = courses + deadlines; Ed row = discussions (domain-correct)
 
 ### Roadmap Evolution
 
@@ -377,5 +383,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T09:15:55.919Z
-Stopped at: Completed 33-05-PLAN.md (Google OAuth UI + USYD banner + check-email copy fix)
+Last session: 2026-04-15T09:19:16.808Z
+Stopped at: Completed 33-07-PLAN.md (setup polish: skip-revalidate + per-platform SuccessStep + Retry failed only)
