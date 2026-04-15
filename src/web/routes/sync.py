@@ -15,6 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import Profile
 from src.schemas.common import NotFoundError, RateLimitedError, SuccessResponse
 from src.schemas.sync import (
+    CanvasPlatformCounts,
+    EdPlatformCounts,
+    PerPlatformCounts,
     PlatformHealth,
     PlatformStatus,
     SyncCount,
@@ -36,6 +39,45 @@ _SYNC_COOLDOWN = timedelta(minutes=5)
 _SYNC_SEMAPHORE: Final = asyncio.Semaphore(2)
 
 router = APIRouter()
+
+
+# Single source of truth for domain->platform grouping on the sync status
+# endpoint. Extend this map when new sync domains are added; the response
+# shape does not change for existing consumers.
+DOMAIN_TO_PLATFORM: Final[dict[str, str]] = {
+    "grades": "canvas",
+    "deadlines": "canvas",
+    "discussions": "ed",
+}
+
+
+def aggregate_per_platform_counts(
+    results: SyncResults | None,
+) -> PerPlatformCounts | None:
+    """Group SyncResults domain counters by their source platform.
+
+    Returns None when `results` is None (no sync has happened yet),
+    matching last_sync=None semantics. Missing domain counters default
+    to zero so the canvas/ed shape is always fully populated.
+    """
+    if results is None:
+        return None
+
+    grades = results.grades.synced if results.grades is not None else 0
+    deadlines = results.deadlines.synced if results.deadlines is not None else 0
+    discussions = results.discussions.synced if results.discussions is not None else 0
+
+    return PerPlatformCounts(
+        canvas=CanvasPlatformCounts(
+            grades=grades,
+            deadlines=deadlines,
+            total=grades + deadlines,
+        ),
+        ed=EdPlatformCounts(
+            discussions=discussions,
+            total=discussions,
+        ),
+    )
 
 
 _ValidScope = Literal["all", "grades", "deadlines", "modules", "outline"]
@@ -243,6 +285,12 @@ async def get_sync_status(
         results=results,
     )
 
+    # Group domain counters under their source platform for onboarding UX
+    # (plan 33-07 consumes this). None signals "no sync has happened yet".
+    per_platform_counts = (
+        aggregate_per_platform_counts(results) if profile.last_sync_at else None
+    )
+
     # Build platform health
     def _platform_health(status: str, last_synced: datetime | None) -> PlatformHealth:
         if status in ("success", "pending"):
@@ -262,6 +310,10 @@ async def get_sync_status(
     )
 
     return SuccessResponse(
-        data=SyncStatusResponse(last_sync=last_sync, platforms=platforms),
+        data=SyncStatusResponse(
+            last_sync=last_sync,
+            per_platform_counts=per_platform_counts,
+            platforms=platforms,
+        ),
         meta=get_request_meta(request),
     )
