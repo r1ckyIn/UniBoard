@@ -155,10 +155,11 @@ describe("TokenStep", () => {
   it("shows backend error when canvas token is rejected by API", async () => {
     const user = userEvent.setup();
 
-    // Backend rejects canvas token
-    mockConfigureTokenMutateAsync.mockRejectedValueOnce(
-      new Error("Invalid Canvas API token")
-    );
+    // Backend rejects canvas token (simulate ky HTTPError with 401 status)
+    const httpError = Object.assign(new Error("Invalid Canvas API token"), {
+      response: { status: 401 },
+    });
+    mockConfigureTokenMutateAsync.mockRejectedValueOnce(httpError);
 
     render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
 
@@ -184,10 +185,13 @@ describe("TokenStep", () => {
   it("shows ed error when canvas passes but ed rejected by API", async () => {
     const user = userEvent.setup();
 
-    // Canvas succeeds, Ed fails
+    // Canvas succeeds, Ed fails (simulate ky HTTPError with 401 status)
+    const httpError = Object.assign(new Error("Invalid Ed API token"), {
+      response: { status: 401 },
+    });
     mockConfigureTokenMutateAsync
       .mockResolvedValueOnce({ data: { status: "active", courses_found: 5 } })
-      .mockRejectedValueOnce(new Error("Invalid Ed API token"));
+      .mockRejectedValueOnce(httpError);
 
     render(<TokenStep onBack={mockOnBack} onSuccess={mockOnSuccess} />);
 

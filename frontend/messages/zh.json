@@ -405,7 +405,22 @@
       "errors": {
         "canvas": "Canvas 令牌格式：'{数字}'~'{字母数字}'。请确保完整复制了令牌（包括 ~ 字符）。",
         "ed": "Ed 令牌应为较短的字母数字字符串。请检查是否完整复制了令牌。"
-      }
+      },
+      "invalid": {
+        "title": "Token 验证失败",
+        "lastValidated": "上次验证时间：{when}",
+        "lastValidatedNever": "从未验证",
+        "tip1": "确认 Token 完整复制",
+        "tip2": "确认 Token 未被重新生成",
+        "tip3": "确认 Token 属于对应平台",
+        "testConnection": "测试连接"
+      },
+      "unreachable": {
+        "title": "无法连接到 {platform}",
+        "body": "通常是 {platform} 服务异常，请稍后重试。",
+        "retry": "重试"
+      },
+      "alreadyValidated": "本次会话中 Token 已验证"
     },
     "success": {
       "title": "设置完成！",

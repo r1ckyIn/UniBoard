@@ -405,7 +405,22 @@
       "errors": {
         "canvas": "Canvas token format: '{number}'~'{alphanumeric}'. Check that you copied the full token including the ~ character.",
         "ed": "Ed token should be a shorter alphanumeric string. Check that you copied the full token."
-      }
+      },
+      "invalid": {
+        "title": "Token validation failed",
+        "lastValidated": "Token last validated: {when}",
+        "lastValidatedNever": "never",
+        "tip1": "Make sure you copied the entire token",
+        "tip2": "Check the token hasn't been regenerated",
+        "tip3": "Confirm it belongs to the right platform",
+        "testConnection": "Test connection"
+      },
+      "unreachable": {
+        "title": "We can't reach {platform}",
+        "body": "This is usually a {platform} outage. Please retry later.",
+        "retry": "Retry"
+      },
+      "alreadyValidated": "Token already validated in this session"
     },
     "success": {
       "title": "You're all set!",
