@@ -195,9 +195,19 @@
       "backToLogin": "返回登录"
     },
     "checkEmail": {
-      "title": "检查你的邮箱",
-      "description": "我们已发送确认链接到你的邮箱，点击链接激活你的账户。",
+      "title": "账户已创建 — 立即登录",
+      "description": "邮箱确认已关闭，你可以直接用刚才创建的账号密码登录。",
+      "goToLogin": "前往登录",
       "backToLogin": "返回登录"
+    },
+    "google": {
+      "continueWith": "使用 Google 继续",
+      "or": "或",
+      "errorGeneric": "登录失败 — 请重试或联系支持。"
+    },
+    "usydBanner": {
+      "body": "USYD 学生？UniBoard 发出的密码重置和账户邮件（发件人 noreply@uniboard.uk）经常落入 Mimecast Held Messages。推荐使用 Google 登录以完全绕开此问题。",
+      "dismiss": "关闭"
     },
     "errors": {
       "loginFailed": "邮箱或密码无效，请重试。",

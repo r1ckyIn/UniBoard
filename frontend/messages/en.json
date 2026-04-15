@@ -195,9 +195,19 @@
       "backToLogin": "Back to sign in"
     },
     "checkEmail": {
-      "title": "Check your email",
-      "description": "We've sent a confirmation link to your email. Click it to activate your account.",
+      "title": "Account created — sign in now",
+      "description": "Email confirmation is disabled. You can sign in immediately with the credentials you just created.",
+      "goToLogin": "Go to sign in",
       "backToLogin": "Back to sign in"
+    },
+    "google": {
+      "continueWith": "Continue with Google",
+      "or": "or",
+      "errorGeneric": "Sign-in failed — please try again or contact support."
+    },
+    "usydBanner": {
+      "body": "USYD student? Password-reset and account emails from UniBoard (sender noreply@uniboard.uk) often land in Mimecast Held Messages. Sign in with Google is recommended to bypass the issue entirely.",
+      "dismiss": "Dismiss"
     },
     "errors": {
       "loginFailed": "Invalid email or password. Please try again.",
