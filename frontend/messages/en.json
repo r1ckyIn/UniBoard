@@ -176,7 +176,11 @@
       "submitButton": "Send Reset Link",
       "backToLogin": "Back to sign in",
       "successTitle": "Check your email",
-      "successMessage": "We've sent a password reset link to your email address."
+      "successMessage": "We've sent a password reset link to your email address.",
+      "resend": "Resend email",
+      "resendCooldown": "Resend in 00:{seconds}",
+      "resendSuccess": "Reset email resent",
+      "resendFailed": "Failed to resend. Please try again."
     },
     "updatePassword": {
       "title": "Set new password",

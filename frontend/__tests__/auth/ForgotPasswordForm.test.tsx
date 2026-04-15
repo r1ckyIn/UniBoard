@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  act,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 
@@ -185,10 +191,16 @@ describe("ForgotPasswordForm", () => {
       vi.useRealTimers();
     });
 
-    const submitInitialReset = async (
+    // Helper: install fake timers BEFORE rendering so useEffect setInterval
+    // is registered with the fake scheduler. Uses fireEvent (synchronous)
+    // instead of userEvent to avoid wall-clock delays that conflict with
+    // fake timers.
+    const setupWithFakeTimers = async (
       email = "student@uni.sydney.edu.au",
     ) => {
-      // Trigger initial reset (synchronous onSuccess via mock)
+      vi.useFakeTimers();
+
+      // Wire initial submit onSuccess
       mockResetMutate.mockImplementation(
         (
           _email: unknown,
@@ -198,25 +210,30 @@ describe("ForgotPasswordForm", () => {
         },
       );
 
-      const user = userEvent.setup();
       render(<ForgotPasswordForm onSwitchToLogin={mockOnSwitchToLogin} />);
 
-      const emailInput = screen.getByPlaceholderText("you@uni.sydney.edu.au");
-      await user.type(emailInput, email);
+      const emailInput = screen.getByPlaceholderText(
+        "you@uni.sydney.edu.au",
+      ) as HTMLInputElement;
+      fireEvent.change(emailInput, { target: { value: email } });
 
       const submitBtn = screen.getByRole("button", { name: "Send Reset Link" });
-      await user.click(submitBtn);
-
-      // Wait for success state to render
-      await waitFor(() => {
-        expect(screen.getByText("Check your email")).toBeInTheDocument();
+      // react-hook-form runs async validation; use act + flush microtasks
+      await act(async () => {
+        fireEvent.click(submitBtn);
+        // Flush pending microtasks for react-hook-form resolver
+        await Promise.resolve();
+        await Promise.resolve();
       });
+
+      // Success state should now be rendered
+      expect(screen.getByText("Check your email")).toBeInTheDocument();
     };
 
     it("Test 1: shows Resend button disabled with 'Resend in 00:60' label right after initial success", async () => {
-      await submitInitialReset();
+      await setupWithFakeTimers();
 
-      const resendBtn = await screen.findByRole("button", {
+      const resendBtn = screen.getByRole("button", {
         name: /Resend in 00:60/,
       });
       expect(resendBtn).toBeInTheDocument();
@@ -224,10 +241,7 @@ describe("ForgotPasswordForm", () => {
     });
 
     it("Test 2: after 30s the label updates to 'Resend in 00:30'", async () => {
-      await submitInitialReset();
-
-      // Now switch to fake timers for the cooldown tick
-      vi.useFakeTimers({ shouldAdvanceTime: false });
+      await setupWithFakeTimers();
 
       await act(async () => {
         vi.advanceTimersByTime(30_000);
@@ -241,9 +255,7 @@ describe("ForgotPasswordForm", () => {
     });
 
     it("Test 3: after 60s the button is enabled with label 'Resend email'", async () => {
-      await submitInitialReset();
-
-      vi.useFakeTimers({ shouldAdvanceTime: false });
+      await setupWithFakeTimers();
 
       await act(async () => {
         vi.advanceTimersByTime(60_000);
@@ -255,18 +267,16 @@ describe("ForgotPasswordForm", () => {
     });
 
     it("Test 4: clicking enabled Resend calls useResetPassword().mutate with same email, shows success toast, restarts cooldown", async () => {
-      await submitInitialReset("student@uni.sydney.edu.au");
+      await setupWithFakeTimers("student@uni.sydney.edu.au");
 
-      // Reset call tracker after initial submit
-      mockResetMutate.mockClear();
-
-      vi.useFakeTimers({ shouldAdvanceTime: false });
-
+      // Advance past initial cooldown
       await act(async () => {
         vi.advanceTimersByTime(60_000);
       });
 
-      // Wire resend to call onSuccess
+      // Clear call tracker so only the resend call is counted
+      mockResetMutate.mockClear();
+      // Re-wire resend onSuccess (mockClear also clears implementation)
       mockResetMutate.mockImplementation(
         (
           _email: unknown,
@@ -300,16 +310,13 @@ describe("ForgotPasswordForm", () => {
     });
 
     it("Test 5: failed resend fires error toast and does NOT restart cooldown (allow immediate retry)", async () => {
-      await submitInitialReset("student@uni.sydney.edu.au");
+      await setupWithFakeTimers("student@uni.sydney.edu.au");
 
-      mockResetMutate.mockClear();
-
-      vi.useFakeTimers({ shouldAdvanceTime: false });
       await act(async () => {
         vi.advanceTimersByTime(60_000);
       });
 
-      // Wire resend to call onError with a specific Error
+      mockResetMutate.mockClear();
       mockResetMutate.mockImplementation(
         (
           _email: unknown,
@@ -334,15 +341,13 @@ describe("ForgotPasswordForm", () => {
     });
 
     it("Test 6: the same email used in initial request is reused on resend (no re-prompt)", async () => {
-      await submitInitialReset("alice@uni.sydney.edu.au");
+      await setupWithFakeTimers("alice@uni.sydney.edu.au");
 
-      mockResetMutate.mockClear();
-
-      vi.useFakeTimers({ shouldAdvanceTime: false });
       await act(async () => {
         vi.advanceTimersByTime(60_000);
       });
 
+      mockResetMutate.mockClear();
       mockResetMutate.mockImplementation(
         (
           _email: unknown,
