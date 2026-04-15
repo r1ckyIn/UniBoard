@@ -1,0 +1,73 @@
+<!--
+  UniBoard recall (re-engagement) email template.
+
+  Rendered via Python str.format(**ctx). There are currently no literal
+  curly braces in this template; any inline CSS braces added in future
+  edits must be doubled (open-brace open-brace / close-brace close-brace)
+  to survive str.format. The four placeholders the renderer substitutes:
+
+      display_name      str   salutation target (falls back to "there")
+      deadline_count    int   upcoming deadlines in the next 14 days
+      deadline_line     str   full sentence or "" (omitted when 0)
+      deep_link         str   absolute https URL to /setup?step=token
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your UniBoard sync has paused</title>
+</head>
+<body style="margin:0;padding:0;background-color:#faf9f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#faf9f5;">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding:32px 32px 0;">
+              <h1 style="margin:0;font-size:24px;color:#1a1a1a;font-family:Georgia,'Times New Roman',serif;">UniBoard</h1>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding:24px 32px;">
+              <h2 style="margin:0 0 16px;font-size:20px;color:#1a1a1a;">We've paused your sync</h2>
+              <p style="margin:0 0 16px;font-size:15px;color:#555555;line-height:1.5;">
+                Hi {display_name},
+              </p>
+              <p style="margin:0 0 16px;font-size:15px;color:#555555;line-height:1.5;">
+                Your Canvas or Ed token has expired, so UniBoard has stopped pulling fresh grades and deadlines into your dashboard. Reconnect once and you're back in business.
+              </p>
+              <p style="margin:0 0 24px;font-size:15px;color:#555555;line-height:1.5;">
+                {deadline_line}
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <a href="{deep_link}"
+                       style="display:inline-block;padding:12px 32px;background-color:#d97757;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;">
+                      Reconnect UniBoard
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:24px 0 0;font-size:13px;color:#999999;line-height:1.5;">
+                P.S. Sign in with Google to avoid future email disruptions &mdash; your USYD Google account works.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 32px 32px;border-top:1px solid #f0ede8;">
+              <p style="margin:0;font-size:12px;color:#bbbbbb;text-align:center;">
+                UniBoard &mdash; Your GPA, Maximized.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

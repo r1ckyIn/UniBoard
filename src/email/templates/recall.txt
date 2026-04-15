@@ -1,0 +1,13 @@
+Hi {display_name},
+
+Your Canvas or Ed token has expired, so UniBoard has stopped pulling fresh grades and deadlines into your dashboard. Reconnect once and you're back in business.
+
+{deadline_line}
+
+Reconnect UniBoard:
+{deep_link}
+
+P.S. Sign in with Google to avoid future email disruptions -- your USYD Google account works.
+
+--
+UniBoard -- Your GPA, Maximized.

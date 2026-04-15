@@ -22,23 +22,32 @@ class SESEmailSender:
         subject: str,
         html_body: str,
         sender: str = "digest@uniboard.app",
+        text_body: str | None = None,
     ) -> bool:
         """Send an HTML email via SES.
 
         Runs boto3 synchronous call in asyncio.to_thread().
         Returns True on success, False on error (never raises).
+
+        When ``text_body`` is provided, the SES Message includes a Text body
+        alongside the HTML body for recipients whose clients prefer or
+        require plaintext (and for better deliverability).
         """
+        body: dict[str, object] = {
+            "Html": {"Data": html_body, "Charset": "utf-8"},
+        }
+        if text_body is not None:
+            body["Text"] = {"Data": text_body, "Charset": "utf-8"}
+        message = {
+            "Subject": {"Data": subject, "Charset": "utf-8"},
+            "Body": body,
+        }
         try:
             await asyncio.to_thread(
                 self._client.send_email,
                 Source=sender,
                 Destination={"ToAddresses": [to_email]},
-                Message={
-                    "Subject": {"Data": subject, "Charset": "utf-8"},
-                    "Body": {
-                        "Html": {"Data": html_body, "Charset": "utf-8"},
-                    },
-                },
+                Message=message,
             )
             logger.info("email_sent", to=to_email, subject=subject)
             return True
