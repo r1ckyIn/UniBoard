@@ -13,9 +13,9 @@ vi.mock("@/lib/supabase/server", () => ({
         mockExchangeCodeForSession(...args),
       getUser: (...args: unknown[]) => mockGetUser(...args),
     },
-    from: (_table: string) => ({
-      select: (_cols: string) => ({
-        eq: (_col: string, _val: unknown) => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
           single: () => mockProfileSingle(),
         }),
       }),
