@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: phase_complete
-stopped_at: Phase 32.1 complete and verified (passed) -- all 5 SYNC-FIX requirements closed
-last_updated: "2026-04-14T05:09:54.691Z"
-last_activity: 2026-04-14
+status: completed
+stopped_at: Completed 33-04-PLAN.md (Google OAuth wiring after human-action checkpoint resolved — 8/8 Phase 33 plans done)
+last_updated: "2026-04-16T02:15:22.871Z"
+last_activity: 2026-04-16
 progress:
   total_phases: 20
-  completed_phases: 15
-  total_plans: 50
-  completed_plans: 50
+  completed_phases: 16
+  total_plans: 58
+  completed_plans: 58
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 32 — production-email
+**Current focus:** Phase 33 — token-lifecycle-onboarding
 
 ## Current Position
 
-Phase: 32.1
-Plan: All 6 plans complete (Wave 0 scaffolding + Wave 1 SYNC-FIX-05 + Wave 2 SYNC-FIX-01/02/04 + Wave 3 SYNC-FIX-03 + real-data harness). All 5 SYNC-FIX requirements closed.
-Status: Phase 32.1 complete -- ready for /gsd:verify-work 32.1
-Last activity: 2026-04-14
+Phase: 34
+Plan: Not started
+Status: Phase 33 complete; ready for Phase 34 (AI Features Live)
+Last activity: 2026-04-16
 
 ## Milestones Completed
 
@@ -142,6 +142,13 @@ Last activity: 2026-04-14
 | Phase 32.1 P03 | 6min | 2 tasks | 4 files |
 | Phase 32.1 P04 | 4min | 1 tasks | 2 files |
 | Phase 32.1 P05 | 6min | 3 tasks | 5 files |
+| Phase 33 P01 | 2min | 2 tasks | 2 files |
+| Phase 33 P08 | 2 | 2 tasks | 3 files |
+| Phase 33 P03 | 6min | 2 tasks | 5 files |
+| Phase 33 P06 | 7min | 1 tasks | 4 files |
+| Phase 33 P02 | 15min | 3 tasks | 8 files |
+| Phase 33 P05 | 9min | 3 tasks | 11 files |
+| Phase 33 P07 | 25min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -339,6 +346,28 @@ Recent decisions affecting current work:
 - [Phase 32.1-03]: SYNC-FIX-02 Canvas get_assignments gets optional keyword-only include: list[str] | None kwarg; _sync_user_grades passes include=['submission'] to populate Grade.score. Empty-truthy guard keeps deadlines.py no-kwarg call path intact. httpx natively serializes list values as repeated include[]= query params.
 - [Phase 32.1]: [Phase 32.1-04]: SYNC-FIX-04 null-safe due_at handling via isinstance(due_raw, str) guard in both Canvas and Ed Lessons phases of aggregate_and_dedup. Replaces str(None)=="None" truthy check that was polluting compute_dedup_key with sentinel "None" date before try/except ValueError swallowed the error. Two SYNC-FIX-04 audit markers added for code-review visibility.
 - [Phase 32.1]: [Phase 32.1-05]: SYNC-FIX-03 closed via single-candidate semester fallback in link_courses. ed_code_only dict indexes Ed courses with no extractable semester; when primary (code, semester) match misses and exactly 1 candidate exists, link them with course_linking_ambiguous_semester_fallback log. Multiple candidates: log _skipped with reason=multiple_candidates, no auto-link. Primary match always wins. Real-data harness populated: 5 env-gated tests (one per SYNC-FIX-NN), skip cleanly when SYNC_REAL_DATA_CANVAS_TOKEN unset. Phase 32.1 as a whole: all 5 SYNC-FIX requirements have automated regression tests.
+- [Phase 33]: Plan 33-01: No index on recall_email_sent_at (partial index not justified at <10k users)
+- [Phase 33]: Plan 33-01: handle_new_user() uses COALESCE(display_name, full_name, name, '') for Google OAuth fallback
+- [Phase 33]: Plan 33-01: recall_email_sent_at excluded from Pydantic response schemas (internal-only)
+- [Phase 33]: [Phase 33-08]: Email confirmation permanently OFF documented in TRD §7.5/§16.9, PROJECT.md Key Decisions, and supabase/config.toml inline comment
+- [Phase 33]: [Phase 33-03]: aggregate_per_platform_counts extracted as pure function (no DB/auth deps) for unit testability — Pydantic helper pattern
+- [Phase 33]: [Phase 33-03]: openapi.yaml is single source of truth for types.gen.d.ts — regenerate via pnpm generate:types, never hand-edit the generated file
+- [Phase 33]: [Phase 33-06]: Cooldown starts on initial reset success (not only after first resend) to prevent inbox flooding via rapid form re-submission
+- [Phase 33]: [Phase 33-06]: Failed resend does NOT restart cooldown — UX tradeoff favoring immediate retry on transient errors
+- [Phase 33]: [Phase 33-06]: Test strategy — install vi.useFakeTimers() BEFORE render + use fireEvent (not userEvent) to avoid wall-clock delays hanging under fake timers; flush react-hook-form async resolver with await Promise.resolve() twice inside act()
+- [Phase 33]: [Phase 33-02]: SES (existing) over Resend — no new dependencies; str.format templates over Jinja
+- [Phase 33]: [Phase 33-02]: Pure-function gating (should_send_recall_email) + injected now kwarg on check_token_health and DeadlineService.list_upcoming enable freezegun-free deterministic tests
+- [Phase 33]: [Phase 33-02]: Recall branch isolated in its own session + try/except with Sentry phase=33 tag so SES failures cannot block PLAT-04 in-app notifications
+- [Phase 33]: [33-05]: UsydBanner scoped useTranslations('auth.usydBanner') + 30-day localStorage re-show via Date.parse timestamp comparison
+- [Phase 33]: [33-05]: Removed 'Check your email' post-register copy (confirmation OFF); new copy 'Account created — sign in now' with primary 'Go to sign in' CTA
+- [Phase 33]: [33-05]: Inline SVG GoogleIcon (no next/image, SSR-safe) placed above email/password with white-bg 1.5px border vocabulary
+- [Phase 33]: 33-07: Used SHA-256 sessionStorage cache for token skip-revalidate (5-min TTL, hash-only storage)
+- [Phase 33]: 33-07: Exp-backoff helper classifies retryable as no-status OR status>=500; 401/422 immediately invalid
+- [Phase 33]: 33-07: Backend SyncTriggerRequest extended additively with platforms filter; takes precedence over scope
+- [Phase 33]: 33-07: Reused configureToken for Test connection (Option A) — no separate validate-only endpoint
+- [Phase 33]: 33-07: Canvas SuccessStep row counts = courses + deadlines; Ed row = discussions (domain-correct)
+- [Phase 33]: [33-04]: Google OAuth provisioned end-to-end — External consent screen (no USYD org verification needed), env-var-driven config.toml, prod + local redirect URIs registered, live 302 to accounts.google.com verified
+- [Phase 33]: [33-04]: Pre-existing Phase 32 supabase config bug fixed as out-of-scope unblocker (e9530d9) — email template content_path was ./templates/*.html but files live at ./supabase/templates/*.html, blocking `supabase start`
 
 ### Roadmap Evolution
 
@@ -356,5 +385,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-14T05:09:45.401Z
-Stopped at: Phase 32.1 verified (passed) -- all 5 SYNC-FIX requirements closed; ready for next phase
+Last session: 2026-04-16T00:30:00.000Z
+Stopped at: Completed 33-04-PLAN.md (Google OAuth wiring after human-action checkpoint resolved — 8/8 Phase 33 plans done)

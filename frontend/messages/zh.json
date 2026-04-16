@@ -176,7 +176,11 @@
       "submitButton": "发送重置链接",
       "backToLogin": "返回登录",
       "successTitle": "检查你的邮箱",
-      "successMessage": "我们已发送密码重置链接到你的邮箱。"
+      "successMessage": "我们已发送密码重置链接到你的邮箱。",
+      "resend": "重新发送邮件",
+      "resendCooldown": "可在 00:{seconds} 后重发",
+      "resendSuccess": "重置邮件已重新发送",
+      "resendFailed": "重发失败，请重试。"
     },
     "updatePassword": {
       "title": "设置新密码",
@@ -191,9 +195,19 @@
       "backToLogin": "返回登录"
     },
     "checkEmail": {
-      "title": "检查你的邮箱",
-      "description": "我们已发送确认链接到你的邮箱，点击链接激活你的账户。",
+      "title": "账户已创建 — 立即登录",
+      "description": "邮箱确认已关闭，你可以直接用刚才创建的账号密码登录。",
+      "goToLogin": "前往登录",
       "backToLogin": "返回登录"
+    },
+    "google": {
+      "continueWith": "使用 Google 继续",
+      "or": "或",
+      "errorGeneric": "登录失败 — 请重试或联系支持。"
+    },
+    "usydBanner": {
+      "body": "USYD 学生？UniBoard 发出的密码重置和账户邮件（发件人 noreply@uniboard.uk）经常落入 Mimecast Held Messages。推荐使用 Google 登录以完全绕开此问题。",
+      "dismiss": "关闭"
     },
     "errors": {
       "loginFailed": "邮箱或密码无效，请重试。",
@@ -337,6 +351,8 @@
       "title": "欢迎来到 UniBoard",
       "description": "让我们连接你的 Canvas LMS 和 Ed Discussion 账户，一站式追踪你的成绩、截止日期和课程资料。",
       "subtitle": "大约需要 2 分钟。你需要先登录 Canvas 和 Ed。",
+      "signedInAs": "你已以 {email} 登录。",
+      "firstTimeNote": "初次使用也可以选择 Google 登录。",
       "features": {
         "readonly": "只读访问",
         "encrypted": "AES-256 加密",
@@ -391,7 +407,22 @@
       "errors": {
         "canvas": "Canvas 令牌格式：'{数字}'~'{字母数字}'。请确保完整复制了令牌（包括 ~ 字符）。",
         "ed": "Ed 令牌应为较短的字母数字字符串。请检查是否完整复制了令牌。"
-      }
+      },
+      "invalid": {
+        "title": "Token 验证失败",
+        "lastValidated": "上次验证时间：{when}",
+        "lastValidatedNever": "从未验证",
+        "tip1": "确认 Token 完整复制",
+        "tip2": "确认 Token 未被重新生成",
+        "tip3": "确认 Token 属于对应平台",
+        "testConnection": "测试连接"
+      },
+      "unreachable": {
+        "title": "无法连接到 {platform}",
+        "body": "通常是 {platform} 服务异常，请稍后重试。",
+        "retry": "重试"
+      },
+      "alreadyValidated": "本次会话中 Token 已验证"
     },
     "success": {
       "title": "设置完成！",
@@ -400,7 +431,16 @@
       "synced": "已成功同步 {count} 门课程",
       "syncSlow": "同步时间较长，你可以先进入仪表盘——数据会在后台继续同步。",
       "cta": "前往仪表盘",
-      "toast": "欢迎！你的账户已连接。"
+      "toast": "欢迎！你的账户已连接。",
+      "canvasLabel": "Canvas",
+      "edLabel": "Ed Discussion",
+      "canvasCounts": "已同步 {courses} 门课程、{deadlines} 个截止日期",
+      "edCounts": "已同步 {discussions} 条讨论",
+      "retryFailed": "仅重试失败项",
+      "pending": "等待同步",
+      "inProgress": "同步中...",
+      "failed": "同步失败",
+      "done": "已同步"
     }
   },
   "predict": {

@@ -15,8 +15,14 @@ type SyncTriggerResponse =
   paths["/sync/trigger"]["post"]["responses"]["202"]["content"]["application/json"];
 
 // ── Request body type alias ─────────────────────────────────────────────────
-type SyncTriggerBody =
+// Extended locally to add `platforms` field (backend accepts it for the
+// onboarding "Retry failed only" UX in plan 33-07; openapi.yaml will be
+// regenerated in a future plan to bring this into the generated types).
+type SyncTriggerBodyBase =
   paths["/sync/trigger"]["post"]["requestBody"]["content"]["application/json"];
+export type SyncTriggerBody = SyncTriggerBodyBase & {
+  platforms?: Array<"canvas" | "ed">;
+};
 
 // ── Query key factory ───────────────────────────────────────────────────────
 export const syncKeys = {

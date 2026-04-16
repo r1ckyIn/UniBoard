@@ -168,6 +168,27 @@ class DeadlineService:
 
         return responses
 
+    async def list_upcoming(
+        self,
+        user_id: uuid.UUID,
+        horizon_days: int = 14,
+        *,
+        now: datetime | None = None,
+    ) -> list[DeadlineResponse]:
+        """Return upcoming deadlines for a user within ``horizon_days`` of ``now``.
+
+        Thin wrapper around ``get_deadlines`` for caller readability. The
+        optional ``now`` parameter exists for deterministic testing (no
+        freezegun in this project).
+        """
+        reference = now or datetime.now(UTC)
+        return await self.get_deadlines(
+            user_id,
+            from_date=reference,
+            to_date=reference + timedelta(days=horizon_days),
+            include_past=False,
+        )
+
     async def get_deadline(
         self,
         user_id: uuid.UUID,

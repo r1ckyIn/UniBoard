@@ -15,6 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import Profile
 from src.schemas.common import NotFoundError, RateLimitedError, SuccessResponse
 from src.schemas.sync import (
+    CanvasPlatformCounts,
+    EdPlatformCounts,
+    PerPlatformCounts,
     PlatformHealth,
     PlatformStatus,
     SyncCount,
@@ -38,7 +41,55 @@ _SYNC_SEMAPHORE: Final = asyncio.Semaphore(2)
 router = APIRouter()
 
 
+# Single source of truth for domain->platform grouping on the sync status
+# endpoint. Extend this map when new sync domains are added; the response
+# shape does not change for existing consumers.
+DOMAIN_TO_PLATFORM: Final[dict[str, str]] = {
+    "grades": "canvas",
+    "deadlines": "canvas",
+    "discussions": "ed",
+}
+
+
+def aggregate_per_platform_counts(
+    results: SyncResults | None,
+) -> PerPlatformCounts | None:
+    """Group SyncResults domain counters by their source platform.
+
+    Returns None when `results` is None (no sync has happened yet),
+    matching last_sync=None semantics. Missing domain counters default
+    to zero so the canvas/ed shape is always fully populated.
+    """
+    if results is None:
+        return None
+
+    grades = results.grades.synced if results.grades is not None else 0
+    deadlines = results.deadlines.synced if results.deadlines is not None else 0
+    discussions = results.discussions.synced if results.discussions is not None else 0
+
+    return PerPlatformCounts(
+        canvas=CanvasPlatformCounts(
+            grades=grades,
+            deadlines=deadlines,
+            total=grades + deadlines,
+        ),
+        ed=EdPlatformCounts(
+            discussions=discussions,
+            total=discussions,
+        ),
+    )
+
+
 _ValidScope = Literal["all", "grades", "deadlines", "modules", "outline"]
+_ValidPlatform = Literal["canvas", "ed"]
+
+# Map platform -> sync scopes belonging to that platform. Used by the
+# onboarding "Retry failed only" UX (plan 33-07) to re-trigger sync for
+# a specific failed adapter instead of running the full pipeline.
+_PLATFORM_TO_SCOPES: Final[dict[str, list[str]]] = {
+    "canvas": ["grades", "deadlines", "modules", "outline"],
+    "ed": ["discussions"],
+}
 
 # Module-level set to hold strong references to background sync tasks,
 # preventing garbage collection mid-execution.
@@ -46,9 +97,17 @@ _background_tasks: set[asyncio.Task[None]] = set()
 
 
 class SyncTriggerRequest(BaseModel):
-    """Optional request body for manual sync trigger."""
+    """Optional request body for manual sync trigger.
+
+    `scope` selects a single sync domain (or "all" for the full pipeline).
+    `platforms` is an optional override that limits dispatch to scopes
+    belonging to the listed platforms — used by the onboarding
+    SuccessStep "Retry failed only" button. When `platforms` is set,
+    `scope` is ignored.
+    """
 
     scope: _ValidScope = "all"
+    platforms: list[_ValidPlatform] | None = None
 
 
 @router.post("/trigger")
@@ -82,6 +141,7 @@ async def trigger_sync(
     await session.flush()
 
     scope = body.scope if body else "all"
+    platforms_filter = body.platforms if body else None
     next_allowed_at = now + _SYNC_COOLDOWN
 
     # Dispatch actual sync task in background based on scope.
@@ -92,6 +152,7 @@ async def trigger_sync(
         sync_all_grades,
         sync_all_modules,
         sync_all_outlines,
+        sync_ed_discussions,
     )
 
     _SCOPE_DISPATCH: dict[str, Callable[[], Coroutine[Any, Any, None]]] = {
@@ -99,6 +160,7 @@ async def trigger_sync(
         "deadlines": sync_all_deadlines,
         "modules": sync_all_modules,
         "outline": sync_all_outlines,
+        "discussions": sync_ed_discussions,
     }
 
     def _on_task_done(task: asyncio.Task[None]) -> None:
@@ -133,14 +195,30 @@ async def trigger_sync(
 
             _launch(_run)
 
-    if scope == "all":
+    # Platform filter takes precedence over scope (used by onboarding
+    # "Retry failed only" UX in plan 33-07). When platforms are listed,
+    # only the scopes belonging to those platforms are dispatched.
+    if platforms_filter is not None and len(platforms_filter) > 0:
+        for platform in platforms_filter:
+            for scope_name in _PLATFORM_TO_SCOPES.get(platform, []):
+                fn = _SCOPE_DISPATCH.get(scope_name)
+                if fn is not None:
+                    _launch(fn)
+        message = (
+            f"Sync triggered successfully (platforms={','.join(platforms_filter)})"
+        )
+    elif scope == "all":
         _launch(_sync_pipeline)
+        message = "Sync triggered successfully (scope=all)"
     elif scope in _SCOPE_DISPATCH:
         _launch(_SCOPE_DISPATCH[scope])
+        message = f"Sync triggered successfully (scope={scope})"
+    else:
+        message = f"Sync triggered successfully (scope={scope})"
 
     return SuccessResponse(
         data=SyncTriggerResponse(
-            message=f"Sync triggered successfully (scope={scope})",
+            message=message,
             next_allowed_at=next_allowed_at.isoformat(),
         ),
         meta=get_request_meta(request),
@@ -243,6 +321,12 @@ async def get_sync_status(
         results=results,
     )
 
+    # Group domain counters under their source platform for onboarding UX
+    # (plan 33-07 consumes this). None signals "no sync has happened yet".
+    per_platform_counts = (
+        aggregate_per_platform_counts(results) if profile.last_sync_at else None
+    )
+
     # Build platform health
     def _platform_health(status: str, last_synced: datetime | None) -> PlatformHealth:
         if status in ("success", "pending"):
@@ -262,6 +346,10 @@ async def get_sync_status(
     )
 
     return SuccessResponse(
-        data=SyncStatusResponse(last_sync=last_sync, platforms=platforms),
+        data=SyncStatusResponse(
+            last_sync=last_sync,
+            per_platform_counts=per_platform_counts,
+            platforms=platforms,
+        ),
         meta=get_request_meta(request),
     )

@@ -149,7 +149,7 @@ enabled = true
 # in emails.
 site_url = "http://localhost:3001"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["http://localhost:3001", "http://localhost:3001/auth/confirm"]
+additional_redirect_urls = ["http://localhost:3001", "http://localhost:3001/auth/confirm", "http://localhost:3001/auth/callback"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
@@ -202,6 +202,9 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = false
 # If enabled, users need to confirm their email address before signing in.
+# NOTE: production has enable_confirmations = false (set in Supabase Studio).
+# Local dev keeps it true for parity testing of /auth/confirm + email templates.
+# See .planning/PROJECT.md ## Key Decisions and docs/UniBoard_TRD_v2.md §7.5 for rationale.
 enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
@@ -229,11 +232,11 @@ otp_expiry = 3600
 
 [auth.email.template.confirmation]
 subject = "Confirm your UniBoard account"
-content_path = "./templates/confirmation.html"
+content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
 subject = "Reset your UniBoard password"
-content_path = "./templates/recovery.html"
+content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
@@ -318,6 +321,20 @@ redirect_uri = ""
 url = ""
 # If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
 skip_nonce_check = false
+# If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
+email_optional = false
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+# Default: <site_url>/auth/v1/callback. Local Supabase listens on 54321.
+redirect_uri = ""
+# Overrides the default auth provider URL.
+url = ""
+# Required for SPA-mode local sign-in (matches Apple template)
+skip_nonce_check = true
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
 

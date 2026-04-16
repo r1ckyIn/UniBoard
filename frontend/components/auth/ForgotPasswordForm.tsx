@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { Mail, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useResetPassword } from "@/hooks/use-auth";
 
 const forgotPasswordSchema = z.object({
@@ -24,12 +25,31 @@ interface ForgotPasswordFormProps {
   onSwitchToLogin: () => void;
 }
 
+// Cooldown duration in milliseconds. Kept client-only; Supabase enforces
+// server-side rate-limiting separately (max_frequency = "1s").
+const COOLDOWN_MS = 60_000;
+
 export default function ForgotPasswordForm({
   onSwitchToLogin,
 }: ForgotPasswordFormProps) {
   const t = useTranslations();
   const resetMutation = useResetPassword();
   const [sent, setSent] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string>("");
+
+  // Cooldown state: end timestamp (ms epoch) + ticker
+  const [cooldownEnd, setCooldownEnd] = useState<number | null>(null);
+  const [tick, setTick] = useState<number>(() => Date.now());
+
+  useEffect(() => {
+    if (!cooldownEnd) return;
+    const id = setInterval(() => setTick(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [cooldownEnd]);
+
+  const remainingMs = cooldownEnd ? Math.max(0, cooldownEnd - tick) : 0;
+  const inCooldown = remainingMs > 0;
+  const remainingSec = Math.ceil(remainingMs / 1000);
 
   const {
     register,
@@ -43,7 +63,30 @@ export default function ForgotPasswordForm({
   const onSubmit = (data: ForgotPasswordInput) => {
     resetMutation.mutate(data.email, {
       onSuccess: () => {
+        setSubmittedEmail(data.email);
         setSent(true);
+        // Start initial cooldown immediately on first success.
+        setCooldownEnd(Date.now() + COOLDOWN_MS);
+        setTick(Date.now());
+      },
+    });
+  };
+
+  const handleResend = () => {
+    if (inCooldown || !submittedEmail || resetMutation.isPending) return;
+    resetMutation.mutate(submittedEmail, {
+      onSuccess: () => {
+        setCooldownEnd(Date.now() + COOLDOWN_MS);
+        setTick(Date.now());
+        toast.success(t("auth.forgotPassword.resendSuccess"));
+      },
+      onError: (err) => {
+        const message =
+          err instanceof Error
+            ? err.message
+            : t("auth.forgotPassword.resendFailed");
+        toast.error(message);
+        // Do NOT restart cooldown on failure -- allow immediate retry.
       },
     });
   };
@@ -52,8 +95,14 @@ export default function ForgotPasswordForm({
     "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";
   const inputErrorClass = "border-[#cc4455]";
 
-  // Success state: show check-email UI
+  // Success state: show check-email UI with resend button + cooldown
   if (sent) {
+    const resendLabel = inCooldown
+      ? t("auth.forgotPassword.resendCooldown", {
+          seconds: String(remainingSec).padStart(2, "0"),
+        })
+      : t("auth.forgotPassword.resend");
+
     return (
       <div className="flex flex-col items-center text-center py-4">
         <div className="w-14 h-14 rounded-full bg-[rgba(120,140,93,0.11)] grid place-items-center text-[#788c5d] mb-4">
@@ -71,6 +120,14 @@ export default function ForgotPasswordForm({
           className="text-[0.84rem] text-[#d97757] font-semibold hover:opacity-80 transition-opacity"
         >
           {t("auth.forgotPassword.backToLogin")}
+        </button>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={inCooldown || resetMutation.isPending}
+          className="mt-3 text-[0.84rem] font-medium text-[#d97757] hover:underline disabled:text-text-3 disabled:no-underline disabled:cursor-default"
+        >
+          {resendLabel}
         </button>
       </div>
     );

@@ -176,7 +176,11 @@
       "submitButton": "Send Reset Link",
       "backToLogin": "Back to sign in",
       "successTitle": "Check your email",
-      "successMessage": "We've sent a password reset link to your email address."
+      "successMessage": "We've sent a password reset link to your email address.",
+      "resend": "Resend email",
+      "resendCooldown": "Resend in 00:{seconds}",
+      "resendSuccess": "Reset email resent",
+      "resendFailed": "Failed to resend. Please try again."
     },
     "updatePassword": {
       "title": "Set new password",
@@ -191,9 +195,19 @@
       "backToLogin": "Back to sign in"
     },
     "checkEmail": {
-      "title": "Check your email",
-      "description": "We've sent a confirmation link to your email. Click it to activate your account.",
+      "title": "Account created — sign in now",
+      "description": "Email confirmation is disabled. You can sign in immediately with the credentials you just created.",
+      "goToLogin": "Go to sign in",
       "backToLogin": "Back to sign in"
+    },
+    "google": {
+      "continueWith": "Continue with Google",
+      "or": "or",
+      "errorGeneric": "Sign-in failed — please try again or contact support."
+    },
+    "usydBanner": {
+      "body": "USYD student? Password-reset and account emails from UniBoard (sender noreply@uniboard.uk) often land in Mimecast Held Messages. Sign in with Google is recommended to bypass the issue entirely.",
+      "dismiss": "Dismiss"
     },
     "errors": {
       "loginFailed": "Invalid email or password. Please try again.",
@@ -337,6 +351,8 @@
       "title": "Welcome to UniBoard",
       "description": "Let's connect your Canvas LMS and Ed Discussion accounts so we can start tracking your grades, deadlines, and course materials in one place.",
       "subtitle": "This takes about 2 minutes. You'll need access to Canvas and Ed.",
+      "signedInAs": "You're signed in as {email}.",
+      "firstTimeNote": "First-time users can also sign in with Google.",
       "features": {
         "readonly": "Read-only access",
         "encrypted": "AES-256 encrypted",
@@ -391,7 +407,22 @@
       "errors": {
         "canvas": "Canvas token format: '{number}'~'{alphanumeric}'. Check that you copied the full token including the ~ character.",
         "ed": "Ed token should be a shorter alphanumeric string. Check that you copied the full token."
-      }
+      },
+      "invalid": {
+        "title": "Token validation failed",
+        "lastValidated": "Token last validated: {when}",
+        "lastValidatedNever": "never",
+        "tip1": "Make sure you copied the entire token",
+        "tip2": "Check the token hasn't been regenerated",
+        "tip3": "Confirm it belongs to the right platform",
+        "testConnection": "Test connection"
+      },
+      "unreachable": {
+        "title": "We can't reach {platform}",
+        "body": "This is usually a {platform} outage. Please retry later.",
+        "retry": "Retry"
+      },
+      "alreadyValidated": "Token already validated in this session"
     },
     "success": {
       "title": "You're all set!",
@@ -400,7 +431,16 @@
       "synced": "{count} courses synced successfully",
       "syncSlow": "Sync is taking longer than expected. You can continue to the dashboard — data will appear as it syncs.",
       "cta": "Go to Dashboard",
-      "toast": "Welcome! Your accounts are connected."
+      "toast": "Welcome! Your accounts are connected.",
+      "canvasLabel": "Canvas",
+      "edLabel": "Ed Discussion",
+      "canvasCounts": "{courses} courses, {deadlines} deadlines synced",
+      "edCounts": "{discussions} discussions synced",
+      "retryFailed": "Retry failed only",
+      "pending": "Waiting to sync",
+      "inProgress": "Syncing...",
+      "failed": "Sync failed",
+      "done": "Synced"
     }
   },
   "predict": {

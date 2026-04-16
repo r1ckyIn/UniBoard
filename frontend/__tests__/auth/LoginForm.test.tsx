@@ -20,9 +20,18 @@ vi.mock("next-intl", () => ({
       "auth.login.createOne": "Create one",
       "auth.errors.loginFailed":
         "Invalid email or password. Please try again.",
+      "auth.google.continueWith": "Continue with Google",
+      "auth.google.or": "or",
+      "auth.google.errorGeneric":
+        "Sign-in failed — please try again or contact support.",
     };
     return map[key] ?? key;
   },
+}));
+
+// Mock sonner
+vi.mock("sonner", () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
 }));
 
 // Mock motion/react
@@ -38,7 +47,7 @@ vi.mock("motion/react", () => ({
   AnimatePresence: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
 
-// Mock useLogin
+// Mock useLogin + useGoogleLogin
 const mockLoginMutate = vi.fn();
 const mockLoginMutation = {
   mutate: mockLoginMutate,
@@ -46,8 +55,16 @@ const mockLoginMutation = {
   isError: false,
   error: null,
 };
+const mockGoogleLoginMutate = vi.fn();
+const mockGoogleLoginMutation = {
+  mutate: mockGoogleLoginMutate,
+  isPending: false,
+  isError: false,
+  error: null as unknown,
+};
 vi.mock("@/hooks/use-auth", () => ({
   useLogin: () => mockLoginMutation,
+  useGoogleLogin: () => mockGoogleLoginMutation,
   useRegister: () => ({
     mutate: vi.fn(),
     isPending: false,
@@ -85,6 +102,50 @@ describe("LoginForm", () => {
     mockLoginMutation.isPending = false;
     mockLoginMutation.isError = false;
     mockLoginMutation.error = null;
+    mockGoogleLoginMutation.isPending = false;
+    mockGoogleLoginMutation.isError = false;
+    mockGoogleLoginMutation.error = null;
+  });
+
+  it("renders Continue with Google button", () => {
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Continue with Google" }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders 'or' divider", () => {
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
+
+    expect(screen.getByText("or")).toBeInTheDocument();
+  });
+
+  it("calls googleLogin.mutate when Google button clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <LoginForm
+        onSwitchToRegister={mockOnSwitchToRegister}
+        onSwitchToForgotPassword={mockOnSwitchToForgotPassword}
+      />,
+    );
+
+    const googleBtn = screen.getByRole("button", {
+      name: "Continue with Google",
+    });
+    await user.click(googleBtn);
+
+    expect(mockGoogleLoginMutate).toHaveBeenCalled();
   });
 
   it("renders email and password fields with placeholders", () => {

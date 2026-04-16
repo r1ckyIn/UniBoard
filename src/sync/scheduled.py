@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+import sentry_sdk
 import structlog
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, text
 
 from src.models.course import Course
 from src.models.user import Profile
+from src.observability import sentry_phase_scope
+from src.services.recall_email import RecallEmailService, should_send_recall_email
 from src.sync._shared import _get_sync_session_factory
 
 logger = structlog.get_logger()
@@ -121,15 +124,23 @@ async def generate_daily_digests() -> None:
             )
 
 
-async def check_token_health() -> None:
-    """Check for expired tokens and create warning notifications (PLAT-04).
+async def check_token_health(now: datetime | None = None) -> None:
+    """Check for expired tokens and dispatch warnings + recall emails.
 
-    Runs alongside deadline reminders. Queries profiles with
-    canvas_token_status='expired' or ed_token_status='expired' and creates
-    in-app notifications guiding users to Settings page for re-auth.
+    PLAT-04: create in-app token-expiry notifications guiding users to
+    Settings for re-auth.
+
+    EMAIL-03 (Phase 33): additionally dispatch a recall (re-engagement)
+    email for users who have an expired token AND have been absent from
+    both the app (no sign-in >=14d) and the sync pipeline (no sync >=14d)
+    AND have not received a recall email in the last 30 days.
+
+    The optional ``now`` parameter exists for deterministic testing (no
+    freezegun in this project).
     """
     from src.services.notification import NotificationService
 
+    reference = now or datetime.now(UTC)
     session_factory = _get_sync_session_factory()
 
     async with session_factory() as session:
@@ -170,6 +181,33 @@ async def check_token_health() -> None:
         except Exception:
             logger.warning(
                 "token_health_check_failed",
+                user_id=str(user.id),
+                exc_info=True,
+            )
+            continue
+
+        # Recall email evaluation (EMAIL-03) -- isolated so a failure here
+        # never propagates into the per-user loop above.
+        try:
+            async with session_factory() as session:
+                row_result = await session.execute(
+                    text(
+                        "SELECT last_sign_in_at FROM auth.users WHERE id = :uid"
+                    ),
+                    {"uid": str(user.id)},
+                )
+                row = row_result.first()
+                last_sign_in_at = row.last_sign_in_at if row else None
+
+                if should_send_recall_email(user, last_sign_in_at, reference):
+                    recall_svc = RecallEmailService(session)
+                    await recall_svc.send_recall(user.id, user, now=reference)
+                    await session.commit()
+        except Exception:
+            with sentry_phase_scope("33"):
+                sentry_sdk.capture_exception()
+            logger.warning(
+                "recall_email_branch_failed",
                 user_id=str(user.id),
                 exc_info=True,
             )

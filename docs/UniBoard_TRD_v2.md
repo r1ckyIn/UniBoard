@@ -1289,6 +1289,23 @@ class ClaudeEngine(AIEngine):
 | 悉大官网 | 礼貌爬取: 每次请求间隔 ≥ 1 秒，每学期只抓取一次（无反爬机制，已验证） |
 | UniBoard 自身 API | 每用户每分钟 60 次 |
 
+### 7.5 Email Confirmation Policy
+
+**Status:** Permanently OFF in production (Supabase Studio toggle: Authentication > Providers > Email > Confirm email = OFF).
+
+**Rationale:** USYD students use `@uni.sydney.edu.au` mailboxes governed by Mimecast Secure Email Gateway. Mimecast quarantines messages originating from the `uniboard.uk` sender domain (Held Messages queue) and releases them only via a digest delivered every 3 hours. A signup-time confirmation flow would therefore force users to wait 0–3 hours for the confirmation email to surface — by which time the confirmation link may have expired — making the UX untenable.
+
+Note that recipient-side deliverability (inbox vs Junk vs Mimecast quarantine) is a **recipient-policy** issue, not a sender-side acceptance criterion. Resend (our custom SMTP provider) reports 100% Delivered for non-bounced addresses; SPF/DKIM/DMARC all pass sender authentication.
+
+**Mitigation strategy (Phase 33 AUTH-HARDEN):**
+
+1. **Primary auth path — Google OAuth (AUTH-HARDEN-01).** USYD Google Workspace accounts sign in via Google OAuth, bypassing email entirely. This is the recommended path for all users.
+2. **USYD-aware registration banner (AUTH-HARDEN-02).** The registration page warns USYD-domain users about Mimecast Held Messages and nudges them toward Google sign-in.
+3. **Password reset with resend (AUTH-HARDEN-03).** Email-based password reset remains available with a "Resend email" button (60-second cooldown) to let users recover from Mimecast digest-delay situations.
+4. **Permanent OFF documentation (AUTH-HARDEN-04).** This subsection plus §16.9 plus `.planning/PROJECT.md` ## Key Decisions records the permanent-OFF policy so it cannot be accidentally reverted during future audits.
+
+See §16.9 for the corresponding Supabase Auth deployment configuration, and `.planning/phases/32-production-email/32-03-SUMMARY.md` for the strategic-shift narrative that led to this decision.
+
 ---
 
 ## 8. 代码质量标准
@@ -2733,6 +2750,27 @@ GitHub Actions，`.github/workflows/deploy.yml`：
 **部署**: `cdk bootstrap` → `cdk deploy dev-network dev-database` → 验证 RDS → `cdk deploy --all -c env=dev` → 上传前端 → CloudFront 失效。
 
 **验证**: `GET /health` 200 → 注册+登录+配置 Token+同步 → Dashboard 数据显示 → CloudWatch 确认定时 Lambda 触发。
+
+### 16.9 Supabase Auth Configuration
+
+This subsection documents the intentional configuration divergence between local development and production. The divergence is driven by the email confirmation policy defined in §7.5 (Mimecast quarantine mitigation).
+
+**Production (Supabase Dashboard, managed via Supabase Studio):**
+
+- Authentication > Providers > Email > **Confirm email = OFF** (permanent — see §7.5 rationale)
+- Authentication > Providers > Email > **Secure password change = OFF** (Supabase default)
+- Authentication > Providers > Google > **Enabled = ON** with USYD-aware OAuth client (Phase 33 AUTH-HARDEN-01)
+- Authentication > URL Configuration > **Site URL** = `https://uniboard.uk`
+- Authentication > URL Configuration > **Redirect URLs** = `https://uniboard.uk/auth/callback`, `https://uniboard.uk/auth/confirm`, plus Vercel preview deployment wildcard
+- Custom SMTP = Resend (sender `noreply@uniboard.uk`), retained as fallback channel for password reset even though signup confirmations are disabled
+
+**Local development (`supabase/config.toml`):**
+
+- `[auth.email] enable_confirmations = true` — intentionally ON locally so developers can exercise the full `/auth/confirm` code path and email template rendering without depending on production Resend + Mimecast deliverability
+- `[auth.external.google] enabled = true` with env-var-driven `client_id` / `secret`
+- Local inbucket captures all emails for inspection during development
+
+**Why the divergence is intentional:** Local dev keeps confirmations ON so the confirmation route, email templates, and token-exchange flow remain testable end-to-end. Production keeps confirmations OFF because USYD's Mimecast gateway makes the confirmation-email round-trip unusable (see §7.5). An inline comment in `supabase/config.toml` references this subsection and `.planning/PROJECT.md` ## Key Decisions so future developers cannot accidentally "fix" the divergence without reading the rationale.
 
 ---
 

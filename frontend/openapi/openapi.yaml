@@ -1505,8 +1505,10 @@ components:
       allOf:
         - $ref: "#/components/schemas/CourseDeadline"
         - type: object
-          required: [course_code, course_name, is_confirmed]
+          required: [course_id, course_code, course_name, is_confirmed]
           properties:
+            course_id:
+              type: string
             course_code:
               type: string
             course_name:
@@ -1798,8 +1800,41 @@ components:
       properties:
         last_sync:
           $ref: "#/components/schemas/SyncDetail"
+        per_platform_counts:
+          oneOf:
+            - $ref: "#/components/schemas/PerPlatformCounts"
+            - type: "null"
         platforms:
           $ref: "#/components/schemas/PlatformStatus"
+
+    PerPlatformCounts:
+      type: object
+      required: [canvas, ed]
+      properties:
+        canvas:
+          $ref: "#/components/schemas/CanvasPlatformCounts"
+        ed:
+          $ref: "#/components/schemas/EdPlatformCounts"
+
+    CanvasPlatformCounts:
+      type: object
+      required: [grades, deadlines, total]
+      properties:
+        grades:
+          type: integer
+        deadlines:
+          type: integer
+        total:
+          type: integer
+
+    EdPlatformCounts:
+      type: object
+      required: [discussions, total]
+      properties:
+        discussions:
+          type: integer
+        total:
+          type: integer
 
     SyncDetail:
       type: object

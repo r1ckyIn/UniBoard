@@ -55,10 +55,38 @@ class PlatformStatus(BaseModel):
     ed: PlatformHealth
 
 
+class CanvasPlatformCounts(BaseModel):
+    """Canvas-platform domain counters (grades + deadlines)."""
+
+    grades: int = 0
+    deadlines: int = 0
+    total: int = 0
+
+
+class EdPlatformCounts(BaseModel):
+    """Ed-platform domain counters (discussions)."""
+
+    discussions: int = 0
+    total: int = 0
+
+
+class PerPlatformCounts(BaseModel):
+    """Domain counters grouped by source platform.
+
+    Used by the onboarding SuccessStep (plan 33-07) to render per-platform
+    sync progress. Keeps the domain->platform mapping server-side so future
+    domain additions don't require frontend changes.
+    """
+
+    canvas: CanvasPlatformCounts
+    ed: EdPlatformCounts
+
+
 class SyncStatusResponse(BaseModel):
     """Aggregated sync status matching OpenAPI SyncStatusResponse schema."""
 
     last_sync: SyncDetail
+    per_platform_counts: PerPlatformCounts | None = None
     platforms: PlatformStatus
 
 
