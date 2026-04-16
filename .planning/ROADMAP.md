@@ -361,7 +361,13 @@ Plans:
   1. AI study recommendations prioritize assessments by weight ("Focus on Final Exam, worth 50%")
   2. Course material QA uses RAG on Ed Lessons with cited sources, verified with real data
   3. GPA path planner calculates required average for remaining subjects to reach target distinction
-**Plans**: TBD
+**Plans**: 6 plans
+- [x] 34-00-PLAN.md — Wave 0 RED-state test scaffolding (xfail/it.todo stubs across 11 test files)
+- [ ] 34-01-PLAN.md — Schema migration + ORM extensions (Profile.remaining_credit_points, Course content_hash/last_qa_access_at/embedded_at, study_recommendation_cache table + RLS) [AIFEAT-01/02/03]
+- [ ] 34-02-PLAN.md — StudyRecommendationService + APScheduler 7am AEST daily job + GET /ai/study-recommendations [AIFEAT-01]
+- [ ] 34-03-PLAN.md — GPAService.calculate_multi_course_path (Decimal-precise math) + AI advisory + POST /gpa/multi-course-path [AIFEAT-03]
+- [ ] 34-04-PLAN.md — Embedding worker (30-min hot-set) + content_hash trigger + SSE sources event + numeric [N] citations [AIFEAT-02]
+- [ ] 34-05-PLAN.md — Frontend integration: hooks + Sources/StudyRecCard/MultiCoursePathCard + Dashboard hero + Settings 4-band chips + Sources panel [AIFEAT-01/02/03]
 
 ### Phase 35: Push Notifications
 **Goal**: Browser push notifications or email notifications for deadline reminders
