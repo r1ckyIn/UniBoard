@@ -214,6 +214,11 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - AI study suggestions, course QA, GPA path planning with live data
 - Push notifications for deadline reminders
 
+## Current State
+
+- **Phase 33 complete (2026-04-16):** Token lifecycle + onboarding with auth hardening — Google OAuth primary auth path, recall emails for dormant users, setup flow polish (per-platform sync counts, token cache skip-revalidation), USYD banner, password-reset resend cooldown, email-confirmation-OFF documentation.
+- **Gap-closure fixes:** OAuth race condition (zustand hydration + TanStack Query gating), WelcomeStep email source (authStore vs backend API), Supabase redirect URL wildcard for preview deployments, supabase config.toml template path fix.
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
