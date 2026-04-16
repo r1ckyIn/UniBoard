@@ -221,7 +221,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 31. E2E Verification & AI Config | v3.0 | 3/3 | Complete    | 2026-04-13 |
 | 32. Production Email | v3.0 | 3/3 | Complete (32-03 strategically resolved — confirmation OFF; recipient placement deferred to Phase 33 AUTH-HARDEN) | 2026-04-14 |
 | 32.1. Sync Integration Fixes | v3.0 | 6/6 | Complete | 2026-04-14 |
-| 33. Token Lifecycle & Onboarding | v3.0 | 7/8 | In Progress|  |
+| 33. Token Lifecycle & Onboarding | v3.0 | 8/8 | Complete   | 2026-04-16 |
 | 34. AI Features Live | v3.0 | 0/TBD | Not started | - |
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
@@ -347,7 +347,7 @@ Plans:
 - [x] 33-01-PLAN.md — Migration: profiles.recall_email_sent_at + handle_new_user trigger COALESCE patch (EMAIL-03, AUTH-HARDEN-01)
 - [x] 33-02-PLAN.md — RecallEmailService + SES extension + check_token_health() integration (EMAIL-03)
 - [x] 33-03-PLAN.md — /sync/status response: per_platform_counts schema + frontend types regen (ONBD-01)
-- [ ] 33-04-PLAN.md — Supabase Google OAuth config + /auth/callback Next.js route (AUTH-HARDEN-01)
+- [x] 33-04-PLAN.md — Supabase Google OAuth config + /auth/callback Next.js route (AUTH-HARDEN-01)
 - [x] 33-05-PLAN.md — Google button on LoginForm/RegisterForm + USYD banner + check-email copy fix (AUTH-HARDEN-01, AUTH-HARDEN-02)
 - [x] 33-06-PLAN.md — Resend email button + 60s cooldown on ForgotPasswordForm (AUTH-HARDEN-03)
 - [x] 33-07-PLAN.md — Setup edge cases: TokenStep cache + invalid/unreachable UX + SuccessStep platform rows + retry-failed (ONBD-01, ONBD-02)

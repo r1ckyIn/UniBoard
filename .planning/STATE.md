@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 33-07-PLAN.md (setup polish: skip-revalidate + per-platform SuccessStep + Retry failed only)"
-last_updated: "2026-04-15T09:19:26.557Z"
-last_activity: 2026-04-15
+stopped_at: "Completed 33-04-PLAN.md (Google OAuth wiring: supabase config + /auth/callback route + live Google Cloud OAuth client provisioned)"
+last_updated: "2026-04-16T00:30:00.000Z"
+last_activity: 2026-04-16
 progress:
   total_phases: 20
-  completed_phases: 15
+  completed_phases: 16
   total_plans: 58
-  completed_plans: 57
+  completed_plans: 58
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 
 ## Current Position
 
-Phase: 33 (token-lifecycle-onboarding) — EXECUTING
-Plan: 7 of 8
-Status: Ready to execute
-Last activity: 2026-04-15
+Phase: 33 (token-lifecycle-onboarding) — COMPLETE (8/8 plans)
+Plan: 8 of 8 (all plans executed)
+Status: Phase 33 complete; ready for Phase 34 (AI Features Live)
+Last activity: 2026-04-16
 
 ## Milestones Completed
 
@@ -366,6 +366,8 @@ Recent decisions affecting current work:
 - [Phase 33]: 33-07: Backend SyncTriggerRequest extended additively with platforms filter; takes precedence over scope
 - [Phase 33]: 33-07: Reused configureToken for Test connection (Option A) — no separate validate-only endpoint
 - [Phase 33]: 33-07: Canvas SuccessStep row counts = courses + deadlines; Ed row = discussions (domain-correct)
+- [Phase 33]: [33-04]: Google OAuth provisioned end-to-end — External consent screen (no USYD org verification needed), env-var-driven config.toml, prod + local redirect URIs registered, live 302 to accounts.google.com verified
+- [Phase 33]: [33-04]: Pre-existing Phase 32 supabase config bug fixed as out-of-scope unblocker (e9530d9) — email template content_path was ./templates/*.html but files live at ./supabase/templates/*.html, blocking `supabase start`
 
 ### Roadmap Evolution
 
@@ -383,5 +385,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T09:19:16.808Z
-Stopped at: Completed 33-07-PLAN.md (setup polish: skip-revalidate + per-platform SuccessStep + Retry failed only)
+Last session: 2026-04-16T00:30:00.000Z
+Stopped at: Completed 33-04-PLAN.md (Google OAuth wiring after human-action checkpoint resolved — 8/8 Phase 33 plans done)
