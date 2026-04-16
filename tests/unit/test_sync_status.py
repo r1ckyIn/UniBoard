@@ -11,7 +11,6 @@ from __future__ import annotations
 from src.schemas.sync import (
     CanvasPlatformCounts,
     EdPlatformCounts,
-    PerPlatformCounts,
     SyncCount,
     SyncResults,
 )
