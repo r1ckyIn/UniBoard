@@ -1263,32 +1263,39 @@ async def _sse_wrap(
 
 **For the planner:** A1 is a HIGH-risk assumption that contradicts the CONTEXT.md locked decision. The planner SHOULD flag this in `/gsd-plan-phase` step 11 (present plan for approval) as a clarifying question before finalizing the migration task.
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All open questions resolved during plan-phase 34 review (2026-04-16). Each is now a documented decision; no outstanding clarifications block plan execution.
 
 1. **`Module.content_hash` vs `Course.content_hash` placement?** (See A1.)
    - What we know: CONTEXT.md D-B2 says `Module.content_hash`. Embedding pipeline operates per-course (`embed_course_materials(course_id)`).
    - What's unclear: Whether the user wants per-module re-embed granularity (would require a new pipeline that respects module boundaries) or per-course (simpler).
    - Recommendation: ask user. Default: `Course.content_hash` (simpler, matches existing pipeline).
+   - **RESOLVED:** Use `Course.content_hash` (single per-course sha256 over joined `module_items.text_content + lessons.text_content`). Embedding pipeline is per-course, so storing the hash on `Course` matches the worker's re-embed granularity. Per-module hash would require rewriting the embedding pipeline (out of scope). See `34-01-PLAN.md` migration deviation block (lines 49-50, header SQL comment, and `Course.content_hash` ORM comment).
 
 2. **AI advisory streaming or one-shot?**
    - What we know: CONTEXT.md doesn't specify streaming for path advisory.
    - What's unclear: If the user wants the verdict to "type out" for visual continuity with QA chat.
    - Recommendation: one-shot POST → JSON. 30-50 words is too short for streaming to matter; SSE adds infra cost.
+   - **RESOLVED:** One-shot POST → JSON. 30-50 word verdict; streaming infra not justified. Implemented in `34-03-PLAN.md` Task 2 (`POST /gpa/multi-course-path` returns full payload synchronously; `advisory_text` field populated or `null`).
 
 3. **Should the daily rec job's failure for one user block subsequent users?**
    - What we know: Existing pattern in `generate_daily_digests` uses per-user try/except.
    - What's unclear: nothing — this is a settled pattern.
    - Recommendation: per-user try/except, mirror existing pattern. Already documented in §6.
+   - **RESOLVED:** Per-user `try/except` with sentry-tagged failure isolation, mirroring `generate_daily_digests`. See `34-02-PLAN.md` Task 2 `generate_study_recommendations_daily` body.
 
 4. **`StudyRecommendationService.generate_and_cache` method signature — sync from cron + on-demand?**
    - What we know: D-A2 says cached daily, no realtime LLM on page load.
    - What's unclear: Should an on-demand "regenerate now" button exist for testing/admin?
    - Recommendation: NO admin endpoint in Phase 34. Out of scope. Optional dev-only `/internal/regen-rec` if needed for UAT — gate with debug flag.
+   - **RESOLVED:** No admin/regen endpoint in Phase 34. Out of scope. UAT will exercise via the daily cron (or manually invoke `generate_study_recommendations_daily()` from a Python REPL during dev). Re-revisit in a later phase if ops need it.
 
 5. **Top-3 list — does the AI also generate a sentence per item, or just structured ranking?**
    - What we know: D-A1 says "Top-3 ranked actions list" on Predict page.
    - What's unclear: Whether each list item is just (course/assessment/weight) or also includes a 1-sentence rationale.
    - Recommendation: structured ranking only (no per-item LLM cost). Frontend renders each row with course color + name + weight + days + score badge. The hero "main suggestion" is the only LLM-generated prose.
+   - **RESOLVED:** Structured ranking only — no per-item LLM call. Frontend `StudyRecCard` (Plan 34-05 Task 2) renders course color dot + assessment name + weight pill + days-left badge. The hero `main_suggestion` (one ~20-30 word LLM line) is the only AI-generated prose for AIFEAT-01.
 
 ## Environment Availability
 
