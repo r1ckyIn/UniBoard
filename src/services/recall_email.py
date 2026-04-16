@@ -150,10 +150,12 @@ class RecallEmailService:
             text_body=text_body,
         )
         if not sent:
-            sentry_sdk.set_tag("phase", "33")
-            sentry_sdk.capture_message(
-                "recall_email_send_failed", level="warning"
-            )
+            # Scope tag locally so it does not leak to subsequent SES events.
+            with sentry_sdk.new_scope() as scope:
+                scope.set_tag("phase", "33")
+                sentry_sdk.capture_message(
+                    "recall_email_send_failed", level="warning"
+                )
             logger.warning("recall_email_send_failed", user_id=str(user_id))
             return False
 

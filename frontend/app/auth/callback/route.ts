@@ -37,27 +37,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(next, origin));
   }
 
-  // Inspect profile token state to decide /setup vs /en.
+  // Inspect token state via the Python API (single data-query entry point per
+  // CLAUDE.md "数据查询单一入口" rule — supabase-js is reserved for Auth).
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) {
     return NextResponse.redirect(
       new URL("/en/auth?error=oauth_failed", origin),
     );
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("canvas_token_status, ed_token_status")
-    .eq("id", user.id)
-    .single();
-
-  const tokensMissing =
-    !profile ||
-    ((profile.canvas_token_status === "missing" ||
-      !profile.canvas_token_status) &&
-      (profile.ed_token_status === "missing" || !profile.ed_token_status));
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  let tokensMissing = true;
+  try {
+    const resp = await fetch(`${apiBase}/users/me`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (resp.ok) {
+      const body = (await resp.json()) as {
+        data?: {
+          tokens?: {
+            canvas?: { status?: string };
+            ed?: { status?: string };
+          };
+        };
+      };
+      const canvasActive = body.data?.tokens?.canvas?.status === "active";
+      const edActive = body.data?.tokens?.ed?.status === "active";
+      tokensMissing = !canvasActive && !edActive;
+    }
+  } catch {
+    // Backend unreachable — default to /setup so the user can still onboard.
+  }
 
   return NextResponse.redirect(
     new URL(tokensMissing ? "/setup" : "/en", origin),

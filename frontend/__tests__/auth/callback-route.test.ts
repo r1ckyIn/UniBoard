@@ -1,25 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 // Mock the server-side Supabase client
 const mockExchangeCodeForSession = vi.fn();
-const mockGetUser = vi.fn();
-const mockProfileSingle = vi.fn();
+const mockGetSession = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue({
     auth: {
       exchangeCodeForSession: (...args: unknown[]) =>
         mockExchangeCodeForSession(...args),
-      getUser: (...args: unknown[]) => mockGetUser(...args),
+      getSession: (...args: unknown[]) => mockGetSession(...args),
     },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: () => mockProfileSingle(),
-        }),
-      }),
-    }),
   }),
 }));
 
@@ -31,21 +23,41 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-describe("GET /auth/callback", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// Stub global fetch for the Python API call.
+const originalFetch = global.fetch;
+const mockFetch = vi.fn();
 
+beforeEach(() => {
+  vi.clearAllMocks();
+  global.fetch = mockFetch as unknown as typeof fetch;
+});
+
+afterAll(() => {
+  global.fetch = originalFetch;
+});
+
+function mockUserApi(canvas: string, ed: string) {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => ({
+      data: {
+        tokens: {
+          canvas: { status: canvas },
+          ed: { status: ed },
+        },
+      },
+    }),
+  });
+}
+
+describe("GET /auth/callback", () => {
   it("redirects to /setup when code is valid and both tokens are missing", async () => {
     mockExchangeCodeForSession.mockResolvedValue({ data: {}, error: null });
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: "user-123" } },
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "jwt-abc" } },
       error: null,
     });
-    mockProfileSingle.mockResolvedValue({
-      data: { canvas_token_status: "missing", ed_token_status: "missing" },
-      error: null,
-    });
+    mockUserApi("not_configured", "not_configured");
 
     const { GET } = await import("@/app/auth/callback/route");
     const request = new NextRequest(
@@ -54,6 +66,10 @@ describe("GET /auth/callback", () => {
     const response = await GET(request);
 
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith("abc123");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/users/me"),
+      { headers: { Authorization: "Bearer jwt-abc" } },
+    );
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe(
       "http://localhost:3001/setup",
@@ -62,14 +78,11 @@ describe("GET /auth/callback", () => {
 
   it("redirects to /en when at least one token is configured", async () => {
     mockExchangeCodeForSession.mockResolvedValue({ data: {}, error: null });
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: "user-456" } },
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "jwt-xyz" } },
       error: null,
     });
-    mockProfileSingle.mockResolvedValue({
-      data: { canvas_token_status: "active", ed_token_status: "missing" },
-      error: null,
-    });
+    mockUserApi("active", "not_configured");
 
     const { GET } = await import("@/app/auth/callback/route");
     const request = new NextRequest(
@@ -129,7 +142,8 @@ describe("GET /auth/callback", () => {
     expect(response.headers.get("location")).toBe(
       "http://localhost:3001/en/dashboard",
     );
-    // getUser / profile lookup must not fire when explicit next is given
-    expect(mockGetUser).not.toHaveBeenCalled();
+    // session lookup / API call must not fire when explicit next is given
+    expect(mockGetSession).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });

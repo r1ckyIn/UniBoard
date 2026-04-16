@@ -203,7 +203,10 @@ async def check_token_health(now: datetime | None = None) -> None:
                     await recall_svc.send_recall(user.id, user, now=reference)
                     await session.commit()
         except Exception:
-            sentry_sdk.set_tag("phase", "33")
+            # Scope tag locally so it does not leak to subsequent scheduler events.
+            with sentry_sdk.new_scope() as scope:
+                scope.set_tag("phase", "33")
+                sentry_sdk.capture_exception()
             logger.warning(
                 "recall_email_branch_failed",
                 user_id=str(user.id),
