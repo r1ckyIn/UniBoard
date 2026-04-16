@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import type { paths } from "@/lib/api/types.gen";
+import { useAuthStore } from "@/lib/auth/store";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -57,7 +58,8 @@ export const userOptions = {
 
 // ── Hooks ───────────────────────────────────────────────────────────────────
 export function useCurrentUser() {
-  return useQuery(userOptions.me());
+  const token = useAuthStore((s) => s.accessToken);
+  return useQuery({ ...userOptions.me(), enabled: token !== null });
 }
 
 export function useUpdateProfile() {
