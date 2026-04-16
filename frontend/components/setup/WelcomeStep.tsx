@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { ShieldCheck, Lock, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { useCurrentUser } from "@/hooks/use-user";
+import { useAuthStore } from "@/lib/auth/store";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -32,8 +32,7 @@ const FEATURE_BADGES = [
 
 export default function WelcomeStep({ onNext }: WelcomeStepProps) {
   const t = useTranslations("setup.welcome");
-  const { data: userResp } = useCurrentUser();
-  const userEmail = userResp?.data?.email ?? "";
+  const userEmail = useAuthStore((s) => s.user?.email) ?? "";
 
   return (
     <div className="flex flex-col items-center text-center">
