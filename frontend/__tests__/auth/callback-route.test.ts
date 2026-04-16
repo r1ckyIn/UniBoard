@@ -67,7 +67,7 @@ describe("GET /auth/callback", () => {
 
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith("abc123");
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("/users/me"),
+      expect.stringContaining("/api/v1/users/me"),
       { headers: { Authorization: "Bearer jwt-abc" } },
     );
     expect(response.status).toBe(307);

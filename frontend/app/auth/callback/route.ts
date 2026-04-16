@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
   let tokensMissing = true;
   try {
-    const resp = await fetch(`${apiBase}/users/me`, {
+    const resp = await fetch(`${apiBase}/api/v1/users/me`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
     });
     if (resp.ok) {
