@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.email.ses import SESEmailSender
 from src.models.user import Profile
+from src.observability import sentry_phase_scope
 from src.services.deadline import DeadlineService
 
 logger = structlog.get_logger()
@@ -150,9 +151,7 @@ class RecallEmailService:
             text_body=text_body,
         )
         if not sent:
-            # Scope tag locally so it does not leak to subsequent SES events.
-            with sentry_sdk.new_scope() as scope:
-                scope.set_tag("phase", "33")
+            with sentry_phase_scope("33"):
                 sentry_sdk.capture_message(
                     "recall_email_send_failed", level="warning"
                 )

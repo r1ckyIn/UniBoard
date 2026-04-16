@@ -53,6 +53,8 @@ export async function GET(request: NextRequest) {
   try {
     const resp = await fetch(`${apiBase}/api/v1/users/me`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
+      // Guard against Railway cold-start stalling the OAuth redirect.
+      signal: AbortSignal.timeout(3000),
     });
     if (resp.ok) {
       const body = (await resp.json()) as {

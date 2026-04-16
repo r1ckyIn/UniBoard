@@ -439,7 +439,8 @@
       "retryFailed": "仅重试失败项",
       "pending": "等待同步",
       "inProgress": "同步中...",
-      "failed": "同步失败"
+      "failed": "同步失败",
+      "done": "已同步"
     }
   },
   "predict": {

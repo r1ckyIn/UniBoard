@@ -10,6 +10,7 @@ from sqlalchemy import or_, select, text
 
 from src.models.course import Course
 from src.models.user import Profile
+from src.observability import sentry_phase_scope
 from src.services.recall_email import RecallEmailService, should_send_recall_email
 from src.sync._shared import _get_sync_session_factory
 
@@ -203,9 +204,7 @@ async def check_token_health(now: datetime | None = None) -> None:
                     await recall_svc.send_recall(user.id, user, now=reference)
                     await session.commit()
         except Exception:
-            # Scope tag locally so it does not leak to subsequent scheduler events.
-            with sentry_sdk.new_scope() as scope:
-                scope.set_tag("phase", "33")
+            with sentry_phase_scope("33"):
                 sentry_sdk.capture_exception()
             logger.warning(
                 "recall_email_branch_failed",

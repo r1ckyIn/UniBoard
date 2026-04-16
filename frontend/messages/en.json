@@ -439,7 +439,8 @@
       "retryFailed": "Retry failed only",
       "pending": "Waiting to sync",
       "inProgress": "Syncing...",
-      "failed": "Sync failed"
+      "failed": "Sync failed",
+      "done": "Synced"
     }
   },
   "predict": {

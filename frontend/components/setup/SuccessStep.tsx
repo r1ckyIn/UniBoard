@@ -271,6 +271,6 @@ function statusLabelFor(
     case "failed":
       return t("failed");
     case "success":
-      return t("syncing");
+      return t("done");
   }
 }
