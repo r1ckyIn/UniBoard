@@ -9,6 +9,7 @@ from src.sync.outlines import sync_all_outlines
 from src.sync.scheduled import (
     check_deadline_reminders,
     check_token_health,
+    embed_hot_courses_worker_task,
     generate_daily_digests,
     generate_study_recommendations_daily,
 )
@@ -16,6 +17,7 @@ from src.sync.scheduled import (
 __all__ = [
     "check_deadline_reminders",
     "check_token_health",
+    "embed_hot_courses_worker_task",
     "generate_daily_digests",
     "generate_study_recommendations_daily",
     "sync_all_courses",

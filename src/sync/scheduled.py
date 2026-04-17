@@ -170,6 +170,24 @@ async def generate_study_recommendations_daily() -> None:
             )
 
 
+async def embed_hot_courses_worker_task() -> None:
+    """APScheduler entry point for the hot-set embedding worker.
+
+    Wraps ``src.services.embedding_worker.embed_hot_courses_worker`` with
+    sentry-tagged failure isolation. Per phase 34 AIFEAT-02 / D-B1.
+    """
+    from src.services.embedding_worker import embed_hot_courses_worker
+
+    session_factory = _get_sync_session_factory()
+    try:
+        stats = await embed_hot_courses_worker(session_factory)
+        logger.info("embed_hot_courses_worker_task_done", **stats)
+    except Exception:
+        with sentry_phase_scope("34"):
+            sentry_sdk.capture_exception()
+        logger.warning("embed_hot_courses_worker_task_failed", exc_info=True)
+
+
 async def check_token_health(now: datetime | None = None) -> None:
     """Check for expired tokens and dispatch warnings + recall emails.
 

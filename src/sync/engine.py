@@ -41,6 +41,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from src.sync import (
         check_deadline_reminders,
         check_token_health,
+        embed_hot_courses_worker_task,
         generate_daily_digests,
         generate_study_recommendations_daily,
         sync_all_deadlines,
@@ -121,6 +122,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             timezone="Australia/Sydney",
         ),
         id="generate_study_recommendations_daily",
+        replace_existing=True,
+        max_instances=1,
+    )
+
+    # Phase 34 -- Hot-set embedding worker (AIFEAT-02 / D-B1).
+    # Iterates courses where last_qa_access_at is within 7d and re-embeds
+    # when content_hash differs. IntervalTrigger (not cron) because access
+    # patterns are independent of wall-clock time.
+    scheduler.add_job(
+        embed_hot_courses_worker_task,
+        IntervalTrigger(minutes=settings.embedding_worker_interval_min),
+        id="embed_hot_courses_worker",
         replace_existing=True,
         max_instances=1,
     )
