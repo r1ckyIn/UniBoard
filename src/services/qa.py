@@ -244,9 +244,16 @@ class QAService:
         voyageai is not installed or no chunks are retrieved (fallback to
         no-sources streaming -- frontend hides the Sources panel).
 
-        Each source carries: ``index`` (1-based), ``source_type``,
-        ``source_id``, ``chunk_index``, ``score`` (cosine similarity in 0-1),
-        and a truncated ``excerpt``. Per RESEARCH §5 schema.
+        Each source carries: ``index`` (1-based), ``source_type`` (``module_item``
+        or ``lesson``), ``source_id``, ``title`` (looked up from the owning
+        ModuleItem/Lesson), ``module_id`` (for module items; ``None`` for
+        lessons), ``anchor`` (reserved for future slide/heading deep links),
+        ``chunk_index``, ``score`` (cosine similarity in 0-1), and a
+        truncated ``excerpt``. Per RESEARCH §5 schema + Phase 34 HI-01 fix.
+
+        Legacy rows with ``source_type="mixed"`` emit ``title=None`` /
+        ``module_id=None``; the frontend renders a labelled fallback using
+        ``source_type`` + ``chunk_index``.
         """
         settings = get_settings()
 
@@ -285,6 +292,43 @@ class QAService:
         if not rows:
             return None
 
+        # Phase 34 HI-01 fix: batch-lookup titles for the retrieved chunks so
+        # the SSE payload carries the human-readable title + module_id per
+        # source instead of leaving the frontend to render empty entries.
+        module_item_ids: set[str] = set()
+        lesson_ids: set[str] = set()
+        for row in rows:
+            chunk = row[0]
+            if chunk.source_type == "module_item":
+                module_item_ids.add(chunk.source_id)
+            elif chunk.source_type == "lesson":
+                lesson_ids.add(chunk.source_id)
+
+        module_item_lookup: dict[str, tuple[str, str]] = {}
+        if module_item_ids:
+            from src.models.module import ModuleItem as _ModuleItem
+
+            mi_stmt = select(_ModuleItem).where(
+                _ModuleItem.id.in_([uuid.UUID(i) for i in module_item_ids])
+            )
+            mi_rows = await self._session.execute(mi_stmt)
+            for item in mi_rows.scalars():
+                module_item_lookup[str(item.id)] = (
+                    item.title,
+                    str(item.module_id),
+                )
+
+        lesson_lookup: dict[str, str] = {}
+        if lesson_ids:
+            from src.models.lesson import Lesson as _Lesson
+
+            les_stmt = select(_Lesson).where(
+                _Lesson.id.in_([uuid.UUID(i) for i in lesson_ids])
+            )
+            les_rows = await self._session.execute(les_stmt)
+            for lesson in les_rows.scalars():
+                lesson_lookup[str(lesson.id)] = lesson.title
+
         sources: list[dict[str, object]] = []
         for idx, row in enumerate(rows):
             chunk = row[0]
@@ -293,11 +337,24 @@ class QAService:
             score = max(0.0, min(1.0, 1.0 - distance / 2.0))
             text = chunk.chunk_text or ""
             excerpt = text[:100] + ("..." if len(text) > 100 else "")
+
+            title: str | None = None
+            module_id: str | None = None
+            if chunk.source_type == "module_item":
+                info = module_item_lookup.get(chunk.source_id)
+                if info is not None:
+                    title, module_id = info
+            elif chunk.source_type == "lesson":
+                title = lesson_lookup.get(chunk.source_id)
+
             sources.append(
                 {
                     "index": idx + 1,  # 1-based for [N] markers
                     "source_type": chunk.source_type,
                     "source_id": chunk.source_id,
+                    "title": title,
+                    "module_id": module_id,
+                    "anchor": None,  # reserved for future slide/heading deep links
                     "chunk_index": chunk.chunk_index,
                     "score": score,
                     "excerpt": excerpt,
@@ -459,6 +516,15 @@ class QAService:
     async def embed_course_materials(self, course_id: uuid.UUID) -> int:
         """Chunk and embed all course text content for RAG retrieval.
 
+        Phase 34 HI-01 fix: chunk + embed per source entity (module_item or
+        lesson) so each ContentEmbedding row carries a real ``source_type``
+        (``"module_item"`` | ``"lesson"``) plus the owning entity's UUID as
+        ``source_id``. This lets ``retrieve_rag_sources`` join back to the
+        title/module_id and the frontend Sources panel render non-empty
+        entries. Previously every chunk was stored as ``source_type="mixed"``
+        with ``source_id=str(course_id)`` (contract drift vs the frontend
+        ``CitationSource`` interface).
+
         Returns the number of embeddings created.
         """
         settings = get_settings()
@@ -471,39 +537,80 @@ class QAService:
             logger.warning("embed_skip", reason="voyageai or pgvector not installed")
             return 0
 
-        _, materials_text = await self._load_course_materials(course_id)
-        if not materials_text:
-            return 0
-
-        # Chunk text
-        chunks = _chunk_text(
-            materials_text,
-            chunk_size=settings.rag_chunk_size,
-            overlap=settings.rag_chunk_overlap,
+        # Load course with its sources so each chunk can be attributed to the
+        # owning module_item or lesson.
+        stmt = (
+            select(Course)
+            .where(Course.id == course_id)
+            .options(
+                selectinload(Course.modules).selectinload(Module.items),
+                selectinload(Course.lessons),
+            )
         )
-
-        if not chunks:
+        course_result = await self._session.execute(stmt)
+        course = course_result.scalar_one_or_none()
+        if course is None:
             return 0
 
-        # Embed all chunks
+        # Build per-source chunk list: each entry knows its owning entity's
+        # identifiers so we can round-trip title lookups on retrieval.
+        per_source_chunks: list[tuple[str, str, str]] = []  # (source_type, source_id, chunk_text)
+
+        for module in course.modules:
+            for item in module.items:
+                text = getattr(item, "text_content", None) or ""
+                if not text:
+                    continue
+                item_chunks = _chunk_text(
+                    text,
+                    chunk_size=settings.rag_chunk_size,
+                    overlap=settings.rag_chunk_overlap,
+                )
+                for chunk_text in item_chunks:
+                    per_source_chunks.append(
+                        ("module_item", str(item.id), chunk_text)
+                    )
+
+        for lesson in course.lessons:
+            text = lesson.text_content or ""
+            if not text:
+                continue
+            lesson_chunks = _chunk_text(
+                text,
+                chunk_size=settings.rag_chunk_size,
+                overlap=settings.rag_chunk_overlap,
+            )
+            for chunk_text in lesson_chunks:
+                per_source_chunks.append(
+                    ("lesson", str(lesson.id), chunk_text)
+                )
+
+        if not per_source_chunks:
+            return 0
+
+        # Embed all chunks in one Voyage call (cost efficient; identical to
+        # the pre-fix batching behaviour).
+        chunk_texts = [c[2] for c in per_source_chunks]
         vo = voyageai.AsyncClient(api_key=self._voyage_api_key)  # type: ignore[attr-defined]
         result = await vo.embed(
-            chunks, model="voyage-3", input_type="document"
+            chunk_texts, model="voyage-3", input_type="document"
         )
         embeddings = result.embeddings
 
-        # Delete existing embeddings for this course
+        # Delete existing embeddings for this course (full refresh).
         from sqlalchemy import delete
         await self._session.execute(
             delete(ContentEmbedding).where(ContentEmbedding.course_id == course_id)
         )
 
-        # Insert new embeddings
-        for i, (chunk_text, embedding) in enumerate(zip(chunks, embeddings, strict=True)):
+        # Insert new embeddings carrying real source_type + source_id.
+        for i, ((source_type, source_id, chunk_text), embedding) in enumerate(
+            zip(per_source_chunks, embeddings, strict=True)
+        ):
             self._session.add(
                 ContentEmbedding(
-                    source_type="mixed",
-                    source_id=str(course_id),
+                    source_type=source_type,
+                    source_id=source_id,
                     course_id=course_id,
                     chunk_text=chunk_text,
                     chunk_index=i,

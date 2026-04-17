@@ -29,18 +29,28 @@ export default function Sources({ sources }: SourcesProps) {
         {t("label", { count: sources.length })}
       </summary>
       <ol className="mt-[6px] space-y-[6px] pl-[16px]">
-        {sources.map((s) => (
-          <li key={s.index}>
-            <span className="font-semibold">[{s.index}]</span> {s.title}
-            {s.anchor ? <> &middot; {s.anchor}</> : null}
-            <span className="ml-[6px] text-[#9b9b94]">
-              {Math.round(s.score * 100)}%
-            </span>
-            {s.excerpt ? (
-              <p className="italic mt-[2px]">{s.excerpt}</p>
-            ) : null}
-          </li>
-        ))}
+        {sources.map((s) => {
+          // Phase 34 HI-01 fix: legacy rows with source_type="mixed" have no
+          // attributed title/module_id; render a labelled fallback so every
+          // citation entry is visibly informative.
+          const label =
+            s.title ??
+            (s.chunk_index !== undefined
+              ? `${s.source_type} (chunk ${s.chunk_index})`
+              : s.source_type);
+          return (
+            <li key={s.index}>
+              <span className="font-semibold">[{s.index}]</span> {label}
+              {s.anchor ? <> &middot; {s.anchor}</> : null}
+              <span className="ml-[6px] text-[#9b9b94]">
+                {Math.round(s.score * 100)}%
+              </span>
+              {s.excerpt ? (
+                <p className="italic mt-[2px]">{s.excerpt}</p>
+              ) : null}
+            </li>
+          );
+        })}
       </ol>
     </details>
   );
