@@ -11,6 +11,8 @@ const LANGUAGE_OPTIONS = [
   { value: "zh", label: "\u4e2d\u6587" },
 ] as const;
 
+type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]["value"];
+
 /**
  * Language preference dropdown with English/Chinese options.
  * On change: (1) persists to backend via PATCH /users/me,
@@ -28,7 +30,7 @@ export default function LanguageSection() {
   const currentLang = userData?.data?.language_preference ?? locale;
 
   const handleLanguageChange = useCallback(
-    (lang: string) => {
+    (lang: LanguageCode) => {
       if (lang === currentLang) return;
 
       // 1. Persist to backend

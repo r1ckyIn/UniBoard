@@ -4,8 +4,21 @@
  * EventSource only supports GET; Q&A needs POST with question body.
  */
 
+// Phase 34 AIFEAT-02 — citation source payload emitted via `event: sources`
+// BEFORE the first `event: token`. Frontend renders inline [N] markers +
+// collapsible Sources panel tied to the index field.
+export interface CitationSource {
+  index: number; // 1-based marker matching inline [N]
+  module_id: string | null;
+  title: string;
+  source_type: "module_item" | "lesson";
+  anchor: string | null;
+  score: number; // 0-1 cosine similarity (1 - pgvector distance / 2)
+  excerpt: string; // server-truncated preview (~100 chars)
+}
+
 export interface SSEEvent {
-  event: "status" | "token" | "done" | "error";
+  event: "status" | "token" | "done" | "error" | "sources";
   data: Record<string, unknown>;
 }
 

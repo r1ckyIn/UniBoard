@@ -308,6 +308,14 @@ paths:
                 gpa_scale:
                   type: string
                   enum: [wam, gpa_4, gpa_7]
+                remaining_credit_points:
+                  type: ["integer", "null"]
+                  minimum: 0
+                  maximum: 500
+                  description: "Credit points remaining for degree completion (AIFEAT-03)"
+                language_preference:
+                  type: string
+                  enum: [en, zh]
       responses:
         "200":
           description: Updated user profile
@@ -815,6 +823,63 @@ paths:
         "401":
           $ref: "#/components/responses/AuthError"
 
+  /gpa/multi-course-path:
+    post:
+      operationId: calculateMultiCoursePath
+      summary: Multi-course path planner (AIFEAT-03) — closed-form Decimal math + optional AI advisory
+      tags: [gpa]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MultiCoursePathRequest"
+      responses:
+        "200":
+          description: Path planner result (math + optional AI advisory)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MultiCoursePath"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # ── AI Features (Phase 34) ────────────────────────────────────────
+  /ai/study-recommendations:
+    get:
+      operationId: getStudyRecommendations
+      summary: Get cached daily study recommendations (AIFEAT-01)
+      tags: [ai]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cached recommendation row (data = null if not yet generated)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    oneOf:
+                      - $ref: "#/components/schemas/StudyRecommendation"
+                      - type: "null"
+                  meta:
+                    $ref: "#/components/schemas/ResponseMeta"
+        "401":
+          $ref: "#/components/responses/AuthError"
+
   # ── Deadlines ─────────────────────────────────────────────────────
   /deadlines:
     get:
@@ -1293,6 +1358,15 @@ components:
         gpa_scale:
           type: string
           enum: [wam, gpa_4, gpa_7]
+        remaining_credit_points:
+          type: ["integer", "null"]
+          minimum: 0
+          maximum: 500
+          description: "Credit points remaining for degree completion; used by AIFEAT-03 multi-course path planner"
+        language_preference:
+          type: string
+          enum: [en, zh]
+          description: "Preferred language for AI-generated content"
         tokens:
           type: object
           required: [canvas, ed]
@@ -2036,3 +2110,87 @@ components:
         monday_date:
           type: string
           format: date
+
+    # ── AI Features (Phase 34) ──────────────────────────────────
+    StudyCandidate:
+      type: object
+      required: [course_code, assessment_name, weight, days_until_due, roi_score, score]
+      properties:
+        course_code:
+          type: string
+        assessment_name:
+          type: string
+        weight:
+          type: number
+          format: float
+        days_until_due:
+          type: number
+          format: float
+        roi_score:
+          type: number
+          format: float
+        score:
+          type: number
+          format: float
+          description: "composite ranking score"
+
+    StudyRecommendation:
+      type: object
+      required: [generated_for_date, main_suggestion, top_3, language]
+      properties:
+        generated_for_date:
+          type: string
+          format: date
+        main_suggestion:
+          type: string
+          description: "20-30 word focus suggestion; empty string on AI fallback (D-D1)"
+        top_3:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudyCandidate"
+        language:
+          type: string
+          enum: [en, zh]
+
+    MultiCoursePathRequest:
+      type: object
+      required: [target_wam, remaining_credit_points]
+      properties:
+        target_wam:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+        remaining_credit_points:
+          type: integer
+          minimum: 0
+
+    MultiCoursePath:
+      type: object
+      required: [target_wam, current_wam, is_achievable, max_reachable, language]
+      properties:
+        target_wam:
+          type: number
+          format: float
+        current_wam:
+          type: number
+          format: float
+        is_achievable:
+          type: boolean
+        required_avg:
+          type: ["number", "null"]
+          format: float
+          description: "null if cp_remain=0 OR target already met"
+        max_reachable:
+          type: number
+          format: float
+        suggested_target:
+          type: ["number", "null"]
+          format: float
+          description: "next-best USYD band (HD 85 / D 75 / CR 65 / P 50) if target unreachable"
+        advisory_text:
+          type: ["string", "null"]
+          description: "30-50 word AI advisory; null on AI failure (D-D1 silent fallback)"
+        language:
+          type: string
+          enum: [en, zh]
