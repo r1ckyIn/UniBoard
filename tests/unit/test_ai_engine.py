@@ -61,13 +61,17 @@ async def test_evaluate_thread_returns_valid_evaluation() -> None:
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_ask_question_returns_answer_with_citations() -> None:
-    """AIEngine.ask_question extracts inline citations from response."""
+    """AIEngine.ask_question extracts inline numeric citations from response.
+
+    Phase 34 AIFEAT-02 replaced the legacy `[Platform: Name]` citation format
+    with numeric `[N]` markers that correlate 1:1 with the SSE `sources` event
+    payload. `_CITATION_PATTERN` captures the integer inside the brackets.
+    """
     from src.services.ai_engine import AIEngine
 
     answer_text = (
         "Based on the materials, quicksort has O(n log n) average case "
-        "[Canvas: Week 3 Lecture Notes]. The worst case is O(n^2) "
-        "[Ed: Sorting Algorithms Lesson]."
+        "[1]. The worst case is O(n^2) [2]."
     )
     mock_resp = _make_mock_response(answer_text)
 
@@ -84,8 +88,8 @@ async def test_ask_question_returns_answer_with_citations() -> None:
 
     assert isinstance(result, QAResponse)
     assert "quicksort" in result.answer.lower()
-    assert "[Canvas: Week 3 Lecture Notes]" in result.citations
-    assert "[Ed: Sorting Algorithms Lesson]" in result.citations
+    assert "1" in result.citations
+    assert "2" in result.citations
     assert result.tokens_used > 0
 
 
