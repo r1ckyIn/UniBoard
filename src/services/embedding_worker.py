@@ -191,13 +191,21 @@ async def embed_hot_courses_worker(
                 # for production tier monitoring. When Voyage SDK exposes
                 # response headers (X-Voyage-Token-Usage), swap chunks for
                 # the actual token count.
-                sentry_sdk.set_context(
-                    "voyage_usage",
-                    {
-                        "course_id": str(course_id),
-                        "chunks_embedded": chunk_count,
-                    },
-                )
+                #
+                # Phase 34 MD-02 fix: wrap in ``new_scope()`` to prevent the
+                # per-course telemetry from leaking into subsequent captures
+                # on the same process (previously every later exception was
+                # decorated with the last-processed course's context).
+                with sentry_sdk.new_scope() as scope:
+                    scope.set_tag("phase", "34")
+                    scope.set_tag("feature", "rag_embedding")
+                    scope.set_context(
+                        "voyage_usage",
+                        {
+                            "course_id": str(course_id),
+                            "chunks_embedded": chunk_count,
+                        },
+                    )
         except Exception:  # noqa: BLE001
             errors += 1
             with sentry_sdk.new_scope() as scope:
