@@ -17,8 +17,11 @@ from src.schemas.ai import QAResponse, ThreadEvaluation, UnitReviewResponse
 
 logger = structlog.get_logger()
 
-# Regex pattern for inline citations: [Canvas: ...] or [Ed: ...]
-_CITATION_PATTERN = re.compile(r"\[(?:Canvas|Ed): [^\]]+\]")
+# Phase 34 AIFEAT-02: switch from `[Canvas: name]` / `[Ed: lesson]` text markers
+# to numeric `[N]` markers matching the 1-based order of sources in the
+# `Sources:` context block. The new regex captures the index as group 1 so the
+# frontend can correlate marker -> sources[N-1] via a map.
+_CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 
 # Tool definitions for adapter-backed cross-platform research (MCP fallback)
 AGENT_TOOLS: list[dict[str, object]] = [

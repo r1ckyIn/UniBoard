@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Sequence
 from datetime import UTC, datetime
 
 import structlog
@@ -48,6 +48,24 @@ class QAService:
         self._voyage_api_key = voyage_api_key
         self._tool_executor = tool_executor
         self._skill_service = skill_service
+
+    async def _bump_qa_access(self, course_id: uuid.UUID) -> None:
+        """Bump ``Course.last_qa_access_at`` to fuel the hot-set predicate.
+
+        Phase 34 AIFEAT-02 / D-B1 -- the embedding worker scans courses whose
+        ``last_qa_access_at >= now() - 7d``. Concurrent bumps on the same
+        course row are acceptable (heuristic column, not a correctness
+        boundary), so no ``FOR UPDATE`` lock is needed (RESEARCH §10).
+
+        Called BEFORE the LLM invocation in ``answer_question`` and
+        ``stream_answer_question`` so the hot-set window correctly reflects
+        user engagement regardless of whether the request ultimately succeeds.
+        """
+        course = await self._session.get(Course, course_id)
+        if course is None:
+            return
+        course.last_qa_access_at = datetime.now(UTC)
+        await self._session.flush()
 
     async def _check_and_increment_limit(self, user_id: uuid.UUID) -> Profile:
         """Check AI daily limit and atomically increment counter. Raises RateLimitedError.
@@ -128,6 +146,7 @@ class QAService:
         auto-switches to RAG for large courses.
         """
         await self._check_and_increment_limit(user_id)
+        await self._bump_qa_access(course_id)  # Phase 34 AIFEAT-02 / D-B1
         settings = get_settings()
 
         course, materials_text = await self._load_course_materials(course_id)
@@ -158,7 +177,12 @@ class QAService:
         question: str,
         course_id: uuid.UUID,
     ) -> QAResponse:
-        """RAG Q&A: embed question, retrieve similar chunks via pgvector."""
+        """RAG Q&A: embed question, retrieve similar chunks via pgvector.
+
+        Phase 34 AIFEAT-02: context is formatted with numbered `Sources:` block
+        so the LLM can cite with `[N]` markers (matching the updated
+        QA_SYSTEM_PROMPT + _CITATION_PATTERN in ai_engine.py).
+        """
         settings = get_settings()
 
         try:
@@ -182,20 +206,20 @@ class QAService:
                 .limit(settings.rag_top_k)
             )
             result = await self._session.execute(stmt)
-            chunks = result.scalars().all()
+            chunks = list(result.scalars().all())
 
-            # Build context from retrieved chunks
-            context_parts = [
-                f"[{chunk.source_type}: chunk {chunk.chunk_index}]\n{chunk.chunk_text}"
-                for chunk in chunks
-            ]
-            context_text = "\n\n---\n\n".join(context_parts)
+            # Build numbered context so the LLM emits `[N]` citations
+            sources, context_text = _build_rag_context(chunks)
 
             qa_result = await self._ai_engine.ask_question(
                 question=question,
                 context_text=context_text,
             )
-            # Override method since we used RAG
+            # Override method since we used RAG. Sources are preserved on the
+            # QAResponse.citations field already (numeric markers extracted
+            # by _CITATION_PATTERN in ai_engine.py); the structured source
+            # list is exposed via retrieve_rag_sources for streaming callers.
+            _ = sources  # sources consumed by context_text; frontend uses retrieve_rag_sources
             return QAResponse(
                 answer=qa_result.answer,
                 citations=qa_result.citations,
@@ -207,6 +231,79 @@ class QAService:
             # Fallback: load materials directly
             _, materials_text = await self._load_course_materials(course_id)
             return await self._answer_direct(question, materials_text)
+
+    async def retrieve_rag_sources(
+        self,
+        course_id: uuid.UUID,
+        question: str,
+    ) -> list[dict[str, object]] | None:
+        """Return structured RAG sources payload for SSE ``sources`` event.
+
+        Phase 34 AIFEAT-02 helper used by the streaming route to pre-build
+        the citation map that the frontend renders. Returns ``None`` when
+        voyageai is not installed or no chunks are retrieved (fallback to
+        no-sources streaming -- frontend hides the Sources panel).
+
+        Each source carries: ``index`` (1-based), ``source_type``,
+        ``source_id``, ``chunk_index``, ``score`` (cosine similarity in 0-1),
+        and a truncated ``excerpt``. Per RESEARCH §5 schema.
+        """
+        settings = get_settings()
+
+        try:
+            import voyageai
+            from pgvector.sqlalchemy import cosine_distance
+
+            from src.models.embedding import ContentEmbedding
+        except ImportError:
+            return None
+
+        try:
+            vo = voyageai.AsyncClient(api_key=self._voyage_api_key)  # type: ignore[attr-defined]
+            embed_result = await vo.embed(
+                [question], model="voyage-3", input_type="query"
+            )
+            q_embedding = embed_result.embeddings[0]
+
+            # Use cosine_distance expression; also pull the distance value so
+            # we can convert to a similarity score in [0, 1].
+            distance_expr = cosine_distance(
+                ContentEmbedding.embedding, q_embedding
+            )
+            stmt = (
+                select(ContentEmbedding, distance_expr.label("distance"))
+                .where(ContentEmbedding.course_id == course_id)
+                .order_by(distance_expr)
+                .limit(settings.rag_top_k)
+            )
+            result = await self._session.execute(stmt)
+            rows = list(result.all())
+        except Exception:  # noqa: BLE001
+            logger.warning("retrieve_rag_sources_failed", exc_info=True)
+            return None
+
+        if not rows:
+            return None
+
+        sources: list[dict[str, object]] = []
+        for idx, row in enumerate(rows):
+            chunk = row[0]
+            distance = float(row[1] or 0.0)
+            # cosine_distance returns [0, 2]; similarity in [0, 1] = 1 - d/2
+            score = max(0.0, min(1.0, 1.0 - distance / 2.0))
+            text = chunk.chunk_text or ""
+            excerpt = text[:100] + ("..." if len(text) > 100 else "")
+            sources.append(
+                {
+                    "index": idx + 1,  # 1-based for [N] markers
+                    "source_type": chunk.source_type,
+                    "source_id": chunk.source_id,
+                    "chunk_index": chunk.chunk_index,
+                    "score": score,
+                    "excerpt": excerpt,
+                }
+            )
+        return sources
 
     async def generate_review(
         self,
@@ -243,8 +340,12 @@ class QAService:
         MCP fallback triggers when:
         (a) DB context token count < MCP_FALLBACK_TOKEN_THRESHOLD
         (b) search_more=True (user clicked "Search More")
+
+        Phase 34 AIFEAT-02 / D-B1: ``_bump_qa_access`` is invoked BEFORE the
+        LLM call to fuel the hot-set predicate used by the embedding worker.
         """
         await self._check_and_increment_limit(user_id)
+        await self._bump_qa_access(course_id)  # Phase 34 AIFEAT-02 / D-B1
 
         course, materials_text = await self._load_course_materials(course_id)
         total_tokens = len(_ENCODER.encode(materials_text))
@@ -412,6 +513,41 @@ class QAService:
 
         await self._session.flush()
         return len(embeddings)
+
+
+def _build_rag_context(
+    chunks: Sequence[object],
+) -> tuple[list[dict[str, object]], str]:
+    """Assemble a numbered ``Sources:`` block for the LLM context window.
+
+    Phase 34 AIFEAT-02: the prompt instructs numeric ``[N]`` citations; this
+    helper prefixes each retrieved chunk with ``[1]``, ``[2]`` etc. so the
+    LLM can cite consistently. Returns ``(sources_payload, context_text)``
+    where ``sources_payload`` is the structured list suitable for the
+    ``sources`` SSE event (though the streaming path builds its own via
+    ``QAService.retrieve_rag_sources``; this helper is used by
+    ``_answer_rag`` for the non-streaming path).
+    """
+    sources_payload: list[dict[str, object]] = []
+    lines: list[str] = ["Sources:"]
+    for idx, chunk in enumerate(chunks):
+        source_type = getattr(chunk, "source_type", "unknown")
+        chunk_text = getattr(chunk, "chunk_text", "") or ""
+        chunk_index = getattr(chunk, "chunk_index", 0)
+        source_id = getattr(chunk, "source_id", "")
+        index = idx + 1
+        lines.append(f"[{index}] ({source_type} chunk {chunk_index}) {chunk_text}")
+        excerpt = chunk_text[:100] + ("..." if len(chunk_text) > 100 else "")
+        sources_payload.append(
+            {
+                "index": index,
+                "source_type": source_type,
+                "source_id": source_id,
+                "chunk_index": chunk_index,
+                "excerpt": excerpt,
+            }
+        )
+    return sources_payload, "\n\n".join(lines)
 
 
 def _chunk_text(text: str, chunk_size: int = 512, overlap: int = 50) -> list[str]:

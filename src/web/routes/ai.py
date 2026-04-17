@@ -98,9 +98,19 @@ def _build_qa_service(
 async def _sse_wrap(
     stream: AsyncGenerator[str, None],
     initial_phase: str,
+    sources: list[dict[str, object]] | None = None,
 ) -> AsyncGenerator[dict[str, str], None]:
-    """Wrap an async token stream into SSE event dicts with error handling."""
+    """Wrap an async token stream into SSE event dicts with error handling.
+
+    Phase 34 AIFEAT-02 / RESEARCH §10 Pitfall 2: when ``sources`` is provided
+    (non-empty), emit a ``sources`` event BEFORE the first ``token`` event so
+    the frontend has the citation map ready when ``[1]`` arrives in the
+    token stream. The event is omitted when ``sources`` is ``None`` or empty.
+    """
     yield {"event": "status", "data": json.dumps({"phase": initial_phase})}
+
+    if sources:
+        yield {"event": "sources", "data": json.dumps({"sources": sources})}
 
     try:
         async for token in stream:
@@ -168,6 +178,16 @@ async def course_qa_stream(
     skill_service = SkillService(session)
     svc = _build_qa_service(session, tool_executor=tool_executor, skill_service=skill_service)
 
+    # Phase 34 AIFEAT-02: pre-fetch RAG sources so the SSE 'sources' event
+    # can be emitted BEFORE the first token (RESEARCH §10 Pitfall 2).
+    # Returns None when the course context is small enough for direct-context
+    # streaming (no RAG retrieval), or when voyageai is unavailable.
+    sources_payload: list[dict[str, object]] | None = None
+    try:
+        sources_payload = await svc.retrieve_rag_sources(course_id, body.question)
+    except Exception:
+        logger.warning("rag_sources_prefetch_failed", exc_info=True)
+
     async def _stream_with_cleanup() -> AsyncGenerator[dict[str, str], None]:
         try:
             stream = svc.stream_answer_question(
@@ -178,7 +198,7 @@ async def course_qa_stream(
                 search_more=body.search_more,
                 language=body.language,
             )
-            async for event in _sse_wrap(stream, "searching"):
+            async for event in _sse_wrap(stream, "searching", sources=sources_payload):
                 yield event
         finally:
             if tool_executor:
