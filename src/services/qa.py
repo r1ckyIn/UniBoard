@@ -139,11 +139,16 @@ class QAService:
         user_id: uuid.UUID,
         course_id: uuid.UUID,
         question: str,
+        language: str = "en",
     ) -> QAResponse:
         """Answer a question about course materials.
 
         Uses direct context for small courses (< rag_token_threshold tokens),
         auto-switches to RAG for large courses.
+
+        Phase 34 MD-01 fix: threads ``language`` through to the underlying
+        ``AIEngine.ask_question`` so ZH users get ZH answers on the
+        non-streaming ``POST /courses/{id}/qa`` path.
         """
         await self._check_and_increment_limit(user_id)
         await self._bump_qa_access(course_id)  # Phase 34 AIFEAT-02 / D-B1
@@ -155,9 +160,9 @@ class QAService:
         total_tokens = len(_ENCODER.encode(materials_text))
 
         if total_tokens < settings.rag_token_threshold:
-            result = await self._answer_direct(question, materials_text)
+            result = await self._answer_direct(question, materials_text, language=language)
         else:
-            result = await self._answer_rag(question, course_id)
+            result = await self._answer_rag(question, course_id, language=language)
 
         return result
 
@@ -165,17 +170,20 @@ class QAService:
         self,
         question: str,
         materials_text: str,
+        language: str = "en",
     ) -> QAResponse:
         """Direct context Q&A: send all materials as context."""
         return await self._ai_engine.ask_question(
             question=question,
             context_text=materials_text,
+            language=language,
         )
 
     async def _answer_rag(
         self,
         question: str,
         course_id: uuid.UUID,
+        language: str = "en",
     ) -> QAResponse:
         """RAG Q&A: embed question, retrieve similar chunks via pgvector.
 
@@ -214,6 +222,7 @@ class QAService:
             qa_result = await self._ai_engine.ask_question(
                 question=question,
                 context_text=context_text,
+                language=language,
             )
             # Override method since we used RAG. Sources are preserved on the
             # QAResponse.citations field already (numeric markers extracted
@@ -230,7 +239,7 @@ class QAService:
             logger.warning("rag_fallback_no_voyageai", reason="voyageai not installed")
             # Fallback: load materials directly
             _, materials_text = await self._load_course_materials(course_id)
-            return await self._answer_direct(question, materials_text)
+            return await self._answer_direct(question, materials_text, language=language)
 
     async def retrieve_rag_sources(
         self,

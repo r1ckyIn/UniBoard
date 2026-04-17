@@ -131,13 +131,24 @@ async def course_qa(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> SuccessResponse[QAResponse]:
-    """Ask a question about course materials with AI-powered citation."""
+    """Ask a question about course materials with AI-powered citation.
+
+    Phase 34 MD-01 fix: propagates the user's ``language_preference`` so the
+    non-streaming path matches the streaming path's bilingual behaviour.
+    """
     _require_ai_configured()
+    # Fetch the profile once to pick the correct QA system prompt (EN/ZH).
+    profile_result = await session.execute(
+        select(Profile).where(Profile.id == current_user_id)
+    )
+    profile = profile_result.scalar_one_or_none()
+    language = (profile.language_preference or "en") if profile else "en"
     svc = _build_qa_service(session)
     result = await svc.answer_question(
         user_id=current_user_id,
         course_id=course_id,
         question=body.question,
+        language=language,
     )
     return SuccessResponse(data=result, meta=get_request_meta(request))
 
