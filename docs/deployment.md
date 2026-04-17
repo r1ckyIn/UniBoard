@@ -75,7 +75,7 @@ These have sensible defaults but can be overridden:
 | `AI_DAILY_LIMIT_PER_USER` | `100` | Max AI requests per user per day |
 | `SYNC_GRADES_INTERVAL_MIN` | `15` | Grade sync interval in minutes |
 | `SYNC_DEADLINES_INTERVAL_MIN` | `60` | Deadline sync interval in minutes |
-| `SES_SENDER_EMAIL` | `digest@uniboard.app` | Email sender address for digest notifications |
+| `SES_SENDER_EMAIL` | `digest@uniboard.uk` | Email sender address for digest notifications |
 | `SES_REGION` | `ap-southeast-2` | AWS SES region |
 | `EMAIL_NOTIFICATIONS_ENABLED` | `true` | Enable/disable email notifications |
 
@@ -96,7 +96,7 @@ These have sensible defaults but can be overridden:
 |----------|----------|--------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Same as Railway's `SUPABASE_URL` |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase Dashboard -> Settings -> API -> anon/public key |
-| `NEXT_PUBLIC_API_URL` | Yes | Railway production URL (e.g., `https://uniboard-backend.up.railway.app`) |
+| `NEXT_PUBLIC_API_URL` | Yes | Backend API URL (e.g., `https://api.uniboard.uk/api/v1`) |
 | `NEXT_PUBLIC_SENTRY_DSN` | Optional | Sentry Dashboard -> Settings -> Client Keys (DSN) -- use a separate Sentry project from backend |
 | `SENTRY_AUTH_TOKEN` | Optional | Sentry Dashboard -> Settings -> Auth Tokens (for source map upload) |
 | `SENTRY_ORG` | Optional | Sentry organization slug |
@@ -230,7 +230,7 @@ UniBoard 使用三服务生产架构：
 | `AI_DAILY_LIMIT_PER_USER` | `100` | 每用户每日最大 AI 请求数 |
 | `SYNC_GRADES_INTERVAL_MIN` | `15` | 成绩同步间隔（分钟） |
 | `SYNC_DEADLINES_INTERVAL_MIN` | `60` | 截止日期同步间隔（分钟） |
-| `SES_SENDER_EMAIL` | `digest@uniboard.app` | 摘要通知的发件人地址 |
+| `SES_SENDER_EMAIL` | `digest@uniboard.uk` | 摘要通知的发件人地址 |
 | `SES_REGION` | `ap-southeast-2` | AWS SES 区域 |
 | `EMAIL_NOTIFICATIONS_ENABLED` | `true` | 启用/禁用邮件通知 |
 
@@ -251,7 +251,7 @@ UniBoard 使用三服务生产架构：
 |------|------|------|
 | `NEXT_PUBLIC_SUPABASE_URL` | 是 | 与 Railway 的 `SUPABASE_URL` 相同 |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 是 | Supabase Dashboard -> Settings -> API -> anon/public key |
-| `NEXT_PUBLIC_API_URL` | 是 | Railway 生产 URL（例如 `https://uniboard-backend.up.railway.app`） |
+| `NEXT_PUBLIC_API_URL` | 是 | 后端 API URL（例如 `https://api.uniboard.uk/api/v1`） |
 | `NEXT_PUBLIC_SENTRY_DSN` | 可选 | Sentry Dashboard -> Settings -> Client Keys (DSN) -- 使用与后端不同的 Sentry 项目 |
 | `SENTRY_AUTH_TOKEN` | 可选 | Sentry Dashboard -> Settings -> Auth Tokens（用于 source map 上传） |
 | `SENTRY_ORG` | 可选 | Sentry 组织 slug |
