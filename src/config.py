@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     translation_enabled: bool = True  # enable AI batch translation during sync
 
     # AWS SES
-    ses_sender_email: str = "digest@uniboard.app"
+    ses_sender_email: str = "digest@uniboard.uk"
     ses_region: str = "ap-southeast-2"
     email_notifications_enabled: bool = True
 

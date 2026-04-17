@@ -6,7 +6,7 @@ info:
 servers:
   - url: /api/v1
     description: Mock (Next.js Route Handlers)
-  - url: https://api.uniboard.app/v1
+  - url: https://api.uniboard.uk/v1
     description: Production
 
 tags:

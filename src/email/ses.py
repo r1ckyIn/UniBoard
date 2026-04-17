@@ -21,7 +21,7 @@ class SESEmailSender:
         to_email: str,
         subject: str,
         html_body: str,
-        sender: str = "digest@uniboard.app",
+        sender: str = "digest@uniboard.uk",
         text_body: str | None = None,
     ) -> bool:
         """Send an HTML email via SES.
