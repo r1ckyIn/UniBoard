@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle } from "lucide-react";
 
@@ -75,14 +75,31 @@ export default function GpaTargetSection({ user }: GpaTargetSectionProps) {
   }
 
   function handleSave() {
-    // Single atomic PATCH persists both fields (D-C1 + D-C2)
-    updateProfile.mutate({
-      gpa_target: gpaValue,
-      remaining_credit_points: remainingCp === "" ? null : Number(remainingCp),
-    });
-    setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 2000);
+    // Single atomic PATCH persists both fields (D-C1 + D-C2).
+    //
+    // Phase 34 WR-02 fix: flip "Saved!" only on mutation success so the
+    // optimistic confirmation never shows for failed PATCHes (e.g. 422).
+    updateProfile.mutate(
+      {
+        gpa_target: gpaValue,
+        remaining_credit_points: remainingCp === "" ? null : Number(remainingCp),
+      },
+      {
+        onSuccess: () => {
+          setShowSaved(true);
+        },
+      },
+    );
   }
+
+  // Phase 34 WR-02 fix: schedule the "Saved!" auto-dismiss via an effect so
+  // the timer is cleaned up on unmount (prevents setting state on an
+  // unmounted component when the user navigates away inside the 2s window).
+  useEffect(() => {
+    if (!showSaved) return;
+    const t = setTimeout(() => setShowSaved(false), 2000);
+    return () => clearTimeout(t);
+  }, [showSaved]);
 
   return (
     <div>
