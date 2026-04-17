@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Float, String, Text
+from sqlalchemy import DateTime, Float, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from src.models.digest import Digest
     from src.models.notification import Notification
     from src.models.push_record import PushRecord
+    from src.models.study_recommendation_cache import StudyRecommendationCache
     from src.models.whatif import WhatIfScenario
 
 
@@ -41,6 +42,17 @@ class Profile(TimestampMixin, Base):
     ed_api_token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     gpa_target: Mapped[float | None] = mapped_column(Float, nullable=True)
     gpa_scale: Mapped[str] = mapped_column(String(10), default="wam")
+    remaining_credit_points: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+        comment=(
+            "User remaining credit points to graduation. Canonical user input "
+            "(USYD typical Bachelor=144cp; planner does NOT auto-infer). "
+            "Used by GPAService.calculate_multi_course_path. NULL = user has "
+            "not configured yet; UI prompts on first Path Planner visit. "
+            "Per phase 34 D-C1."
+        ),
+    )
     last_sync_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
@@ -103,6 +115,11 @@ class Profile(TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
     digests: Mapped[list[Digest]] = relationship(
+        back_populates="profile",
+        cascade="all, delete-orphan",
+    )
+    # Phase 34 -- back-populates from StudyRecommendationCache
+    study_recommendations: Mapped[list[StudyRecommendationCache]] = relationship(
         back_populates="profile",
         cascade="all, delete-orphan",
     )

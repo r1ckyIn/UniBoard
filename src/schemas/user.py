@@ -24,6 +24,7 @@ class UserResponse(BaseModel):
     display_name: str
     gpa_target: float | None
     gpa_scale: str
+    remaining_credit_points: int | None = None
     language_preference: str = "en"
     tokens: dict[str, TokenStatus]
     created_at: datetime
@@ -37,6 +38,7 @@ class UserUpdateRequest(BaseModel):
     display_name: str | None = Field(default=None, min_length=1, max_length=100)
     gpa_target: float | None = None
     gpa_scale: str | None = None
+    remaining_credit_points: int | None = Field(default=None, ge=0, le=500)
     language_preference: str | None = None
 
 
