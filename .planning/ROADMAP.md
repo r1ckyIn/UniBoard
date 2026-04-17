@@ -222,7 +222,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 32. Production Email | v3.0 | 3/3 | Complete (32-03 strategically resolved — confirmation OFF; recipient placement deferred to Phase 33 AUTH-HARDEN) | 2026-04-14 |
 | 32.1. Sync Integration Fixes | v3.0 | 6/6 | Complete | 2026-04-14 |
 | 33. Token Lifecycle & Onboarding | v3.0 | 8/8 | Complete    | 2026-04-16 |
-| 34. AI Features Live | v3.0 | 0/TBD | Not started | - |
+| 34. AI Features Live | v3.0 | 2/6 | In Progress|  |
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
 
@@ -363,7 +363,7 @@ Plans:
   3. GPA path planner calculates required average for remaining subjects to reach target distinction
 **Plans**: 6 plans
 - [x] 34-00-PLAN.md — Wave 0 RED-state test scaffolding (xfail/it.todo stubs across 11 test files)
-- [ ] 34-01-PLAN.md — Schema migration + ORM extensions (Profile.remaining_credit_points, Course content_hash/last_qa_access_at/embedded_at, study_recommendation_cache table + RLS) [AIFEAT-01/02/03]
+- [x] 34-01-PLAN.md — Schema migration + ORM extensions (Profile.remaining_credit_points, Course content_hash/last_qa_access_at/embedded_at, study_recommendation_cache table + RLS) [AIFEAT-01/02/03]
 - [ ] 34-02-PLAN.md — StudyRecommendationService + APScheduler 7am AEST daily job + GET /ai/study-recommendations [AIFEAT-01]
 - [ ] 34-03-PLAN.md — GPAService.calculate_multi_course_path (Decimal-precise math) + AI advisory + POST /gpa/multi-course-path [AIFEAT-03]
 - [ ] 34-04-PLAN.md — Embedding worker (30-min hot-set) + content_hash trigger + SSE sources event + numeric [N] citations [AIFEAT-02]
