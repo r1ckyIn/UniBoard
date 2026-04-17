@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, ForeignKey, Index, String
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -41,6 +42,37 @@ class Course(UUIDMixin, TimestampMixin, Base):
     )
     unit_outline_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     name_zh: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # Phase 34 -- RAG hot-set tracker + content-hash trigger
+    last_qa_access_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment=(
+            "Bumped on every /courses/{id}/qa or /qa/stream call BEFORE LLM. "
+            "Fuels embedding worker hot-set predicate "
+            "(last_qa_access_at >= now() - 7d). "
+            "Per phase 34 D-B1."
+        ),
+    )
+    embedded_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment=(
+            "Timestamp of most recent successful embedding pass for this course. "
+            "Set by embedding worker after QAService.embed_course_materials "
+            "completes. Per phase 34 D-B1."
+        ),
+    )
+    content_hash: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        comment=(
+            "sha256 hex of concatenated module_items.text_content + "
+            "lessons.text_content. Worker re-embeds when computed hash differs "
+            "from this column. Stored on Course (not Module) -- embedding "
+            "granularity is per-course. Per phase 34 D-B2."
+        ),
+    )
 
     # Relationships
     profile: Mapped[Profile] = relationship(back_populates="courses")

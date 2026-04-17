@@ -13,6 +13,7 @@ from src.models.module import Module, ModuleItem
 from src.models.notification import Notification
 from src.models.push_record import PushRecord
 from src.models.skill import Skill, SkillExecution
+from src.models.study_recommendation_cache import StudyRecommendationCache
 from src.models.sync_history import SyncHistory
 from src.models.unit_outline import UnitOutline
 from src.models.user import Profile
@@ -35,6 +36,7 @@ __all__ = [
     "Skill",
     "SkillExecution",
     "Slide",
+    "StudyRecommendationCache",
     "SyncHistory",
     "UnifiedDeadline",
     "UnitOutline",

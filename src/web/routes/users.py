@@ -39,6 +39,7 @@ def _build_user_response(profile: Profile) -> UserResponse:
         display_name=profile.display_name,
         gpa_target=profile.gpa_target,
         gpa_scale=profile.gpa_scale,
+        remaining_credit_points=profile.remaining_credit_points,
         language_preference=profile.language_preference,
         tokens={
             "canvas": TokenStatus(status=canvas_status, platform="canvas"),
@@ -86,6 +87,9 @@ async def update_profile(
         if body.gpa_scale not in ("wam", "gpa_4"):
             raise ValidationError(detail="gpa_scale must be 'wam' or 'gpa_4'")
         profile.gpa_scale = body.gpa_scale
+
+    if body.remaining_credit_points is not None:
+        profile.remaining_credit_points = body.remaining_credit_points
 
     if body.language_preference is not None:
         if body.language_preference not in ("en", "zh"):
