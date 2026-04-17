@@ -8,6 +8,9 @@ import { useQueries } from "@tanstack/react-query";
 // Hooks
 import { useGpaReport } from "@/hooks/use-gpa";
 import { courseOptions } from "@/hooks/use-courses";
+import { useCurrentUser } from "@/hooks/use-user";
+import { useStudyRecommendation } from "@/hooks/use-study-recommendations";
+import { useMultiCoursePath } from "@/hooks/use-multi-course-path";
 
 // Components
 import PredictTitleRow from "@/components/predict/PredictTitleRow";
@@ -17,6 +20,9 @@ import TargetWamCard from "@/components/predict/TargetWamCard";
 import RequiredScoresCard from "@/components/predict/RequiredScoresCard";
 import SemesterProgressCard from "@/components/predict/SemesterProgressCard";
 import RoiCard from "@/components/predict/RoiCard";
+import StudyRecCard from "@/components/predict/StudyRecCard";
+import MultiCoursePathCard from "@/components/predict/MultiCoursePathCard";
+import type { MultiCoursePathData } from "@/components/predict/MultiCoursePathCard";
 import AnimatedEntry from "@/components/shared/AnimatedEntry";
 import SkeletonCard from "@/components/dashboard/SkeletonCard";
 
@@ -61,6 +67,12 @@ export default function PredictPage() {
   const gpaReport = useGpaReport();
   const courses = useMemo(() => gpaReport.data?.data.courses ?? [], [gpaReport.data]);
 
+  // Phase 34 AIFEAT-01/03 hooks
+  const studyRec = useStudyRecommendation();
+  const currentUser = useCurrentUser();
+  const pathMutation = useMultiCoursePath();
+  const remainingCp = currentUser.data?.data.remaining_credit_points ?? null;
+
   // Fetch course details for all courses (assessment_weights)
   const courseDetailQueries = useQueries({
     queries: courses.map((c) => courseOptions.detail(c.course_id)),
@@ -93,13 +105,19 @@ export default function PredictPage() {
   const [facultyScheme, setFacultyScheme] = useState<FacultyScheme>(readFacultyScheme);
   const [targetWam, setTargetWam] = useState<number>(85);
 
-  // Set target from API when data first arrives
+  // Set target from API when data first arrives.
+  //
+  // Phase 34 WR-04 fix: mark initialized as soon as the GPA report loads,
+  // even when the user has no saved target (null), so the multi-course path
+  // effect can gate on it and skip the placeholder-fueled advisory call.
   const targetInitialized = useRef(false);
   useEffect(() => {
-    if (!targetInitialized.current && gpaReport.data?.data.target_wam != null) {
-      targetInitialized.current = true;
+    if (targetInitialized.current) return;
+    if (gpaReport.data === undefined) return;
+    if (gpaReport.data.data.target_wam != null) {
       setTargetWam(gpaReport.data.data.target_wam);
     }
+    targetInitialized.current = true;
   }, [gpaReport.data]);
 
   // ── Faculty scheme persistence ─────────────────────────────────
@@ -230,6 +248,28 @@ export default function PredictPage() {
     setPortalTarget(document.getElementById("right-panel-slot"));
   }, []);
 
+  // ── Multi-course path trigger (AIFEAT-03) ─────────────────────
+  // Re-fire the mutation only when input (target_wam + remaining_credit_points)
+  // actually changes — mutation state changes do NOT re-fire per design.
+  //
+  // Phase 34 WR-04 fix: wait for ``targetInitialized`` before firing so the
+  // placeholder default (85) never fuels an advisory call that would be
+  // immediately superseded by the user's saved target (2x Sonnet cost).
+  const lastFiredPathKey = useRef<string | null>(null);
+  const pathMutate = pathMutation.mutate;
+  useEffect(() => {
+    if (!targetInitialized.current) return;
+    if (remainingCp === null || remainingCp === undefined) return;
+    if (!Number.isFinite(targetWam)) return;
+    const key = `${targetWam}|${remainingCp}`;
+    if (key === lastFiredPathKey.current) return;
+    lastFiredPathKey.current = key;
+    pathMutate({ target_wam: targetWam, remaining_credit_points: remainingCp });
+  }, [targetWam, remainingCp, pathMutate, gpaReport.data]);
+
+  const pathData: MultiCoursePathData | null =
+    (pathMutation.data?.data as MultiCoursePathData | undefined) ?? null;
+
   // ── Render ─────────────────────────────────────────────────────
   return (
     <>
@@ -310,6 +350,20 @@ export default function PredictPage() {
                   code: c.code,
                   color: courseColorsMap[c.code] ?? { base: "#9b9b94", soft: "rgba(155,155,148,0.11)" },
                 }))}
+              />
+            </AnimatedEntry>
+            {/* Phase 34 AIFEAT-01: Top-3 study recommendations */}
+            <AnimatedEntry delay={10}>
+              <StudyRecCard
+                items={studyRec.data?.data?.top_3 ?? []}
+                isLoading={studyRec.isLoading}
+              />
+            </AnimatedEntry>
+            {/* Phase 34 AIFEAT-03: multi-course path verdict + advisory */}
+            <AnimatedEntry delay={10}>
+              <MultiCoursePathCard
+                path={pathData}
+                remainingCp={remainingCp ?? 0}
               />
             </AnimatedEntry>
           </>,

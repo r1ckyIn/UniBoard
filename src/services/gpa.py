@@ -6,6 +6,8 @@ import re
 import uuid
 from decimal import ROUND_HALF_UP, Decimal
 
+import sentry_sdk
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -13,6 +15,10 @@ from sqlalchemy.orm import selectinload
 from src.models.course import Course
 from src.models.grade import Grade
 from src.models.whatif import WhatIfScenario
+from src.prompts.path_advisory import (
+    get_path_advisory_prompt,
+    get_path_advisory_user_message,
+)
 from src.schemas.common import NotFoundError
 from src.schemas.gpa import (
     AssessmentDetail,
@@ -20,6 +26,7 @@ from src.schemas.gpa import (
     CourseDetailResponse,
     CourseSummary,
     GPASummaryResponse,
+    MultiCoursePathResponse,
     SemesterTrend,
     TargetPathResponse,
     TargetRequest,
@@ -28,6 +35,8 @@ from src.schemas.gpa import (
     WhatIfScenarioResponse,
     WhatIfScore,
 )
+
+logger = structlog.get_logger()
 
 
 def _parse_level_weight(course_code: str) -> int:
@@ -47,12 +56,27 @@ GRADE_BANDS: list[tuple[Decimal, str, int]] = [
 
 _TWO_PLACES = Decimal("0.01")
 
+# Phase 34 -- USYD WAM bands ordered HD > D > CR > P (AIFEAT-03)
+_USYD_BANDS: tuple[Decimal, ...] = (
+    Decimal("85"),  # HD (High Distinction)
+    Decimal("75"),  # D (Distinction)
+    Decimal("65"),  # CR (Credit)
+    Decimal("50"),  # P (Pass)
+)
+
 
 class GPAService:
     """Business logic for GPA/WAM calculation, what-if, and target path."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        anthropic_api_key: str = "",
+        language: str = "en",
+    ) -> None:
         self._session = session
+        self._anthropic_api_key = anthropic_api_key
+        self._language = language
 
     # ------------------------------------------------------------------
     # Pure calculation helpers (all use Decimal)
@@ -530,3 +554,164 @@ class GPAService:
             )
 
         return TrendResponse(semesters=trends)
+
+    # ------------------------------------------------------------------
+    # Phase 34 -- Multi-course path planner (AIFEAT-03)
+    # ------------------------------------------------------------------
+
+    async def calculate_multi_course_path(
+        self,
+        user_id: uuid.UUID,
+        target_wam: float,
+        remaining_credit_points: int,
+    ) -> MultiCoursePathResponse:
+        """Compute required avg for remaining UNITS (closed-form, per RESEARCH §7).
+
+        Math identity:
+            target_wam = (current_wam * cp_done + required_avg * cp_remain)
+                         / (cp_done + cp_remain)
+          => required_avg = (target_wam * (cp_done + cp_remain)
+                             - current_wam * cp_done) / cp_remain
+
+        Edge cases (per plan D-C3):
+        - cp_remain == 0: required_avg=None; is_achievable=(current_wam>=target)
+        - current_wam >= target: required_avg=0 (any future score keeps target)
+        - required_avg > 100: unreachable -> suggested_target = next lower band
+
+        Returns advisory_text=None -- caller invokes get_path_advisory
+        separately so the math layer never blocks on AI calls.
+        """
+        summary = await self.get_summary(user_id)
+        current_wam = Decimal(str(summary.cumulative_wam))
+        cp_done = Decimal(str(summary.total_credit_points))
+        cp_remain = Decimal(str(remaining_credit_points))
+        target = Decimal(str(target_wam))
+
+        # Edge case: 0 remaining credits
+        if cp_remain == 0:
+            return MultiCoursePathResponse(
+                target_wam=float(target),
+                current_wam=float(current_wam),
+                is_achievable=current_wam >= target,
+                required_avg=None,
+                max_reachable=float(current_wam),
+                suggested_target=None,
+                advisory_text=None,
+                language=self._language,
+            )
+
+        # Edge case: target already met
+        if current_wam >= target:
+            max_reachable = (
+                (current_wam * cp_done + Decimal("100") * cp_remain)
+                / (cp_done + cp_remain)
+            ).quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
+            return MultiCoursePathResponse(
+                target_wam=float(target),
+                current_wam=float(current_wam),
+                is_achievable=True,
+                required_avg=0.0,  # any future score keeps target
+                max_reachable=float(max_reachable),
+                suggested_target=None,
+                advisory_text=None,
+                language=self._language,
+            )
+
+        total_cp = cp_done + cp_remain
+        required = (
+            (target * total_cp - current_wam * cp_done) / cp_remain
+        ).quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
+
+        max_reachable = (
+            (current_wam * cp_done + Decimal("100") * cp_remain) / total_cp
+        ).quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
+
+        if required > Decimal("100"):
+            # Unreachable -- find next-best band
+            suggested = self._suggest_next_band(max_reachable, target)
+            return MultiCoursePathResponse(
+                target_wam=float(target),
+                current_wam=float(current_wam),
+                is_achievable=False,
+                required_avg=None,
+                max_reachable=float(max_reachable),
+                suggested_target=float(suggested) if suggested is not None else None,
+                advisory_text=None,
+                language=self._language,
+            )
+
+        return MultiCoursePathResponse(
+            target_wam=float(target),
+            current_wam=float(current_wam),
+            is_achievable=True,
+            required_avg=float(required),
+            max_reachable=float(max_reachable),
+            suggested_target=None,
+            advisory_text=None,
+            language=self._language,
+        )
+
+    @staticmethod
+    def _suggest_next_band(
+        max_reachable: Decimal,
+        original_target: Decimal,
+    ) -> Decimal | None:
+        """Pick the highest USYD band below original_target that's still reachable.
+
+        Per phase 34 D-C3: avoid dead-end UX when original target is
+        unreachable by suggesting the next best goal the student can still
+        hit (HD > D > CR > P ordering).
+        """
+        for band in _USYD_BANDS:
+            if band < original_target and max_reachable >= band:
+                return band
+        return None
+
+    async def get_path_advisory(
+        self,
+        result: MultiCoursePathResponse,
+        course_levels: list[int] | None = None,
+    ) -> str | None:
+        """Wrap math result in 30-50 word AI verdict + tactic.
+
+        Returns None on AI failure (per plan D-D1 silent fallback).
+        Sentry-tagged with phase=34 + feature=path_planner so ops can
+        correlate systemic advisory outages with math-only UX regressions.
+        """
+        if not self._anthropic_api_key:
+            return None
+        try:
+            # Inline Anthropic call -- mirrors ROIService._ai_difficulty pattern
+            # (AIEngine.ask_question hardcodes QA_SYSTEM_PROMPT, so we call
+            # AsyncAnthropic directly to use the path-advisory system prompt).
+            from anthropic import AsyncAnthropic
+
+            client = AsyncAnthropic(api_key=self._anthropic_api_key)
+            system_prompt = get_path_advisory_prompt(result.language)
+            user_msg = get_path_advisory_user_message(
+                is_achievable=result.is_achievable,
+                required_avg=result.required_avg,
+                max_reachable=result.max_reachable,
+                suggested_target=result.suggested_target,
+                course_levels=course_levels,
+                language=result.language,
+            )
+            response = await client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=200,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_msg}],
+            )
+            text: str = response.content[0].text  # type: ignore[union-attr]
+            return text.strip()
+        except Exception:
+            with sentry_sdk.new_scope() as scope:
+                scope.set_tag("phase", "34")
+                scope.set_tag("feature", "path_planner")
+                sentry_sdk.capture_exception()
+            logger.warning(
+                "path_advisory_ai_failed",
+                target_wam=result.target_wam,
+                exc_info=True,
+            )
+            return None

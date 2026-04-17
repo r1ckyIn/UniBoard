@@ -75,6 +75,11 @@ async def sync_all_modules() -> None:
                             user_in_session, ed_token, courses, session
                         )
 
+                    # Phase 34 AIFEAT-02 / D-B2 -- recompute Course.content_hash
+                    # for each course in this user's sync. Flushes so later
+                    # commit persists. Worker decides re-embed based on diff.
+                    await _recompute_course_hashes(courses, session)
+
                     await session.commit()
 
                 # Post-sync translation for non-English users
@@ -294,3 +299,36 @@ async def _sync_ed_lessons(
         logger.warning("sync_ed_token_expired", user_id=str(user.id))
     finally:
         await adapter.close()
+
+
+async def _recompute_course_hashes(
+    courses: list[Course],
+    session: AsyncSession,
+) -> None:
+    """Recompute Course.content_hash for each course after module/lesson sync.
+
+    Per phase 34 AIFEAT-02 / D-B2: hash is sha256 of joined
+    module_items.text_content + lessons.text_content. Worker re-embeds when
+    computed != stored. ``embedded_at`` is NOT cleared here -- let the worker
+    decide based on hash diff (avoids double writes in the happy path).
+    """
+    from src.services.embedding_worker import compute_course_content_hash
+
+    for course in courses:
+        try:
+            new_hash = await compute_course_content_hash(session, course.id)
+        except Exception:
+            logger.warning(
+                "course_content_hash_compute_failed",
+                course_id=str(course.id),
+                exc_info=True,
+            )
+            continue
+        if course.content_hash != new_hash:
+            course.content_hash = new_hash
+            await session.flush()
+            logger.info(
+                "course_content_hash_updated",
+                course_id=str(course.id),
+                hash_prefix=new_hash[:8],  # log prefix only (privacy hygiene)
+            )

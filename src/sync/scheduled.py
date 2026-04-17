@@ -124,6 +124,70 @@ async def generate_daily_digests() -> None:
             )
 
 
+async def generate_study_recommendations_daily() -> None:
+    """Generate daily study recommendations for all users.
+
+    Runs via CronTrigger at 07:00 AEST (Australia/Sydney timezone).
+    Per phase 34 AIFEAT-01 / D-A2.
+
+    Per RESEARCH §10 Pitfall 5: each per-user invocation BYPASSES
+    _check_and_increment_limit because this is server-initiated and bounded
+    by APScheduler (1 call/user/day).
+    """
+    from src.config import get_settings
+    from src.services.study_recommendation import StudyRecommendationService
+
+    session_factory = _get_sync_session_factory()
+    settings = get_settings()
+
+    async with session_factory() as session:
+        result = await session.execute(select(Profile))
+        users = list(result.scalars().all())
+
+    if not users:
+        logger.info("study_rec_skip", reason="no users")
+        return
+
+    for user in users:
+        try:
+            async with session_factory() as session:
+                user_lang = user.language_preference or "en"
+                svc = StudyRecommendationService(
+                    session,
+                    anthropic_api_key=settings.anthropic_api_key,
+                    language=user_lang,
+                )
+                await svc.generate_and_cache(user.id)
+                await session.commit()
+                logger.info("study_rec_generated", user_id=str(user.id))
+        except Exception:
+            with sentry_phase_scope("34"):
+                sentry_sdk.capture_exception()
+            logger.warning(
+                "study_rec_generation_failed",
+                user_id=str(user.id),
+                exc_info=True,
+            )
+
+
+async def embed_hot_courses_worker_task() -> None:
+    """APScheduler entry point for the hot-set embedding worker.
+
+    Wraps ``src.services.embedding_worker.embed_hot_courses_worker`` with
+    sentry-tagged failure isolation. Per phase 34 AIFEAT-02 / D-B1.
+    """
+    from src.services.embedding_worker import embed_hot_courses_worker
+
+    session_factory = _get_sync_session_factory()
+    try:
+        stats = await embed_hot_courses_worker(session_factory)
+        logger.info("embed_hot_courses_worker_task_done", **stats)
+    except Exception:
+        with sentry_phase_scope("34"):
+            sentry_sdk.capture_exception()
+        logger.warning("embed_hot_courses_worker_task_failed", exc_info=True)
+
+
 async def check_token_health(now: datetime | None = None) -> None:
     """Check for expired tokens and dispatch warnings + recall emails.
 

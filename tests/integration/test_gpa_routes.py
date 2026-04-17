@@ -5,6 +5,7 @@ Auth tokens obtained via register + login endpoints.
 """
 
 import uuid
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -12,6 +13,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.course import Course
 from src.models.grade import Grade
+from src.schemas.gpa import MultiCoursePathResponse
+from src.web.deps import get_current_user_id
+
+# Fixed user ID for Phase 34 AIFEAT-03 dependency override
+_TEST_USER_ID = uuid.uuid4()
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -292,3 +298,119 @@ async def test_trend_returns_semesters(
     # Verify chronological order
     assert semesters[0]["semester"] == "2025S2"
     assert semesters[1]["semester"] == "2026S1"
+
+
+# ---------------------------------------------------------------------------
+# Phase 34 Wave 1 tests (AIFEAT-03) -- flipped from Wave 0 xfail stubs by 34-03
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_multi_course_path(test_client: httpx.AsyncClient) -> None:
+    """AIFEAT-03: POST /gpa/multi-course-path returns full payload with advisory.
+
+    Mocks _build_ai_gpa_service so service methods return fixture values
+    without DB or Anthropic calls. Verifies the advisory string from
+    get_path_advisory is wired into the response via model_copy.
+    """
+    fixture = MultiCoursePathResponse(
+        target_wam=78.0,
+        current_wam=75.0,
+        is_achievable=True,
+        required_avg=81.0,
+        max_reachable=87.5,
+        suggested_target=None,
+        advisory_text=None,  # service returns None; route fills via get_path_advisory
+        language="en",
+    )
+
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user_id] = lambda: _TEST_USER_ID
+
+    try:
+        with patch("src.web.routes.gpa._build_ai_gpa_service") as mock_factory:
+            mock_svc = AsyncMock()
+            mock_svc.calculate_multi_course_path = AsyncMock(return_value=fixture)
+            mock_svc.get_path_advisory = AsyncMock(
+                return_value=(
+                    "Reachable -- remaining 8 units need avg 78. "
+                    "Focus on the capstone (50% weight)."
+                )
+            )
+            mock_factory.return_value = mock_svc
+
+            resp = await test_client.post(
+                "/api/v1/gpa/multi-course-path",
+                json={"target_wam": 78.0, "remaining_credit_points": 72},
+                headers={"Authorization": "Bearer fake-token"},
+            )
+    finally:
+        app.dependency_overrides.pop(get_current_user_id, None)
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["data"]["is_achievable"] is True
+    assert body["data"]["required_avg"] == 81.0
+    assert body["data"]["advisory_text"].startswith("Reachable")
+    assert body["data"]["suggested_target"] is None
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_path_ai_fallback(test_client: httpx.AsyncClient) -> None:
+    """AIFEAT-03 / D-D1: AI advisory failure -> advisory_text=None, math returned.
+
+    Silent fallback verified at HTTP layer: advisory=None but math present.
+    """
+    fixture = MultiCoursePathResponse(
+        target_wam=78.0,
+        current_wam=75.0,
+        is_achievable=True,
+        required_avg=81.0,
+        max_reachable=87.5,
+        suggested_target=None,
+        advisory_text=None,
+        language="en",
+    )
+
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user_id] = lambda: _TEST_USER_ID
+
+    try:
+        with patch("src.web.routes.gpa._build_ai_gpa_service") as mock_factory:
+            mock_svc = AsyncMock()
+            mock_svc.calculate_multi_course_path = AsyncMock(return_value=fixture)
+            mock_svc.get_path_advisory = AsyncMock(return_value=None)  # D-D1 fallback
+            mock_factory.return_value = mock_svc
+
+            resp = await test_client.post(
+                "/api/v1/gpa/multi-course-path",
+                json={"target_wam": 78.0, "remaining_credit_points": 72},
+                headers={"Authorization": "Bearer fake-token"},
+            )
+    finally:
+        app.dependency_overrides.pop(get_current_user_id, None)
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["data"]["advisory_text"] is None  # D-D1 silent fallback honored
+    assert body["data"]["required_avg"] == 81.0  # math still present
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_multi_course_path_validation_rejects_invalid_target(
+    test_client: httpx.AsyncClient,
+) -> None:
+    """AIFEAT-03 / V5: target_wam > 100 -> 422 (Pydantic Field validator)."""
+    app = test_client._transport.app  # type: ignore[union-attr]
+    app.dependency_overrides[get_current_user_id] = lambda: _TEST_USER_ID
+
+    try:
+        resp = await test_client.post(
+            "/api/v1/gpa/multi-course-path",
+            json={"target_wam": 150.0, "remaining_credit_points": 72},
+            headers={"Authorization": "Bearer fake-token"},
+        )
+    finally:
+        app.dependency_overrides.pop(get_current_user_id, None)
+
+    assert resp.status_code == 422

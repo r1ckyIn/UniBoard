@@ -1,13 +1,16 @@
 """GPA/WAM REST endpoints matching OpenAPI contract."""
 
+import os
 import uuid
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
+import structlog
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import get_settings
 from src.models.course import Course
 from src.models.grade import Grade
 from src.models.user import Profile
@@ -21,6 +24,8 @@ from src.schemas.gpa import (
     GpaPredictionCourseResponse,
     GpaPredictionResponse,
     GpaReportResponse,
+    MultiCoursePathRequest,
+    MultiCoursePathResponse,
     PredictRequest,
     TrendResponse,
     WhatIfScenarioResponse,
@@ -28,13 +33,76 @@ from src.schemas.gpa import (
 )
 from src.services.gpa import _TWO_PLACES, GPAService, _parse_level_weight
 from src.web.deps import get_current_user_id, get_request_meta, get_session
+from src.web.rate_limit import limiter
+
+logger = structlog.get_logger()
 
 router = APIRouter()
 
 
+async def _try_reserve_ai_call(
+    session: AsyncSession, user_id: uuid.UUID
+) -> bool:
+    """Atomically check AI daily limit + increment counter.
+
+    Phase 34 MD-04 fix: ``/gpa/multi-course-path`` makes an Anthropic Sonnet
+    call per request via ``get_path_advisory``. Previously this call was
+    uncounted so users who had exhausted their Q&A quota still got advisory
+    generations (silently raising the daily AI budget).
+
+    Returns True if a call slot was reserved (caller may run AI); False if
+    over budget (caller skips AI and emits ``advisory_text=None`` per D-D1
+    silent fallback). Uses ``SELECT ... FOR UPDATE`` to avoid TOCTOU races
+    (mirrors ``QAService._check_and_increment_limit``).
+    """
+    settings = get_settings()
+    stmt = select(Profile).where(Profile.id == user_id).with_for_update()
+    result = await session.execute(stmt)
+    profile = result.scalar_one_or_none()
+    if profile is None:
+        return False
+
+    today = datetime.now(UTC)
+    if (
+        profile.ai_calls_reset_date is None
+        or profile.ai_calls_reset_date.date() < today.date()
+    ):
+        profile.ai_calls_today = 0
+        profile.ai_calls_reset_date = today
+
+    if profile.ai_calls_today >= settings.ai_daily_limit_per_user:
+        return False
+
+    profile.ai_calls_today += 1
+    await session.flush()
+    return True
+
+
 def get_gpa_service(session: AsyncSession = Depends(get_session)) -> GPAService:
-    """FastAPI dependency: create GPAService with current session."""
+    """FastAPI dependency: create GPAService with current session.
+
+    Note: math-only callers use this factory. Phase 34 AIFEAT-03 endpoint
+    uses _build_ai_gpa_service to inject ANTHROPIC_API_KEY + user language.
+    """
     return GPAService(session)
+
+
+async def _build_ai_gpa_service(
+    session: AsyncSession,
+    user_id: uuid.UUID,
+) -> GPAService:
+    """Build a GPAService instance with AI credentials + user language.
+
+    Phase 34 AIFEAT-03: the multi-course-path endpoint calls
+    get_path_advisory which needs ANTHROPIC_API_KEY. User's
+    language_preference drives EN vs ZH advisory output.
+    """
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    profile_stmt = select(Profile).where(Profile.id == user_id)
+    profile_result = await session.execute(profile_stmt)
+    profile = profile_result.scalar_one_or_none()
+    language = profile.language_preference if profile else "en"
+    return GPAService(session, anthropic_api_key=api_key, language=language)
 
 
 @router.get("")
@@ -309,3 +377,52 @@ async def get_trend(
     """Return per-semester WAM/GPA trend data."""
     result = await svc.get_trend(current_user_id)
     return SuccessResponse(data=result, meta=get_request_meta(request))
+
+
+# Phase 34 AIFEAT-03 -- multi-course path planner with optional AI advisory
+@router.post("/multi-course-path")
+@limiter.limit("10/minute")  # involves AI call; matches AI-backed route rates
+async def calculate_multi_course_path(
+    body: MultiCoursePathRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+) -> SuccessResponse[MultiCoursePathResponse]:
+    """Calculate required avg for remaining UNITS to reach target WAM.
+
+    Per phase 34 AIFEAT-03:
+    - Math always returned (Decimal-precise via service)
+    - AI advisory_text=None on failure (D-D1 silent fallback)
+    - Pydantic validates target_wam in [0, 100], remaining_credit_points >= 0
+
+    Returns SuccessResponse[MultiCoursePathResponse].
+    """
+    svc = await _build_ai_gpa_service(session, current_user_id)
+
+    # 1. Compute math (always succeeds)
+    result = await svc.calculate_multi_course_path(
+        current_user_id,
+        target_wam=body.target_wam,
+        remaining_credit_points=body.remaining_credit_points,
+    )
+
+    # 2. Phase 34 MD-04 fix: gate the optional AI advisory behind the same
+    #    daily AI limit that the Q&A path enforces. When the user is over
+    #    budget, skip the Anthropic call and return ``advisory_text=None``
+    #    (D-D1 silent fallback). Math is always returned regardless.
+    advisory_text: str | None = None
+    if await _try_reserve_ai_call(session, current_user_id):
+        advisory_text = await svc.get_path_advisory(result)
+    else:
+        logger.info(
+            "path_advisory_skipped_over_quota",
+            user_id=str(current_user_id),
+        )
+
+    # 3. Wire advisory back into response (service-layer result had
+    #    advisory_text=None by design -- Pydantic is immutable so use model_copy)
+    result_with_advisory = result.model_copy(update={"advisory_text": advisory_text})
+
+    return SuccessResponse(
+        data=result_with_advisory, meta=get_request_meta(request)
+    )

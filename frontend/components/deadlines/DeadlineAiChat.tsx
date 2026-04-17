@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ArrowUp, Info, MessageCircle } from "lucide-react";
 import { useAiStream } from "@/hooks/use-ai-stream";
 import AiChatBubble from "@/components/shared/AiChatBubble";
+import Sources from "@/components/shared/Sources";
 import RoughCard from "@/components/design-system/RoughCard";
 
 interface DeadlineAiChatProps {
@@ -22,7 +23,7 @@ export default function DeadlineAiChat({
 }: DeadlineAiChatProps) {
   const t = useTranslations("deadlines");
   const locale = useLocale();
-  const { messages, isStreaming, status, error, sendMessage, clearMessages } =
+  const { messages, sources, isStreaming, status, error, sendMessage, clearMessages } =
     useAiStream(courseId, locale);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -83,18 +84,23 @@ export default function DeadlineAiChat({
             ref={scrollRef}
             className="max-h-[300px] overflow-y-auto mb-[8px] px-[4px]"
           >
-            {messages.map((msg, i) => (
-              <AiChatBubble
-                key={i}
-                role={msg.role}
-                content={msg.content}
-                isStreaming={
-                  isStreaming &&
-                  i === messages.length - 1 &&
-                  msg.role === "assistant"
-                }
-              />
-            ))}
+            {messages.map((msg, i) => {
+              const isLatest = i === messages.length - 1;
+              const isLatestAssistant = isLatest && msg.role === "assistant";
+              return (
+                <Fragment key={i}>
+                  <AiChatBubble
+                    role={msg.role}
+                    content={msg.content}
+                    isStreaming={isStreaming && isLatestAssistant}
+                  />
+                  {/* Phase 34 AIFEAT-02: Sources panel only below latest assistant answer */}
+                  {isLatestAssistant && sources.length > 0 && (
+                    <Sources sources={sources} />
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
         )}
 

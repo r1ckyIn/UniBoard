@@ -78,6 +78,12 @@ class Settings(BaseSettings):
     # Digest -- uses Australia/Sydney timezone, NOT static UTC offset
     digest_cron_hour_aest: int = 7  # 07:00 AEST (APScheduler handles DST)
 
+    # Phase 34 -- Study recommendations daily cache (AIFEAT-01 / D-A2)
+    study_rec_cron_hour_aest: int = 7  # 07:00 AEST (APScheduler handles DST)
+
+    # Phase 34 -- Hot-set embedding worker interval (AIFEAT-02 / D-B1)
+    embedding_worker_interval_min: int = 30
+
     # Reminder check interval
     reminder_check_interval_min: int = 30
 

@@ -347,6 +347,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/gpa/multi-course-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Multi-course path planner (AIFEAT-03) — closed-form Decimal math + optional AI advisory */
+        post: operations["calculateMultiCoursePath"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/study-recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get cached daily study recommendations (AIFEAT-01) */
+        get: operations["getStudyRecommendations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/deadlines": {
         parameters: {
             query?: never;
@@ -581,6 +615,13 @@ export interface components {
             gpa_target: number | null;
             /** @enum {string} */
             gpa_scale: "wam" | "gpa_4" | "gpa_7";
+            /** @description Credit points remaining for degree completion; used by AIFEAT-03 multi-course path planner */
+            remaining_credit_points?: number | null;
+            /**
+             * @description Preferred language for AI-generated content
+             * @enum {string}
+             */
+            language_preference?: "en" | "zh";
             tokens: {
                 canvas: components["schemas"]["TokenStatus"];
                 ed: components["schemas"]["TokenStatus"];
@@ -940,6 +981,58 @@ export interface components {
             /** Format: date */
             monday_date: string;
         };
+        StudyCandidate: {
+            course_code: string;
+            assessment_name: string;
+            /** Format: float */
+            weight: number;
+            /** Format: float */
+            days_until_due: number;
+            /** Format: float */
+            roi_score: number;
+            /**
+             * Format: float
+             * @description composite ranking score
+             */
+            score: number;
+        };
+        StudyRecommendation: {
+            /** Format: date */
+            generated_for_date: string;
+            /** @description 20-30 word focus suggestion; empty string on AI fallback (D-D1) */
+            main_suggestion: string;
+            top_3: components["schemas"]["StudyCandidate"][];
+            /** @enum {string} */
+            language: "en" | "zh";
+        };
+        MultiCoursePathRequest: {
+            /** Format: float */
+            target_wam: number;
+            remaining_credit_points: number;
+        };
+        MultiCoursePath: {
+            /** Format: float */
+            target_wam: number;
+            /** Format: float */
+            current_wam: number;
+            is_achievable: boolean;
+            /**
+             * Format: float
+             * @description null if cp_remain=0 OR target already met
+             */
+            required_avg?: number | null;
+            /** Format: float */
+            max_reachable: number;
+            /**
+             * Format: float
+             * @description next-best USYD band (HD 85 / D 75 / CR 65 / P 50) if target unreachable
+             */
+            suggested_target?: number | null;
+            /** @description 30-50 word AI advisory; null on AI failure (D-D1 silent fallback) */
+            advisory_text?: string | null;
+            /** @enum {string} */
+            language: "en" | "zh";
+        };
     };
     responses: {
         /** @description Validation error */
@@ -1242,6 +1335,10 @@ export interface operations {
                     gpa_target?: number;
                     /** @enum {string} */
                     gpa_scale?: "wam" | "gpa_4" | "gpa_7";
+                    /** @description Credit points remaining for degree completion (AIFEAT-03) */
+                    remaining_credit_points?: number | null;
+                    /** @enum {string} */
+                    language_preference?: "en" | "zh";
                 };
             };
         };
@@ -1653,6 +1750,59 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: components["schemas"]["GpaPath"];
+                        meta: components["schemas"]["ResponseMeta"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthError"];
+        };
+    };
+    calculateMultiCoursePath: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MultiCoursePathRequest"];
+            };
+        };
+        responses: {
+            /** @description Path planner result (math + optional AI advisory) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MultiCoursePath"];
+                        meta: components["schemas"]["ResponseMeta"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthError"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    getStudyRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cached recommendation row (data = null if not yet generated) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["StudyRecommendation"] | null;
                         meta: components["schemas"]["ResponseMeta"];
                     };
                 };

@@ -9,7 +9,7 @@ from collections.abc import AsyncGenerator, Awaitable, Callable
 import structlog
 from anthropic import AsyncAnthropic
 
-from src.prompts.qa import QA_SYSTEM_PROMPT, get_qa_prompt
+from src.prompts.qa import get_qa_prompt
 from src.prompts.review import REVIEW_SYSTEM_PROMPT, get_review_prompt
 from src.prompts.risk_analysis import GPA_RISK_ANALYSIS_SYSTEM_PROMPT
 from src.prompts.thread_eval import THREAD_EVAL_SYSTEM_PROMPT
@@ -17,8 +17,11 @@ from src.schemas.ai import QAResponse, ThreadEvaluation, UnitReviewResponse
 
 logger = structlog.get_logger()
 
-# Regex pattern for inline citations: [Canvas: ...] or [Ed: ...]
-_CITATION_PATTERN = re.compile(r"\[(?:Canvas|Ed): [^\]]+\]")
+# Phase 34 AIFEAT-02: switch from `[Canvas: name]` / `[Ed: lesson]` text markers
+# to numeric `[N]` markers matching the 1-based order of sources in the
+# `Sources:` context block. The new regex captures the index as group 1 so the
+# frontend can correlate marker -> sources[N-1] via a map.
+_CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 
 # Tool definitions for adapter-backed cross-platform research (MCP fallback)
 AGENT_TOOLS: list[dict[str, object]] = [
@@ -130,10 +133,15 @@ class AIEngine:
         question: str,
         context_text: str,
         model: str = "claude-opus-4-6",
+        language: str = "en",
     ) -> QAResponse:
         """Answer a student question using provided course material context.
 
         Uses opus for high-quality Q&A. Extracts inline citations from response.
+
+        Phase 34 MD-01 fix: honours user language preference by selecting the
+        EN/ZH QA system prompt via ``get_qa_prompt``. Previously the
+        non-streaming path was hardcoded to English even for ZH users.
         """
         user_message = (
             f"Course materials:\n{context_text}\n\n"
@@ -143,7 +151,7 @@ class AIEngine:
         response = await self._client.messages.create(
             model=model,
             max_tokens=1000,
-            system=QA_SYSTEM_PROMPT,
+            system=get_qa_prompt(language),
             messages=[{"role": "user", "content": user_message}],
         )
 

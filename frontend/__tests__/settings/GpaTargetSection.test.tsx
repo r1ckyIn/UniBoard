@@ -63,6 +63,18 @@ describe("GpaTargetSection", () => {
     renderGpaSection({ gpa_target: 85.0 });
     const saveBtn = screen.getByText("gpa.saveTarget");
     await user.click(saveBtn);
-    expect(mockMutate).toHaveBeenCalledWith({ gpa_target: 85 });
+    // Phase 34 AIFEAT-03: atomic save persists gpa_target + remaining_credit_points together.
+    // Mock user has no remaining_credit_points → initial state is "" → payload sends null.
+    //
+    // Phase 34 WR-02 fix: handleSave now passes an onSuccess option so the
+    // "Saved!" indicator only flashes after the server confirms the write.
+    // Assert the body shape and the presence of an onSuccess callback.
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        gpa_target: 85,
+        remaining_credit_points: null,
+      },
+      expect.objectContaining({ onSuccess: expect.any(Function) }),
+    );
   });
 });

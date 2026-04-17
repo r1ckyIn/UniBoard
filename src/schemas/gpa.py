@@ -232,3 +232,34 @@ class GpaPathRequest(BaseModel):
     """Request body for POST /gpa/path."""
 
     target_wam: float = Field(ge=0, le=100)
+
+
+# ---------------------------------------------------------------------------
+# Phase 34 -- multi-course path planner (AIFEAT-03)
+# ---------------------------------------------------------------------------
+
+
+class MultiCoursePathRequest(BaseModel):
+    """Request body for POST /gpa/multi-course-path (per phase 34 D-C1)."""
+
+    target_wam: float = Field(ge=0, le=100)
+    remaining_credit_points: int = Field(ge=0)
+
+
+class MultiCoursePathResponse(BaseModel):
+    """Multi-course planner result: math + optional AI advisory.
+
+    Per phase 34 D-C3: when target unreachable, returns suggested_target
+    (highest USYD band still in max_reachable's reach).
+    Per phase 34 D-D1: AI advisory_text=None on AI failure (math always
+    returned).
+    """
+
+    target_wam: float
+    current_wam: float
+    is_achievable: bool
+    required_avg: float | None  # None if cp_remain=0 OR target already met (=0)
+    max_reachable: float
+    suggested_target: float | None  # next-best USYD band when unreachable
+    advisory_text: str | None  # 30-50 word AI line; None on AI failure (D-D1)
+    language: str  # "en" | "zh"

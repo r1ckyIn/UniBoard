@@ -4,8 +4,29 @@
  * EventSource only supports GET; Q&A needs POST with question body.
  */
 
+// Phase 34 AIFEAT-02 — citation source payload emitted via `event: sources`
+// BEFORE the first `event: token`. Frontend renders inline [N] markers +
+// collapsible Sources panel tied to the index field.
+//
+// Phase 34 HI-01 fix: `title` and `module_id` may be null for legacy rows
+// embedded before the per-source attribution fix (source_type="mixed"). The
+// Sources component renders a labelled fallback using source_type +
+// chunk_index when title is null. `source_type` is typed as a string union
+// plus "mixed" to accept legacy rows without breaking compile-time.
+export interface CitationSource {
+  index: number; // 1-based marker matching inline [N]
+  module_id: string | null;
+  title: string | null;
+  source_type: "module_item" | "lesson" | "mixed";
+  source_id?: string;
+  chunk_index?: number;
+  anchor: string | null;
+  score: number; // 0-1 cosine similarity (1 - pgvector distance / 2)
+  excerpt: string; // server-truncated preview (~100 chars)
+}
+
 export interface SSEEvent {
-  event: "status" | "token" | "done" | "error";
+  event: "status" | "token" | "done" | "error" | "sources";
   data: Record<string, unknown>;
 }
 

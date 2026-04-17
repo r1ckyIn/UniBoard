@@ -28,18 +28,34 @@ VALID_PLATFORMS = ("canvas", "ed")
 
 
 def _build_user_response(profile: Profile) -> UserResponse:
-    """Build UserResponse from Profile ORM model with token statuses."""
+    """Build UserResponse from Profile ORM model with token statuses.
+
+    Phase 34 WR-03 fix: coerce legacy rows with NULL/unknown
+    ``language_preference`` or ``gpa_scale`` values to the documented
+    defaults (``"en"`` / ``"wam"``) so the tightened ``Literal`` fields on
+    ``UserResponse`` never raise at response time. A backfill migration
+    remains the preferred long-term fix; this keeps GETs working until then.
+    """
     canvas_status: str = (
         "active" if profile.canvas_api_token_encrypted else "not_configured"
     )
     ed_status: str = "active" if profile.ed_api_token_encrypted else "not_configured"
 
+    language_preference = profile.language_preference or "en"
+    if language_preference not in ("en", "zh"):
+        language_preference = "en"
+
+    gpa_scale = profile.gpa_scale or "wam"
+    if gpa_scale not in ("wam", "gpa_4"):
+        gpa_scale = "wam"
+
     return UserResponse(
         id=str(profile.id),
         display_name=profile.display_name,
         gpa_target=profile.gpa_target,
-        gpa_scale=profile.gpa_scale,
-        language_preference=profile.language_preference,
+        gpa_scale=gpa_scale,
+        remaining_credit_points=profile.remaining_credit_points,
+        language_preference=language_preference,
         tokens={
             "canvas": TokenStatus(status=canvas_status, platform="canvas"),
             "ed": TokenStatus(status=ed_status, platform="ed"),
@@ -82,14 +98,15 @@ async def update_profile(
     if body.gpa_target is not None:
         profile.gpa_target = body.gpa_target
 
+    # Phase 34 WR-01 fix: Pydantic ``Literal`` validation rejects non-enum
+    # values before the handler runs; no runtime check needed here.
     if body.gpa_scale is not None:
-        if body.gpa_scale not in ("wam", "gpa_4"):
-            raise ValidationError(detail="gpa_scale must be 'wam' or 'gpa_4'")
         profile.gpa_scale = body.gpa_scale
 
+    if body.remaining_credit_points is not None:
+        profile.remaining_credit_points = body.remaining_credit_points
+
     if body.language_preference is not None:
-        if body.language_preference not in ("en", "zh"):
-            raise ValidationError(detail="language_preference must be 'en' or 'zh'")
         profile.language_preference = body.language_preference
 
     await session.flush()
