@@ -41,9 +41,9 @@ describe("Sources component", () => {
     const summary = screen.getByText(/label/i);
     fireEvent.click(summary);
 
-    // Both titles appear
-    expect(screen.getByText("Lecture 1")).toBeInTheDocument();
-    expect(screen.getByText("Module 2")).toBeInTheDocument();
+    // Both titles appear (titles live as text nodes inside <li>)
+    expect(screen.getByText(/Lecture 1/)).toBeInTheDocument();
+    expect(screen.getByText(/Module 2/)).toBeInTheDocument();
 
     // [1] and [2] inline markers present
     expect(screen.getByText("[1]")).toBeInTheDocument();

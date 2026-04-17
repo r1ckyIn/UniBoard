@@ -17,6 +17,12 @@
     "courses": "Courses",
     "creditPts": "Credit Pts"
   },
+  "shared": {
+    "sources": {
+      "label": "{count, plural, one {1 source} other {# sources}}",
+      "empty": "No sources available."
+    }
+  },
   "dashboard": {
     "hero": {
       "greeting": {
@@ -27,6 +33,7 @@
       "date": "It's {weekday}, {weekNumber} of Semester {semester}.",
       "weekLabel": "Week {weekNumber}",
       "scrollPrompt": "your dashboard",
+      "roiFallback": "Focus: {course} — {assessment} ({weight}%)",
       "encourage": {
         "multiComplete": "The {item1} and the {item2} are done and behind you now. You've been working so hard \u2014 {highlight}.",
         "multiCompleteHighlight": "it's okay to take it slow today",
@@ -514,7 +521,21 @@
     "roi_low": "Low priority",
     "roi_weight": "Weight",
     "roi_difficulty": "Difficulty",
-    "roi_ai_badge": "AI estimated"
+    "roi_ai_badge": "AI estimated",
+    "studyRec": {
+      "title": "Today's focus",
+      "empty": "No upcoming assessments. Enjoy the calm.",
+      "weight": "{pct}% weight",
+      "daysLeft": "{days, plural, =0 {Due today} one {1 day left} other {# days left}}"
+    },
+    "path": {
+      "title": "Multi-course path",
+      "empty": "Set your remaining credit points in Settings to plan your GPA path.",
+      "reachable": "Reachable",
+      "unreachable": "Not reachable — try {suggested}",
+      "requiredAvg": "Need avg {requiredAvg} across remaining {remainingCp} cp",
+      "maxReachable": "Max reachable WAM: {value}"
+    }
   },
   "timetable": {
     "title": "Timetable",
@@ -638,7 +659,19 @@
       "currentTarget": "Current Target",
       "saveTarget": "Save Target",
       "saved": "Saved!",
-      "scale": "Scale: USYD 7-point (HD >= 85, D >= 75, CR >= 65, P >= 50)"
+      "scale": "Scale: USYD 7-point (HD >= 85, D >= 75, CR >= 65, P >= 50)",
+      "bandChips": {
+        "label": "Quick pick",
+        "pass": "P 50",
+        "credit": "CR 65",
+        "distinction": "D 75",
+        "highDistinction": "HD 85"
+      },
+      "remainingCp": {
+        "label": "Remaining credit points",
+        "hint": "USYD typical Bachelor: 144 cp total. Used by the GPA path planner.",
+        "placeholder": "e.g., 72"
+      }
     },
     "notifications": {
       "title": "Notifications",

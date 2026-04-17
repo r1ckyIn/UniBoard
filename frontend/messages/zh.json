@@ -17,6 +17,12 @@
     "courses": "课程",
     "creditPts": "学分"
   },
+  "shared": {
+    "sources": {
+      "label": "{count, plural, one {1 个来源} other {# 个来源}}",
+      "empty": "暂无来源信息。"
+    }
+  },
   "dashboard": {
     "hero": {
       "greeting": {
@@ -27,6 +33,7 @@
       "date": "今天是{weekday}，第{semester}学期{weekNumber}。",
       "weekLabel": "第{weekNumber}周",
       "scrollPrompt": "你的仪表盘",
+      "roiFallback": "重点：{course} — {assessment}（{weight}%）",
       "encourage": {
         "multiComplete": "{item1} 和 {item2} 都已完成了。你一直很努力\u2014\u2014{highlight}\u3002",
         "multiCompleteHighlight": "今天可以放慢脚步休息一下",
@@ -514,7 +521,21 @@
     "roi_low": "低优先级",
     "roi_weight": "权重",
     "roi_difficulty": "难度",
-    "roi_ai_badge": "AI 估算"
+    "roi_ai_badge": "AI 估算",
+    "studyRec": {
+      "title": "今日重点",
+      "empty": "暂无待办评估，好好休息。",
+      "weight": "权重 {pct}%",
+      "daysLeft": "{days, plural, =0 {今日截止} other {还剩 {days} 天}}"
+    },
+    "path": {
+      "title": "多门课程路径",
+      "empty": "请到「设置」填写剩余学分以规划 GPA 路径。",
+      "reachable": "可达",
+      "unreachable": "不可达 — 建议 {suggested}",
+      "requiredAvg": "剩余 {remainingCp} 学分需平均 {requiredAvg} 分",
+      "maxReachable": "理论最高可达 WAM：{value}"
+    }
   },
   "timetable": {
     "title": "课程表",
@@ -638,7 +659,19 @@
       "currentTarget": "当前目标",
       "saveTarget": "保存目标",
       "saved": "已保存！",
-      "scale": "评分标准：USYD 7 分制（HD >= 85，D >= 75，CR >= 65，P >= 50）"
+      "scale": "评分标准：USYD 7 分制（HD >= 85，D >= 75，CR >= 65，P >= 50）",
+      "bandChips": {
+        "label": "快速选择",
+        "pass": "P 50",
+        "credit": "CR 65",
+        "distinction": "D 75",
+        "highDistinction": "HD 85"
+      },
+      "remainingCp": {
+        "label": "剩余学分",
+        "hint": "USYD 本科常见：共 144 学分。GPA 路径规划器使用。",
+        "placeholder": "例如：72"
+      }
     },
     "notifications": {
       "title": "通知",
