@@ -43,7 +43,7 @@ class UnitOutlineParser:
         Always stores raw_html in the result for future re-parsing.
         Parses HTML once and passes the soup object to all extraction methods.
         """
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()
             html = response.text
