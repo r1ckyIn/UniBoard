@@ -5,10 +5,12 @@ import uuid
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
+import structlog
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import get_settings
 from src.models.course import Course
 from src.models.grade import Grade
 from src.models.user import Profile
@@ -33,7 +35,47 @@ from src.services.gpa import _TWO_PLACES, GPAService, _parse_level_weight
 from src.web.deps import get_current_user_id, get_request_meta, get_session
 from src.web.rate_limit import limiter
 
+logger = structlog.get_logger()
+
 router = APIRouter()
+
+
+async def _try_reserve_ai_call(
+    session: AsyncSession, user_id: uuid.UUID
+) -> bool:
+    """Atomically check AI daily limit + increment counter.
+
+    Phase 34 MD-04 fix: ``/gpa/multi-course-path`` makes an Anthropic Sonnet
+    call per request via ``get_path_advisory``. Previously this call was
+    uncounted so users who had exhausted their Q&A quota still got advisory
+    generations (silently raising the daily AI budget).
+
+    Returns True if a call slot was reserved (caller may run AI); False if
+    over budget (caller skips AI and emits ``advisory_text=None`` per D-D1
+    silent fallback). Uses ``SELECT ... FOR UPDATE`` to avoid TOCTOU races
+    (mirrors ``QAService._check_and_increment_limit``).
+    """
+    settings = get_settings()
+    stmt = select(Profile).where(Profile.id == user_id).with_for_update()
+    result = await session.execute(stmt)
+    profile = result.scalar_one_or_none()
+    if profile is None:
+        return False
+
+    today = datetime.now(UTC)
+    if (
+        profile.ai_calls_reset_date is None
+        or profile.ai_calls_reset_date.date() < today.date()
+    ):
+        profile.ai_calls_today = 0
+        profile.ai_calls_reset_date = today
+
+    if profile.ai_calls_today >= settings.ai_daily_limit_per_user:
+        return False
+
+    profile.ai_calls_today += 1
+    await session.flush()
+    return True
 
 
 def get_gpa_service(session: AsyncSession = Depends(get_session)) -> GPAService:
@@ -364,8 +406,18 @@ async def calculate_multi_course_path(
         remaining_credit_points=body.remaining_credit_points,
     )
 
-    # 2. Optional AI advisory (D-D1 fallback: None on failure)
-    advisory_text = await svc.get_path_advisory(result)
+    # 2. Phase 34 MD-04 fix: gate the optional AI advisory behind the same
+    #    daily AI limit that the Q&A path enforces. When the user is over
+    #    budget, skip the Anthropic call and return ``advisory_text=None``
+    #    (D-D1 silent fallback). Math is always returned regardless.
+    advisory_text: str | None = None
+    if await _try_reserve_ai_call(session, current_user_id):
+        advisory_text = await svc.get_path_advisory(result)
+    else:
+        logger.info(
+            "path_advisory_skipped_over_quota",
+            user_id=str(current_user_id),
+        )
 
     # 3. Wire advisory back into response (service-layer result had
     #    advisory_text=None by design -- Pydantic is immutable so use model_copy)
