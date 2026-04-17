@@ -292,3 +292,24 @@ async def test_trend_returns_semesters(
     # Verify chronological order
     assert semesters[0]["semester"] == "2025S2"
     assert semesters[1]["semester"] == "2026S1"
+
+
+# ---------------------------------------------------------------------------
+# Phase 34 Wave 0 RED-state stubs (AIFEAT-03)
+# xfail(strict=False) - flipped to real bodies by Wave 1 plan 34-03.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=False, reason="Phase 34: implementation pending (34-03)")
+def test_multi_course_path() -> None:
+    """AIFEAT-03: POST /gpa/multi-course-path returns full payload.
+
+    Payload must include required_avg math plus AI advisory text.
+    """
+    pytest.xfail("Phase 34: implementation pending")
+
+
+@pytest.mark.xfail(strict=False, reason="Phase 34: implementation pending (34-03)")
+def test_path_ai_fallback() -> None:
+    """AIFEAT-03 / D-D1: AI advisory failure -> advisory_text=None, math payload still returned."""
+    pytest.xfail("Phase 34: implementation pending")

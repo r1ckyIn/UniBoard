@@ -114,3 +114,27 @@ async def test_get_intelligence_ai_returns_200(
     assert resp.status_code == 200
     body = resp.json()["data"]
     assert isinstance(body, list)
+
+
+# ---------------------------------------------------------------------------
+# Phase 34 Wave 0 RED-state stubs (AIFEAT-01, AIFEAT-02)
+# xfail(strict=False) - flipped to real bodies by Wave 1 plans (34-02, 34-04).
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(strict=False, reason="Phase 34: implementation pending (34-02)")
+def test_get_study_recommendations() -> None:
+    """AIFEAT-01: GET /ai/study-recommendations returns cached row for authenticated user."""
+    pytest.xfail("Phase 34: implementation pending")
+
+
+@pytest.mark.xfail(strict=False, reason="Phase 34: implementation pending (34-04)")
+def test_qa_bumps_last_access() -> None:
+    """AIFEAT-02: POST /courses/{id}/qa bumps Course.last_qa_access_at column."""
+    pytest.xfail("Phase 34: implementation pending")
+
+
+@pytest.mark.xfail(strict=False, reason="Phase 34: implementation pending (34-04)")
+def test_sse_sources_event_order() -> None:
+    """AIFEAT-02: SSE stream emits sources event before first token."""
+    pytest.xfail("Phase 34: implementation pending")
