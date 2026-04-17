@@ -42,6 +42,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         check_deadline_reminders,
         check_token_health,
         generate_daily_digests,
+        generate_study_recommendations_daily,
         sync_all_deadlines,
         sync_all_grades,
         sync_all_modules,
@@ -106,6 +107,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             timezone="Australia/Sydney",
         ),
         id="generate_daily_digests",
+        replace_existing=True,
+        max_instances=1,
+    )
+
+    # Phase 34 -- Daily study recommendation generation (AIFEAT-01 / D-A2).
+    # AEST literal timezone is required: CLAUDE.md Pitfall 4 bans UTC+offset.
+    scheduler.add_job(
+        generate_study_recommendations_daily,
+        CronTrigger(
+            hour=settings.study_rec_cron_hour_aest,
+            minute=0,
+            timezone="Australia/Sydney",
+        ),
+        id="generate_study_recommendations_daily",
         replace_existing=True,
         max_instances=1,
     )

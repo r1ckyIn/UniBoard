@@ -15,10 +15,12 @@ from src.models.course import Course
 from src.models.user import Profile
 from src.schemas.ai import QARequest, QAResponse, StreamingQARequest, UnitReviewResponse
 from src.schemas.common import SuccessResponse
+from src.schemas.study_recommendation import StudyRecommendationResponse
 from src.security.encryption import TokenEncryption
 from src.services.ai_engine import AIEngine
 from src.services.qa import QAService
 from src.services.skill import SkillService
+from src.services.study_recommendation import StudyRecommendationService
 from src.services.tool_executor import ToolExecutor
 from src.web.deps import get_current_user_id, get_encryption, get_request_meta, get_session
 from src.web.rate_limit import limiter
@@ -204,3 +206,42 @@ async def course_review_stream(
         language=lang,
     )
     return EventSourceResponse(_sse_wrap(stream, "analyzing"), ping=15)
+
+
+# ---------------------------------------------------------------------------
+# Phase 34 AIFEAT-01 -- Daily study recommendation (D-A2, no realtime LLM)
+# ---------------------------------------------------------------------------
+
+
+def _build_study_rec_service(
+    session: AsyncSession = Depends(get_session),
+) -> StudyRecommendationService:
+    """Dependency factory for StudyRecommendationService.
+
+    Endpoint only reads the cached row; language was set at generation time
+    by the APScheduler job using the user's Profile.language_preference.
+    """
+    settings = get_settings()
+    return StudyRecommendationService(
+        session,
+        anthropic_api_key=settings.anthropic_api_key,
+        language="en",
+    )
+
+
+@router.get("/ai/study-recommendations")
+@limiter.limit("60/minute")
+async def get_study_recommendations(
+    request: Request,
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+    svc: StudyRecommendationService = Depends(_build_study_rec_service),
+) -> SuccessResponse[StudyRecommendationResponse | None]:
+    """Get cached daily study recommendations for the current user.
+
+    Returns 200 + data=null if no recommendation has been generated yet
+    (e.g., a new user before the first 07:00 AEST cycle). Frontend falls
+    back to the defaultEncouragementProvider per D-D1.
+    """
+    result = await svc.get_latest(current_user_id)
+    meta = get_request_meta(request)
+    return SuccessResponse(data=result, meta=meta)
