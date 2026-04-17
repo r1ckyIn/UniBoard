@@ -151,7 +151,7 @@ class DeadlineService:
         if to_date:
             stmt = stmt.where(UnifiedDeadline.due_date <= to_date)
         if not include_past:
-            stmt = stmt.where(UnifiedDeadline.due_date >= datetime.utcnow())  # noqa: DTZ003
+            stmt = stmt.where(UnifiedDeadline.due_date >= datetime.now(UTC))
 
         # Sort
         sort_col = UnifiedDeadline.due_date
