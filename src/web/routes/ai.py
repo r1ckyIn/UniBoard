@@ -14,7 +14,7 @@ from src.config import get_settings
 from src.models.course import Course
 from src.models.user import Profile
 from src.schemas.ai import QARequest, QAResponse, StreamingQARequest, UnitReviewResponse
-from src.schemas.common import SuccessResponse
+from src.schemas.common import RateLimitedError, SuccessResponse
 from src.schemas.study_recommendation import StudyRecommendationResponse
 from src.security.encryption import TokenEncryption
 from src.services.ai_engine import AIEngine
@@ -180,7 +180,14 @@ async def course_qa_stream(
     current_user_id: uuid.UUID = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),
 ) -> EventSourceResponse:
-    """Stream AI Q&A response via SSE."""
+    """Stream AI Q&A response via SSE.
+
+    Phase 34 MD-03 fix: increment the AI daily-limit counter BEFORE the RAG
+    sources prefetch so users cannot bypass the quota by driving
+    ``retrieve_rag_sources`` (a Voyage embedding call) without ever yielding
+    the stream. On 429, emit a structured SSE ``error`` event instead of an
+    uncaught HTTPException so the frontend sees the standard SSE flow.
+    """
     _require_ai_configured()
     encryption = get_encryption()
     tool_executor = await _build_tool_executor(
@@ -188,6 +195,26 @@ async def course_qa_stream(
     )
     skill_service = SkillService(session)
     svc = _build_qa_service(session, tool_executor=tool_executor, skill_service=skill_service)
+
+    # Phase 34 MD-03 fix: gate all cost-bearing work behind the daily AI
+    # limit check. Increment the counter up front; ``stream_answer_question``
+    # is told ``already_counted=True`` to avoid a double increment.
+    try:
+        await svc.check_and_increment_limit(current_user_id)
+    except RateLimitedError as exc:
+        rate_limit_message = str(exc)
+
+        async def _rate_limit_stream() -> AsyncGenerator[dict[str, str], None]:
+            yield {
+                "event": "error",
+                "data": json.dumps(
+                    {"message": rate_limit_message, "code": "rate_limited"}
+                ),
+            }
+
+        if tool_executor:
+            await tool_executor.close()
+        return EventSourceResponse(_rate_limit_stream(), ping=15)
 
     # Phase 34 AIFEAT-02: pre-fetch RAG sources so the SSE 'sources' event
     # can be emitted BEFORE the first token (RESEARCH §10 Pitfall 2).
@@ -208,6 +235,7 @@ async def course_qa_stream(
                 history=body.history,
                 search_more=body.search_more,
                 language=body.language,
+                already_counted=True,  # route incremented counter above
             )
             async for event in _sse_wrap(stream, "searching", sources=sources_payload):
                 yield event

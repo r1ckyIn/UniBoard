@@ -99,6 +99,18 @@ class QAService:
 
         return user
 
+    async def check_and_increment_limit(self, user_id: uuid.UUID) -> Profile:
+        """Public wrapper around ``_check_and_increment_limit``.
+
+        Phase 34 MD-03 fix: routes that perform cost-bearing work (e.g. a
+        Voyage embedding call via ``retrieve_rag_sources``) BEFORE entering
+        the streaming generator need to gate that work on the AI daily
+        limit explicitly. Exposing the check lets the route pre-increment
+        the counter and pass ``already_counted=True`` to
+        ``stream_answer_question`` to avoid a double increment.
+        """
+        return await self._check_and_increment_limit(user_id)
+
     async def _load_course_materials(
         self, course_id: uuid.UUID,
     ) -> tuple[Course, str]:
@@ -400,6 +412,7 @@ class QAService:
         history: list[dict[str, str]] | None = None,
         search_more: bool = False,
         language: str = "en",
+        already_counted: bool = False,
     ) -> AsyncGenerator[str, None]:
         """Stream Q&A answer. Uses direct context or MCP fallback.
 
@@ -409,8 +422,15 @@ class QAService:
 
         Phase 34 AIFEAT-02 / D-B1: ``_bump_qa_access`` is invoked BEFORE the
         LLM call to fuel the hot-set predicate used by the embedding worker.
+
+        Phase 34 MD-03 fix: ``already_counted=True`` suppresses the internal
+        daily-limit check when the route has already incremented the counter
+        BEFORE the (cost-bearing) sources prefetch. This prevents a double
+        increment per request while preserving the check for callers that
+        drive the service directly (tests, other routes).
         """
-        await self._check_and_increment_limit(user_id)
+        if not already_counted:
+            await self._check_and_increment_limit(user_id)
         await self._bump_qa_access(course_id)  # Phase 34 AIFEAT-02 / D-B1
 
         course, materials_text = await self._load_course_materials(course_id)
