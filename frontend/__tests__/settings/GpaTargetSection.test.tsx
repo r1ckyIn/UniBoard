@@ -63,6 +63,11 @@ describe("GpaTargetSection", () => {
     renderGpaSection({ gpa_target: 85.0 });
     const saveBtn = screen.getByText("gpa.saveTarget");
     await user.click(saveBtn);
-    expect(mockMutate).toHaveBeenCalledWith({ gpa_target: 85 });
+    // Phase 34 AIFEAT-03: atomic save persists gpa_target + remaining_credit_points together.
+    // Mock user has no remaining_credit_points → initial state is "" → payload sends null.
+    expect(mockMutate).toHaveBeenCalledWith({
+      gpa_target: 85,
+      remaining_credit_points: null,
+    });
   });
 });

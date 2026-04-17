@@ -12,6 +12,7 @@ import { useCourses, useCourseDetail } from "@/hooks/use-courses";
 import { useUpcomingDeadlines } from "@/hooks/use-deadlines";
 import { useNotifications, useAlerts } from "@/hooks/use-notifications";
 import { useCurrentUser } from "@/hooks/use-user";
+import { useStudyRecommendation } from "@/hooks/use-study-recommendations";
 import { useAuthStore } from "@/lib/auth/store";
 import { getGradeBand } from "@/lib/utils/grade-band";
 import { mapNotificationToActivity } from "@/lib/notifications/map-to-activity";
@@ -60,6 +61,7 @@ export default function DashboardPage() {
   const notifications = useNotifications();
   const alerts = useAlerts();
   const user = useCurrentUser();
+  const studyRec = useStudyRecommendation(); // Phase 34 AIFEAT-01
   const authUser = useAuthStore((s) => s.user);
 
   // ── Cross-card state: Deadline <-> Donut ───────────────────────
@@ -235,6 +237,8 @@ export default function DashboardPage() {
         <HeroSection
           userName={authUser?.displayName ?? "Student"}
           onScrollClick={handleScrollToStats}
+          mainSuggestion={studyRec.data?.data?.main_suggestion ?? null}
+          top3Items={studyRec.data?.data?.top_3 ?? null}
         />
 
         {/* Stats Row */}

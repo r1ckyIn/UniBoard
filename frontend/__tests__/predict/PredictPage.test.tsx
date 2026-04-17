@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, within, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createElement } from "react";
 
 // ── Mocks must be hoisted before imports ─────────────────────────
 
@@ -256,6 +257,42 @@ vi.mock("@/hooks/use-courses", () => ({
       error: null,
     };
   },
+}));
+
+// Phase 34 AIFEAT-01/03 hooks — stub to avoid contaminating existing tests
+vi.mock("@/hooks/use-study-recommendations", () => ({
+  useStudyRecommendation: () => ({
+    data: undefined,
+    isLoading: false,
+    error: null,
+  }),
+}));
+
+vi.mock("@/hooks/use-multi-course-path", () => ({
+  useMultiCoursePath: () => ({
+    mutate: vi.fn(),
+    data: undefined,
+    isPending: false,
+  }),
+}));
+
+vi.mock("@/hooks/use-user", () => ({
+  useCurrentUser: () => ({
+    data: { data: { remaining_credit_points: null } },
+    isLoading: false,
+    error: null,
+  }),
+}));
+
+// Stub the new Phase 34 cards so their i18n "title" key does not collide with
+// the PredictPage title text in screen.getByText assertions below.
+vi.mock("@/components/predict/StudyRecCard", () => ({
+  default: () => createElement("div", { "data-testid": "study-rec-card-stub" }),
+}));
+
+vi.mock("@/components/predict/MultiCoursePathCard", () => ({
+  default: () =>
+    createElement("div", { "data-testid": "multi-course-path-card-stub" }),
 }));
 
 // ── Import component under test after mocks ──────────────────────

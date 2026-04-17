@@ -18,6 +18,30 @@ const HeroDoodles = withClientOnly(
 interface HeroSectionProps {
   userName: string;
   onScrollClick: () => void;
+  // Phase 34 AIFEAT-01 / D-A1: daily AI study suggestion (20-30 words).
+  // Empty string or null triggers the D-D1 fallback chain:
+  //   mainSuggestion (AI prose)
+  //     -> top3Items[0] (deterministic ROI fallback)
+  //       -> defaultEncouragementProvider (generic encouragement)
+  mainSuggestion?: string | null;
+  top3Items?: { course_code: string; assessment_name: string; weight: number }[] | null;
+}
+
+/**
+ * Deterministic fallback line derived from the highest-ROI item when the
+ * AI prose main_suggestion is empty. Per D-D1: rule-engine fallback never
+ * leaks internal fallback vocabulary — just a plain focus hint.
+ */
+function formatRoiFallbackLine(
+  item: { course_code: string; assessment_name: string; weight: number },
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  const pct = Math.round(item.weight * 100);
+  return t("hero.roiFallback", {
+    course: item.course_code,
+    assessment: item.assessment_name,
+    weight: pct,
+  });
 }
 
 /**
@@ -52,7 +76,12 @@ const mockActivity = {
   recentCompletedItems: ["COMP2017 lab", "the stats quiz"],
 };
 
-export default function HeroSection({ userName, onScrollClick }: HeroSectionProps) {
+export default function HeroSection({
+  userName,
+  onScrollClick,
+  mainSuggestion,
+  top3Items,
+}: HeroSectionProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const dateFnsLocale = locale === "zh" ? zhCN : enUS;
@@ -72,8 +101,23 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
   // Date line — locale-aware weekday (e.g. "Monday" in en, full-form weekday in zh)
   const weekday = format(new Date(), "EEEE", { locale: dateFnsLocale });
 
-  // Encouragement text
-  const encouragement = defaultEncouragementProvider(mockActivity, t);
+  // Encouragement text — 3-stage fallback chain (D-D1):
+  //   1. AI prose main_suggestion (when non-empty)
+  //   2. Top-3 ROI deterministic fallback (when prose empty but Top-3 present)
+  //   3. defaultEncouragementProvider (new-user / neither-available)
+  const fallbackEncouragement = defaultEncouragementProvider(mockActivity, t);
+  const aiSuggestion = mainSuggestion?.trim() ?? "";
+  const heroLine =
+    aiSuggestion.length > 0
+      ? aiSuggestion
+      : top3Items && top3Items.length > 0
+        ? formatRoiFallbackLine(top3Items[0], t)
+        : fallbackEncouragement.message;
+  // Only render the animated rough-notation highlight when we're on the
+  // third-stage default encouragement (the AI prose / ROI fallback don't
+  // contain the highlightPhrase).
+  const useAnimatedHighlight = aiSuggestion.length === 0 && !(top3Items && top3Items.length > 0);
+  const encouragement = fallbackEncouragement;
 
   // Staggered Rough Notation annotations
   useEffect(() => {
@@ -108,8 +152,13 @@ export default function HeroSection({ userName, onScrollClick }: HeroSectionProp
     };
   }, []);
 
-  // Split the encouragement message to wrap the highlightPhrase
+  // Split the encouragement message to wrap the highlightPhrase (only when
+  // we're on the third-stage default fallback — AI prose / ROI fallback lines
+  // don't contain the highlightPhrase so we render them plain).
   const renderEncouragement = () => {
+    if (!useAnimatedHighlight) {
+      return <span>{heroLine}</span>;
+    }
     const { message, highlightPhrase } = encouragement;
     const idx = message.indexOf(highlightPhrase);
     if (idx === -1) {
