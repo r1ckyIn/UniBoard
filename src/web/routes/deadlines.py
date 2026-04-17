@@ -134,8 +134,7 @@ async def get_upcoming_deadlines(
     svc: DeadlineService = Depends(get_deadline_service),
 ) -> SuccessResponse[list[ContractDeadlineResponse]]:
     """Return deadlines due within the next 7 days."""
-    # Use naive datetime to match TIMESTAMP WITHOUT TIME ZONE column
-    now = datetime.utcnow()  # noqa: DTZ003
+    now = datetime.now(UTC)
     result = await svc.get_deadlines(
         current_user_id,
         from_date=now,

@@ -1,7 +1,7 @@
 """Course REST endpoints matching OpenAPI contract."""
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
@@ -261,8 +261,7 @@ async def list_course_deadlines(
     result = await session.execute(stmt)
     deadlines = result.scalars().all()
 
-    # Use naive datetime to match TIMESTAMP WITHOUT TIME ZONE column
-    now = datetime.utcnow()  # noqa: DTZ003
+    now = datetime.now(UTC)
 
     # Pre-load grades for this course to check completed status
     grade_stmt = select(Grade).where(Grade.course_id == course_id)
