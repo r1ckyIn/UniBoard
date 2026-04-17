@@ -11,9 +11,6 @@ interface RoughCardProps {
   disableHover?: boolean;
 }
 
-// Duration (ms) for the rAF burst that tracks layout animation resizes
-const RESIZE_BURST_DURATION = 400;
-
 export default function RoughCard({
   children,
   className,
@@ -61,25 +58,18 @@ export default function RoughCard({
     const el = containerRef.current;
     if (!el) return;
 
-    let burstRafId: number | null = null;
+    let pendingRafId: number | null = null;
 
+    // Single-frame rAF debounce: coalesce all ResizeObserver callbacks fired in
+    // the same frame into one drawBorder() call. Avoids the per-card 400 ms x
+    // 60 fps redraw burst that saturates the main thread when N cards mount or
+    // resize simultaneously (skeleton -> content swap, scrollbar toggle, etc).
     const observer = new ResizeObserver(() => {
-      // Cancel any ongoing burst to avoid stacking loops
-      if (burstRafId !== null) cancelAnimationFrame(burstRafId);
-
-      // Start a rAF burst that redraws the border every frame for RESIZE_BURST_DURATION ms.
-      // This ensures the rough.js border follows height changes frame-by-frame
-      // during spring/layout animations rather than snapping at discrete intervals.
-      const start = performance.now();
-      const loop = () => {
+      if (pendingRafId !== null) return;
+      pendingRafId = requestAnimationFrame(() => {
+        pendingRafId = null;
         drawBorder();
-        if (performance.now() - start < RESIZE_BURST_DURATION) {
-          burstRafId = requestAnimationFrame(loop);
-        } else {
-          burstRafId = null;
-        }
-      };
-      loop();
+      });
     });
     observer.observe(el);
 
@@ -87,7 +77,7 @@ export default function RoughCard({
       cancelAnimationFrame(outerRafId);
       cancelAnimationFrame(innerRafId);
       observer.disconnect();
-      if (burstRafId !== null) cancelAnimationFrame(burstRafId);
+      if (pendingRafId !== null) cancelAnimationFrame(pendingRafId);
     };
   }, [drawBorder]);
 
