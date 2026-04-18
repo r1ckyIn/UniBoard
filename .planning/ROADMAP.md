@@ -389,3 +389,19 @@ Plans:
   3. Setup TokenStep skips re-validation for tokens that already passed validation on retry
   4. Setup SuccessStep shows per-domain sync progress bars (Canvas sync, Ed sync, etc.) instead of single spinner
 **Plans**: TBD
+
+## Backlog
+
+### Phase 999.1: Sidebar transform-based architecture refactor (BACKLOG)
+**Goal**: [Captured for future planning] Eliminate sidebar hover lag on content-heavy pages by replacing `transition: width` with GPU-composited `transform: translateX`. Two-layer DOM: outer 68 px container always visible + inner 224 px panel absolutely positioned with `translateX(-156 px)` by default, `translateX(0)` on hover. Bypasses per-frame layout cost that `width` animation incurs (non-composited property). Expected ~50 line refactor, requires reworking icon positioning logic and careful visual verification.
+**Context**: Remaining issue from the 2026-04-17/18 5fps-lag investigation (.planning/debug/uniboard-5fps-lag-dashboard.md). PRs #80-87 drove INP 267→107 ms and cleared the Rough.js hotspots, but sidebar hover on dashboard/predict/settings/timetable still feels draggy because `transition: width` physically requires main-thread layout per frame.
+**Requirements**: TBD
+**Plans**: 0 plans
+  - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.2: Page mount lazy loading (BACKLOG)
+**Goal**: [Captured for future planning] Eliminate "first-visit lag" on dashboard/predict/settings/timetable by converting eager mount + query waterfall + staggered entrance animations to intersection-observer-driven progressive rendering. For SettingsPage: lazy-mount sections based on active nav instead of rendering all 11 RoughCard sections at once. For DashboardPage: defer non-hero cards (MiniCalendar, RecentActivity, etc.) until they enter the viewport. Expected 20-40 lines per page, medium-risk refactor.
+**Context**: Remaining issue from the 2026-04-17/18 5fps-lag investigation. User confirmed dashboard hover-sidebar is smooth only after a 5 s wait — the entrance phase saturates the compositor. Same pattern repeats on predict/settings/timetable. AnimatedEntry stagger (0.04-0.72 s × N components) + per-section useQuery mount storm compound into a ~1-3 s window of contested main-thread work.
+**Requirements**: TBD
+**Plans**: 0 plans
+  - [ ] TBD (promote with /gsd-review-backlog when ready)
