@@ -11,6 +11,46 @@ interface RoughCardProps {
   disableHover?: boolean;
 }
 
+// Module-level LRU cache for Rough.js path output, keyed by "WxH" (rounded).
+// With seed:42 fixed, the generated path is deterministic — identical sizes
+// produce identical SVG subtrees, so any card of the same dimensions can
+// clone the cached template instead of re-running the Rough.js algorithm.
+// Dashboard/courses/timetable mount many same-width cards; hit rate is high.
+const ROUGH_PATH_CACHE = new Map<string, SVGGElement>();
+const ROUGH_PATH_CACHE_MAX = 64;
+
+function getRoughBorder(
+  svg: SVGSVGElement,
+  w: number,
+  h: number,
+): SVGGElement {
+  const key = `${Math.round(w)}x${Math.round(h)}`;
+  const cached = ROUGH_PATH_CACHE.get(key);
+  if (cached !== undefined) {
+    // LRU touch: re-insert at the tail so it is last to be evicted.
+    ROUGH_PATH_CACHE.delete(key);
+    ROUGH_PATH_CACHE.set(key, cached);
+    return cached.cloneNode(true) as SVGGElement;
+  }
+  const rc = rough.svg(svg);
+  const rect = rc.rectangle(0, 0, w, h, {
+    stroke: "#d0cdc4",
+    strokeWidth: 1.4,
+    roughness: 1.5,
+    bowing: 1.2,
+    fill: "none",
+    seed: 42, // Fixed seed → deterministic path for a given (w, h)
+  }) as SVGGElement;
+  // Evict oldest entry if over the cap. Map iteration order is insertion.
+  if (ROUGH_PATH_CACHE.size >= ROUGH_PATH_CACHE_MAX) {
+    const oldest = ROUGH_PATH_CACHE.keys().next().value;
+    if (oldest !== undefined) ROUGH_PATH_CACHE.delete(oldest);
+  }
+  ROUGH_PATH_CACHE.set(key, rect);
+  // Return a clone so the template stays detached and reusable.
+  return rect.cloneNode(true) as SVGGElement;
+}
+
 export default function RoughCard({
   children,
   className,
@@ -33,16 +73,7 @@ export default function RoughCard({
     // Clear previous SVG children before drawing
     svg.replaceChildren();
 
-    const rc = rough.svg(svg);
-    const rect = rc.rectangle(0, 0, w, h, {
-      stroke: "#d0cdc4",
-      strokeWidth: 1.4,
-      roughness: 1.5,
-      bowing: 1.2,
-      fill: "none",
-      seed: 42, // Fixed seed for deterministic hand-drawn paths (no jitter on redraw)
-    });
-    svg.appendChild(rect);
+    svg.appendChild(getRoughBorder(svg, w, h));
   }, []);
 
   useEffect(() => {
