@@ -119,16 +119,11 @@ export default function HeroSection({
   const useAnimatedHighlight = aiSuggestion.length === 0 && !(top3Items && top3Items.length > 0);
   const encouragement = fallbackEncouragement;
 
-  // Staggered Rough Notation annotations — compressed from the original
-  // [900/1500/2300]ms schedule to [400/700/1000]ms so the hero's entrance
-  // phase settles in ~1.5s instead of ~3.3s. During the entrance window the
-  // SVG path dashoffset animations dominated the compositor queue, so
-  // sidebar hover on dashboard felt laggy until users waited ~5s for the
-  // hero to quiesce. Stagger is preserved, just tighter.
+  // Staggered Rough Notation annotations
   useEffect(() => {
-    const t1 = setTimeout(() => setShowUnderline(true), 400);
-    const t2 = setTimeout(() => setShowCircle(true), 700);
-    const t3 = setTimeout(() => setShowHighlight(true), 1000);
+    const t1 = setTimeout(() => setShowUnderline(true), 900);
+    const t2 = setTimeout(() => setShowCircle(true), 1500);
+    const t3 = setTimeout(() => setShowHighlight(true), 2300);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
@@ -178,7 +173,7 @@ export default function HeroSection({
           type="highlight"
           color="rgba(217,119,87,0.10)"
           show={showHighlight}
-          animationDuration={500}
+          animationDuration={1000}
           padding={4}
         >
           {highlightPhrase}
@@ -206,7 +201,7 @@ export default function HeroSection({
             type="underline"
             color="#d97757"
             show={showUnderline}
-            animationDuration={500}
+            animationDuration={600}
             strokeWidth={2}
             padding={2}
           >
@@ -221,7 +216,7 @@ export default function HeroSection({
             type="circle"
             color="#6a9bcc"
             show={showCircle}
-            animationDuration={500}
+            animationDuration={800}
             strokeWidth={2}
             padding={4}
           >
