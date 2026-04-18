@@ -53,6 +53,44 @@ function ProgressBarFill({ progress, color }: { progress: number; color: string 
   );
 }
 
+// Module-level LRU cache for the course-card Rough.js border, keyed by "WxH"
+// (rounded). seed:42 is fixed so identical sizes yield identical SVG subtrees.
+// Dashboard/courses pages mount multiple CourseCard instances at the same
+// width (grid columns); this lets them clone one template instead of each
+// re-running the Rough.js generator.
+const COURSE_BORDER_CACHE = new Map<string, SVGGElement>();
+const COURSE_BORDER_CACHE_MAX = 32;
+
+function getCourseCardBorder(
+  svg: SVGSVGElement,
+  w: number,
+  h: number,
+): SVGGElement {
+  const key = `${Math.round(w)}x${Math.round(h)}`;
+  const cached = COURSE_BORDER_CACHE.get(key);
+  if (cached !== undefined) {
+    // LRU touch: re-insert at the tail.
+    COURSE_BORDER_CACHE.delete(key);
+    COURSE_BORDER_CACHE.set(key, cached);
+    return cached.cloneNode(true) as SVGGElement;
+  }
+  const rc = rough.svg(svg);
+  const rect = rc.rectangle(0, 0, w, h, {
+    stroke: "#d0cdc4",
+    strokeWidth: 0.8,
+    roughness: 1.0,
+    bowing: 1,
+    fill: "none",
+    seed: 42,
+  }) as SVGGElement;
+  if (COURSE_BORDER_CACHE.size >= COURSE_BORDER_CACHE_MAX) {
+    const oldest = COURSE_BORDER_CACHE.keys().next().value;
+    if (oldest !== undefined) COURSE_BORDER_CACHE.delete(oldest);
+  }
+  COURSE_BORDER_CACHE.set(key, rect);
+  return rect.cloneNode(true) as SVGGElement;
+}
+
 interface CourseCardProps {
   id: string;
   name: string;
@@ -64,9 +102,6 @@ interface CourseCardProps {
   colorSoft: string;
   decoIndex: number;
 }
-
-// Duration (ms) for the rAF burst that tracks layout animation resizes
-const RESIZE_BURST_DURATION = 400;
 
 // Grade band label keys for i18n
 const BAND_KEYS: Record<string, string> = {
@@ -104,17 +139,7 @@ export default function CourseCard({
     svg.setAttribute("viewBox", `-4 -4 ${w + 8} ${h + 8}`);
 
     svg.replaceChildren();
-
-    const rc = rough.svg(svg);
-    const rect = rc.rectangle(0, 0, w, h, {
-      stroke: "#d0cdc4",
-      strokeWidth: 0.8,
-      roughness: 1.0,
-      bowing: 1,
-      fill: "none",
-      seed: 42,
-    });
-    svg.appendChild(rect);
+    svg.appendChild(getCourseCardBorder(svg, w, h));
   }, []);
 
   useEffect(() => {
@@ -126,27 +151,20 @@ export default function CourseCard({
       });
     });
 
-    // Redraw on resize to keep borders aligned
+    // Redraw on resize to keep the border aligned — same single-frame rAF
+    // debounce pattern as RoughCard.tsx. The previous 400 ms x 60 fps burst
+    // compounded across 4+ simultaneously-mounting course cards and froze
+    // the courses list page.
     const el = containerRef.current;
     if (!el) return;
 
-    let burstRafId: number | null = null;
-
+    let pendingRafId: number | null = null;
     const observer = new ResizeObserver(() => {
-      // Cancel any ongoing burst to avoid stacking loops
-      if (burstRafId !== null) cancelAnimationFrame(burstRafId);
-
-      // Start a rAF burst that redraws the border every frame for RESIZE_BURST_DURATION ms
-      const start = performance.now();
-      const loop = () => {
+      if (pendingRafId !== null) return;
+      pendingRafId = requestAnimationFrame(() => {
+        pendingRafId = null;
         drawBorder();
-        if (performance.now() - start < RESIZE_BURST_DURATION) {
-          burstRafId = requestAnimationFrame(loop);
-        } else {
-          burstRafId = null;
-        }
-      };
-      loop();
+      });
     });
     observer.observe(el);
 
@@ -154,7 +172,7 @@ export default function CourseCard({
       cancelAnimationFrame(outerRafId);
       cancelAnimationFrame(innerRafId);
       observer.disconnect();
-      if (burstRafId !== null) cancelAnimationFrame(burstRafId);
+      if (pendingRafId !== null) cancelAnimationFrame(pendingRafId);
     };
   }, [drawBorder]);
 
