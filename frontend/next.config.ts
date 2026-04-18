@@ -40,6 +40,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Emit source maps for production client bundles so DevTools Performance
+  // traces and React profiles resolve minified names back to source files.
+  // Repo is public; revealing source paths carries no secret risk.
+  productionBrowserSourceMaps: true,
   // Forward Vercel system env var to the client bundle.
   // VERCEL_GIT_COMMIT_SHA is exposed server-side automatically, but Next.js
   // only embeds NEXT_PUBLIC_* into the browser. This mapping runs at build
@@ -60,6 +64,9 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   silent: !process.env.CI,
   widenClientFileUpload: true,
   sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
+    // Keep .map files on the CDN so DevTools in the browser can resolve
+    // minified stack frames and Performance trace entries to source names.
+    // Sentry still uploads its own copy for server-side symbolication.
+    deleteSourcemapsAfterUpload: false,
   },
 });
