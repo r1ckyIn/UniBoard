@@ -10,6 +10,40 @@ import { withClientOnly } from "@/components/design-system/ClientOnly";
 const BannerDecoClient = withClientOnly(
   () => import("@/components/courses/BannerDeco")
 );
+
+// Stable options reference for the progress-bar background rectangle.
+const PROGRESS_BG_OPTIONS = {
+  stroke: "#d5d2ca",
+  fill: "#eae7e0",
+  fillStyle: "solid",
+  roughness: 1.2,
+  seed: 42,
+} as const;
+
+// Module-level LRU cache for the progress-bar background rect, keyed by
+// rounded width (height is constant 10). Fill rects are not cached because
+// their width is a continuous product of progress and vary per course color.
+const PROGRESS_BG_CACHE = new Map<number, SVGGElement>();
+const PROGRESS_BG_CACHE_MAX = 16;
+
+function getCachedProgressBg(svg: SVGSVGElement, w: number): SVGGElement {
+  const key = Math.round(w);
+  const cached = PROGRESS_BG_CACHE.get(key);
+  if (cached !== undefined) {
+    PROGRESS_BG_CACHE.delete(key);
+    PROGRESS_BG_CACHE.set(key, cached);
+    return cached.cloneNode(true) as SVGGElement;
+  }
+  const rc = rough.svg(svg);
+  const rect = rc.rectangle(0, 0, w, 10, PROGRESS_BG_OPTIONS) as SVGGElement;
+  if (PROGRESS_BG_CACHE.size >= PROGRESS_BG_CACHE_MAX) {
+    const oldest = PROGRESS_BG_CACHE.keys().next().value;
+    if (oldest !== undefined) PROGRESS_BG_CACHE.delete(oldest);
+  }
+  PROGRESS_BG_CACHE.set(key, rect);
+  return rect.cloneNode(true) as SVGGElement;
+}
+
 // Inline progress bar that fills remaining width via CSS
 function ProgressBarFill({ progress, color }: { progress: number; color: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -25,11 +59,9 @@ function ProgressBarFill({ progress, color }: { progress: number; color: string 
     svg.setAttribute("viewBox", `-2 -2 ${w + 4} ${h + 4}`);
     svg.replaceChildren();
 
-    const rc = rough.svg(svg);
-    svg.appendChild(rc.rectangle(0, 0, w, h, {
-      stroke: "#d5d2ca", fill: "#eae7e0", fillStyle: "solid", roughness: 1.2, seed: 42,
-    }));
+    svg.appendChild(getCachedProgressBg(svg, w));
     if (progress > 0) {
+      const rc = rough.svg(svg);
       svg.appendChild(rc.rectangle(0, 0, w * Math.min(progress, 1), h, {
         stroke: color, fill: color, fillStyle: "solid", roughness: 1.6, seed: 42,
       }));
@@ -37,12 +69,28 @@ function ProgressBarFill({ progress, color }: { progress: number; color: string 
   }, [progress, color]);
 
   useEffect(() => {
-    draw();
+    // Initial paint on a rAF to let layout settle before reading offsetWidth.
+    const initialRafId = requestAnimationFrame(() => draw());
     const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => draw());
+    if (!el) return () => cancelAnimationFrame(initialRafId);
+
+    // Single-frame rAF debounce on resize — same pattern as RoughCard /
+    // CourseCard, avoids redrawing 60 fps while parent animations settle.
+    let pendingRafId: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (pendingRafId !== null) return;
+      pendingRafId = requestAnimationFrame(() => {
+        pendingRafId = null;
+        draw();
+      });
+    });
     observer.observe(el);
-    return () => observer.disconnect();
+
+    return () => {
+      cancelAnimationFrame(initialRafId);
+      observer.disconnect();
+      if (pendingRafId !== null) cancelAnimationFrame(pendingRafId);
+    };
   }, [draw]);
 
   return (
