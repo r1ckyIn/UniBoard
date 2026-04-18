@@ -49,7 +49,12 @@ export default function Sidebar() {
         "bg-dark flex flex-col py-5 z-[100]",
         "transition-[width] duration-[0.28s] ease-[cubic-bezier(.4,0,.2,1)]",
         "overflow-hidden shadow-[2px_0_16px_rgba(20,20,19,.06)]",
-        "hover:w-[var(--spacing-sidebar-w-expanded)] group"
+        "hover:w-[var(--spacing-sidebar-w-expanded)] group",
+        // Isolate layout + paint so the width-transition redraw cost stays
+        // inside the sidebar subtree and does not ripple into main content
+        // on every animation frame (previously manifested as a global
+        // feeling of lag whenever the pointer grazed the sidebar).
+        "[contain:layout_paint]"
       )}
     >
       {/* Logo */}
@@ -62,8 +67,9 @@ export default function Sidebar() {
         </span>
       </div>
 
-      {/* Rule */}
-      <div className="w-[26px] h-px bg-[rgba(60,50,40,.1)] mx-auto mb-[10px] transition-[width] duration-[0.28s] group-hover:w-[calc(100%-44px)]" />
+      {/* Rule — hover-expand is instantaneous; an animated calc() width
+          compounded style-recalc cost across every sidebar hover frame. */}
+      <div className="w-[26px] h-px bg-[rgba(60,50,40,.1)] mx-auto mb-[10px] group-hover:w-[calc(100%-44px)]" />
 
       {/* Main nav */}
       <ul className="list-none w-full flex-1 flex flex-col gap-[2px] px-[10px]">
