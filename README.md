@@ -19,6 +19,14 @@
 
 ---
 
+## Demo
+
+![Demo](assets/demo.gif)
+
+Static screenshot of the auth flow; interactive UI demo recording pending.
+
+---
+
 ## English
 
 ### Problem
@@ -55,20 +63,9 @@ UniBoard is a GPA maximization dashboard that aggregates data from Canvas LMS, E
 
 ### Architecture
 
-```
-Browser / Claude Desktop
-    |
-    +-- Next.js 15 (Vercel) -- supabase-js Auth + TanStack Query -> Python API
-    |
-    +-- Python FastAPI (Railway)
-    |       Services: GPA, Deadlines, Intelligence, Sync, AI Engine
-    |       Adapters: Canvas, Ed Discussion, Ed Lessons, Unit Outline
-    |       MCP Server: 17-tool access for Claude Desktop
-    |       3-source API deduplication with SHA-256 hashing
-    |
-    +-- Supabase (Managed)
-            PostgreSQL (15 tables) + Auth + RLS (60 policies)
-```
+![Architecture](assets/architecture.svg)
+
+Source: [architecture.excalidraw](assets/architecture.excalidraw) — drag to [excalidraw.com](https://excalidraw.com) to edit.
 
 ### AI-Augmented Development
 
@@ -115,6 +112,10 @@ cd frontend && pnpm install && pnpm dev
 ### Design
 
 UniBoard follows an Anthropic/Claude-inspired design aesthetic -- warm colors, paper texture, hand-drawn borders (Rough.js), and restrained typography. The goal is to feel like "a quiet, trustworthy notebook on your desk" rather than a flashy EdTech product.
+
+### Why Story
+
+UniBoard started because USyd's Canvas LMS and Ed Discussion were two apps I kept context-switching between — and I missed submissions because of it. Aggregating both sources into one dashboard was the fix. Adding the 17-tool MCP server was the unlock: Claude can now reason over the merged data (GPA projections, deadline clustering, study-time estimates) instead of me parsing it manually. 40+ USyd students use it daily. The story is that AI-native interfaces beat traditional dashboards when the data is structured enough for an LLM to reason about.
 
 ---
 
