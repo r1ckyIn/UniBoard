@@ -63,6 +63,12 @@
 - [ ] **AIFEAT-03**: GPA 路径规划（"剩余科目需要平均 78+ 才能达到 Distinction"）
 - [ ] **AIFEAT-04**: 推送通知（截止日期提醒，浏览器 Push API 或邮件通知）
 
+### Performance (PERF)
+
+- [ ] **PERF-01**: First paint shows real data on Dashboard/Courses/Deadlines/Predict/Digest/Timetable for cached-auth revisits (no SkeletonCard flash visible to the naked eye)
+- [ ] **PERF-02**: Dashboard serial waterfall (`/deadlines/upcoming → /courses/{nearest}`) eliminated via server-side `Promise.all` parallelisation
+- [ ] **PERF-03**: Railway cold-start p50/p95 characterised; if p95 > 2s, warmup strategy implemented (GH Actions cron preferred over Railway always-on)
+
 ## Future Requirements
 
 ### Scale (v4.0+)
@@ -117,12 +123,15 @@
 | UXPOL-02 | Phase 36 | Pending |
 | UXPOL-03 | Phase 36 | Pending |
 | UXPOL-04 | Phase 36 | Pending |
+| PERF-01 | Phase 38 | Pending |
+| PERF-02 | Phase 38 | Pending |
+| PERF-03 | Phase 38 | Pending |
 
 **Coverage:**
-- v3.0 requirements: 22 total
-- Mapped to phases: 22/22
+- v3.0 requirements: 25 total
+- Mapped to phases: 25/25
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-06 — Traceability populated by roadmapper*
+*Last updated: 2026-04-20 — PERF-01/02/03 added for Phase 38 (promoted from backlog 999.2)*
