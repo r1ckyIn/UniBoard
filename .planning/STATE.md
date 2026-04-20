@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 Phase: 34 (ai-features-live) — EXECUTING
 Plan: 1 of 6
 Status: Executing Phase 34
-Last activity: 2026-04-17
+Last activity: 2026-04-20 - Completed quick task 260420-n29: fix GPU paint-cost stalls on Intel Mac — 4 subtypes across Header backdrop-blur / Sidebar bleeding shadow / Timetable skeleton shimmer / Grid entry fade (PRs #89-92)
 
 ## Milestones Completed
 
@@ -383,6 +383,12 @@ None.
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260420-n29 | fix GPU paint-cost stalls on Intel Mac — 4 subtypes across Header backdrop-blur / Sidebar bleeding shadow / Timetable skeleton shimmer / Grid entry fade (PRs #89-92) | 2026-04-20 | c6ed6eb | Verified | [260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4](./quick/260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4/) |
 
 ## Session Continuity
 
