@@ -4,10 +4,10 @@ milestone: v2.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 34 context gathered
-last_updated: "2026-04-17T07:56:13.064Z"
-last_activity: 2026-04-17
+last_updated: "2026-04-20T07:36:31.817Z"
+last_activity: 2026-04-20
 progress:
-  total_phases: 20
+  total_phases: 22
   completed_phases: 17
   total_plans: 64
   completed_plans: 64
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 Phase: 34 (ai-features-live) — EXECUTING
 Plan: 1 of 6
 Status: Executing Phase 34
-Last activity: 2026-04-20 - Completed quick task 260420-n29: fix GPU paint-cost stalls on Intel Mac — 4 subtypes across Header backdrop-blur / Sidebar bleeding shadow / Timetable skeleton shimmer / Grid entry fade (PRs #89-92)
+Last activity: 2026-04-20
 
 ## Milestones Completed
 
