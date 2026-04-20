@@ -358,18 +358,20 @@ export default function TimetablePage() {
             onModeChange={handleModeChange}
           />
         </AnimatedEntry>
-        <AnimatedEntry delay={2}>
-          <TimetableGrid
-            sessions={filteredSessions}
-            deadlines={weekDeadlineItems}
-            weekPosition={weekPosition}
-            mode={mode}
-            currentWeek={currentWeek}
-            isBreak={isBreak}
-            isCurrentWeekView={isCurrentWeekView}
-            attendanceCourses={attendanceCourses}
-          />
-        </AnimatedEntry>
+        {/* No AnimatedEntry here — the grid's box-shadow + ~850k px²
+            compositor layer made the 0.6 s opacity fade-in paint-expensive
+            at large viewports. Title row still fades in so the page
+            doesn't feel inert; grid appears instantly once data is ready. */}
+        <TimetableGrid
+          sessions={filteredSessions}
+          deadlines={weekDeadlineItems}
+          weekPosition={weekPosition}
+          mode={mode}
+          currentWeek={currentWeek}
+          isBreak={isBreak}
+          isCurrentWeekView={isCurrentWeekView}
+          attendanceCourses={attendanceCourses}
+        />
       </div>
       {portalTarget &&
         createPortal(
