@@ -8,10 +8,25 @@ const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const apiHost = apiUrl ? new URL(apiUrl).origin : "";
 
+// Allow non-hosted Supabase origins (e.g. local `supabase start` at 127.0.0.1:54321).
+// The default CSP only whitelists *.supabase.co; when NEXT_PUBLIC_SUPABASE_URL points
+// elsewhere (local dev, self-hosted), append that origin + its ws(s) variant.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseOrigin = supabaseUrl ? new URL(supabaseUrl).origin : "";
+const supabaseIsHosted =
+  !supabaseOrigin || /\.supabase\.co$/i.test(new URL(supabaseUrl!).hostname);
+const supabaseExtraOrigins = supabaseIsHosted
+  ? []
+  : [
+      supabaseOrigin,
+      supabaseOrigin.replace(/^http(s?):/, (_, s) => (s ? "wss:" : "ws:")),
+    ];
+
 const connectSrc = [
   "'self'",
   "https://*.supabase.co",
   "wss://*.supabase.co",
+  ...supabaseExtraOrigins,
   "https://*.ingest.sentry.io",
   apiHost,
 ]
