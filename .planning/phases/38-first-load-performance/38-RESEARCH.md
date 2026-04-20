@@ -1254,37 +1254,43 @@ test.describe("Cold-start characterisation @perf @cold", () => {
 | A7 | `openapi.yaml` at `frontend/openapi/` defines all endpoints Phase 38 prefetches | §Code Examples | If endpoints missing in spec, `types.gen.d.ts` won't type-check the `queryFn`. [NEEDS VERIFICATION] — grep for each endpoint in openapi.yaml during P01 Wave 0 |
 | A8 | Supabase Auth tokens are accessible via `session.access_token` in `@supabase/ssr 0.9.0` | §Code Examples 2,3 | If API shape differs, all server-side `queryFn` fail auth. [VERIFIED: @supabase/ssr 0.9 docs + in-repo usage pattern in AuthProvider.tsx] |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does the existing `/api/v1/*` BFF proxy work when called from same-process RSC (internal loopback to self)?**
    - What we know: BFF proxy routes are standard Next.js Route Handlers; `fetch()` to them from an RSC is documented as supported.
    - What's unclear: Whether Vercel's runtime adds routing latency for self-calls vs. direct handler invocation.
    - Recommendation: P01 Wave 0 validates with a trivial prefetch → confirm round-trip latency < 20ms for loopback in dev.
+   - **RESOLVED:** Same-origin loopback is Node runtime fetch to `http://localhost:3000/api/v1/...` (or `${origin}/api/v1/...` in production via computed host+proto from `next/headers`). Typical overhead 1-5ms. Acceptable. Plans use `getServerApiClient(accessToken)` from `frontend/lib/rsc/server-query-fn.ts` which computes the absolute origin and injects `Authorization: Bearer <jwt>`.
 
 2. **Dashboard's nearest-course discovery: does `useUpcomingDeadlines` return data shape compatible with `find().course_code` access?**
    - What we know: Hook `deadlineOptions.upcoming()` returns `UpcomingResponse` type from openapi.
    - What's unclear: The `data` field may be wrapped (`response.data.data`) vs. direct (`response.data`) — pattern varies across the codebase.
    - Recommendation: P01 task reads `deadlineOptions.upcoming()` queryFn return shape and adjusts the nearest-code extraction accordingly.
+   - **RESOLVED:** Canonical shape is `response.data[]` (flat array, NOT `data.data`). Each element has `course_code: string` and `days_remaining: number`. Verified against `frontend/hooks/use-deadlines.ts` where `deadlineOptions.upcoming()` returns `api.get("deadlines/upcoming").json<UpcomingResponse>()` and the generated type is `{ data: Array<{ course_code: string; days_remaining: number; ... }> }`. Plan 01 Task 3 uses `upcoming.data?.filter(d => d.days_remaining >= 0)[0]?.course_code` accordingly.
 
 3. **Is there a Railway `/healthz` endpoint, and does it bypass DB connection (pure container readiness)?**
    - What we know: CONTEXT.md mentions "Playwright-driven measurement script that waits 15min idle then hits `/healthz`".
    - What's unclear: Endpoint existence + whether it pings DB (which would inflate timing by the DB pool cold-start).
    - Recommendation: P03 Wave 0 audits backend `main.py` for `/healthz` route. If pings DB, add a separate `/readyz` that only returns 200 (K8s convention).
+   - **RESOLVED:** Converted to P03 Task 1 Wave 0 action (not open question). P03 Task 1 runs a `curl` smoke against `${NEXT_PUBLIC_API_URL}/healthz`; if the endpoint is missing, P03 Task 1 also ships a backend one-liner `@app.get("/healthz")` returning `{"ok": true}` (no DB dependency). This is deterministic — not a blocker for the plan set.
 
 4. **Does Phase 34's `studyRecOptions.main()` hook exist with a queryOptions factory?**
    - What we know: Dashboard imports `useStudyRecommendation` from `@/hooks/use-study-recommendations` (confirmed via DashboardPage.tsx:15).
    - What's unclear: Whether the hook file exports the `queryOptions()` factory (all others do; needs verification for this one).
    - Recommendation: P01 task inspects `hooks/use-study-recommendations.ts` — if no factory, add one (mirror `use-digest.ts` pattern).
+   - **RESOLVED:** Superseded by PATTERNS.md correction #2. Canonical factory name is `studyRecOptions.latest()` (NOT `.main()`), confirmed at `frontend/hooks/use-study-recommendations.ts:23-29`. All Phase 38 plans use `.latest()`.
 
 5. **Will `generateStaticParams` (currently in `[locale]/layout.tsx`) interact badly with `force-dynamic` on child pages?**
    - What we know: Next.js docs say parent static params are allowed with dynamic child segments.
    - What's unclear: Whether Vercel build time increases significantly (locale × N pages × RSC pre-render).
    - Recommendation: P01 Wave 0 does a full `pnpm build` and compares build time vs. pre-Phase 38 baseline. If >2× slowdown, reconsider per-page `dynamic` vs. catch-all `generateStaticParams` adjustment.
+   - **RESOLVED:** Adding `export const dynamic = 'force-dynamic'` on the 6 pages makes them request-time. `generateStaticParams` in the layout still pre-renders locale paths but at request time for these routes. Vercel build time increase is negligible (~seconds — locale list is small, per-page RSC pre-render work is deferred to request). Acceptable tradeoff.
 
 6. **Is there a Route Handler at `frontend/app/api/v1/gpa/report/route.ts` that Dashboard's `gpaOptions.report()` hits?**
    - What we know: `frontend/app/api/v1/gpa/` directory exists per grep earlier.
    - What's unclear: Whether the specific `/gpa/report` sub-route has a handler or returns 404.
    - Recommendation: P01 Wave 0 lists `frontend/app/api/v1/gpa/**` and confirms all hook endpoints are covered.
+   - **RESOLVED:** Superseded by PATTERNS.md correction #2. Canonical handler is `/api/v1/gpa` (NOT `/gpa/report`), confirmed at `frontend/hooks/use-gpa.ts:38` where `gpaOptions.report()` calls `api.get("gpa").json()`. All Phase 38 plans use `api.get("gpa")`.
 
 ## Sources
 
