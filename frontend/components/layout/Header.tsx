@@ -55,10 +55,16 @@ export default function Header() {
   }, [notifOpen, avatarOpen]);
 
   return (
+    // Do not re-introduce `backdrop-blur-*` here — full-viewport
+    // backdrop-filter is O(w×h) on the GPU raster pipeline and stalls the
+    // compositor on Intel Mac whenever any paint invalidates under the
+    // header (e.g. sidebar hover, route transitions), producing 2-5 fps
+    // while rAF still ticks at 60 Hz. Background alpha was raised from
+    // .82 to .97 to preserve the frosted-glass look without the blur.
     <header
       className={cn(
         "sticky top-0 z-50 h-[var(--spacing-header-h)]",
-        "bg-[rgba(250,249,245,.82)] backdrop-blur-[18px]",
+        "bg-[rgba(250,249,245,.97)]",
         "border-b border-divider",
         "flex items-center justify-between px-8"
       )}
