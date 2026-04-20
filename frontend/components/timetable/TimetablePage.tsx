@@ -290,7 +290,15 @@ export default function TimetablePage() {
           <div className="h-[40px] bg-[#f6f5f0] rounded-[8px] animate-skeleton-shimmer bg-[length:200%_100%] bg-gradient-to-r from-[#f0ede6] via-[#e8e3d9] to-[#f0ede6]" />
         </AnimatedEntry>
         <AnimatedEntry delay={2}>
-          <div className="bg-[#f6f5f0] border-[1.5px] border-[#d0cdc4] rounded-[14px] h-[500px] animate-skeleton-shimmer bg-[length:200%_100%] bg-gradient-to-r from-[#f0ede6] via-[#e8e3d9] to-[#f0ede6]" />
+          {/* `animate-skeleton-shimmer` animates `background-position` on a
+              gradient, which forces a full re-raster of the gradient every
+              frame. On a 500px × viewport-width element that cost scales
+              O(w × h) and stalls compositor on Intel Mac at larger
+              viewports. `animate-pulse` cycles opacity on the compositor
+              layer only — no re-raster per frame. Small shimmer skeletons
+              elsewhere (~120px) stay on shimmer because total area is
+              small enough. */}
+          <div className="bg-[#f0ede6] border-[1.5px] border-[#d0cdc4] rounded-[14px] h-[500px] animate-pulse" />
         </AnimatedEntry>
         {portalTarget &&
           createPortal(
