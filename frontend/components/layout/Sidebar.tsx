@@ -50,17 +50,21 @@ export default function Sidebar() {
         // Shortened from 0.28s — user perceives lag is halved; each frame's
         // layout cost is unchanged but fewer frames are painted total.
         "transition-[width] duration-[0.14s] ease-[cubic-bezier(.4,0,.2,1)]",
-        "overflow-hidden shadow-[2px_0_16px_rgba(20,20,19,.06)]",
+        // Paint-cheap right-edge separator. The previous
+        // `shadow-[2px_0_16px_rgba(20,20,19,.06)]` extended ~18 px into main
+        // content; the `[contain:layout_paint]` below only isolates the
+        // sidebar's INTERNAL paint, not the blur that bleeds out. During the
+        // width animation the browser re-rasterised the shadow region on
+        // every frame, which on content-dense pages (timetable: 7×30 grid
+        // lines + events + overlays) stalled the compositor. A 1 px border
+        // paints inside the contain box, costs nothing per frame, and keeps
+        // the visual separation.
+        "overflow-hidden border-r border-[rgba(20,20,19,.08)]",
         "hover:w-[var(--spacing-sidebar-w-expanded)] group",
         // Isolate layout + paint so the width-transition redraw cost stays
         // inside the sidebar subtree and does not ripple into main content
         // on every animation frame.
-        "[contain:layout_paint]",
-        // Promote to a dedicated compositor layer. box-shadow + sidebar
-        // subtree render to the GPU surface once; subsequent hover frames
-        // only transform the layer rather than re-painting the shadow blur
-        // (16px blur is one of the most expensive paint ops per frame).
-        "will-change-[width]"
+        "[contain:layout_paint]"
       )}
     >
       {/* Logo */}
