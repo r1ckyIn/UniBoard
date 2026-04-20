@@ -67,7 +67,7 @@ created: 2026-04-20
 |----------|-------------|------------|-------------------|
 | "No SkeletonCard flash to the naked eye" on cached-auth revisit (all 6 pages) | PERF-01 / Success #2 | Subjective human judgement; pixel-diff covers regression but initial sign-off is human | Walk through Dashboard, Courses, Deadlines, Predict, Digest, Timetable on Vercel preview with warm session; no skeleton visible |
 | `en` locale coverage | PERF-01 | CI spec count bounded to `zh-CN` only (D-C4) | Manual UAT rotation — spot-check `en` path on preview |
-| Backlog 999.2 re-evaluation | Success #5 | Requires human judgement on whether RSC prefetch resolves viewport-lazy symptom | Update `.planning/ROADMAP_BACKLOG.md` entry with "obsolete" or "retained + residual case" after Phase 38 ship |
+| Backlog 999.2 re-evaluation | Success #5 | Requires human judgement on whether RSC prefetch resolves viewport-lazy symptom | Update `.planning/ROADMAP.md` entry with "obsolete" or "retained + residual case" after Phase 38 ship |
 | Railway warmup cron activation decision | PERF-03 / Success #4 | Conditional — depends on measured p95 value | After P03 measurement report: if p95 > 2s, enable GH Actions cron; otherwise document "not needed" |
 
 ---
