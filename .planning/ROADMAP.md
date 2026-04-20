@@ -225,6 +225,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 34. AI Features Live | v3.0 | 6/6 | Complete   | 2026-04-17 |
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
+| 38. First-Load Performance | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -390,6 +391,20 @@ Plans:
   4. Setup SuccessStep shows per-domain sync progress bars (Canvas sync, Ed sync, etc.) instead of single spinner
 **Plans**: TBD
 
+### Phase 38: First-Load Performance (RSC Prefetch + HydrationBoundary)
+**Goal**: First paint shows real data across 6 card-heavy pages (Dashboard, Courses, Deadlines, Predict, Digest, Timetable) — no skeleton flash on cached-auth revisit — achieved via Next.js 15 Server Component prefetch + TanStack Query `HydrationBoundary`, with dashboard waterfall collapsed and Railway cold-start behaviour characterised.
+**Depends on**: Phase 34
+**Requirements**: PERF-01, PERF-02, PERF-03
+**Success Criteria** (what must be TRUE):
+  1. All 6 target pages (Dashboard, Courses, Deadlines, Predict, Digest, Timetable) have their page.tsx as an `async` Server Component that prefetches required queries and returns a `<HydrationBoundary state={dehydrate(queryClient)}>` wrapper — verified by reading dehydrated cache on client before any `useQuery` fires
+  2. On cached-auth revisit (JWT valid, warm Railway), first paint displays real data on the above pages — no `SkeletonCard` visible to the naked eye in a local dev build or Vercel preview walkthrough
+  3. Dashboard deadline→courseDetail waterfall eliminated — either backend bundles assessment_weights into `/deadlines/upcoming`, or frontend parallelises via `Promise.all` in the RSC prefetch layer (no serial client-side dependency chain)
+  4. Railway cold-start behaviour characterised — measured p50/p95 latency for first request after 15-min idle; if >2s, implement a warmup strategy (cron ping /healthz OR Railway always-on) and document the choice
+  5. Backlog 999.2 (viewport lazy-mount) re-evaluated post-ship — marked obsolete if this phase resolves the symptom, or retained as orthogonal follow-up with a specific residual case documented
+**Plans**: TBD
+
+**Context**: Rolled up from backlog 999.2 "Page mount lazy loading" (promoted 2026-04-20). Original 999.2 proposed viewport-driven progressive mount; user decision is to pursue RSC prefetch + HydrationBoundary instead — eager data delivery rather than deferred render — which eliminates the first-visit lag window at its source while preserving `AnimatedEntry` intro animations. Leverages prior debug investigation `.planning/debug/resolved/uniboard-5fps-lag-dashboard.md` (PRs #80-87 already drove INP 267→107 ms; remaining gap is the data-fetch waterfall during hydrate).
+
 ## Backlog
 
 ### Phase 999.1: Sidebar transform-based architecture refactor (BACKLOG)
@@ -399,9 +414,5 @@ Plans:
 **Plans**: 0 plans
   - [ ] TBD (promote with /gsd-review-backlog when ready)
 
-### Phase 999.2: Page mount lazy loading (BACKLOG)
-**Goal**: [Captured for future planning] Eliminate "first-visit lag" on dashboard/predict/settings/timetable by converting eager mount + query waterfall + staggered entrance animations to intersection-observer-driven progressive rendering. For SettingsPage: lazy-mount sections based on active nav instead of rendering all 11 RoughCard sections at once. For DashboardPage: defer non-hero cards (MiniCalendar, RecentActivity, etc.) until they enter the viewport. Expected 20-40 lines per page, medium-risk refactor.
-**Context**: Remaining issue from the 2026-04-17/18 5fps-lag investigation. User confirmed dashboard hover-sidebar is smooth only after a 5 s wait — the entrance phase saturates the compositor. Same pattern repeats on predict/settings/timetable. AnimatedEntry stagger (0.04-0.72 s × N components) + per-section useQuery mount storm compound into a ~1-3 s window of contested main-thread work.
-**Requirements**: TBD
-**Plans**: 0 plans
-  - [ ] TBD (promote with /gsd-review-backlog when ready)
+### ~~Phase 999.2: Page mount lazy loading~~ — PROMOTED to Phase 38 on 2026-04-20
+Original scope ("viewport-driven progressive mount") superseded by Phase 38's eager-prefetch approach. Symptom and debug context preserved in Phase 38's Context block above.
