@@ -99,6 +99,15 @@ const courseDetailFixture = {
   },
 };
 
+// Phase 38.1 parity fixtures — Dashboard's Wave A now also prefetches
+// useCurrentUser / useNotifications / useAlerts. Shapes only need to satisfy
+// the `.json<T>()` call — deep field contracts are validated elsewhere.
+const userMeFixture = {
+  data: { id: "u1", email: "t@e.com", full_name: "Test" },
+};
+const notificationsFixture = { data: [] };
+const alertsFixture = { data: [] };
+
 // ── Tests ────────────────────────────────────────────────────────────────
 describe("Dashboard RSC prefetch", () => {
   beforeEach(() => {
@@ -120,6 +129,13 @@ describe("Dashboard RSC prefetch", () => {
       if (path === "deadlines/upcoming") return deadlinesFixture;
       if (path === "gpa") return gpaFixture;
       if (path === "ai/study-recommendations") return studyRecFixture;
+      // Phase 38.1 additions — Dashboard now also prefetches
+      // useCurrentUser / useNotifications / useAlerts so the mock must
+      // answer these paths or the Wave A prefetches throw and pollute the
+      // test assertions (even though wrapSentry catches them).
+      if (path === "users/me") return userMeFixture;
+      if (path === "notifications") return notificationsFixture;
+      if (path === "alerts") return alertsFixture;
       if (path.startsWith("courses/")) return courseDetailFixture;
       throw new Error(`Unexpected path: ${path}`);
     });
@@ -161,6 +177,11 @@ describe("Dashboard RSC prefetch", () => {
       if (path === "courses") return coursesFixture;
       if (path === "gpa") return gpaFixture;
       if (path === "ai/study-recommendations") return studyRecFixture;
+      // Phase 38.1 parity additions — keep failure-path stubs in sync with
+      // the default mock so Wave A prefetches don't throw unrelated errors.
+      if (path === "users/me") return userMeFixture;
+      if (path === "notifications") return notificationsFixture;
+      if (path === "alerts") return alertsFixture;
       if (path.startsWith("courses/")) return courseDetailFixture;
       throw new Error(`Unexpected path: ${path}`);
     });
