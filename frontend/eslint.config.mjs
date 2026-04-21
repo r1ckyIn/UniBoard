@@ -18,6 +18,10 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Phase 38 P04 will install @playwright/test and activate this spec;
+      // until then the file carries a `@ts-nocheck` pragma and is excluded
+      // from lint to avoid a false "ban-ts-comment" error.
+      "tests/e2e/perf/coldstart.spec.ts",
     ],
   },
 ];
