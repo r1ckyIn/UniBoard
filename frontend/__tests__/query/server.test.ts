@@ -1,6 +1,35 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Tests run in jsdom environment per vitest.config.ts, so `window` is defined and
+// @tanstack/react-query's `isServer` export reports false. We mock `isServer` per
+// test to simulate both server and client contexts.
+//
+// We use a top-level spy variable that individual tests flip between true/false.
+// `vi.mock` is hoisted, so the factory closes over this variable lazily at import
+// time — flipping it before `await import("@/lib/query/server")` takes effect.
+const isServerFlag = { value: true };
+
+vi.mock("@tanstack/react-query", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@tanstack/react-query")>();
+  return {
+    ...actual,
+    get isServer() {
+      return isServerFlag.value;
+    },
+  };
+});
 
 describe("getServerQueryClient", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    isServerFlag.value = true;
+  });
+
+  afterEach(() => {
+    isServerFlag.value = true;
+  });
+
   it("returns a fresh QueryClient instance on every call (no cross-request sharing)", async () => {
     // T-38-01: information disclosure via shared cache. Must be fresh per call.
     const { getServerQueryClient } = await import("@/lib/query/server");
@@ -36,22 +65,8 @@ describe("getServerQueryClient", () => {
   });
 
   it("throws a clear error when called from a client context (isServer === false)", async () => {
-    // Mock @tanstack/react-query to report isServer as false. We simulate client
-    // misuse and assert the factory refuses to run. This guards against accidental
-    // client-side imports that would silently leak cache across users in dev.
-    vi.resetModules();
-    vi.doMock("@tanstack/react-query", async () => {
-      const actual =
-        await vi.importActual<typeof import("@tanstack/react-query")>(
-          "@tanstack/react-query",
-        );
-      return { ...actual, isServer: false };
-    });
-
+    isServerFlag.value = false;
     const { getServerQueryClient } = await import("@/lib/query/server");
     expect(() => getServerQueryClient()).toThrow(/Server Component/);
-
-    vi.doUnmock("@tanstack/react-query");
-    vi.resetModules();
   });
 });
