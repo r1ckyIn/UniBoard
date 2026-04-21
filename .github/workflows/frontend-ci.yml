@@ -112,16 +112,18 @@ jobs:
 
       - name: Start Next.js production server
         run: |
-          pnpm start &
+          # Next.js default port is 3000; pin to 3001 to match PLAYWRIGHT_BASE_URL
+          # + project dev convention.
+          pnpm exec next start -p 3001 &
           # Wait up to 60 s for the server to bind before running tests.
           for i in $(seq 1 60); do
             if curl -sf http://localhost:3001 >/dev/null 2>&1; then
-              echo "Next.js server ready after ${i}s"
+              echo "Next.js server ready on :3001 after ${i}s"
               exit 0
             fi
             sleep 1
           done
-          echo "Next.js server did not become ready in 60s" >&2
+          echo "Next.js server did not become ready on :3001 in 60s" >&2
           exit 1
 
       - name: Run Playwright tests
