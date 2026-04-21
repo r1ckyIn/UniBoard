@@ -49,6 +49,8 @@ type DeadlinesResponse =
   paths["/deadlines"]["get"]["responses"]["200"]["content"]["application/json"];
 type CoursesResponse =
   paths["/courses"]["get"]["responses"]["200"]["content"]["application/json"];
+type CourseDetailResponse =
+  paths["/courses/{id}"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export default async function TimetableRoute({ params }: Props) {
   const { locale } = await params;
@@ -62,7 +64,26 @@ export default async function TimetableRoute({ params }: Props) {
     ),
     run: async ({ queryClient, accessToken, userId }) => {
       const api = await getServerApiClient(accessToken);
-      await Promise.allSettled([
+
+      // Step 1: await /courses to obtain the N courseIds for the N-fanout.
+      // fetchQuery rejects on error so wrapSentry fires here for real.
+      // Matches Predict's Step 1 shape and Dashboard's Wave B pattern.
+      let courseIds: string[] = [];
+      try {
+        const coursesResp = await queryClient.fetchQuery({
+          ...courseOptions.list(),
+          queryFn: () => api.get("courses").json<CoursesResponse>(),
+        });
+        courseIds = coursesResp.data.map((c) => c.id);
+      } catch (error) {
+        wrapSentry("courses", userId)(error);
+      }
+
+      // Step 2: top-level independent prefetches + N × course detail fanout.
+      // Sessions / weeks / deadlines-list fire in parallel with the N-fanout.
+      // If Step 1 failed (courseIds === []), the N-fanout is empty but the
+      // 3 top-level prefetches still fire (D-B4 silent graceful degrade).
+      const prefetches: Promise<unknown>[] = [
         queryClient
           .prefetchQuery({
             ...timetableOptions.sessions(),
@@ -83,13 +104,17 @@ export default async function TimetableRoute({ params }: Props) {
             queryFn: () => api.get("deadlines").json<DeadlinesResponse>(),
           })
           .catch(wrapSentry("deadlines-list", userId)),
-        queryClient
-          .prefetchQuery({
-            ...courseOptions.list(),
-            queryFn: () => api.get("courses").json<CoursesResponse>(),
-          })
-          .catch(wrapSentry("courses", userId)),
-      ]);
+        ...courseIds.map((id) =>
+          queryClient
+            .prefetchQuery({
+              ...courseOptions.detail(id),
+              queryFn: () =>
+                api.get(`courses/${id}`).json<CourseDetailResponse>(),
+            })
+            .catch(wrapSentry("course-detail", userId, { courseId: id })),
+        ),
+      ];
+      await Promise.allSettled(prefetches);
     },
   });
 }
