@@ -90,6 +90,7 @@ export default function Sidebar() {
             <li key={item.key}>
               <Link
                 href={item.href}
+                prefetch={true}
                 className={cn(
                   "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
                   "cursor-pointer transition-all duration-[0.15s] whitespace-nowrap overflow-hidden no-underline",
@@ -117,6 +118,7 @@ export default function Sidebar() {
             <Link
               key={item.key}
               href={item.href}
+              prefetch={true}
               className={cn(
                 "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
                 "cursor-pointer transition-all duration-[0.15s] whitespace-nowrap overflow-hidden no-underline",
