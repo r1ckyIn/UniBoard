@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright (Phase 38 P04)
+# Run artifacts are per-invocation; only __screenshots__/ baselines are committed.
+/test-results/
+/playwright-report/
+/playwright/.cache/
