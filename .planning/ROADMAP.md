@@ -225,7 +225,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 34. AI Features Live | v3.0 | 6/6 | Complete   | 2026-04-17 |
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
-| 38. First-Load Performance | v3.0 | 0/4 | Not started | - |
+| 38. First-Load Performance | v3.0 | 2/4 | In Progress|  |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -404,9 +404,9 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 38-01-PLAN.md — Infra + Dashboard reference implementation (server QueryClient, createPrefetchedPage HOF, waterfall collapse) [PERF-01, PERF-02]
+- [x] 38-01-PLAN.md — Infra + Dashboard reference implementation (server QueryClient, createPrefetchedPage HOF, waterfall collapse) [PERF-01, PERF-02]
 - [ ] 38-02-PLAN.md — Remaining 5 pages conversion (Courses, Deadlines, Predict N-fanout, Digest, Timetable) [PERF-01]
-- [ ] 38-03-PLAN.md — Railway cold-start characterisation + conditional warmup cron [PERF-03]
+- [x] 38-03-PLAN.md — Railway cold-start characterisation + conditional warmup cron [PERF-03]
 - [ ] 38-04-PLAN.md — Playwright pixel-diff regression suite (6 pages, zh-CN, perf-test seed account) [PERF-01]
 
 **Context**: Rolled up from backlog 999.2 "Page mount lazy loading" (promoted 2026-04-20). Original 999.2 proposed viewport-driven progressive mount; user decision is to pursue RSC prefetch + HydrationBoundary instead — eager data delivery rather than deferred render — which eliminates the first-visit lag window at its source while preserving `AnimatedEntry` intro animations. Leverages prior debug investigation `.planning/debug/resolved/uniboard-5fps-lag-dashboard.md` (PRs #80-87 already drove INP 267→107 ms; remaining gap is the data-fetch waterfall during hydrate).
