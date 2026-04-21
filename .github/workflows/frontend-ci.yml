@@ -45,3 +45,102 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  # Phase 38 P04 — Playwright pixel-diff perf regression.
+  #
+  # Runs on the same pull_request / push paths as `check`. The suite is
+  # env-gated: when PERF_TEST_PASSWORD (or the Supabase env vars) is
+  # absent, the spec's `test.skip(!shouldRunPerfSuite(), ...)` causes all
+  # 6 cases to no-op. This keeps fork PRs (which never see repository
+  # secrets) green without work, and only enforces the pixel-diff on
+  # trusted branches where the secret is provisioned.
+  #
+  # When the secret IS present, a mismatch against any of the 6 committed
+  # baselines fails CI and uploads the diff report as an artifact.
+  playwright-e2e:
+    name: Playwright E2E (pixel-diff)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      PERF_TEST_PASSWORD: ${{ secrets.PERF_TEST_PASSWORD }}
+      PERF_TEST_EMAIL: ${{ vars.PERF_TEST_EMAIL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      PLAYWRIGHT_BASE_URL: http://localhost:3001
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Cache Playwright browsers between runs — the download is ~200 MB
+      # of Chromium. Keyed on the pnpm lockfile so a Playwright bump
+      # invalidates the cache.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+
+      # Build + start the Next.js production bundle on port 3001 in the
+      # background so the spec can hit a real RSC-rendered page. We
+      # intentionally do NOT use playwright.config.ts's `webServer` field
+      # here — separate steps give us clearer cache hits on build output
+      # and individual failure visibility.
+      - name: Build Next.js production bundle
+        run: pnpm build
+
+      - name: Start Next.js production server
+        run: |
+          # Next.js default port is 3000; pin to 3001 to match PLAYWRIGHT_BASE_URL
+          # + project dev convention.
+          pnpm exec next start -p 3001 &
+          # Wait up to 60 s for the server to bind before running tests.
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3001 >/dev/null 2>&1; then
+              echo "Next.js server ready on :3001 after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Next.js server did not become ready on :3001 in 60s" >&2
+          exit 1
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 14
+
+      - name: Upload test-results diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: frontend/test-results/
+          retention-days: 14

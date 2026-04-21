@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 34 context gathered
-last_updated: "2026-04-17T07:56:13.064Z"
-last_activity: 2026-04-17
+stopped_at: Phase 38 context gathered
+last_updated: "2026-04-21T06:52:40.354Z"
+last_activity: 2026-04-21
 progress:
-  total_phases: 20
-  completed_phases: 17
-  total_plans: 64
-  completed_plans: 64
+  total_phases: 22
+  completed_phases: 18
+  total_plans: 68
+  completed_plans: 68
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 34 — ai-features-live
+**Current focus:** Phase 38 — first-load-performance
 
 ## Current Position
 
-Phase: 34 (ai-features-live) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 34
-Last activity: 2026-04-17
+Phase: 999.1
+Plan: Not started
+Status: Executing Phase 38
+Last activity: 2026-04-21
 
 ## Milestones Completed
 
@@ -40,7 +40,7 @@ Last activity: 2026-04-17
 
 **Velocity:**
 
-- Total plans completed: 6
+- Total plans completed: 10
 - Average duration: 6.3min
 - Total execution time: 0.63 hours
 
@@ -49,6 +49,7 @@ Last activity: 2026-04-17
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 2/2 | 15min | 7.5min |
+| 38 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -384,7 +385,13 @@ None.
 
 None.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260420-n29 | fix GPU paint-cost stalls on Intel Mac — 4 subtypes across Header backdrop-blur / Sidebar bleeding shadow / Timetable skeleton shimmer / Grid entry fade (PRs #89-92) | 2026-04-20 | c6ed6eb | Verified | [260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4](./quick/260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4/) |
+
 ## Session Continuity
 
-Last session: 2026-04-16T10:42:47.960Z
-Stopped at: Phase 34 context gathered
+Last session: 2026-04-20T11:20:17.023Z
+Stopped at: Phase 38 context gathered

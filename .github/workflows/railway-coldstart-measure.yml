@@ -1,0 +1,108 @@
+name: Railway Cold-Start Measurement
+
+# On-demand (workflow_dispatch) only. Invoked by a human via the GitHub Actions
+# UI when they want to characterise Railway cold-start latency for PERF-03.
+#
+# Expected runtime with default inputs: ~150 min (10 samples × 15 min idle).
+# Under the free-tier per-job limit (6h). Uploads raw samples + percentiles as
+# a workflow artifact; a human then transcribes the numbers into
+# .planning/phases/38-first-load-performance/coldstart-report.md and decides
+# whether to enable railway-warmup.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      sample_count:
+        description: "Number of samples (N)"
+        required: false
+        default: "10"
+      idle_minutes:
+        description: "Minutes between samples to force cold-start"
+        required: false
+        default: "15"
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    # N=10 × 15 min = 150 min; pad to 180 min for setup + variance.
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      # Pass workflow_dispatch inputs through env to avoid untrusted-input
+      # interpolation directly in shell blocks.
+      INPUT_SAMPLE_COUNT: ${{ github.event.inputs.sample_count }}
+      INPUT_IDLE_MINUTES: ${{ github.event.inputs.idle_minutes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run N spaced samples against /healthz
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Validate numeric inputs (defensive; workflow_dispatch inputs are
+          # collaborator-controlled but untrusted by principle).
+          N="${INPUT_SAMPLE_COUNT:-10}"
+          IDLE_MIN="${INPUT_IDLE_MINUTES:-15}"
+          if ! [[ "$N" =~ ^[0-9]+$ ]] || [ "$N" -lt 1 ] || [ "$N" -gt 50 ]; then
+            echo "::error::sample_count must be an integer in [1, 50]; got '$N'"
+            exit 1
+          fi
+          if ! [[ "$IDLE_MIN" =~ ^[0-9]+$ ]] || [ "$IDLE_MIN" -lt 0 ] || [ "$IDLE_MIN" -gt 60 ]; then
+            echo "::error::idle_minutes must be an integer in [0, 60]; got '$IDLE_MIN'"
+            exit 1
+          fi
+          if [ -z "${NEXT_PUBLIC_API_URL:-}" ]; then
+            echo "::error::NEXT_PUBLIC_API_URL secret not configured in repo settings"
+            exit 1
+          fi
+          SAMPLES=()
+          for i in $(seq 1 "$N"); do
+            echo "--- Sample $i of $N ---"
+            # Node 22 supports --experimental-strip-types natively; avoids an
+            # extra tsx devDependency install.
+            OUT=$(node --experimental-strip-types tests/e2e/perf/measure-coldstart.ts 2>&1 || true)
+            echo "$OUT"
+            MS=$(echo "$OUT" | grep -oE "SAMPLE_MS=[0-9]+" | head -1 | cut -d= -f2 || true)
+            if [ -z "$MS" ]; then
+              echo "::error::Sample $i did not produce SAMPLE_MS= output"
+              exit 1
+            fi
+            SAMPLES+=("$MS")
+            echo "Sample $i = ${MS}ms"
+            if [ "$i" -lt "$N" ]; then
+              echo "Idle ${IDLE_MIN} min before next sample..."
+              sleep $((IDLE_MIN * 60))
+            fi
+          done
+          echo "RAW_SAMPLES=${SAMPLES[*]}" | tee samples.txt
+          # Compute percentiles via sort + index math.
+          SORTED=$(printf "%s\n" "${SAMPLES[@]}" | sort -n)
+          P50_IDX=$(( (N + 1) / 2 ))
+          # Ceil(0.95 * N) — for N=10, p95 index = 10 (largest sample).
+          P95_IDX=$(awk -v n="$N" 'BEGIN { v = n * 0.95; iv = int(v); print (v > iv) ? iv + 1 : iv }')
+          P50=$(printf "%s\n" "$SORTED" | sed -n "${P50_IDX}p")
+          P95=$(printf "%s\n" "$SORTED" | sed -n "${P95_IDX}p")
+          echo "p50=${P50}" | tee -a samples.txt
+          echo "p95=${P95}" | tee -a samples.txt
+          echo "::notice::Cold-start p50=${P50}ms p95=${P95}ms (N=${N})"
+
+      - name: Upload samples artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coldstart-samples
+          path: frontend/samples.txt
+          if-no-files-found: warn

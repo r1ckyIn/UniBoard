@@ -1,0 +1,42 @@
+name: Railway Warmup
+
+# DISABLED BY DEFAULT — only runs on workflow_dispatch until the cold-start
+# measurement report (`.planning/phases/38-first-load-performance/coldstart-report.md`)
+# justifies enabling the scheduled cron.
+#
+# To enable the 10-minute warmup cron:
+#   1. Uncomment the `schedule:` block below (remove the leading `# ` from
+#      BOTH `# schedule:` AND `#   - cron: "*/10 * * * *"`)
+#   2. Commit on the default branch with a message referencing the
+#      coldstart-report.md p95 value, e.g.:
+#        chore(38-03): enable railway warmup cron (p95=3200ms)
+#   3. Verify the next scheduled run appears in the GitHub Actions UI within
+#      ~15 min of the commit landing on main
+#
+# To disable again (if p95 drops or Railway plan changes): re-comment both
+# lines and commit as `chore(38-03): disable railway warmup cron`.
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "*/10 * * * *" # every 10 minutes — ACTIVATE ONLY IF p95 > 2000ms
+
+jobs:
+  warmup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      RAILWAY_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+    steps:
+      - name: Ping /healthz
+        run: |
+          set -euo pipefail
+          if [ -z "${RAILWAY_URL:-}" ]; then
+            echo "::error::NEXT_PUBLIC_API_URL secret not configured"
+            exit 1
+          fi
+          # -fsS: fail on non-2xx, silent unless error, show error
+          # --max-time 15: bound request time; warmup is a cheap probe, not a
+          # measurement — we don't want warmup to queue if Railway is mid-boot
+          curl -fsS --max-time 15 "${RAILWAY_URL%/}/healthz" > /dev/null
+          echo "Warmup ping OK"

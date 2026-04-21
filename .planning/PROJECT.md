@@ -19,6 +19,7 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - Phase 29 Sentry Hardening — complete
 - Phase 30 BFF Proxy Conversion — complete (2026-04-06). All 25 Route Handlers converted from mock fixtures to proxyRequest BFF proxy pattern
 - Phase 31 E2E Verification & AI Config — complete (2026-04-06). Setup flow wired to real backend, SSE streaming via BFF proxy, AI API key guard added, ANTHROPIC_API_KEY configured in Railway
+- Phase 38 First-Load Performance — complete (2026-04-21). RSC prefetch + HydrationBoundary across 6 pages (Dashboard, Courses, Deadlines, Predict, Digest, Timetable); Dashboard `/deadlines/upcoming → /courses/{nearest}` waterfall collapsed via `Promise.all`/`allSettled`; Railway cold-start measurement infra + conditional warmup workflow (disabled until human measurement justifies activation); Playwright pixel-diff regression suite scaffolded (baselines pending human checkpoint). Validates PERF-01, PERF-02, PERF-03
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
