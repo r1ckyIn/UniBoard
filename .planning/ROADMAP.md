@@ -422,3 +422,8 @@ Plans:
 
 ### ~~Phase 999.2: Page mount lazy loading~~ — PROMOTED to Phase 38 on 2026-04-20
 Original scope ("viewport-driven progressive mount") superseded by Phase 38's eager-prefetch approach. Symptom and debug context preserved in Phase 38's Context block above.
+
+**Post-ship verdict (2026-04-21, pending final UAT sign-off):** retained — provisional until Phase 38 P04 baselines are captured and the 6-page pixel-diff run is green on a fresh PR. The expected verdict after that run is **obsolete** (superseded by Phase 38 RSC prefetch: all 6 pages render real data on first paint, eliminating the viewport lazy-mount symptom at its source). Rubric for closing this backlog:
+- If 0 of 6 pixel-diff baselines show any `SkeletonCard` pixels → flip status to `obsolete` and strike this backlog entry entirely.
+- If any baseline shows residual skeleton in a specific sub-region (e.g., below-the-fold card, a particular state transition) → keep as `retained + residual case` with the exact sub-region documented, so a future micro-phase can address it with a narrow viewport-gated remount.
+- If AI study-rec hero / deadline hero flashes despite RSC hydration → treat as Phase 38 bug (Rule 1), not a Phase 999.2 scope item; file a gap-closure plan against Phase 38.
