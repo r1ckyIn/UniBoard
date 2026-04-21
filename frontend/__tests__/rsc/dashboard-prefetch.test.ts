@@ -199,7 +199,12 @@ describe("Dashboard RSC prefetch", () => {
       "../../app/[locale]/(dashboard)/page.tsx",
     );
     const source = readFileSync(pagePath, "utf8");
-    const matches = source.match(/await[^\n]*?fetchQuery/g) ?? [];
+    // Match only the `.fetchQuery(` method shape — the literal `.` before
+    // `fetchQuery` excludes `.prefetchQuery` (which is `.pre` + `fetchQuery`),
+    // and `\b` ensures `fetchQuery` is a standalone identifier. Without these
+    // guards, `await queryClient.prefetchQuery(...)` would be false-counted
+    // as a blocking fetch call (WR-02).
+    const matches = source.match(/await[^\n]*?\.fetchQuery\b/g) ?? [];
     expect(matches.length).toBeLessThanOrEqual(2);
   });
 });
