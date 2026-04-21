@@ -28,7 +28,12 @@ import { getServerApiClient } from "@/lib/rsc/server-query-fn";
 import { courseOptions } from "@/hooks/use-courses";
 import { deadlineOptions } from "@/hooks/use-deadlines";
 import { gpaOptions } from "@/hooks/use-gpa";
+import {
+  alertOptions,
+  notificationOptions,
+} from "@/hooks/use-notifications";
 import { studyRecOptions } from "@/hooks/use-study-recommendations";
+import { userOptions } from "@/hooks/use-user";
 import type { paths } from "@/lib/api/types.gen";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +52,12 @@ type GpaReportResponse =
   paths["/gpa"]["get"]["responses"]["200"]["content"]["application/json"];
 type StudyRecResponse =
   paths["/ai/study-recommendations"]["get"]["responses"]["200"]["content"]["application/json"];
+type UserMeResponse =
+  paths["/users/me"]["get"]["responses"]["200"]["content"]["application/json"];
+type NotificationsResponse =
+  paths["/notifications"]["get"]["responses"]["200"]["content"]["application/json"];
+type AlertsResponse =
+  paths["/alerts"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export default async function Page({ params }: Props) {
   const { locale } = await params;
@@ -84,6 +95,31 @@ export default async function Page({ params }: Props) {
               api.get("ai/study-recommendations").json<StudyRecResponse>(),
           })
           .catch(wrapSentry("study-rec", userId)),
+        // Phase 38.1 parity additions — DashboardPage consumes these via
+        // useCurrentUser / useNotifications / useAlerts (DashboardPage.tsx
+        // L58-64). Prefetching here eliminates the SkeletonCard flash in
+        // ProfileCard + RecentActivity on hard-refresh of the dashboard.
+        queryClient
+          .prefetchQuery({
+            ...userOptions.me(),
+            queryFn: () => api.get("users/me").json<UserMeResponse>(),
+          })
+          .catch(wrapSentry("users", userId)),
+        queryClient
+          .prefetchQuery({
+            // No arg — queryKey ["notifications", undefined] must match the
+            // consumer's useNotifications() call at DashboardPage.tsx:61.
+            ...notificationOptions.list(),
+            queryFn: () =>
+              api.get("notifications").json<NotificationsResponse>(),
+          })
+          .catch(wrapSentry("notifications", userId)),
+        queryClient
+          .prefetchQuery({
+            ...alertOptions.list(),
+            queryFn: () => api.get("alerts").json<AlertsResponse>(),
+          })
+          .catch(wrapSentry("alerts", userId)),
       ];
 
       // Wave B: await /deadlines/upcoming ONCE (needed to discover the

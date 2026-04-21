@@ -9,6 +9,10 @@
     "plan_check": true,
     "verifier": true,
     "nyquist_validation": true,
-    "_auto_chain_active": false
+    "_auto_chain_active": false,
+    "ui_safety_gate": true
+  },
+  "graphify": {
+    "enabled": true
   }
 }

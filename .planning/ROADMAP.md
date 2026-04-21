@@ -226,6 +226,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
 | 38. First-Load Performance | v3.0 | 4/4 | Complete    | 2026-04-21 |
+| 38.1. Prefetch ↔ Consumer Parity | v3.0 | 3/3 | Complete   | 2026-04-21 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -410,6 +411,25 @@ Plans:
 - [x] 38-04-PLAN.md — Playwright pixel-diff regression suite (6 pages, zh-CN, perf-test seed account) [PERF-01]
 
 **Context**: Rolled up from backlog 999.2 "Page mount lazy loading" (promoted 2026-04-20). Original 999.2 proposed viewport-driven progressive mount; user decision is to pursue RSC prefetch + HydrationBoundary instead — eager data delivery rather than deferred render — which eliminates the first-visit lag window at its source while preserving `AnimatedEntry` intro animations. Leverages prior debug investigation `.planning/debug/resolved/uniboard-5fps-lag-dashboard.md` (PRs #80-87 already drove INP 267→107 ms; remaining gap is the data-fetch waterfall during hydrate).
+
+### Phase 38.1: Server-Prefetch ↔ Client-Consumer Parity (Gap Closure)
+**Goal**: Close the Phase 38 HUMAN-UAT Truth #2 gap — eliminate `SkeletonCard` flash on hard-refresh of any `force-dynamic` dashboard page by aligning each page's `run()` prefetch list with the full set of client `useQuery*` consumers it renders.
+**Depends on**: Phase 38
+**Requirements**: PERF-01 (completion)
+**Success Criteria** (what must be TRUE):
+  1. Hard-refresh each of Dashboard / Courses / Deadlines / Predict / Digest / Timetable — zero `SkeletonCard` visible above the fold (naked eye, production)
+  2. All `force-dynamic` `page.tsx` prefetch lists cover 100% of client-side `useQuery*` consumers of those pages (auditable)
+  3. Static invariant test added — every client `useQuery` consumed by a `force-dynamic` page has a matching `prefetchQuery`/`fetchQuery` in the page's `run` body — fails CI if a future regression drifts
+  4. No regression in automated tests (vitest + Playwright smoke) — sidebar navigation warm-path performance preserved
+  5. Sentry tag convention preserved (`phase: "38"`, `operation: "rsc_prefetch"`, `query: <label>`) for all new prefetches
+  6. Phase 38 HUMAN-UAT #1 (skeleton-flash on cached-auth revisit) flips to `passed` post-deploy
+**Plans**: 3 plans
+
+Plans:
+- [x] 38.1-01-PLAN.md — Static-invariant test scaffold (RED state; Plans 02+03 flip to GREEN) [TDD]
+- [x] 38.1-02-PLAN.md — Dashboard + Digest prefetch gaps (userOptions.me / notificationOptions.list / alertOptions.list / digestOptions.history)
+- [x] 38.1-03-PLAN.md — Predict + Timetable prefetch gaps (hoisted userOptions.me + studyRecOptions.latest / N-fanout courseOptions.detail)
+**Context**: Production UAT 2026-04-21 confirmed Phase 38's Truth #2 (`HUMAN_NEEDED` in 38-VERIFICATION.md) fails — hard-refresh flashes skeleton because server prefetch is a strict subset of client consumers. Dashboard audit: `useCurrentUser` + `useNotifications` missing; Timetable audit: `useQueries(courseOptions.detail(c.id))` N-fanout missing. Other 4 pages need identical audit. Fix reuses `createPrefetchedPage` HOF verbatim — zero architectural change. Debug trace: `.planning/debug/sidebar-nav-skeleton-stall.md`.
 
 ## Backlog
 

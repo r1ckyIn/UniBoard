@@ -25,6 +25,8 @@ import { getServerApiClient } from "@/lib/rsc/server-query-fn";
 import { courseOptions } from "@/hooks/use-courses";
 import { roiOptions, type CourseROIResponse } from "@/hooks/use-roi";
 import { gpaOptions } from "@/hooks/use-gpa";
+import { studyRecOptions } from "@/hooks/use-study-recommendations";
+import { userOptions } from "@/hooks/use-user";
 import type { paths } from "@/lib/api/types.gen";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +44,10 @@ type CourseRoiResponse = {
   data: CourseROIResponse;
   meta: { request_id: string; timestamp: string };
 };
+type UserMeResponse =
+  paths["/users/me"]["get"]["responses"]["200"]["content"]["application/json"];
+type StudyRecResponse =
+  paths["/ai/study-recommendations"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export default async function PredictRoute({ params }: Props) {
   const { locale } = await params;
@@ -70,10 +76,31 @@ export default async function PredictRoute({ params }: Props) {
         wrapSentry("gpa", userId)(error);
       }
 
-      // Step 2: full N-fanout — ALL N × detail + ALL N × roi in ONE
+      // Step 2a: top-level prefetches that do NOT depend on courseIds.
+      // Hoisted outside the guard so they fire even when /gpa fails
+      // (per PATTERNS.md §5 load-bearing fact #7 — useCurrentUser +
+      // useStudyRecommendation are cross-page queries that must always
+      // hydrate for Predict consumer parity).
+      const topLevelPrefetches: Promise<unknown>[] = [
+        queryClient
+          .prefetchQuery({
+            ...userOptions.me(),
+            queryFn: () => api.get("users/me").json<UserMeResponse>(),
+          })
+          .catch(wrapSentry("users", userId)),
+        queryClient
+          .prefetchQuery({
+            ...studyRecOptions.latest(),
+            queryFn: () =>
+              api.get("ai/study-recommendations").json<StudyRecResponse>(),
+          })
+          .catch(wrapSentry("study-rec", userId)),
+      ];
+
+      // Step 2b: full N-fanout — ALL N × detail + ALL N × roi in ONE
       // Promise.allSettled (D-B3). Do NOT cap, do NOT batch.
       if (courseIds.length > 0) {
-        const prefetches: Promise<unknown>[] = [
+        const fanoutPrefetches: Promise<unknown>[] = [
           ...courseIds.map((id) =>
             queryClient
               .prefetchQuery({
@@ -93,7 +120,12 @@ export default async function PredictRoute({ params }: Props) {
               .catch(wrapSentry("roi", userId, { courseId: id })),
           ),
         ];
-        await Promise.allSettled(prefetches);
+        await Promise.allSettled([...topLevelPrefetches, ...fanoutPrefetches]);
+      } else {
+        // /gpa failed or returned 0 courses — still hydrate the top-level
+        // queries so useCurrentUser / useStudyRecommendation don't flash
+        // skeletons (per PATTERNS.md §5 load-bearing fact #7).
+        await Promise.allSettled(topLevelPrefetches);
       }
     },
   });
