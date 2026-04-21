@@ -226,7 +226,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
 | 38. First-Load Performance | v3.0 | 4/4 | Complete    | 2026-04-21 |
-| 38.1. Prefetch ↔ Consumer Parity | v3.0 | 1/3 | In Progress|  |
+| 38.1. Prefetch ↔ Consumer Parity | v3.0 | 3/3 | Complete   | 2026-04-21 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -427,8 +427,8 @@ Plans:
 
 Plans:
 - [x] 38.1-01-PLAN.md — Static-invariant test scaffold (RED state; Plans 02+03 flip to GREEN) [TDD]
-- [ ] 38.1-02-PLAN.md — Dashboard + Digest prefetch gaps (userOptions.me / notificationOptions.list / alertOptions.list / digestOptions.history)
-- [ ] 38.1-03-PLAN.md — Predict + Timetable prefetch gaps (hoisted userOptions.me + studyRecOptions.latest / N-fanout courseOptions.detail)
+- [x] 38.1-02-PLAN.md — Dashboard + Digest prefetch gaps (userOptions.me / notificationOptions.list / alertOptions.list / digestOptions.history)
+- [x] 38.1-03-PLAN.md — Predict + Timetable prefetch gaps (hoisted userOptions.me + studyRecOptions.latest / N-fanout courseOptions.detail)
 **Context**: Production UAT 2026-04-21 confirmed Phase 38's Truth #2 (`HUMAN_NEEDED` in 38-VERIFICATION.md) fails — hard-refresh flashes skeleton because server prefetch is a strict subset of client consumers. Dashboard audit: `useCurrentUser` + `useNotifications` missing; Timetable audit: `useQueries(courseOptions.detail(c.id))` N-fanout missing. Other 4 pages need identical audit. Fix reuses `createPrefetchedPage` HOF verbatim — zero architectural change. Debug trace: `.planning/debug/sidebar-nav-skeleton-stall.md`.
 
 ## Backlog
