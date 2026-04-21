@@ -225,7 +225,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 34. AI Features Live | v3.0 | 6/6 | Complete   | 2026-04-17 |
 | 35. Push Notifications | v3.0 | 0/TBD | Not started | - |
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
-| 38. First-Load Performance | v3.0 | 4/4 | Complete   | 2026-04-21 |
+| 38. First-Load Performance | v3.0 | 4/4 | Complete    | 2026-04-21 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
