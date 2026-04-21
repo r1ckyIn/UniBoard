@@ -109,60 +109,67 @@ describe("createPrefetchedPage", () => {
     expect(state?.queries).toHaveLength(0);
   });
 
-  it("isolates per-query rejection: captures to Sentry once with phase:38 + operation:rsc_prefetch tags, does NOT throw outward", async () => {
+  it("isolates per-query rejection via QueryCache onError: captures to Sentry once with phase:38 + operation:rsc_prefetch tags, does NOT throw outward", async () => {
+    // DEVIATION (Rule 1 bug fix): TanStack's queryClient.prefetchQuery()
+    // ALWAYS resolves its returned promise — even on queryFn error — so the
+    // pattern `.prefetchQuery(...).catch(wrapSentry(...))` NEVER fires. We
+    // wire silent-degrade via QueryCache `onError` subscriber which fires
+    // reliably for every failed prefetch. wrapSentry helper remains exported
+    // for explicit fetchQuery call sites (which do reject on error).
     mockGetSession.mockResolvedValue({
       data: {
         session: { user: { id: "u1" }, access_token: "t1" },
       },
     });
 
-    const { createPrefetchedPage, wrapSentry } = await import(
+    const { createPrefetchedPage } = await import(
       "@/lib/rsc/create-prefetched-page"
     );
 
     let resolvedData: unknown;
-    let rejectedCaught = false;
 
     await expect(
       createPrefetchedPage({
         children: null,
         run: async ({ queryClient }) => {
-          const good = queryClient
-            .prefetchQuery({
-              queryKey: ["good"],
-              queryFn: async () => {
-                resolvedData = { ok: true };
-                return resolvedData;
-              },
-            })
-            .catch(wrapSentry("good", "u1"));
-          const bad = queryClient
-            .prefetchQuery({
-              queryKey: ["bad"],
-              queryFn: async () => {
-                throw new Error("boom");
-              },
-            })
-            .catch((e) => {
-              rejectedCaught = true;
-              wrapSentry("bad", "u1")(e);
-            });
+          const good = queryClient.prefetchQuery({
+            queryKey: ["good"],
+            queryFn: async () => {
+              resolvedData = { ok: true };
+              return resolvedData;
+            },
+            retry: false,
+          });
+          const bad = queryClient.prefetchQuery({
+            queryKey: ["bad"],
+            queryFn: async () => {
+              throw new Error("boom");
+            },
+            retry: false,
+          });
           await Promise.allSettled([good, bad]);
         },
       }),
     ).resolves.not.toBeNull();
 
     expect(resolvedData).toEqual({ ok: true });
-    expect(rejectedCaught).toBe(true);
 
-    // Sentry.captureException invoked exactly once — only for the rejected query.
+    // Sentry.captureException invoked exactly once — only for the failed query.
+    // Phase 38 sentry tag convention:
+    //   tags: { phase, operation, query }
+    //   extra: { userId, queryKey }
     expect(mockCaptureException).toHaveBeenCalledTimes(1);
     const [err, ctx] = mockCaptureException.mock.calls[0];
     expect((err as Error).message).toBe("boom");
     expect(ctx).toMatchObject({
       tags: { phase: "38", operation: "rsc_prefetch", query: "bad" },
     });
-    expect((ctx as { extra: { userId: string } }).extra.userId).toBe("u1");
+    const extra = (
+      ctx as { extra: { userId: string; queryKey?: string } }
+    ).extra;
+    expect(extra.userId).toBe("u1");
+    expect(typeof extra.queryKey).toBe("string");
+    expect(JSON.parse(extra.queryKey ?? "null")).toEqual(["bad"]);
   });
 
   it("Sentry tag shape: tags include phase=38, operation=rsc_prefetch; extra includes userId", async () => {
