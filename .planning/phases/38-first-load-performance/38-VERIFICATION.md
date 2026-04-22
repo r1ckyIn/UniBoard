@@ -47,6 +47,18 @@ human_verification:
 | 9 | All 5 pages (P02) reuse P01's `wrapSentry` helper verbatim (consistent Sentry tag convention) | VERIFIED | Every P02 page imports `wrapSentry` from `@/lib/rsc/create-prefetched-page`. wrapSentry call counts: dashboard 6, courses 1, deadlines 2, predict 3 (gpa + course-detail per id + roi per id), digest 1, timetable 4. Tag shape `tags: { phase: "38", operation: "rsc_prefetch", query: <label> }` + `extra: { userId, ... }` — unit-test-verified in `create-prefetched-page.test.tsx`. |
 | 10 | Playwright pixel-diff harness shipped (infrastructure only; baselines gated on human credential checkpoint) | VERIFIED | `@playwright/test@^1.59.1` installed; `playwright.config.ts` has `maxDiffPixelRatio: 0.02`, zh-CN locale, 1440×900 viewport, sequential run; `first-paint.spec.ts` has describe-level `test.skip(!shouldRunPerfSuite())` env gate + 6-page loop generating exactly 6 test cases; `loginAsPerfTestUser` fails fast on missing `PERF_TEST_PASSWORD` (T-38-11); `installFixedClock` freezes time to `2026-04-01T08:00:00+10:00`; `playwright-e2e` job added to `.github/workflows/frontend-ci.yml` with all required secrets wired. `__screenshots__/.gitkeep` placeholder committed (baselines captured at 38-04 Task 5 checkpoint — deferred by design). |
 
+> **Truth #1 SUPERSEDED BY PHASE 38.2 (2026-04-22):** The "All 6 pages declare
+> `export const dynamic = "force-dynamic"`" portion of Truth #1 was reversed
+> by Phase 38.2 (CONTEXT.md D-01 through D-05). Rationale: the `force-dynamic`
+> directive defeated Next.js 15's client router cache, causing full RSC re-
+> render on every sidebar navigation to a previously-visited page. Phase
+> 38.2 removes the directive on all 6 pages and relies on Next.js's implicit
+> dynamic-rendering detection via `cookies()` / `getSession()` in the HOF
+> tree. See `.planning/phases/38.2-navigation-cache-parity/38.2-VERIFICATION.md`
+> for the new contract. The rest of Truth #1 (async Server Component,
+> `createPrefetchedPage` HOF usage, `HydrationBoundary` wrapping, no
+> anti-patterns) remains VERIFIED and in force.
+
 **Score:** 7 fully verified / 3 human-needed (deferred to documented checkpoints) = **7/10 automatable must-haves**. No gaps in automated scope; all 3 human items are the explicitly-scheduled `autonomous: false` checkpoints in 38-03 and 38-04.
 
 ### Required Artifacts
