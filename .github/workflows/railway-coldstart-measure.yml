@@ -66,10 +66,7 @@ jobs:
             echo "::error::idle_minutes must be an integer in [0, 60]; got '$IDLE_MIN'"
             exit 1
           fi
-          if [ -z "${NEXT_PUBLIC_API_URL:-}" ]; then
-            echo "::error::NEXT_PUBLIC_API_URL secret not configured in repo settings"
-            exit 1
-          fi
+          # NEXT_PUBLIC_API_URL always set via env fallback (see env block)
           SAMPLES=()
           for i in $(seq 1 "$N"); do
             echo "--- Sample $i of $N ---"
