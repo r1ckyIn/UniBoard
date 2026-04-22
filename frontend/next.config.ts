@@ -69,6 +69,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  // Phase 38.2: restore v14 router cache behaviour for dynamic routes. Next.js
+  // 15.0.0 changed the default staleTimes.dynamic from 30s to 0s, which
+  // defeats the client router cache for auth-gated pages (cookies()/headers()
+  // make every dashboard page dynamic). Setting to 30s gives zero-latency
+  // sidebar revisits within the cache window. See 38.2-RESEARCH.md R1/R6.
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
 };
 
 // Sentry plugin composition: Sentry outermost, then nextIntl (per D-02)

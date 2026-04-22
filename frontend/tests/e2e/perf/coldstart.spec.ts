@@ -12,7 +12,7 @@
 //   1. Removing the `@ts-nocheck` comment at the top of this file
 //   2. Removing the `test.skip(true, ...)` guard below
 // The spec then captures one sample per invocation against the Railway
-// `/healthz` endpoint — looping + percentile computation remain the
+// `/health` endpoint — looping + percentile computation remain the
 // workflow's responsibility to keep the spec short and reusable.
 //
 // Why keep this file now: the plan records it as an anchor location so P04
@@ -26,10 +26,10 @@ import { test, expect } from "@playwright/test";
 test.describe("Cold-start characterisation @perf @cold", () => {
   test.skip(true, "Pending @playwright/test install in Phase 38 P04");
 
-  test("single sample to /healthz", async ({ request }) => {
+  test("single sample to /health", async ({ request }) => {
     const RAILWAY_URL = process.env.NEXT_PUBLIC_API_URL;
     if (!RAILWAY_URL) throw new Error("NEXT_PUBLIC_API_URL not set");
-    const endpoint = `${RAILWAY_URL.replace(/\/$/, "")}/healthz`;
+    const endpoint = `${RAILWAY_URL.replace(/\/$/, "")}/health`;
     const start = Date.now();
     const resp = await request.get(endpoint, { timeout: 30_000 });
     const elapsed = Date.now() - start;

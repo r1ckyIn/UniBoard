@@ -25,8 +25,6 @@ import { courseOptions } from "@/hooks/use-courses";
 import { deadlineOptions } from "@/hooks/use-deadlines";
 import type { paths } from "@/lib/api/types.gen";
 
-export const dynamic = "force-dynamic";
-
 type Props = { params: Promise<{ locale: string }> };
 
 type CoursesResponse =

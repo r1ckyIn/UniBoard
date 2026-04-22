@@ -36,8 +36,6 @@ import { studyRecOptions } from "@/hooks/use-study-recommendations";
 import { userOptions } from "@/hooks/use-user";
 import type { paths } from "@/lib/api/types.gen";
 
-export const dynamic = "force-dynamic";
-
 type Props = { params: Promise<{ locale: string }> };
 
 // Response-shape aliases mirror the per-hook convention so `.json<T>()` and

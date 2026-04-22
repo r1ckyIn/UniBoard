@@ -35,7 +35,7 @@
 //      `useCourseDetail()` directly (both inline `courseOptions.detail` via
 //      `useQueries`).
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const PAGES: Array<{
@@ -251,6 +251,46 @@ describe("Server-prefetch ↔ client-consumer parity (Phase 38.1 invariant)", ()
     expect(
       Array.from(unknownHooks).sort(),
       `unmapped hooks found (add to HOOK_TO_FACTORY, MUTATION_HOOKS, or IGNORED_HOOKS): ${Array.from(unknownHooks).join(", ")}`,
+    ).toEqual([]);
+  });
+
+  // Phase 38.2 invariant: none of the 6 dashboard pages declare
+  // `export const dynamic = "force-dynamic"` after the reversal in 38.2.
+  // Uses stripComments so a comment like "// removed force-dynamic"
+  // doesn't false-positive.
+  it("no force-dynamic declaration in any of the 6 dashboard pages (Phase 38.2 reversal)", () => {
+    const offenders: string[] = [];
+    for (const { name, pagePath } of PAGES) {
+      const source = stripComments(
+        readFileSync(resolve(__dirname, pagePath), "utf8"),
+      );
+      // Match `export const dynamic = "force-dynamic"` with either quote style
+      if (/export\s+const\s+dynamic\s*=\s*['"]force-dynamic['"]/.test(source)) {
+        offenders.push(name);
+      }
+    }
+    expect(
+      offenders,
+      `pages still declaring force-dynamic: ${offenders.join(", ")}`,
+    ).toEqual([]);
+  });
+
+  // Phase 38.2 invariant: no parent-level loading.tsx exists that would
+  // re-inherit into the dashboard (RESEARCH Pitfall 3). Dashboard's own
+  // loading.tsx was deleted in 38.2; a future PR adding one at a parent
+  // level would re-introduce the skeleton-flash symptom.
+  it("no parent-level loading.tsx exists for dashboard routes (Phase 38.2 invariant)", () => {
+    const forbidden = [
+      "../../app/loading.tsx",
+      "../../app/[locale]/loading.tsx",
+      "../../app/[locale]/(dashboard)/loading.tsx",
+    ];
+    const existing = forbidden.filter((p) =>
+      existsSync(resolve(__dirname, p)),
+    );
+    expect(
+      existing,
+      `loading.tsx files found that would re-introduce skeleton-flash: ${existing.join(", ")}`,
     ).toEqual([]);
   });
 

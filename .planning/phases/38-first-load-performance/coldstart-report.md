@@ -107,6 +107,30 @@ p50 (index 5) and p95 (index 10).
 
 ---
 
+## Decision Record — Phase 38.2 Activation (2026-04-22)
+
+**Decision:** Warmup cron ENABLED. `railway-warmup.yml` `schedule:` uncommented
+with cron `"*/10 * * * *"` (every 10 min). Endpoint corrected from `/healthz`
+to `/health` (RESEARCH Pitfall 2: pre-existing Phase 38-03 bug; backend exposes
+`/health`, verified via live curl against production).
+
+**Rationale:** Phase 38.2 reverses `force-dynamic` (all 6 dashboard pages) and
+deletes the `loading.tsx` Suspense fallback (D-04). After this reversal, hard-
+refresh on a cold Railway container would expose the user to ~2-5 s of blank
+body while RSC awaits Railway warmup. Cron activation is therefore tightly
+coupled to the force-dynamic reversal — both land in the same PR.
+
+**Measurement status:** The formal p50/p95 run (Option A in §"How to Run the
+Measurement") is **still pending** post-activation. Activation does not block
+the measurement; measurement will quantify improvement. Tracked under Phase
+38 HUMAN-UAT item #2 (still `pending`).
+
+**Next checkpoint:** 48 h post-activation, re-measure via GH Actions workflow
+to confirm p95 drops below 2000 ms. Record under a "Re-measurement" section
+below.
+
+---
+
 ## Phase 38 Gate
 
 Until the TBD placeholders are replaced with real measurements and a decision
