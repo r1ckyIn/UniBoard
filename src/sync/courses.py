@@ -133,30 +133,119 @@ async def _upsert_courses(
     linked: list[LinkedCourse],
     adapter: CanvasAdapter | None = None,
 ) -> int:
-    """Upsert Course records from linked course data. Returns count of records."""
+    """Upsert Course records from linked course data. Returns count of records.
+
+    Skips Ed-only LinkedCourse entries (canvas_course_id is None). UniBoard
+    is Canvas-centric: every user-visible course must be an active Canvas
+    enrolment. Ed-only rows would otherwise leak COMP2123 / INFO1113 style
+    artefacts into the course list even though the user dropped them on the
+    Canvas side.
+
+    Lookup for existing rows tries the (user_id, code, semester) natural
+    key first, then falls back to (user_id, code) to catch pre-#111 rows
+    that were written with semester="" because the Canvas feed did not
+    expose a semester token -- otherwise a second sync after #111 landed
+    would create a duplicate course and orphan the UUIDs that the frontend
+    already bookmarked.
+    """
     count = 0
     for lc in linked:
         if not lc.course_code:
             continue
+        if not lc.canvas_course_id:
+            # Drop Ed-only enrolments -- users see Canvas-anchored courses.
+            logger.info(
+                "course_upsert_skip_ed_only",
+                user_id=str(user_id),
+                course_code=lc.course_code,
+                ed_course_id=lc.ed_course_id,
+            )
+            continue
 
-        # Use (user_id, code, semester) as natural key via ix_courses_user_semester
-        stmt = select(Course).where(
-            Course.user_id == user_id,
-            Course.code == lc.course_code,
-            Course.semester == (lc.semester or ""),
-        )
-        result = await session.execute(stmt)
-        existing = result.scalar_one_or_none()
+        target_semester = lc.semester or ""
+
+        # Pull every row for (user_id, code) so we can deduplicate before
+        # updating. A previous sync may have left an orphaned legacy row
+        # (semester='') next to a populated row (semester='2026-S1') with
+        # the same canvas_course_id. The frontend UUID was bookmarked on
+        # the legacy row, so we keep that PK and merge the populated one
+        # into it before deleting the duplicate.
+        candidates = (
+            await session.execute(
+                select(Course).where(
+                    Course.user_id == user_id,
+                    Course.code == lc.course_code,
+                )
+            )
+        ).scalars().all()
+
+        canvas_matches = [
+            c
+            for c in candidates
+            if c.canvas_course_id == lc.canvas_course_id
+        ]
+
+        existing: Course | None = None
+        duplicates: list[Course] = []
+
+        if canvas_matches:
+            blank = next(
+                (c for c in canvas_matches if (c.semester or "") == ""),
+                None,
+            )
+            existing = blank or min(canvas_matches, key=lambda c: str(c.id))
+            duplicates = [c for c in canvas_matches if c is not existing]
+        else:
+            primary = next(
+                (c for c in candidates if (c.semester or "") == target_semester),
+                None,
+            )
+            blank_semester = next(
+                (c for c in candidates if (c.semester or "") == ""),
+                None,
+            )
+            if primary is not None:
+                existing = primary
+            elif blank_semester is not None:
+                existing = blank_semester
+            elif len(candidates) == 1:
+                existing = candidates[0]
+
+        # Fold duplicates' populated fields into the row we keep, then drop
+        # them. This cleans up the double-row artefact without orphaning
+        # any grades/outlines that reference either UUID.
+        for dup in duplicates:
+            if existing is None:
+                break
+            if dup.ed_course_id and not existing.ed_course_id:
+                existing.ed_course_id = dup.ed_course_id
+            if dup.canvas_course_id and not existing.canvas_course_id:
+                existing.canvas_course_id = dup.canvas_course_id
+            if dup.unit_outline_url and not existing.unit_outline_url:
+                existing.unit_outline_url = dup.unit_outline_url
+            if dup.semester and not (existing.semester or ""):
+                existing.semester = dup.semester
+            logger.info(
+                "course_upsert_merged_duplicate",
+                kept_id=str(existing.id),
+                dropped_id=str(dup.id),
+                code=lc.course_code,
+            )
+            await session.delete(dup)
 
         course: Course
         if existing:
-            # Update platform IDs if newly discovered
+            # Update platform IDs and metadata in-place so we merge with
+            # any legacy row rather than creating a duplicate.
             changed = False
             if lc.canvas_course_id and not existing.canvas_course_id:
                 existing.canvas_course_id = lc.canvas_course_id
                 changed = True
             if lc.ed_course_id and not existing.ed_course_id:
                 existing.ed_course_id = lc.ed_course_id
+                changed = True
+            if target_semester and (existing.semester or "") != target_semester:
+                existing.semester = target_semester
                 changed = True
             if lc.canvas_name and existing.name == existing.code:
                 existing.name = lc.canvas_name
@@ -168,7 +257,7 @@ async def _upsert_courses(
             course = Course(
                 user_id=user_id,
                 code=lc.course_code,
-                semester=lc.semester or "",
+                semester=target_semester,
                 name=lc.canvas_name or lc.ed_name or lc.course_code,
                 canvas_course_id=lc.canvas_course_id,
                 ed_course_id=lc.ed_course_id,
