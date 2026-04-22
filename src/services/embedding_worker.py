@@ -116,6 +116,8 @@ async def compute_course_content_hash(
 
 async def embed_hot_courses_worker(
     session_factory: async_sessionmaker[AsyncSession],
+    *,
+    now: datetime | None = None,
 ) -> dict[str, int]:
     """Iterate hot-set courses, re-embed if content_hash diff.
 
@@ -128,6 +130,9 @@ async def embed_hot_courses_worker(
     Sleeps ``INTER_COURSE_SLEEP_SEC`` between course iterations (Voyage rate
     limit). Per-course failures are captured to Sentry with
     ``phase=34 / feature=rag_embedding`` tags but do not abort the batch.
+
+    The optional ``now`` parameter mirrors should_reembed_course for
+    deterministic testing (no wall-clock drift). Production callers omit it.
     """
     # Import here to avoid circular import (qa.py imports config + models that
     # may trigger embedding worker imports in tests).
@@ -135,7 +140,7 @@ async def embed_hot_courses_worker(
     from src.services.ai_engine import AIEngine
     from src.services.qa import QAService
 
-    now = datetime.now(UTC)
+    now = now or datetime.now(UTC)
     cutoff = now - timedelta(days=HOT_SET_WINDOW_DAYS)
     considered = 0
     re_embedded = 0
