@@ -1,10 +1,15 @@
 ---
-status: resolving_via_38.1
+status: resolved
 trigger: "每次从左侧边栏进入其他页面都需要等待灰色占位卡片加载一会儿才能进入页面，第二次进入页面也需要加载体验有问题"
 created: 2026-04-21T00:00:00+10:00
 updated: 2026-04-22T00:00:00+10:00
+resolved: 2026-04-22
 resolution_phase: 38.1-prefetch-consumer-parity
-pr_partial_fix: 96 (sidebar Link prefetch={true} — addressed sidebar-nav leg only)
+resolution_prs:
+  - 96 (fix(sidebar): force prefetch on force-dynamic nav links — sidebar-nav leg)
+  - 97 (Phase 38.1 — hard-refresh consumer-parity leg, 4 page.tsx edits + static invariant test)
+  - 98 (docs(38.1): extract learnings)
+naked_eye_uat_rolls_up_to: .planning/phases/38-first-load-performance/38-HUMAN-UAT.md#test-1
 ---
 
 ## Current Focus
