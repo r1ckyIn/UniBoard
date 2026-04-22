@@ -22,6 +22,60 @@ from src.sync._shared import _MAX_RETRIES, _get_sync_session_factory, _record_sy
 logger = structlog.get_logger()
 
 
+def _flatten_ed_courses(
+    raw: list[object],
+) -> list[dict[str, object]]:
+    """Normalise Ed ``/user`` enrolment entries into a ``link_courses``-ready
+    shape.
+
+    Ed returns enrolments as ``[{course: {id, code, name, year, session,
+    status, ...}, role: ..., ...}, ...]`` -- the course metadata is nested
+    inside ``course`` and ``course.name`` omits the course code (it carries
+    the short title like "Introduction to Programming"). Feeding that shape
+    directly into ``link_courses`` produced two independent regressions:
+
+    1. ``ec.get("name")`` returned ``""`` (name was on the nested object).
+    2. Even if the nested name were used, it has no ``COMP2017`` / semester
+       tokens, so ``extract_course_code`` / ``extract_semester`` always
+       returned ``None`` and every user landed in the unlinked branch.
+
+    This helper:
+      * unwraps the nested ``course`` dict,
+      * drops ``status == "archived"`` entries so old semesters do not
+        shadow the current one during multi-candidate tie-breaking,
+      * synthesises ``{"id", "name"}`` dicts where the name is
+        ``"{code} ({year} {session})"`` -- a string that both
+        ``extract_course_code`` and ``extract_semester`` recognise.
+    """
+    flat: list[dict[str, object]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        nested = item.get("course")
+        course = nested if isinstance(nested, dict) else item
+        if not isinstance(course, dict):
+            continue
+        if str(course.get("status", "")).lower() == "archived":
+            continue
+        code = str(course.get("code", "")).strip()
+        year = str(course.get("year", "")).strip()
+        session_str = str(course.get("session", "")).strip()
+        course_id = course.get("id", "")
+        if not code or not course_id:
+            continue
+        # Compose a name that link_courses can parse.
+        if year and session_str:
+            name = f"{code} ({year} {session_str})"
+        elif year:
+            name = f"{code} ({year})"
+        else:
+            # Fall back to whatever Ed called the course -- link_courses will
+            # hit the code-only index path and match on code alone.
+            name = f"{code} {course.get('name', '')}".strip()
+        flat.append({"id": course_id, "name": name})
+    return flat
+
+
 async def _resolve_unit_outline_url(
     adapter: CanvasAdapter, canvas_course_id: str
 ) -> str | None:
@@ -198,7 +252,9 @@ async def sync_all_courses() -> None:
                                     if isinstance(data, dict):
                                         courses_list = data.get("courses", [])
                                         if isinstance(courses_list, list):
-                                            ed_courses = courses_list
+                                            ed_courses = _flatten_ed_courses(
+                                                courses_list
+                                            )
                         except Exception:
                             logger.warning(
                                 "sync_courses_ed_failed", user_id=str(user.id)
