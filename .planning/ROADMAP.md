@@ -227,7 +227,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
 | 38. First-Load Performance | v3.0 | 4/4 | Complete    | 2026-04-21 |
 | 38.1. Prefetch ↔ Consumer Parity | v3.0 | 3/3 | Complete   | 2026-04-21 |
-| 38.2. Navigation-Cache ↔ Skeleton-Free Parity | v3.0 | 0/2 | In progress | - |
+| 38.2. Navigation-Cache ↔ Skeleton-Free Parity | v3.0 | 2/2 | Complete   | 2026-04-22 |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -450,8 +450,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 38.2-01-PLAN.md — Frontend architectural reversal: force-dynamic removal (6 pages) + loading.tsx deletion + experimental.staleTimes.dynamic: 30 + createPrefetchedPage diagnostic cleanup + prefetch-consumer-parity test extension [PERF-01]
-- [ ] 38.2-02-PLAN.md — Infrastructure + docs: Railway warmup cron activation + /healthz → /health fix (4 files) + coldstart-report.md activation record + 38-VERIFICATION.md SUPERSEDED footer [PERF-01]
+- [x] 38.2-01-PLAN.md — Frontend architectural reversal: force-dynamic removal (6 pages) + loading.tsx deletion + experimental.staleTimes.dynamic: 30 + createPrefetchedPage diagnostic cleanup + prefetch-consumer-parity test extension [PERF-01]
+- [x] 38.2-02-PLAN.md — Infrastructure + docs: Railway warmup cron activation + /healthz → /health fix (4 files) + coldstart-report.md activation record + 38-VERIFICATION.md SUPERSEDED footer [PERF-01]
 **Context**: Production UAT 2026-04-22 after Phase 38.1 ship + `[RSC_DIAG]` diagnostic confirmed two architectural missteps neither Phase 38 nor 38.1 recognised: (a) `export const dynamic = "force-dynamic"` defeats Next.js 15 router cache — every sidebar click re-runs the server RSC + prefetch fan-out; (b) `loading.tsx` added in PR #95 as a Suspense fallback renders the full-page skeleton layout while the server is still prefetching, turning Phase 38's "server wait" into a 2 s visible skeleton instead of an invisible network wait. Diagnostic evidence: `hof_completed` event for Dashboard showed `allSuccess: true` with 8/8 queries success, proving hydrate + dehydrate work correctly — yet the user observed a full-page skeleton for ~2 s. Screenshots at T+300/800/1800/3800 ms captured the skeleton-then-real-data transition with pixel-level correspondence to `loading.tsx`'s layout (4 stat + generic + donut + timeline cards). Research scope: Next.js 15 router cache TTL semantics for dynamic routes without the `force-dynamic` directive; per-user data isolation guarantees; CDN (Vercel Edge) interaction. Debug trace continuation: `.planning/debug/resolved/sidebar-nav-skeleton-stall.md`.
 
 ## Backlog
