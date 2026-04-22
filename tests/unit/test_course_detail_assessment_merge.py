@@ -74,6 +74,27 @@ class TestAssessmentWeightsFromOutline:
         rows = _assessment_weights_from_outline(outline)
         assert rows == []
 
+    def test_drops_non_iso_due_date(self) -> None:
+        """Outline parser surfaces duration hints like '2 hours' in the
+        due_date slot; the route must coerce those to None so the frontend
+        date-fns path does not throw RangeError: Invalid time value."""
+        outline = _fake_outline(
+            [
+                {"name": "Final Exam", "weight": 0.5, "due_date": "2 hours"},
+                {"name": "P1", "weight": 0.125, "due_date": "50 minutes"},
+                {"name": "Assignment", "weight": 0.2, "due_date": "2026-06-15"},
+                {"name": "Quiz", "weight": 0.1, "due_date": "2026-06-01T10:00:00Z"},
+                {"name": "Lab", "weight": 0.05, "due_date": None},
+            ]
+        )
+        rows = _assessment_weights_from_outline(outline)
+        by_name = {r.name: r.due_date for r in rows}
+        assert by_name["Final Exam"] is None
+        assert by_name["P1"] is None
+        assert by_name["Assignment"] == "2026-06-15"
+        assert by_name["Quiz"] == "2026-06-01T10:00:00Z"
+        assert by_name["Lab"] is None
+
 
 class TestMergeAssessmentWeights:
     """_merge_assessment_weights handles all empty-Canvas / zero-weight scenarios."""
