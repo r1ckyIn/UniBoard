@@ -85,6 +85,22 @@ def _assessment_weights_from_outline(
             weight_fraction = 0.0
         weight_pct = round(weight_fraction * 100.0, 4)
 
+        # Outline parser may surface free-text hints like "2 hours" or
+        # "50 minutes" in the due_date slot -- those are task-duration
+        # descriptions, not submission datetimes. Frontend AssessmentSection
+        # feeds this field to date-fns which throws RangeError: Invalid time
+        # value when given a non-ISO string. Guard: keep only values that
+        # successfully round-trip through datetime.fromisoformat; drop the
+        # rest to None so the UI simply renders without a due label.
+        due_raw = entry.get("due_date")
+        due_iso: str | None = None
+        if isinstance(due_raw, str) and due_raw:
+            try:
+                datetime.fromisoformat(due_raw.replace("Z", "+00:00"))
+                due_iso = due_raw
+            except ValueError:
+                due_iso = None
+
         rows.append(
             AssessmentWeightResponse(
                 name=name,
@@ -93,7 +109,7 @@ def _assessment_weights_from_outline(
                 max_score=100.0,
                 status="upcoming",
                 group_name=name,
-                due_date=entry.get("due_date"),
+                due_date=due_iso,
             )
         )
     return rows
