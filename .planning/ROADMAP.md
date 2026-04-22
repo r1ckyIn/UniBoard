@@ -227,6 +227,7 @@ Decimal phases (if inserted) execute between their surrounding integers.
 | 36. UX Polish | v3.0 | 0/TBD | Not started | - |
 | 38. First-Load Performance | v3.0 | 4/4 | Complete    | 2026-04-21 |
 | 38.1. Prefetch ↔ Consumer Parity | v3.0 | 3/3 | Complete   | 2026-04-21 |
+| 38.2. Navigation-Cache ↔ Skeleton-Free Parity | v3.0 | 0/TBD | In progress | - |
 
 ### Phase 27: Frontend UX Fixes & Course Materials Preview
 **Goal**: Dashboard and timetable interactions work correctly; course materials have inline preview capability
@@ -430,6 +431,24 @@ Plans:
 - [x] 38.1-02-PLAN.md — Dashboard + Digest prefetch gaps (userOptions.me / notificationOptions.list / alertOptions.list / digestOptions.history)
 - [x] 38.1-03-PLAN.md — Predict + Timetable prefetch gaps (hoisted userOptions.me + studyRecOptions.latest / N-fanout courseOptions.detail)
 **Context**: Production UAT 2026-04-21 confirmed Phase 38's Truth #2 (`HUMAN_NEEDED` in 38-VERIFICATION.md) fails — hard-refresh flashes skeleton because server prefetch is a strict subset of client consumers. Dashboard audit: `useCurrentUser` + `useNotifications` missing; Timetable audit: `useQueries(courseOptions.detail(c.id))` N-fanout missing. Other 4 pages need identical audit. Fix reuses `createPrefetchedPage` HOF verbatim — zero architectural change. Debug trace: `.planning/debug/sidebar-nav-skeleton-stall.md`.
+
+### Phase 38.2: Navigation-Cache ↔ Skeleton-Free Parity (Architectural Correction)
+**Goal**: Deliver the true "skeleton-free on URL-entry page + zero-latency on re-visit" UX that Phase 38 and 38.1 were meant to achieve. Remove `export const dynamic = "force-dynamic"` from the 6 dashboard pages (which currently defeats Next.js router cache on every client-side navigation) and delete the `loading.tsx` Suspense fallback that visibly renders full-page skeleton during server RSC prefetch waits. Activate the Railway warmup cron (Phase 38-03 infrastructure) to collapse cold-start tail latency so the single remaining wait — hard-refresh server TTFB — drops to ~300 ms. Clean up the diagnostic breadcrumbs (`[RSC_DIAG]` + `rsc_prefetch_null_session` + `rsc_hof_entered/completed` Sentry messages) from `create-prefetched-page.tsx` since the root cause is now localised and they add log noise.
+**Depends on**: Phase 38, Phase 38.1
+**Requirements**: PERF-01 (completion, supersedes the force-dynamic-based contract from Phase 38 Truth #1)
+**Success Criteria** (what must be TRUE):
+  1. Hard-refresh any of Dashboard / Courses / Deadlines / Predict / Digest / Timetable on warm Railway → no full-page `SkeletonCard` flash visible (transient skeleton <500 ms acceptable, full 2 s flash is a regression)
+  2. After first hard-refresh, client-side sidebar navigation to any other previously-visited page → **zero** visible loading state (router cache + client QueryClient cache both hit)
+  3. None of the 6 dashboard pages declare `export const dynamic = "force-dynamic"` (auditable via grep); Next.js auto-detects dynamic rendering from `cookies()`/`headers()`/`auth.getSession()` usage in the RSC tree instead
+  4. `frontend/app/[locale]/(dashboard)/loading.tsx` is deleted; route transitions rely on the router cache + old-page-visible-until-new-data semantics Next.js provides by default
+  5. Railway warmup cron is active (`schedule:` uncommented in `.github/workflows/railway-warmup.yml`), pinging `/healthz` at a rate that keeps p95 cold-start probability near zero for user traffic; `coldstart-report.md` updated with the activation decision
+  6. All diagnostic breadcrumbs removed from `frontend/lib/rsc/create-prefetched-page.tsx`: the `diagLog` helper, every `Sentry.captureMessage("rsc_hof_entered"|"rsc_hof_completed"|"rsc_prefetch_null_session")` call, every `[RSC_DIAG]` console.warn; existing QueryCache `onError` Sentry subscriber retained (it was there pre-38.2)
+  7. Per-user data isolation preserved post-`force-dynamic` removal — research + verification must confirm that Next.js 15 router cache does not leak auth-scoped data across users (spec compliance, not an observable)
+  8. Phase 38 VERIFICATION Truth #1 explicitly annotated as SUPERSEDED by 38.2 (status transitions to `superseded`, points at this phase's VERIFICATION.md)
+  9. Phase 38.1 HUMAN-UAT items #1 and #2 flip to `passed` post-deploy (they were `HUMAN_NEEDED`; 38.2 completes the observation)
+  10. No automated-test regression: `pnpm vitest` + `pnpm typecheck` + `pnpm lint --max-warnings 0` + Playwright E2E smoke (when gated filter permits) all green
+**Plans**: TBD (plan-phase decides N — likely 2-3 plans covering page.tsx + loading.tsx + warmup + diag cleanup; may fold into 1-2 plans if scope stays mechanical)
+**Context**: Production UAT 2026-04-22 after Phase 38.1 ship + `[RSC_DIAG]` diagnostic confirmed two architectural missteps neither Phase 38 nor 38.1 recognised: (a) `export const dynamic = "force-dynamic"` defeats Next.js 15 router cache — every sidebar click re-runs the server RSC + prefetch fan-out; (b) `loading.tsx` added in PR #95 as a Suspense fallback renders the full-page skeleton layout while the server is still prefetching, turning Phase 38's "server wait" into a 2 s visible skeleton instead of an invisible network wait. Diagnostic evidence: `hof_completed` event for Dashboard showed `allSuccess: true` with 8/8 queries success, proving hydrate + dehydrate work correctly — yet the user observed a full-page skeleton for ~2 s. Screenshots at T+300/800/1800/3800 ms captured the skeleton-then-real-data transition with pixel-level correspondence to `loading.tsx`'s layout (4 stat + generic + donut + timeline cards). Research scope: Next.js 15 router cache TTL semantics for dynamic routes without the `force-dynamic` directive; per-user data isolation guarantees; CDN (Vercel Edge) interaction. Debug trace continuation: `.planning/debug/resolved/sidebar-nav-skeleton-stall.md`.
 
 ## Backlog
 
