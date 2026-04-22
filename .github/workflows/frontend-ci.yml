@@ -12,6 +12,39 @@ on:
       - ".github/workflows/frontend-ci.yml"
 
 jobs:
+  # Detect whether the PR touches files that can affect rendered pixels.
+  # Output `ui=true` gates the downstream playwright-e2e job so non-UI
+  # changes (RSC helpers, hooks, lib/, server config, unit tests, etc.)
+  # skip the 2-minute pixel-diff suite. `check` (lint + typecheck +
+  # build) still runs on every frontend PR so regressions in non-UI
+  # code are caught.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Detect UI-affecting changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            ui:
+              - 'frontend/app/**'
+              - 'frontend/components/**'
+              - 'frontend/styles/**'
+              - 'frontend/public/**'
+              - 'frontend/tailwind.config.*'
+              - 'frontend/postcss.config.*'
+              - 'frontend/next.config.*'
+              - 'frontend/playwright.config.ts'
+              - 'frontend/tests/e2e/**'
+              - 'frontend/package.json'
+              - 'frontend/pnpm-lock.yaml'
+              - '.github/workflows/frontend-ci.yml'
+
   check:
     runs-on: ubuntu-latest
     defaults:
@@ -52,17 +85,25 @@ jobs:
 
   # Phase 38 P04 — Playwright pixel-diff perf regression.
   #
-  # Runs on the same pull_request / push paths as `check`. The suite is
-  # env-gated: when PERF_TEST_PASSWORD (or the Supabase env vars) is
-  # absent, the spec's `test.skip(!shouldRunPerfSuite(), ...)` causes all
-  # 6 cases to no-op. This keeps fork PRs (which never see repository
-  # secrets) green without work, and only enforces the pixel-diff on
-  # trusted branches where the secret is provisioned.
+  # Gated on `changes.outputs.ui == 'true'` — only runs when the PR
+  # touches files listed in the `changes` job's filter (app/, components/,
+  # styles/, public/, Tailwind/PostCSS/Next configs, Playwright config,
+  # e2e specs, package.json/lockfile, this workflow file). Non-UI PRs
+  # (RSC helpers, hooks, lib/, server-only code, unit tests) skip this
+  # job entirely, saving ~2 minutes per iteration.
+  #
+  # Env-gated: when PERF_TEST_PASSWORD (or the Supabase env vars) is
+  # absent, the spec's `test.skip(!shouldRunPerfSuite(), ...)` causes
+  # all 6 cases to no-op. This keeps fork PRs (which never see
+  # repository secrets) green without work, and only enforces the
+  # pixel-diff on trusted branches where the secret is provisioned.
   #
   # When the secret IS present, a mismatch against any of the 6 committed
   # baselines fails CI and uploads the diff report as an artifact.
   playwright-e2e:
     name: Playwright E2E (pixel-diff)
+    needs: changes
+    if: needs.changes.outputs.ui == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
