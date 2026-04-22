@@ -57,6 +57,27 @@ function deriveQueryLabel(queryKey: readonly unknown[]): string {
   return typeof first === "string" && first.length > 0 ? first : "unknown";
 }
 
+/**
+ * [Phase 38.1 diagnostic — Vercel Functions log]
+ *
+ * Writes a tagged one-line JSON payload to stdout of the RSC function.
+ * Shows in Vercel dashboard -> Deployments -> {deploy} -> Logs in real
+ * time. Runs in parallel with Sentry captureMessage/captureException
+ * calls so the diagnostic survives even when Sentry is quota-limited,
+ * misconfigured, or trial-expired.
+ *
+ * Grep filter in Vercel Logs: `[RSC_DIAG]`
+ *
+ * REMOVE all call sites once the skeleton-flash root cause is localised.
+ */
+function diagLog(event: string, payload: Record<string, unknown>): void {
+  try {
+    console.warn(`[RSC_DIAG] ${event} ${JSON.stringify(payload)}`);
+  } catch {
+    // Never break the HOF.
+  }
+}
+
 export async function createPrefetchedPage({
   children,
   run,
@@ -84,6 +105,7 @@ export async function createPrefetchedPage({
       hdrs.get("next-url") ||
       hdrs.get("referer") ||
       "unknown";
+    diagLog("hof_entered", { pathHint });
     Sentry.captureMessage("rsc_hof_entered", {
       level: "info",
       tags: { phase: PHASE_TAG, operation: "rsc_hof_entered" },
@@ -110,6 +132,12 @@ export async function createPrefetchedPage({
     // REMOVE once root cause is identified (either confirmed via frequent
     // null_session events on URL-entry paths, or refuted via silence).
     // Diagnostic wrapped in try/catch so it can never break the HOF.
+    diagLog("null_session", {
+      pathHint,
+      has_session_user: !!session?.user,
+      has_access_token: !!session?.access_token,
+      userIdPresent: !!session?.user?.id,
+    });
     try {
       Sentry.captureMessage("rsc_prefetch_null_session", {
         level: "warning",
@@ -147,6 +175,12 @@ export async function createPrefetchedPage({
     error: Error,
     query: Query<unknown, unknown, unknown>,
   ) => {
+    diagLog("prefetch_error", {
+      pathHint,
+      queryLabel: deriveQueryLabel(query.queryKey),
+      queryKey: JSON.stringify(query.queryKey),
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     Sentry.captureException(error, {
       tags: {
         phase: PHASE_TAG,
@@ -172,6 +206,12 @@ export async function createPrefetchedPage({
       // already covered by the QueryCache onError above — this branch handles
       // only truly unexpected failures (e.g. getSession throws after initial
       // success, or a run-side control-flow error).
+      diagLog("run_threw", {
+        pathHint,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack:
+          error instanceof Error ? error.stack?.slice(0, 400) : undefined,
+      });
       Sentry.captureException(error, {
         tags: { phase: PHASE_TAG, operation: "rsc_prefetch_outer" },
         extra: { userId },
@@ -194,6 +234,17 @@ export async function createPrefetchedPage({
       stats[s] = (stats[s] ?? 0) + 1;
       labels.push(`${deriveQueryLabel(q.queryKey)}:${s}`);
     }
+    diagLog("hof_completed", {
+      pathHint,
+      hasRun: !!run,
+      allSuccess: stats.error === 0 && stats.pending === 0 && stats.success > 0,
+      hasFailures: stats.error > 0,
+      success: stats.success,
+      error: stats.error,
+      pending: stats.pending,
+      total: all.length,
+      queries: labels.join(","),
+    });
     Sentry.captureMessage("rsc_hof_completed", {
       level: "info",
       tags: {
