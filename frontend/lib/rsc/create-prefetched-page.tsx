@@ -69,6 +69,30 @@ export async function createPrefetchedPage({
 }): Promise<ReactNode> {
   const queryClient = getServerQueryClient();
 
+  // [Phase 38.1 diagnostic — checkpoint 1: HOF entry]
+  // Fires on every RSC render (hard refresh, sidebar navigation, Link prefetch).
+  // Confirms the Sentry -> RSC pipeline is working; if this message appears in
+  // Sentry Issues, we know captureMessage from server RSC context is reaching
+  // the platform. pathHint identifies which page triggered the render.
+  // REMOVE along with checkpoints 2 and the null-session breadcrumb once the
+  // skeleton-flash root cause is localised.
+  let pathHint = "unknown";
+  try {
+    const hdrs = await headers();
+    pathHint =
+      hdrs.get("x-invoke-path") ||
+      hdrs.get("next-url") ||
+      hdrs.get("referer") ||
+      "unknown";
+    Sentry.captureMessage("rsc_hof_entered", {
+      level: "info",
+      tags: { phase: PHASE_TAG, operation: "rsc_hof_entered" },
+      extra: { pathHint },
+    });
+  } catch {
+    // Diagnostic must never break the HOF.
+  }
+
   const supabase = await createSupabaseServer();
   const {
     data: { session },
@@ -87,12 +111,6 @@ export async function createPrefetchedPage({
     // null_session events on URL-entry paths, or refuted via silence).
     // Diagnostic wrapped in try/catch so it can never break the HOF.
     try {
-      const hdrs = await headers();
-      const pathHint =
-        hdrs.get("x-invoke-path") ||
-        hdrs.get("next-url") ||
-        hdrs.get("referer") ||
-        "unknown";
       Sentry.captureMessage("rsc_prefetch_null_session", {
         level: "warning",
         tags: {
@@ -159,6 +177,45 @@ export async function createPrefetchedPage({
         extra: { userId },
       });
     }
+  }
+
+  // [Phase 38.1 diagnostic — checkpoint 2: run() completed, cache stats]
+  // Inspect the queryClient after run() to see how many queries landed in
+  // "success" / "error" / "pending" states. If the URL-entry page shows a
+  // full skeleton flash but this message reports success>0, the bug is in
+  // dehydrate/hydrate serialization — not in run() itself. If success=0
+  // the bug is in run() or the backend.
+  try {
+    const all = queryClient.getQueryCache().getAll();
+    const stats = { pending: 0, success: 0, error: 0 };
+    const labels: string[] = [];
+    for (const q of all) {
+      const s = q.state.status as "pending" | "success" | "error";
+      stats[s] = (stats[s] ?? 0) + 1;
+      labels.push(`${deriveQueryLabel(q.queryKey)}:${s}`);
+    }
+    Sentry.captureMessage("rsc_hof_completed", {
+      level: "info",
+      tags: {
+        phase: PHASE_TAG,
+        operation: "rsc_hof_completed",
+        all_success: String(
+          stats.error === 0 && stats.pending === 0 && stats.success > 0,
+        ),
+        has_failures: String(stats.error > 0),
+        has_run: String(!!run),
+      },
+      extra: {
+        pathHint,
+        success: stats.success,
+        error: stats.error,
+        pending: stats.pending,
+        total: all.length,
+        queries: labels.join(","),
+      },
+    });
+  } catch {
+    // Diagnostic must never break the HOF.
   }
 
   return (
