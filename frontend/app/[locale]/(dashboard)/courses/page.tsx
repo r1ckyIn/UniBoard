@@ -19,8 +19,6 @@ import { getServerApiClient } from "@/lib/rsc/server-query-fn";
 import { courseOptions } from "@/hooks/use-courses";
 import type { paths } from "@/lib/api/types.gen";
 
-export const dynamic = "force-dynamic";
-
 type Props = { params: Promise<{ locale: string }> };
 
 type CoursesResponse =

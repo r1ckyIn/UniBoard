@@ -37,8 +37,6 @@ import { deadlineOptions } from "@/hooks/use-deadlines";
 import { timetableOptions } from "@/hooks/use-timetable";
 import type { paths } from "@/lib/api/types.gen";
 
-export const dynamic = "force-dynamic";
-
 type Props = { params: Promise<{ locale: string }> };
 
 type SessionsResponse =
