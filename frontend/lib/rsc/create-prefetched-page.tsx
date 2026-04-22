@@ -32,6 +32,7 @@ import {
   type QueryClient,
 } from "@tanstack/react-query";
 import * as Sentry from "@sentry/nextjs";
+import { headers } from "next/headers";
 import { getServerQueryClient } from "@/lib/query/server";
 import { createClient as createSupabaseServer } from "@/lib/supabase/server";
 
@@ -74,6 +75,41 @@ export async function createPrefetchedPage({
   } = await supabase.auth.getSession();
 
   if (!session?.user || !session.access_token) {
+    // [Phase 38.1 follow-up — TEMPORARY DIAGNOSTIC BREADCRUMB]
+    // Production UAT 2026-04-22 reports full-page skeleton flash on the
+    // URL-entry page (first page loaded via hard refresh or direct URL).
+    // Hypothesis: this null-session branch fires on hard-refresh RSC, the
+    // HOF returns an empty dehydrate, client QueryClient stays cold, every
+    // useQuery renders isLoading=true -> full-page skeleton.
+    //
+    // This breadcrumb logs the condition so Sentry can confirm or refute.
+    // REMOVE once root cause is identified (either confirmed via frequent
+    // null_session events on URL-entry paths, or refuted via silence).
+    // Diagnostic wrapped in try/catch so it can never break the HOF.
+    try {
+      const hdrs = await headers();
+      const pathHint =
+        hdrs.get("x-invoke-path") ||
+        hdrs.get("next-url") ||
+        hdrs.get("referer") ||
+        "unknown";
+      Sentry.captureMessage("rsc_prefetch_null_session", {
+        level: "warning",
+        tags: {
+          phase: PHASE_TAG,
+          operation: "rsc_prefetch_null_session",
+          has_session_user: String(!!session?.user),
+          has_access_token: String(!!session?.access_token),
+        },
+        extra: {
+          pathHint,
+          userIdPresent: !!session?.user?.id,
+        },
+      });
+    } catch {
+      // Diagnostic must never break the HOF — swallow errors silently.
+    }
+
     // Unauthed -> empty dehydrate. Client DashboardGuard handles redirect.
     return (
       <HydrationBoundary state={dehydrate(queryClient)}>
