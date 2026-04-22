@@ -2,8 +2,19 @@
 
 import re
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 import structlog
+
+
+def _current_semester() -> str:
+    """Return the current Sydney academic semester as ``YYYY-SN``.
+
+    USYD runs S1 Feb-Jun and S2 Jul-Nov; July is the inflection month used
+    across the repo (see src/sync/outlines.py for the mirror calculation).
+    """
+    now = datetime.now(UTC)
+    return f"{now.year}-S{'1' if now.month <= 6 else '2'}"
 
 logger = structlog.get_logger()
 
@@ -179,8 +190,77 @@ def link_courses(
                         is_linked=False,
                     )
                 )
+        elif code:
+            # Canvas has the course code but the name carries no semester
+            # token (USYD's 2026 Canvas feed dropped the "2026 Semester 1"
+            # suffix, which silently broke linking for every enrolled
+            # course). Resolve against the Ed side:
+            #   1. prefer an exact (code, current_semester) hit
+            #   2. otherwise, if ed_index / ed_code_only have a single
+            #      candidate for this code, link to it
+            #   3. if multiple Ed candidates exist, pick the one with the
+            #      most recent semester token (YYYY-SN sorts lexicographically
+            #      = chronologically)
+            current_sem = _current_semester()
+            ed_match = ed_index.get((code, current_sem))
+            matched_key: tuple[str, str] | None = (
+                (code, current_sem) if ed_match is not None else None
+            )
+
+            if ed_match is None:
+                all_with_sem = [
+                    ((code, k[1]), v)
+                    for k, v in ed_index.items()
+                    if k[0] == code
+                ]
+                code_only = ed_code_only.get(code, [])
+
+                if len(all_with_sem) == 1 and not code_only:
+                    matched_key, ed_match = all_with_sem[0]
+                elif len(all_with_sem) > 1:
+                    # Pick the highest (YYYY-SN) -> most recent semester.
+                    matched_key, ed_match = max(
+                        all_with_sem, key=lambda pair: pair[0][1]
+                    )
+                elif len(code_only) == 1 and not all_with_sem:
+                    ed_match = code_only[0]
+                # else: ambiguous or no candidate -> stays unlinked.
+
+            if ed_match is not None:
+                ed_semester = (
+                    matched_key[1] if matched_key is not None else ""
+                )
+                results.append(
+                    LinkedCourse(
+                        course_code=code,
+                        semester=ed_semester,
+                        canvas_course_id=canvas_id,
+                        ed_course_id=str(ed_match.get("id", "")),
+                        canvas_name=canvas_name,
+                        ed_name=str(ed_match.get("name", "")),
+                        is_linked=True,
+                    )
+                )
+                if matched_key is not None:
+                    matched_ed_keys.add(matched_key)
+                logger.info(
+                    "course_linking_canvas_no_semester_resolved",
+                    canvas_code=code,
+                    ed_semester=ed_semester,
+                    ed_course_id=str(ed_match.get("id", "")),
+                )
+            else:
+                results.append(
+                    LinkedCourse(
+                        course_code=code,
+                        semester="",
+                        canvas_course_id=canvas_id,
+                        canvas_name=canvas_name,
+                        is_linked=False,
+                    )
+                )
         else:
-            # No code/semester extractable: canvas-only, unlinked
+            # No code extractable: canvas-only, unlinked
             results.append(
                 LinkedCourse(
                     course_code=code or "",
