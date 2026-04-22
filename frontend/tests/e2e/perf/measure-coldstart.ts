@@ -32,7 +32,7 @@ if (!RAILWAY_URL) {
 }
 
 const TIMEOUT_MS = 30_000;
-const endpoint = `${RAILWAY_URL.replace(/\/$/, "")}/healthz`;
+const endpoint = `${RAILWAY_URL.replace(/\/$/, "")}/health`;
 const start = Date.now();
 
 try {
