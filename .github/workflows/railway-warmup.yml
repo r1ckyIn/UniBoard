@@ -21,17 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     env:
-      RAILWAY_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      # Public production URL — also listed in the app's CSP header
+      # (`connect-src` directive). Secret-context lookup is retained so a
+      # preview / staging override can be set via repo secret, but the
+      # `||` fallback keeps the cron working on a fresh clone or when the
+      # secret is unset. Phase 38.2 activation originally failed because
+      # the secret was never configured; hardcoding the public URL as the
+      # fallback is safe (no sensitive info exposed).
+      RAILWAY_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.uniboard.uk' }}
     steps:
       - name: Ping /health
         run: |
           set -euo pipefail
-          if [ -z "${RAILWAY_URL:-}" ]; then
-            echo "::error::NEXT_PUBLIC_API_URL secret not configured"
-            exit 1
-          fi
           # -fsS: fail on non-2xx, silent unless error, show error
           # --max-time 15: bound request time; warmup is a cheap probe, not a
           # measurement — we don't want warmup to queue if Railway is mid-boot
           curl -fsS --max-time 15 "${RAILWAY_URL%/}/health" > /dev/null
-          echo "Warmup ping OK"
+          echo "Warmup ping OK (${RAILWAY_URL%/}/health)"
