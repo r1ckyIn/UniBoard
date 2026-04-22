@@ -160,7 +160,7 @@ async def test_respects_rate_limits() -> None:
         "src.services.embedding_worker.asyncio.sleep",
         new=AsyncMock(),
     ) as mock_sleep:
-        stats = await embed_hot_courses_worker(_factory)
+        stats = await embed_hot_courses_worker(_factory, now=NOW)
 
     assert stats["considered"] == 3
     # Sleep called between iterations (idx 0->1, 1->2): exactly 2 times

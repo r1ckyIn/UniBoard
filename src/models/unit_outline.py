@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
@@ -19,6 +19,14 @@ class UnitOutline(UUIDMixin, TimestampMixin, Base):
     """Cached assessment structure parsed from USYD Unit Outline HTML."""
 
     __tablename__ = "unit_outlines"
+    __table_args__ = (
+        # Enforces uniqueness targeted by src/sync/outlines.py ON CONFLICT.
+        # Paired with migration 008_unit_outlines_uq_course_semester.py and
+        # Supabase migration 20260422000001_unit_outlines_uq_course_semester.sql.
+        UniqueConstraint(
+            "course_id", "semester", name="uq_unit_outlines_course_semester"
+        ),
+    )
 
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     outline_url: Mapped[str] = mapped_column(String(500))

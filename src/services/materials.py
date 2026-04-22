@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 
 from src.config import get_settings
 from src.models.course import Course
+from src.models.lesson import Lesson, Slide
 from src.models.module import Module
 from src.schemas.common import NotFoundError
 from src.schemas.materials import (
@@ -49,6 +50,40 @@ def _rule_based_description(item_names: list[str]) -> str:
     return f"Contains {count} items"
 
 
+def _lesson_folder_name(lesson: Lesson) -> str:
+    """Render a folder name for an Ed Lesson.
+
+    Prefers a ``Week N: <title>`` shape so the frontend week extractor in
+    ``MaterialsSection.tsx`` can pick up the week number. Falls back to the
+    raw lesson title when ``lesson.number`` is missing or already embedded
+    in the title (e.g. "Week 1 — Intro").
+    """
+    title = (lesson.title or "").strip() or f"Lesson {lesson.number or '?'}"
+    lowered = title.lower()
+    if "week" in lowered:
+        # Title already contains a week marker; use as-is.
+        return title
+    if lesson.number is not None:
+        return f"Week {lesson.number}: {title}"
+    return title
+
+
+def _lesson_rule_description(lesson: Lesson) -> str:
+    """Rule-based description for an Ed Lesson folder.
+
+    Uses slide count and kind to produce a one-line hint.
+    """
+    kind = (lesson.kind or "").strip()
+    slide_count = lesson.slide_count or 0
+    if slide_count > 0 and kind:
+        return f"Ed lesson ({kind}), {slide_count} slide(s)"
+    if slide_count > 0:
+        return f"Ed lesson with {slide_count} slide(s)"
+    if kind:
+        return f"Ed lesson ({kind})"
+    return "Ed lesson"
+
+
 class CourseMaterialService:
     """Business logic for course materials, folder views, and full-text search."""
 
@@ -60,8 +95,13 @@ class CourseMaterialService:
         user_id: uuid.UUID,
         course_id: uuid.UUID,
     ) -> CourseMaterialsResponse:
-        """Get unified folder view merging Canvas modules and Ed Lessons."""
-        # Fetch course with modules and lessons
+        """Get unified folder view merging Canvas modules and Ed Lessons.
+
+        Each Canvas module and each Ed Lesson becomes its own folder so the
+        frontend can render per-week breakdowns (the legacy implementation
+        collapsed all Ed lessons into a single folder, which defeated the
+        week-badge layout on the course detail page).
+        """
         stmt = (
             select(Course)
             .where(Course.id == course_id, Course.user_id == user_id)
@@ -94,19 +134,26 @@ class CourseMaterialService:
             )
             position += 1
 
-        # Ed Lessons -> folders (grouped as a single "Ed Lessons" folder)
-        if course.lessons:
-            lesson_names = [lesson.title for lesson in course.lessons]
+        # Ed Lessons -> one folder per lesson (enables per-week rendering).
+        # Sort by lesson.number first (nulls last), then by title for stable
+        # ordering when multiple lessons share a number or lack one.
+        def _lesson_sort_key(lesson: Lesson) -> tuple[int, int, str]:
+            number_present = 0 if lesson.number is not None else 1
+            number_val = lesson.number if lesson.number is not None else 0
+            return (number_present, number_val, (lesson.title or "").lower())
+
+        for lesson in sorted(course.lessons, key=_lesson_sort_key):
             folders.append(
                 FolderResponse(
-                    id=f"ed-lessons-{course_id}",
-                    name="Ed Lessons",
+                    id=str(lesson.id),
+                    name=_lesson_folder_name(lesson),
                     source="ed_lessons",
                     position=position,
-                    item_count=len(course.lessons),
-                    ai_description=_rule_based_description(lesson_names),
+                    item_count=lesson.slide_count or 0,
+                    ai_description=_lesson_rule_description(lesson),
                 )
             )
+            position += 1
 
         return CourseMaterialsResponse(
             course_id=str(course.id),
@@ -120,9 +167,15 @@ class CourseMaterialService:
         course_id: uuid.UUID,
         folder_id: uuid.UUID,
     ) -> FolderResponse:
-        """Get single folder with items populated."""
-        # Try as Canvas module first
-        stmt = (
+        """Get single folder with items populated.
+
+        Tries Canvas module lookup first; on miss, falls back to an Ed Lesson
+        lookup and returns its slides as folder items. The original
+        implementation only supported Canvas modules which made the Ed Lessons
+        drill-down return 404.
+        """
+        # --- Try Canvas module first ---
+        module_stmt = (
             select(Module)
             .join(Course, Module.course_id == Course.id)
             .where(
@@ -132,8 +185,8 @@ class CourseMaterialService:
             )
             .options(selectinload(Module.items))
         )
-        result = await self._session.execute(stmt)
-        module = result.scalar_one_or_none()
+        module_result = await self._session.execute(module_stmt)
+        module = module_result.scalar_one_or_none()
         if module is not None:
             items = [
                 FolderItem(
@@ -154,6 +207,41 @@ class CourseMaterialService:
                 ai_description=module.ai_description or _rule_based_description(
                     [i.title for i in module.items]
                 ),
+                items=items,
+            )
+
+        # --- Fall back to Ed Lesson slide drill-down ---
+        lesson_stmt = (
+            select(Lesson)
+            .join(Course, Lesson.course_id == Course.id)
+            .where(
+                Lesson.id == folder_id,
+                Course.id == course_id,
+                Course.user_id == user_id,
+            )
+            .options(selectinload(Lesson.slides))
+        )
+        lesson_result = await self._session.execute(lesson_stmt)
+        lesson = lesson_result.scalar_one_or_none()
+        if lesson is not None:
+            slides_sorted = sorted(lesson.slides, key=lambda s: s.index)
+            items = [
+                FolderItem(
+                    id=str(slide.id),
+                    title=_slide_title(slide, idx),
+                    type=slide.type or "slide",
+                    url=None,
+                    source="ed_lessons",
+                )
+                for idx, slide in enumerate(slides_sorted)
+            ]
+            return FolderResponse(
+                id=str(lesson.id),
+                name=_lesson_folder_name(lesson),
+                source="ed_lessons",
+                position=lesson.number or 0,
+                item_count=len(items),
+                ai_description=_lesson_rule_description(lesson),
                 items=items,
             )
 
@@ -304,3 +392,26 @@ class CourseMaterialService:
             total_hits=len(results),
             results=results,
         )
+
+
+def _slide_title(slide: Slide, index: int) -> str:
+    """Derive a short display title for a slide.
+
+    Ed slide records do not always carry an explicit title column; we use the
+    first ~60 characters of the slide content as a fallback so the frontend
+    has something meaningful to render.
+    """
+    content = (slide.content or "").strip()
+    if not content:
+        return f"Slide {index + 1}"
+    # Strip simple HTML tags for readability
+    stripped = " ".join(content.split())
+    # Drop angle-bracket tags with a greedy one-liner regex (cheap enough)
+    import re
+
+    clean = re.sub(r"<[^>]+>", "", stripped).strip()
+    if not clean:
+        return f"Slide {index + 1}"
+    if len(clean) > 60:
+        return clean[:57].rstrip() + "..."
+    return clean
