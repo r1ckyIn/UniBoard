@@ -46,8 +46,9 @@ class TestAssessmentWeightsFromOutline:
         )
         rows = _assessment_weights_from_outline(outline)
         assert [r.name for r in rows] == ["Final Exam", "Assignment 1"]
-        # Fractions must be scaled to percentage points to match Canvas convention.
-        assert [r.weight for r in rows] == [50.0, 20.0]
+        # Pass the fraction through unchanged -- the frontend multiplies by
+        # 100 for display, so pre-scaling here double-counts (5000% bug).
+        assert [r.weight for r in rows] == [0.5, 0.2]
         assert all(r.status == "upcoming" for r in rows)
         assert rows[1].due_date == "2026-04-01"
 
