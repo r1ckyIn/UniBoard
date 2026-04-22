@@ -74,16 +74,16 @@ def _assessment_weights_from_outline(
         name = str(entry.get("name", "")).strip()
         if not name:
             continue
-        # outline.assessments weights are stored as fractions (0.30), but
-        # Canvas Grade.weight is stored as percentage points (30.0). Keep the
-        # response aligned with Canvas convention so the existing frontend
-        # math in AssessmentSection.tsx continues to work.
+        # Weights are stored as fractions (0.30) in unit_outlines.assessments
+        # and the frontend AssessmentSection multiplies by 100 for display,
+        # so the route must pass the fraction through unchanged. An earlier
+        # pre-scale (* 100) stacked with the frontend scale to yield the
+        # 5000% / 1250% regression surfaced by production UAT 2026-04-23.
         weight_raw = entry.get("weight", 0)
         try:
             weight_fraction = float(weight_raw)
         except (TypeError, ValueError):
             weight_fraction = 0.0
-        weight_pct = round(weight_fraction * 100.0, 4)
 
         # Outline parser may surface free-text hints like "2 hours" or
         # "50 minutes" in the due_date slot -- those are task-duration
@@ -104,7 +104,7 @@ def _assessment_weights_from_outline(
         rows.append(
             AssessmentWeightResponse(
                 name=name,
-                weight=weight_pct,
+                weight=weight_fraction,
                 score=None,
                 max_score=100.0,
                 status="upcoming",
