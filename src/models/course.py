@@ -30,7 +30,9 @@ class Course(UUIDMixin, TimestampMixin, Base):
         Index("ix_courses_canvas_id", "user_id", "canvas_course_id"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     canvas_course_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     ed_course_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     name: Mapped[str] = mapped_column(String(255))

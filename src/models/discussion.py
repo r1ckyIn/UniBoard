@@ -31,7 +31,9 @@ class DiscussionThread(UUIDMixin, TimestampMixin, Base):
         ),
     )
 
-    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE")
+    )
     ed_thread_id: Mapped[str] = mapped_column(String(50))
     title: Mapped[str] = mapped_column(String(255))
     author: Mapped[str] = mapped_column(String(255))

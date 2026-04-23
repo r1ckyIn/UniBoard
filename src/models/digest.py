@@ -24,7 +24,9 @@ class Digest(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("user_id", "digest_date", name="uq_digests_user_date"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     digest_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     content_json: Mapped[dict[str, Any]] = mapped_column(JSON)
     ai_summary: Mapped[str | None] = mapped_column(Text, nullable=True)

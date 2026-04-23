@@ -23,7 +23,9 @@ class PushRecord(UUIDMixin, TimestampMixin, Base):
         Index("ix_push_records_user_hash", "user_id", "content_hash", unique=True),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     content_hash: Mapped[str] = mapped_column(String(64))
     source_type: Mapped[str] = mapped_column(String(30))
     source_id: Mapped[str] = mapped_column(String(100))

@@ -24,7 +24,9 @@ class UnifiedDeadline(UUIDMixin, TimestampMixin, Base):
         Index("ix_deadlines_dedup", "dedup_key", unique=True),
     )
 
-    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE")
+    )
     title: Mapped[str] = mapped_column(String(255))
     due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     source: Mapped[str] = mapped_column(String(30))

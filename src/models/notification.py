@@ -23,7 +23,9 @@ class Notification(UUIDMixin, TimestampMixin, Base):
         Index("ix_notifications_user_unread", "user_id", "is_read"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     type: Mapped[str] = mapped_column(String(30))  # deadline_reminder, gpa_risk, digest, system
     severity: Mapped[str] = mapped_column(String(20))  # critical, warning, info
     title: Mapped[str] = mapped_column(String(255))
