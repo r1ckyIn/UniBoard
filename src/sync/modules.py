@@ -23,6 +23,49 @@ from src.sync._shared import _MAX_RETRIES, _get_sync_session_factory, _record_sy
 logger = structlog.get_logger()
 
 
+def _normalise_ed_due_at(raw: object) -> datetime | None:
+    """Coerce Ed Lessons ``due_at`` values into a naive UTC ``datetime``.
+
+    The Ed Lessons API returns ``due_at`` as an ISO8601 string (or null) per
+    EdLessonResponse.due_at schema. The ``lessons.due_at`` DB column is
+    ``TIMESTAMP WITHOUT TIME ZONE`` (see initial_schema migration), which
+    asyncpg refuses to populate from either a raw string or a
+    timezone-aware ``datetime``.
+
+    This helper:
+      * returns ``None`` for ``None`` / empty / unparseable input,
+      * accepts already-parsed ``datetime`` instances (naive passes through,
+        aware is converted to UTC and stripped of tzinfo),
+      * parses ``"...Z"``-suffixed strings by swapping to ``+00:00`` before
+        ``datetime.fromisoformat`` (Python <3.11 cannot parse ``Z`` directly).
+
+    Naive ISO strings (no offset in the payload) are returned as-is on the
+    assumption that Ed emits UTC wall clock. That assumption is not a
+    documented API contract -- we log ``ed_lesson_due_at_naive_string`` so
+    silent timezone drift is at least detectable in Railway logs.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, datetime):
+        if raw.tzinfo is None:
+            return raw
+        return raw.astimezone(UTC).replace(tzinfo=None)
+    if not isinstance(raw, str):
+        return None
+    s = raw.strip()
+    if not s:
+        return None
+    try:
+        parsed = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        logger.warning("ed_lesson_due_at_unparseable", value=s[:50])
+        return None
+    if parsed.tzinfo is None:
+        logger.warning("ed_lesson_due_at_naive_string", value=s[:50])
+        return parsed
+    return parsed.astimezone(UTC).replace(tzinfo=None)
+
+
 async def sync_all_modules() -> None:
     """Sync Canvas modules and Ed Lessons for all users."""
     session_factory = _get_sync_session_factory()
@@ -261,6 +304,12 @@ async def _sync_ed_lessons(
                         if slide_texts:
                             text_content = "\n\n".join(slide_texts)
 
+                # Ed returns due_at as an ISO8601 string; the DB column is
+                # TIMESTAMP WITHOUT TIME ZONE, which asyncpg refuses to
+                # populate from a string or from a tz-aware datetime. Coerce
+                # via _normalise_ed_due_at (returns naive UTC datetime or None).
+                due_at = _normalise_ed_due_at(lesson_data.get("due_at"))
+
                 # Upsert lesson by (course_id, ed_lesson_id)
                 values = {
                     "id": uuid.uuid4(),
@@ -271,7 +320,7 @@ async def _sync_ed_lessons(
                     "kind": str(lesson_data.get("kind", "")),
                     "state": str(lesson_data.get("state", "")),
                     "slide_count": slide_count,
-                    "due_at": lesson_data.get("due_at"),
+                    "due_at": due_at,
                     "text_content": text_content,
                 }
                 lesson_stmt = pg_insert(Lesson).values(**values)
@@ -287,7 +336,23 @@ async def _sync_ed_lessons(
                         "text_content": values["text_content"],
                     },
                 )
-                await session.execute(lesson_stmt)
+                # Guard the upsert with a savepoint so a single malformed
+                # lesson (unexpected DB-level coercion failure, constraint
+                # surprise, etc.) cannot abort the whole batch and roll back
+                # the entire modules sync -- which previously combined with
+                # PR #113's cascade-delete to leave the lessons table empty.
+                savepoint = await session.begin_nested()
+                try:
+                    await session.execute(lesson_stmt)
+                    await savepoint.commit()
+                except Exception as exc:
+                    await savepoint.rollback()
+                    logger.warning(
+                        "sync_ed_lesson_upsert_failed",
+                        course=course.code,
+                        ed_lesson_id=lesson_id_str,
+                        error=str(exc)[:200],
+                    )
 
         user.ed_sync_status = "success"
         user.ed_last_synced_at = datetime.now(UTC)
