@@ -147,6 +147,13 @@ async def _upsert_courses(
     expose a semester token -- otherwise a second sync after #111 landed
     would create a duplicate course and orphan the UUIDs that the frontend
     already bookmarked.
+
+    After the upsert loop, also purges any pre-#113 zombie rows for this
+    user whose canvas_course_id is NULL. Those rows can no longer be
+    produced (the Ed-only skip above prevents it), but Ed-only entries
+    written before that guard still linger and leak into /courses. Uses
+    ORM-level delete so cascade="all, delete-orphan" cleans up associated
+    grades / modules / lessons / deadlines / unit_outlines / threads.
     """
     count = 0
     for lc in linked:
@@ -284,6 +291,29 @@ async def _upsert_courses(
                     course_id=str(course.id),
                     canvas_course_id=lc.canvas_course_id,
                 )
+
+    # Purge pre-#113 zombie rows: earlier syncs wrote Course records without
+    # a canvas_course_id (Ed-only enrolments, now skipped at the head of
+    # this loop). Those zombies still leak into /courses and the sidebar
+    # picker. ORM-level delete so cascade="all, delete-orphan" tears down
+    # attached grades/modules/lessons/deadlines/unit_outlines/threads.
+    stale_rows = (
+        await session.execute(
+            select(Course).where(
+                Course.user_id == user_id,
+                Course.canvas_course_id.is_(None),
+            )
+        )
+    ).scalars().all()
+    for stale in stale_rows:
+        logger.info(
+            "course_upsert_purge_stale",
+            user_id=str(user_id),
+            course_id=str(stale.id),
+            code=stale.code,
+            semester=stale.semester,
+        )
+        await session.delete(stale)
 
     await session.flush()
     return count
