@@ -9,10 +9,13 @@ from datetime import UTC, datetime
 import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.adapters.canvas import CanvasAdapter
 from src.config import get_settings
 from src.models.course import Course
+from src.models.lesson import Lesson
+from src.models.module import Module
 from src.models.user import Profile
 from src.schemas.common import TokenInvalidError
 from src.security.encryption import get_encryption
@@ -20,6 +23,24 @@ from src.services.course_linking import LinkedCourse, link_courses
 from src.sync._shared import _MAX_RETRIES, _get_sync_session_factory, _record_sync_history
 
 logger = structlog.get_logger()
+
+
+# Eager-load options for every Course relationship that declares
+# cascade="all, delete-orphan". Any code path that calls `session.delete(course)`
+# MUST load these collections first: the child tables (grades / modules /
+# lessons / deadlines / outlines / threads) carry `ForeignKey("courses.id")`
+# with NO `ondelete="CASCADE"`, so the cascade only fires at the ORM layer --
+# and AsyncSession cannot lazy-load mid-flush without raising `MissingGreenlet`.
+# selectinload issues one SELECT per relationship (filtered by parent IDs), so
+# the cost is O(number-of-relationships) extra queries per delete batch.
+_CASCADE_LOAD_OPTIONS = (
+    selectinload(Course.grades),
+    selectinload(Course.modules).selectinload(Module.items),
+    selectinload(Course.lessons).selectinload(Lesson.slides),
+    selectinload(Course.unified_deadlines),
+    selectinload(Course.unit_outlines),
+    selectinload(Course.discussion_threads),
+)
 
 
 def _flatten_ed_courses(
@@ -176,13 +197,17 @@ async def _upsert_courses(
         # (semester='') next to a populated row (semester='2026-S1') with
         # the same canvas_course_id. The frontend UUID was bookmarked on
         # the legacy row, so we keep that PK and merge the populated one
-        # into it before deleting the duplicate.
+        # into it before deleting the duplicate. Eager-load cascade
+        # children so `session.delete(dup)` below does not trip
+        # MissingGreenlet / hit an FK violation (no DB-level CASCADE).
         candidates = (
             await session.execute(
-                select(Course).where(
+                select(Course)
+                .where(
                     Course.user_id == user_id,
                     Course.code == lc.course_code,
                 )
+                .options(*_CASCADE_LOAD_OPTIONS)
             )
         ).scalars().all()
 
@@ -297,12 +322,17 @@ async def _upsert_courses(
     # this loop). Those zombies still leak into /courses and the sidebar
     # picker. ORM-level delete so cascade="all, delete-orphan" tears down
     # attached grades/modules/lessons/deadlines/unit_outlines/threads.
+    # `_CASCADE_LOAD_OPTIONS` pre-loads those collections -- AsyncSession
+    # cannot lazy-load mid-flush and the FKs have no DB-level CASCADE, so
+    # an unloaded child would surface as MissingGreenlet or FK violation.
     stale_rows = (
         await session.execute(
-            select(Course).where(
+            select(Course)
+            .where(
                 Course.user_id == user_id,
                 Course.canvas_course_id.is_(None),
             )
+            .options(*_CASCADE_LOAD_OPTIONS)
         )
     ).scalars().all()
     for stale in stale_rows:
@@ -314,6 +344,13 @@ async def _upsert_courses(
             semester=stale.semester,
         )
         await session.delete(stale)
+
+    if stale_rows:
+        logger.info(
+            "course_upsert_purged_stale_total",
+            user_id=str(user_id),
+            count=len(stale_rows),
+        )
 
     await session.flush()
     return count
