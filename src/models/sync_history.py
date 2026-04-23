@@ -16,7 +16,9 @@ class SyncHistory(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "sync_history"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     domain: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(20))
     records_updated: Mapped[int] = mapped_column(default=0)

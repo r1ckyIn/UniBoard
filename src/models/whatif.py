@@ -20,7 +20,9 @@ class WhatIfScenario(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "whatif_scenarios"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     name: Mapped[str] = mapped_column(String(255))
     scores_json: Mapped[dict[str, Any]] = mapped_column(JSONB)
     result_wam: Mapped[float] = mapped_column(Float)

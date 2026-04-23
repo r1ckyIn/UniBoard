@@ -25,7 +25,9 @@ class Lesson(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("course_id", "ed_lesson_id", name="uq_lessons_course_ed"),
     )
 
-    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE")
+    )
     ed_lesson_id: Mapped[str] = mapped_column(String(50))
     title: Mapped[str] = mapped_column(String(255))
     number: Mapped[int | None] = mapped_column(nullable=True)
@@ -58,7 +60,9 @@ class Slide(UUIDMixin, TimestampMixin, Base):
 
     __tablename__ = "slides"
 
-    lesson_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lessons.id"))
+    lesson_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("lessons.id", ondelete="CASCADE")
+    )
     content: Mapped[str | None] = mapped_column(Text, nullable=True)
     type: Mapped[str] = mapped_column(String(50), default="")
     index: Mapped[int] = mapped_column(default=0)

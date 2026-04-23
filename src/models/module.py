@@ -23,7 +23,9 @@ class Module(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("course_id", "canvas_module_id", name="uq_modules_course_canvas"),
     )
 
-    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE")
+    )
     canvas_module_id: Mapped[str] = mapped_column(String(50))
     name: Mapped[str] = mapped_column(String(255))
     position: Mapped[int] = mapped_column()
@@ -46,7 +48,9 @@ class ModuleItem(UUIDMixin, TimestampMixin, Base):
         Index("ix_module_items_search", "search_vector", postgresql_using="gin"),
     )
 
-    module_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("modules.id"))
+    module_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("modules.id", ondelete="CASCADE")
+    )
     title: Mapped[str] = mapped_column(String(255))
     type: Mapped[str] = mapped_column(String(50))
     content_id: Mapped[str | None] = mapped_column(String(50), nullable=True)

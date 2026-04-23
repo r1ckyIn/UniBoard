@@ -19,7 +19,9 @@ class AIFeedback(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("user_id", "thread_id", name="uq_feedback_user_thread"),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     thread_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("discussion_threads.id"))
     feedback_type: Mapped[str] = mapped_column(String(20))  # thumbs_up | thumbs_down
 

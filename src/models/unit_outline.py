@@ -28,7 +28,9 @@ class UnitOutline(UUIDMixin, TimestampMixin, Base):
         ),
     )
 
-    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE")
+    )
     outline_url: Mapped[str] = mapped_column(String(500))
     assessments: Mapped[list | None] = mapped_column(  # type: ignore[type-arg]
         JSON, nullable=True

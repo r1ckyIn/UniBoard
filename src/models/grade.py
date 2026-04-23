@@ -24,7 +24,9 @@ class Grade(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("course_id", "assessment_name", name="uq_grades_course_assessment"),
     )
 
-    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE")
+    )
     assessment_name: Mapped[str] = mapped_column(String(255))
     score: Mapped[float | None] = mapped_column(Float, nullable=True)
     max_score: Mapped[float] = mapped_column(Float)

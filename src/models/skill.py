@@ -27,7 +27,7 @@ class Skill(UUIDMixin, TimestampMixin, Base):
     operation_type: Mapped[str] = mapped_column(String(50))
     category: Mapped[str] = mapped_column(String(30))
     course_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("courses.id"), nullable=True
+        UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=True
     )
     system_prompt: Mapped[str] = mapped_column(Text)
     workflow_steps: Mapped[dict | None] = mapped_column(  # type: ignore[type-arg]
@@ -61,7 +61,7 @@ class SkillExecution(UUIDMixin, TimestampMixin, Base):
 
     operation_type: Mapped[str] = mapped_column(String(50))
     course_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("courses.id"), nullable=True
+        UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=True
     )
     skill_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("skills.id"), nullable=True
