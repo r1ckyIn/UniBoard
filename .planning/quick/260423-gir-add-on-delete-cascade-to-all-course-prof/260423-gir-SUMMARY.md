@@ -9,26 +9,58 @@ status: complete
 
 # Quick Task 260423-gir — Summary
 
-## What shipped
+## Pivot after code review — migration reverted
 
-1. **SQLAlchemy ORM hardening** — added `ondelete="CASCADE"` to 18 FKs
-   across 15 model files. Every child FK whose parent is `courses`,
-   `profiles`, `modules`, or `lessons` now declares CASCADE at the
-   DB layer (matching the existing ORM-level
-   `cascade="all, delete-orphan"` contract on the parent side).
+Initial intent was to add DB-level ON DELETE CASCADE + Alembic migration
+009 + paired Supabase migration. Code review caught a critical discovery
+before merge: the Supabase initial schema
+(`supabase/migrations/00000000000001_initial_schema.sql`) already declares
+`ON DELETE CASCADE` on every FK this PR targeted. Verification:
 
-2. **Alembic migration** `alembic/versions/009_on_delete_cascade_fks.py`
-   — idempotent `DROP CONSTRAINT IF EXISTS` + re-add with
-   `ON DELETE CASCADE` for all 18 FKs. Head of the Alembic chain
-   advanced from `008_unit_outlines_uq` to `009_on_delete_cascade_fks`.
-   `downgrade()` reverts to default `NO ACTION`.
+```
+grep -rn "REFERENCES" supabase/migrations/ | grep -v "ON DELETE CASCADE"
+→ (zero results)
+```
 
-3. **Paired Supabase SQL migration**
-   `supabase/migrations/20260423000001_on_delete_cascade_fks.sql`
-   — same idempotent effect wrapped in `DO $$ … END $$` so it's safe
-   to replay from the Supabase SQL console.
+The migration was therefore at best no-op (13 entries) and at worst a
+semantic regression (5 entries silently re-parented `user_id` FKs from
+`auth.users(id)` → `profiles(id)`, severing the auth-delete cascade
+path).
 
-## Files changed
+Both migration files removed in a follow-up commit. The ORM diff is
+retained — it documents the CASCADE contract in the code developers
+read, and aligns the SA metadata with what the DB actually does.
+
+## Latent drift discovered (out of scope — follow-up)
+
+Five `user_id` FKs carry an ORM-vs-DB parent-table drift:
+- ORM declares: `ForeignKey("profiles.id")`
+- Supabase reality: `REFERENCES auth.users(id) ON DELETE CASCADE`
+
+Affected: courses, digests, notifications, push_records, whatif_scenarios.
+`profiles.id == auth.users.id` by insert trigger, so the drift is
+functionally invisible at runtime. But SA `create_all()` / alembic
+autogenerate would emit FKs against `profiles.id`, not `auth.users(id)`,
+which is misleading for test DBs and future contributors.
+
+Separate follow-up: decide whether to (a) update ORM to reflect
+`auth.users` reality, or (b) migrate Supabase FKs to `profiles` to match
+ORM.
+
+## Second follow-up (also out of scope)
+
+PR #115 added `_CASCADE_LOAD_OPTIONS` in `src/sync/courses.py` as a
+symptom fix for MissingGreenlet on async `session.delete()`. After this
+PR's ORM diff lands, the fix is still necessary — DB cascade alone does
+not prevent SQLAlchemy from trying to lazy-load children during ORM
+delete processing. To actually remove the selectinload, cascade
+relationships need `passive_deletes=True` so SA trusts the DB.
+
+Suggested 1-PR follow-up: add `passive_deletes=True` to every
+`cascade="all, delete-orphan"` relationship in `src/models/course.py` and
+siblings, then remove `_CASCADE_LOAD_OPTIONS`.
+
+## Files changed (final)
 
 - `src/models/course.py` (user_id → profiles)
 - `src/models/digest.py` (user_id → profiles)
@@ -45,18 +77,19 @@ status: complete
 - `src/models/deadline.py` (course_id → courses)
 - `src/models/discussion.py` (course_id → courses)
 - `src/models/unit_outline.py` (course_id → courses)
-- `alembic/versions/009_on_delete_cascade_fks.py` (new, 18 FKs)
-- `supabase/migrations/20260423000001_on_delete_cascade_fks.sql` (new)
+
+No Alembic migration. No Supabase SQL migration.
 
 ## Verification
 
 - `uv run ruff check src/models` → All checks passed
 - `uv run mypy src/models` → Success: no issues found in 20 source files
-- `uv run pytest tests/unit -q -x -m "not db" --deselect tests/unit/test_digest_service.py`
-  → 431 passed, 35 deselected (DB/pgvector), 25 warnings (pre-existing)
-- `uv run alembic heads` → `009_on_delete_cascade_fks (head)`
+- `uv run pytest tests/unit -q -m "not db" --deselect tests/unit/test_digest_service.py`
+  → 446 passed, 35 deselected (DB/pgvector), 25 warnings (pre-existing)
 - `grep -c 'ondelete="CASCADE"' src/models/*.py` → 21 hits
   (18 new + 3 pre-existing: deadline_user_actions×2, study_recommendation_cache×1)
+- `grep -rn "REFERENCES" supabase/migrations/ | grep -v "ON DELETE CASCADE"`
+  → zero results (confirms DB already CASCADE everywhere)
 
 ## Not included (out of scope)
 
@@ -64,12 +97,3 @@ status: complete
 - `ai_feedback.thread_id` (parent = `discussion_threads`, not C/P/M/L)
 - `deadline_user_actions.unified_deadline_id` (parent = `unified_deadlines`,
   not C/P/M/L; already CASCADE regardless)
-
-## Follow-up
-
-- The manual purge block added in #115 (`_upsert_courses` stale
-  `canvas_course_id=NULL` cleanup) can now be simplified if desired:
-  the ORM cascade still works, and raw SQL paths are also safe.
-  Leaving as-is for now — explicit purge is defensive and not redundant.
-- Next deployment: run `alembic upgrade head` (Railway) and apply the
-  Supabase SQL migration via `supabase db push` in production.

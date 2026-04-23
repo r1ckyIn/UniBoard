@@ -59,9 +59,9 @@ Already CASCADE (left alone): `deadline_user_actions.user_id`,
 Out of scope: `skill_executions.skill_id` (parent=`skills`),
 `ai_feedback.thread_id` (parent=`discussion_threads`).
 
-## Approach
+## Approach (final, ORM-only after code-review pivot)
 
-### Part A — ORM models
+### Part A — ORM models (shipped)
 In each file listed above, change
 ```python
 ForeignKey("courses.id")
@@ -71,20 +71,23 @@ to
 ForeignKey("courses.id", ondelete="CASCADE")
 ```
 (likewise for `profiles.id`, `modules.id`, `lessons.id`). Keep existing
-nullability and relationship `cascade="all, delete-orphan"` — the ORM cascade
-is still correct; we're strictly hardening the DB layer to match it.
+nullability and relationship `cascade="all, delete-orphan"` — the ORM
+cascade is still correct; SA metadata is being re-aligned with DB reality.
 
-### Part B — Alembic migration `009_on_delete_cascade_fks`
-Idempotent `ALTER TABLE … DROP CONSTRAINT IF EXISTS … ; ADD CONSTRAINT …
-ON DELETE CASCADE` for all 18 FKs using Postgres's default constraint
-naming (`{table}_{column}_fkey`). Revision `009_on_delete_cascade_fks`,
-`down_revision="008_unit_outlines_uq"`. `downgrade()` reverts to default
-`NO ACTION` behaviour.
+### Part B — Alembic migration `009_on_delete_cascade_fks` (REVERTED)
+Originally: idempotent `ALTER TABLE … DROP CONSTRAINT IF EXISTS … ADD
+CONSTRAINT … ON DELETE CASCADE` for all 18 FKs. **Removed before merge.**
 
-### Part C — Paired Supabase migration
-`supabase/migrations/20260423000001_on_delete_cascade_fks.sql` — same
-idempotent `ALTER TABLE` statements, wrapped in `DO $$ … END $$` so they
-can be replayed safely.
+Reason: code review + `grep -rn "REFERENCES" supabase/migrations/ | grep
+-v "ON DELETE CASCADE"` → zero hits. Supabase prod already CASCADEs every
+FK in scope. The migration was therefore no-op for 13 entries and a
+silent regression for 5 (would have re-parented `user_id` FKs from
+`auth.users(id)` → `profiles(id)`, severing the auth-delete cascade
+path).
+
+### Part C — Paired Supabase migration (REVERTED)
+Same reason as Part B. Both files dropped; no DB-layer change ships in
+this PR.
 
 ## Files Touched
 - `src/models/course.py`
@@ -105,30 +108,29 @@ can be replayed safely.
 - `alembic/versions/009_on_delete_cascade_fks.py` (new)
 - `supabase/migrations/20260423000001_on_delete_cascade_fks.sql` (new)
 
-## Tasks
-1. Update all 15 model files — add `ondelete="CASCADE"` to the 18 FKs.
-2. Write Alembic migration `009_on_delete_cascade_fks` that drops and
-   recreates each FK with CASCADE semantics.
-3. Write paired Supabase migration with the same effect, guarded by
-   `DO $$ … END $$` so it's idempotent.
+## Tasks (final)
+1. ✅ Update all 15 model files — add `ondelete="CASCADE"` to the 18 FKs.
+2. ❌ Alembic migration — reverted after code review (DB already CASCADE).
+3. ❌ Supabase SQL migration — reverted for same reason.
 
-## must_haves
+## must_haves (final)
 - All 18 FKs listed in the scope table declare
   `ondelete="CASCADE"` in their SQLAlchemy `ForeignKey(…)` call.
-- Alembic `upgrade()` drops and recreates the 18 FK constraints with
-  `ON DELETE CASCADE`; `downgrade()` reverts to default behaviour.
-- Supabase SQL migration applies the same change idempotently.
+- No DB migration ships (Supabase already CASCADEs every FK in scope).
 - Pre-existing CASCADE FKs (deadline_user_actions, study_recommendation_cache)
   are not touched.
 - `ruff`, `mypy`, and `pytest` all pass.
 
 ## verify
-- `cd /Users/qinyuan/claude/r1ckyIn_GitHub/UniBoard && uv run ruff check src/models alembic/versions/009_on_delete_cascade_fks.py`
-- `uv run mypy src/models alembic/versions/009_on_delete_cascade_fks.py`
-- `uv run pytest tests/unit -q -x` (fast unit slice; CI covers full suite)
-- `grep -c 'ondelete="CASCADE"' src/models/*.py` — expect ≥ 21 hits
+- `uv run ruff check src/models` → All checks passed
+- `uv run mypy src/models` → Success
+- `uv run pytest tests/unit -q -m "not db" --deselect tests/unit/test_digest_service.py`
+  → 446 passed
+- `grep -c 'ondelete="CASCADE"' src/models/*.py` → 21 hits
   (18 new + 3 pre-existing)
+- `grep -rn "REFERENCES" supabase/migrations/ | grep -v "ON DELETE CASCADE"`
+  → zero results (justifies migration revert)
 
 ## done when
-All four verify commands pass, the new Alembic + Supabase migrations are
-present, and grep confirms every in-scope FK now declares CASCADE.
+All verify commands pass and every in-scope ORM FK declares CASCADE.
+No Alembic or Supabase migration file ships in this PR.
