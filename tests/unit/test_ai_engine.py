@@ -327,3 +327,184 @@ async def test_evaluate_thread_raises_on_invalid_json() -> None:
                 is_endorsed=False,
                 is_staff_post=False,
             )
+
+
+# ---------------------------------------------------------------------------
+# Markdown fence tolerance -- regression for 2026-04-23 Railway prod incident.
+# Claude Sonnet occasionally wraps structured output in ```json ... ``` despite
+# system-prompt guidance, which broke every Ed discussion thread evaluation.
+# _parse_ai_json strips the fence before json.loads; the three call sites
+# (evaluate_thread, generate_review, score_urgency) must now all tolerate it.
+# ---------------------------------------------------------------------------
+
+
+class TestParseAiJsonHelper:
+    """Direct unit tests for the shared `_parse_ai_json` helper."""
+
+    def test_bare_json_object(self) -> None:
+        from src.services.ai_engine import _parse_ai_json
+
+        assert _parse_ai_json('{"a": 1}', context="t") == {"a": 1}
+
+    def test_bare_json_array(self) -> None:
+        from src.services.ai_engine import _parse_ai_json
+
+        assert _parse_ai_json("[1, 2, 3]", context="t") == [1, 2, 3]
+
+    def test_fenced_with_json_tag(self) -> None:
+        # Matches the exact Railway prod payload shape.
+        from src.services.ai_engine import _parse_ai_json
+
+        raw = '```json\n{"gpa_relevance": 0.8, "category": "admin"}\n```'
+        assert _parse_ai_json(raw, context="t") == {
+            "gpa_relevance": 0.8,
+            "category": "admin",
+        }
+
+    def test_fenced_without_json_tag(self) -> None:
+        # Triple-backtick fence with no language hint.
+        from src.services.ai_engine import _parse_ai_json
+
+        raw = '```\n{"x": 1}\n```'
+        assert _parse_ai_json(raw, context="t") == {"x": 1}
+
+    def test_fenced_json_array(self) -> None:
+        # score_urgency path -- the body is an array, not an object.
+        from src.services.ai_engine import _parse_ai_json
+
+        raw = "```json\n[{\"index\": 0, \"urgency_score\": 3}]\n```"
+        assert _parse_ai_json(raw, context="t") == [
+            {"index": 0, "urgency_score": 3}
+        ]
+
+    def test_fenced_with_leading_and_trailing_whitespace(self) -> None:
+        from src.services.ai_engine import _parse_ai_json
+
+        raw = '  \n```json\n{"a": 1}\n```  \n'
+        assert _parse_ai_json(raw, context="t") == {"a": 1}
+
+    def test_case_insensitive_language_tag(self) -> None:
+        from src.services.ai_engine import _parse_ai_json
+
+        raw = '```JSON\n{"a": 1}\n```'
+        assert _parse_ai_json(raw, context="t") == {"a": 1}
+
+    def test_nested_newlines_in_payload(self) -> None:
+        # Payload can span multiple lines; only the outer fences are stripped.
+        from src.services.ai_engine import _parse_ai_json
+
+        raw = '```json\n{\n  "summary": "multi\\nline",\n  "x": 1\n}\n```'
+        assert _parse_ai_json(raw, context="t") == {
+            "summary": "multi\nline",
+            "x": 1,
+        }
+
+    def test_unparseable_raises_valueerror_with_context(self) -> None:
+        from src.services.ai_engine import _parse_ai_json
+
+        with pytest.raises(ValueError) as excinfo:
+            _parse_ai_json("not json at all", context="thread evaluation")
+        assert "thread evaluation" in str(excinfo.value)
+        assert "not json at all" in str(excinfo.value)
+
+    def test_unparseable_raises_on_fenced_garbage(self) -> None:
+        # Opening fence is stripped but the inner content is still not JSON.
+        from src.services.ai_engine import _parse_ai_json
+
+        with pytest.raises(ValueError):
+            _parse_ai_json("```json\nnot valid\n```", context="t")
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_evaluate_thread_tolerates_markdown_fence() -> None:
+    """Regression for 2026-04-23 prod incident: Claude returned JSON wrapped
+    in ```json ... ``` and every evaluate_thread call crashed. The helper
+    strips the fence before json.loads so the call should now succeed."""
+    from src.services.ai_engine import AIEngine
+
+    fenced_response = (
+        "```json\n"
+        '{"gpa_relevance": 0.8, "category": "assignment_clarification", '
+        '"summary": "Student asking about test cases", '
+        '"urgency": "informational", "key_facts": ["Tests unclear"]}\n'
+        "```"
+    )
+    mock_resp = _make_mock_response(fenced_response)
+
+    with patch("src.services.ai_engine.AsyncAnthropic") as mock_cls:
+        client_instance = AsyncMock()
+        client_instance.messages.create = AsyncMock(return_value=mock_resp)
+        mock_cls.return_value = client_instance
+
+        engine = AIEngine(api_key="test-key")
+        result = await engine.evaluate_thread(
+            title="Test cases unclear",
+            content="How do I test FAIL and RECOVER commands?",
+            category="Assignment",
+            is_endorsed=False,
+            is_staff_post=False,
+        )
+
+    assert isinstance(result, ThreadEvaluation)
+    assert result.gpa_relevance == 0.8
+    assert result.category == "assignment_clarification"
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_generate_review_tolerates_markdown_fence() -> None:
+    """generate_review previously had an inline regex fallback that only
+    matched object-shaped payloads. Now it goes through the shared helper,
+    which handles both opening-fence variants uniformly."""
+    from src.services.ai_engine import AIEngine
+
+    fenced_response = (
+        "```\n"  # no `json` tag
+        '{"key_concepts": ["Memory management"], '
+        '"common_mistakes": ["Forgetting free()"], '
+        '"exam_scope": "Focus on pointer arithmetic and allocation.", '
+        '"study_tips": ["Draw memory diagrams"]}\n'
+        "```"
+    )
+    mock_resp = _make_mock_response(fenced_response)
+
+    with patch("src.services.ai_engine.AsyncAnthropic") as mock_cls:
+        client_instance = AsyncMock()
+        client_instance.messages.create = AsyncMock(return_value=mock_resp)
+        mock_cls.return_value = client_instance
+
+        engine = AIEngine(api_key="test-key")
+        result = await engine.generate_review(
+            materials_text="Chapter 5: Memory Management...",
+            course_name="Systems Programming",
+        )
+
+    assert isinstance(result, UnitReviewResponse)
+    assert "Memory management" in result.key_concepts
+    assert len(result.study_tips) >= 1
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_score_urgency_tolerates_markdown_fence() -> None:
+    """score_urgency had no fence handling at all before this fix -- latent
+    landmine if Sonnet ever wrapped the array payload. Covers that path."""
+    from src.services.ai_engine import AIEngine
+
+    fenced_response = (
+        "```json\n"
+        '[{"index": 0, "urgency_score": 5, "reason": "exam tomorrow"}, '
+        '{"index": 1, "urgency_score": 2, "reason": "general info"}]\n'
+        "```"
+    )
+    mock_resp = _make_mock_response(fenced_response)
+
+    with patch("src.services.ai_engine.AsyncAnthropic") as mock_cls:
+        client_instance = AsyncMock()
+        client_instance.messages.create = AsyncMock(return_value=mock_resp)
+        mock_cls.return_value = client_instance
+
+        engine = AIEngine(api_key="test-key")
+        result = await engine.score_urgency(items_json="[]")
+
+    assert len(result) == 2
+    assert result[0]["urgency_score"] == 5
+    assert result[1]["urgency_score"] == 2

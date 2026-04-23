@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import AsyncGenerator, Awaitable, Callable
+from typing import Any
 
 import structlog
 from anthropic import AsyncAnthropic
@@ -22,6 +23,36 @@ logger = structlog.get_logger()
 # `Sources:` context block. The new regex captures the index as group 1 so the
 # frontend can correlate marker -> sources[N-1] via a map.
 _CITATION_PATTERN = re.compile(r"\[(\d+)\]")
+
+# Claude Sonnet occasionally wraps structured output in markdown code fences
+# (```json ... ``` or ``` ... ```) despite system-prompt guidance. These two
+# patterns strip the opening and closing fence so json.loads can read what is
+# actually valid JSON inside. See Railway prod traceback 2026-04-23 01:53 UTC
+# where evaluate_thread was failing on every Ed discussion thread.
+_FENCE_OPEN = re.compile(r"^```(?:json)?\s*\n?", re.IGNORECASE)
+_FENCE_CLOSE = re.compile(r"\n?\s*```\s*$")
+
+
+def _parse_ai_json(raw_text: str, *, context: str) -> Any:
+    """Parse a JSON payload from an AI response, tolerating markdown fences.
+
+    Strips a leading ```` ``` ```` / ```` ```json ```` opener and the matching
+    trailing ```` ``` ````, then `json.loads` what remains. Raises `ValueError`
+    (with a truncated sample of the original payload for debuggability) on
+    parse failure, preserving the log-friendly contract already assumed by
+    callers of `evaluate_thread` / `generate_review` / `score_urgency`.
+    """
+    text = raw_text.strip()
+    if text.startswith("```"):
+        text = _FENCE_OPEN.sub("", text)
+        text = _FENCE_CLOSE.sub("", text)
+        text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"AI returned invalid JSON for {context}: {raw_text[:200]}"
+        ) from exc
 
 # Tool definitions for adapter-backed cross-platform research (MCP fallback)
 AGENT_TOOLS: list[dict[str, object]] = [
@@ -120,12 +151,7 @@ class AIEngine:
         )
 
         raw_text: str = response.content[0].text  # type: ignore[union-attr]
-
-        try:
-            data = json.loads(raw_text)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"AI returned invalid JSON: {raw_text[:200]}") from exc
-
+        data = _parse_ai_json(raw_text, context="thread evaluation")
         return ThreadEvaluation(**data)
 
     async def ask_question(
@@ -189,19 +215,7 @@ class AIEngine:
         )
 
         raw_text: str = response.content[0].text  # type: ignore[union-attr]
-
-        try:
-            data = json.loads(raw_text)
-        except json.JSONDecodeError:
-            # Attempt to extract JSON from markdown code blocks
-            json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw_text, re.DOTALL)
-            if json_match:
-                data = json.loads(json_match.group(1))
-            else:
-                raise ValueError(
-                    f"AI returned invalid JSON for review: {raw_text[:200]}"
-                ) from None
-
+        data = _parse_ai_json(raw_text, context="unit review")
         return UnitReviewResponse(**data)
 
     async def score_urgency(self, items_json: str) -> list[dict[str, object]]:
@@ -220,7 +234,9 @@ class AIEngine:
         )
 
         raw_text: str = response.content[0].text  # type: ignore[union-attr]
-        result: list[dict[str, object]] = json.loads(raw_text)
+        result: list[dict[str, object]] = _parse_ai_json(
+            raw_text, context="urgency scoring"
+        )
         return result
 
     async def analyze_gpa_risk(
