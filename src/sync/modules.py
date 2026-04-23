@@ -38,6 +38,11 @@ def _normalise_ed_due_at(raw: object) -> datetime | None:
         aware is converted to UTC and stripped of tzinfo),
       * parses ``"...Z"``-suffixed strings by swapping to ``+00:00`` before
         ``datetime.fromisoformat`` (Python <3.11 cannot parse ``Z`` directly).
+
+    Naive ISO strings (no offset in the payload) are returned as-is on the
+    assumption that Ed emits UTC wall clock. That assumption is not a
+    documented API contract -- we log ``ed_lesson_due_at_naive_string`` so
+    silent timezone drift is at least detectable in Railway logs.
     """
     if raw is None:
         return None
@@ -56,6 +61,7 @@ def _normalise_ed_due_at(raw: object) -> datetime | None:
         logger.warning("ed_lesson_due_at_unparseable", value=s[:50])
         return None
     if parsed.tzinfo is None:
+        logger.warning("ed_lesson_due_at_naive_string", value=s[:50])
         return parsed
     return parsed.astimezone(UTC).replace(tzinfo=None)
 

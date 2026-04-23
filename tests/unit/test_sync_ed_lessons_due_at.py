@@ -84,6 +84,21 @@ class TestNormaliseEdDueAt:
         assert _normalise_ed_due_at({"wat": "wat"}) is None
         assert _normalise_ed_due_at(["2026-05-08"]) is None
 
+    def test_timezone_abbreviation_returns_none(self) -> None:
+        # datetime.fromisoformat rejects "AEST" / "PST" / etc. We treat
+        # that as unparseable -> warning + None, not a crash. Guards
+        # against a future Ed payload change leaking raw abbreviations.
+        assert _normalise_ed_due_at("2026-05-08T10:00:00 AEST") is None
+        assert _normalise_ed_due_at("2026-05-08T10:00:00 UTC") is None
+
+    def test_microseconds_preserved(self) -> None:
+        # fromisoformat on 3.12 handles sub-second precision; make sure
+        # the Z -> +00:00 swap and astimezone round-trip do not truncate.
+        result = _normalise_ed_due_at("2026-05-08T13:59:00.123456Z")
+        assert result == datetime(2026, 5, 8, 13, 59, 0, 123456)
+        assert result is not None
+        assert result.tzinfo is None
+
 
 @pytest.mark.parametrize(
     "raw,expected",
