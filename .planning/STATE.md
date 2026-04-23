@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-05)
 Phase: 38.2 (navigation-cache-parity) — EXECUTING
 Plan: 1 of 2
 Status: Executing Phase 38.2
-Last activity: 2026-04-22 -- Phase 38.2 execution started
+Last activity: 2026-04-23 -- Completed quick task 260423-ebp: purge stale canvas_course_id=NULL Course rows (on branch, ship deferred pending parallel debug)
 
 ## Milestones Completed
 
@@ -390,6 +390,7 @@ None.
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
 | 260420-n29 | fix GPU paint-cost stalls on Intel Mac — 4 subtypes across Header backdrop-blur / Sidebar bleeding shadow / Timetable skeleton shimmer / Grid entry fade (PRs #89-92) | 2026-04-20 | c6ed6eb | Verified | [260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4](./quick/260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4/) |
+| 260423-ebp | purge stale canvas_course_id=NULL Course rows at end of `_upsert_courses` (branch `fix/purge-stale-null-canvas-courses`; ship deferred until parallel `ed-lessons-sync-degraded` debug finishes — cascade would delete lessons) | 2026-04-23 | ffc7f2d | On branch — not merged | [260423-ebp-purge-null-canvas-courses](./quick/260423-ebp-purge-null-canvas-courses/) |
 
 ## Session Continuity
 
