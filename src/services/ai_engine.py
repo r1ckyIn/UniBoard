@@ -29,7 +29,12 @@ _CITATION_PATTERN = re.compile(r"\[(\d+)\]")
 # patterns strip the opening and closing fence so json.loads can read what is
 # actually valid JSON inside. See Railway prod traceback 2026-04-23 01:53 UTC
 # where evaluate_thread was failing on every Ed discussion thread.
-_FENCE_OPEN = re.compile(r"^```(?:json)?\s*\n?", re.IGNORECASE)
+#
+# `_FENCE_OPEN` accepts any alphanumeric language tag (```json, ```JSON,
+# ```typescript, ```) so a future rephrased prompt that drifts Claude into a
+# non-`json` tag still round-trips to valid input rather than silently landing
+# a tag token inside the JSON buffer.
+_FENCE_OPEN = re.compile(r"^```[a-zA-Z0-9]*\s*\n?")
 _FENCE_CLOSE = re.compile(r"\n?\s*```\s*$")
 
 

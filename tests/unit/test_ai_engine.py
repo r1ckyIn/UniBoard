@@ -414,6 +414,32 @@ class TestParseAiJsonHelper:
         with pytest.raises(ValueError):
             _parse_ai_json("```json\nnot valid\n```", context="t")
 
+    def test_truncated_fence_no_closer_raises_valueerror(self) -> None:
+        # If the response is cut off mid-stream we keep the opener-stripped
+        # payload but it is invalid JSON -- surface as ValueError, not a silent
+        # pass-through.
+        from src.services.ai_engine import _parse_ai_json
+
+        with pytest.raises(ValueError):
+            _parse_ai_json(
+                '```json\n{"gpa_relevance": 0.8,',
+                context="thread evaluation",
+            )
+
+    def test_unknown_language_tag_is_stripped(self) -> None:
+        # The fence regex accepts any alphanumeric language tag (typescript,
+        # python, etc.), not just `json`, so a future prompt that shifts
+        # Claude's tag choice does not produce a surprise JSONDecodeError
+        # stemming from a leftover `typescript\n` prefix.
+        from src.services.ai_engine import _parse_ai_json
+
+        assert _parse_ai_json(
+            '```typescript\n{"x": 1}\n```', context="t"
+        ) == {"x": 1}
+        assert _parse_ai_json(
+            '```JSON5\n{"x": 2}\n```', context="t"
+        ) == {"x": 2}
+
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_evaluate_thread_tolerates_markdown_fence() -> None:
