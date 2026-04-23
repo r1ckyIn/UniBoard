@@ -50,28 +50,33 @@ def _make_session(
     """Return (session, added_rows) where the session's execute() resolves
     SELECT Course WHERE ... expressions against ``existing_rows``.
 
-    We approximate the two patterns _upsert_courses uses:
-    1. ``select(Course).where(user_id, code, semester)`` -> scalar_one_or_none
-    2. ``select(Course).where(user_id, code)`` -> scalars().all()
-    The differentiator is whether the 3rd clause (Course.semester ==) is
-    present, which we detect via the number of WHERE expressions on the
-    compiled statement.
+    Resolves any WHERE clause of the form ``col == literal`` or
+    ``col.is_(None)`` by reading each BinaryExpression's left-column name
+    and comparing against the attribute of the same name on each stored
+    FakeCourse. That covers all patterns _upsert_courses uses:
+
+    - ``where(user_id, code)`` -> scalars().all()
+    - ``where(user_id, code, semester)`` -> scalars().all()
+    - ``where(user_id, canvas_course_id.is_(None))`` -> scalars().all()
+      (zombie-row purge at the end of _upsert_courses)
     """
     added: list[Any] = []
 
     def _match_rows(stmt: Any) -> list[FakeCourse]:
-        clauses = list(stmt.whereclause.clauses)  # user_id + code [+ semester]
-        # Extract the .right literal value from each BinaryExpression.
-        values = [c.right.value for c in clauses]
-        if len(values) == 3:
-            uid, code, sem = values
-            return [
-                r
-                for r in existing_rows
-                if r.user_id == uid and r.code == code and r.semester == sem
-            ]
-        uid, code = values
-        return [r for r in existing_rows if r.user_id == uid and r.code == code]
+        filters: dict[str, Any] = {}
+        for clause in stmt.whereclause.clauses:
+            col_name = clause.left.name
+            # `col == value` exposes `.right.value`; `col.is_(None)` produces
+            # a Null literal without that attribute -- treat as None.
+            try:
+                filters[col_name] = clause.right.value
+            except AttributeError:
+                filters[col_name] = None
+        return [
+            r
+            for r in existing_rows
+            if all(getattr(r, k) == v for k, v in filters.items())
+        ]
 
     async def _execute(stmt: Any) -> MagicMock:
         matched = _match_rows(stmt)
@@ -284,3 +289,82 @@ async def test_fresh_install_creates_new_row() -> None:
     assert created.canvas_course_id == "69855"
     assert created.ed_course_id == "31567"
     assert created.semester == "2026-S1"
+
+
+@pytest.mark.asyncio
+async def test_purges_stale_null_canvas_rows() -> None:
+    """Pre-#113 zombie rows (canvas_course_id=None) must be deleted at the
+    end of _upsert_courses, while current-user Canvas-linked rows stay and
+    rows belonging to other users are untouched."""
+    user_id = uuid.uuid4()
+    other_user_id = uuid.uuid4()
+
+    zombie = FakeCourse(
+        user_id=user_id,
+        code="COMP2123",
+        semester="2025-S1",
+        name="COMP2123 Data Structures",
+        canvas_course_id=None,
+        ed_course_id="24579",
+    )
+    existing_canvas = FakeCourse(
+        user_id=user_id,
+        code="COMP2017",
+        semester="2026-S1",
+        name="COMP2017 Systems Programming",
+        canvas_course_id="69855",
+        ed_course_id="31567",
+    )
+    other_users_zombie = FakeCourse(
+        user_id=other_user_id,
+        code="INFO1113",
+        semester="",
+        name="INFO1113 OOP",
+        canvas_course_id=None,
+        ed_course_id="11111",
+    )
+    rows = [zombie, existing_canvas, other_users_zombie]
+    session, _ = _make_session(rows)
+
+    linked = [
+        LinkedCourse(
+            course_code="COMP2017",
+            semester="2026-S1",
+            canvas_course_id="69855",
+            ed_course_id="31567",
+            canvas_name="COMP2017 Systems Programming",
+            ed_name="COMP2017 (2026 Semester 1)",
+            is_linked=True,
+        )
+    ]
+
+    await _upsert_courses(session, user_id, linked, adapter=None)
+
+    session.delete.assert_any_call(zombie)
+    assert zombie not in rows  # purged
+    assert existing_canvas in rows  # Canvas-linked row survives
+    assert other_users_zombie in rows  # other user's data untouched
+
+
+@pytest.mark.asyncio
+async def test_purges_zombie_even_when_no_linked_courses() -> None:
+    """Edge case: user has a zombie row but nothing to upsert this tick
+    (empty linked list). The purge must still run -- otherwise the zombie
+    only clears on syncs that happen to bring a Canvas course."""
+    user_id = uuid.uuid4()
+    zombie = FakeCourse(
+        user_id=user_id,
+        code="COMP2123",
+        semester="",
+        name="COMP2123",
+        canvas_course_id=None,
+        ed_course_id="24579",
+    )
+    rows = [zombie]
+    session, added = _make_session(rows)
+
+    await _upsert_courses(session, user_id, linked=[], adapter=None)
+
+    assert added == []  # no new rows from empty input
+    session.delete.assert_awaited_once_with(zombie)
+    assert zombie not in rows
