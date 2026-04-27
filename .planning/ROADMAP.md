@@ -2,12 +2,12 @@
 
 ## Overview
 
-UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). v3.0 absorbs the three out-of-scope phases that accumulated during v2.0 closure (35 Push Notifications, 36 UX Polish, 37 Sidebar Refactor) and any new phases added after the v3.0 milestone is opened. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.
+UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). v3.0 polishes v2.0's user experience (notifications, UX rough edges, sidebar architecture) before adding new product features. Three active phases (35 / 36 / 37) — focus on reducing user friction and modernizing frontend internals. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.
 
 ## Milestones
 
 - ✅ **v2.0 — Production Foundation** — Phases 1-12, 11.1, 13-34, 32.1, 38, 38.1, 38.2 (39 phases shipped 2026-04-25) [archive](milestones/v2.0-ROADMAP.md)
-- 📋 **v3.0 — UX Polish + Push Notifications + Sidebar Refactor** (planned — to be formalised via `/gsd-new-milestone v3.0`)
+- 🚧 **v3.0 UX Polish + Notifications + Sidebar Refactor** — Phases 35-37 (active)
 
 ## Phases
 
@@ -67,13 +67,68 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 
 </details>
 
-### 📋 v3.0 — Planned (formalise via `/gsd-new-milestone v3.0`)
+### 🚧 v3.0 — Active (bootstrapped 2026-04-27 via `/gsd-new-milestone v3.0`)
 
-These phases were declared during v2.0 but were **out of v2.0 scope** (zero plans, zero artifacts at v2.0 close). They become candidate scope for v3.0:
+Three active phases continuing numbering from v2.0. Each requirement maps via `.planning/REQUIREMENTS.md` traceability table.
 
-- [ ] **Phase 35: Push Notifications** — Browser push API or email notifications for deadline reminders. Requirement: AIFEAT-04. (0 plans)
-- [ ] **Phase 36: UX Polish** — Fix accumulated UX rough edges across AI chat, setup flow, error handling. Requirements: UXPOL-01..04. (0 plans)
-- [ ] **Phase 37: Sidebar Transform-Based Architecture Refactor** — Eliminate sidebar hover lag by replacing `transition: width` with GPU-composited `transform: translateX`. Two-layer DOM. Duplicate of backlog 999.1; **merge candidates when promoted**. (0 plans)
+#### Phase 35: Push Notifications
+
+**Goal:** Browser push (Push API) or email-based deadline reminders to notify users at configurable intervals before each deadline.
+
+**Requirements:**
+- NOTIFY-01: Users can opt-in to deadline reminder notifications via browser Push API or email channel
+- NOTIFY-02: Notifications fire at configurable intervals before deadline (24h, 6h, 1h)
+- NOTIFY-03: Notification preferences persist across sessions and sync cycles
+
+**Success criteria:**
+- User can opt in/out via Settings page; preference round-trips through API and persists
+- At least one notification channel (browser push OR email) delivers reliably in production
+- Configurable interval set lands at the chosen time (no silent drops)
+- Preferences survive logout/login cycle
+
+**Depends on:** Phase 34 (AI Features Live, shipped in v2.0)
+**Plans:** TBD (promote via `/gsd-discuss-phase 35` → `/gsd-plan-phase 35`)
+
+#### Phase 36: UX Polish
+
+**Goal:** Fix accumulated UX rough edges across AI chat, setup flow, and error handling — reduce friction observed during v2.0 production walkthroughs.
+
+**Requirements:**
+- UXPOL-01: AI Chat shows client-side validation when input < 3 chars (no raw 422)
+- UXPOL-02: AI request failures show specific backend error message (not generic "AI request failed")
+- UXPOL-03: Setup TokenStep skips re-validation for tokens that already passed (memory: project_ux_improvements_backlog.md)
+- UXPOL-04: Setup SuccessStep shows per-domain sync progress bars (memory: project_sync_progress_ux.md)
+
+**Success criteria:**
+- AI Chat input < 3 chars shows inline guidance, never returns 422 to user-facing UI
+- AI failures display the specific backend error string in toast/inline message
+- Setup retry skips re-validation for already-validated tokens (verified in dev with throttle test)
+- Setup SuccessStep renders per-domain progress (Canvas / Ed) instead of single composite indicator
+
+**Depends on:** Phase 31 (E2E Verification, shipped in v2.0)
+**Plans:** TBD (promote via `/gsd-discuss-phase 36` → `/gsd-plan-phase 36`)
+
+#### Phase 37: Sidebar Transform-Based Architecture Refactor
+
+**Goal:** Refactor sidebar from current `transition: width` implementation to transform-based architecture for better animation perf and modularity. Eliminates sidebar hover lag on content-heavy pages.
+
+**Requirements:**
+- REFACTOR-01: Sidebar uses transform-based positioning (no layout-thrashing on toggle)
+- REFACTOR-02: 60fps animation on Intel Mac (per memory: project_backdrop_filter_intel_mac.md GPU paint-cost family)
+
+**Approach (from absorbed backlog 999.1):**
+- Two-layer DOM: outer 68 px container always visible + inner 224 px panel absolutely positioned
+- Default `translateX(-156 px)`, `translateX(0)` on hover — GPU-composited, no per-frame layout
+- Carefully rework icon positioning logic and run pixel-diff visual verification
+
+**Success criteria:**
+- DevTools Performance panel shows zero layout thrashing on hover toggle
+- Intel Mac (user's primary device) measures 60fps stable during animation
+- Visual parity with current sidebar (pixel-diff regression test green on dashboard / predict / settings / timetable)
+
+**Depends on:** Phase 36 (UX Polish)
+**Merge note:** Backlog Phase 999.1 was duplicate scope — absorbed into Phase 37 on 2026-04-27 (this milestone bootstrap). 999.1 entry removed from backlog.
+**Plans:** TBD (promote via `/gsd-discuss-phase 37` → `/gsd-plan-phase 37`)
 
 ## Progress
 
@@ -84,19 +139,15 @@ These phases were declared during v2.0 but were **out of v2.0 scope** (zero plan
 | 18-21 | v2.0 (M3) | 14/14 | Complete | 2026-03-29 |
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
-| 35. Push Notifications | v3.0 (planned) | 0/0 | Not started | - |
-| 36. UX Polish | v3.0 (planned) | 0/0 | Not started | - |
-| 37. Sidebar Refactor | v3.0 (planned) | 0/0 | Not started — duplicate of 999.1 | - |
+| 35. Push Notifications | v3.0 | 0/0 | Not started | - |
+| 36. UX Polish | v3.0 | 0/0 | Not started | - |
+| 37. Sidebar Transform Refactor | v3.0 | 0/0 | Not started — absorbs backlog 999.1 | - |
 
 ## Backlog
 
-### Phase 999.1: Sidebar transform-based architecture refactor (BACKLOG)
-**Goal**: [Captured for future planning] Eliminate sidebar hover lag on content-heavy pages by replacing `transition: width` with GPU-composited `transform: translateX`. Two-layer DOM: outer 68 px container always visible + inner 224 px panel absolutely positioned with `translateX(-156 px)` by default, `translateX(0)` on hover. Bypasses per-frame layout cost that `width` animation incurs (non-composited property). Expected ~50 line refactor, requires reworking icon positioning logic and careful visual verification.
-**Context**: Remaining issue from the 2026-04-17/18 5fps-lag investigation (.planning/debug/uniboard-5fps-lag-dashboard.md). PRs #80-87 drove INP 267→107 ms and cleared the Rough.js hotspots, but sidebar hover on dashboard/predict/settings/timetable still feels draggy because `transition: width` physically requires main-thread layout per frame.
-**Status**: **Duplicate of Phase 37 — to be merged when v3.0 milestone formalised.**
-**Requirements**: TBD
-**Plans**: 0 plans
-  - [ ] TBD (promote with /gsd-review-backlog when ready)
+### ~~Phase 999.1: Sidebar transform-based architecture refactor~~ — ABSORBED into Phase 37 on 2026-04-27
+
+Original scope merged verbatim into Phase 37 during v3.0 milestone bootstrap (`/gsd-new-milestone v3.0`). Two-layer DOM `translateX` approach is now Phase 37's implementation strategy. See Phase 37 details above.
 
 ### ~~Phase 999.2: Page mount lazy loading~~ — PROMOTED to Phase 38 on 2026-04-20
 Original scope ("viewport-driven progressive mount") superseded by Phase 38's eager-prefetch approach. Symptom and debug context preserved in Phase 38 archive.
@@ -108,4 +159,4 @@ Original scope ("viewport-driven progressive mount") superseded by Phase 38's ea
 
 ---
 
-*Roadmap reorganized 2026-04-27 by `/gsd-complete-milestone v2.0`. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.*
+*Roadmap reorganized 2026-04-27 by `/gsd-complete-milestone v2.0`. v3.0 milestone bootstrapped same day via `/gsd-new-milestone v3.0` — Phases 35/36/37 active; backlog 999.1 absorbed into Phase 37. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.*

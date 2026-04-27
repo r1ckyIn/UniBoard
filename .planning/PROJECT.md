@@ -20,10 +20,12 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 - Audit verdict: `passed` (39/39 v2.0-scope phases complete)
 - Archive: `.planning/milestones/v2.0-ROADMAP.md`, `.planning/milestones/v2.0-REQUIREMENTS.md`, `.planning/milestones/v2.0-MILESTONE-AUDIT.md`
 
-**Next milestone:** v3.0 (to be formalised via `/gsd-new-milestone v3.0`)
-- Phase 35: Push Notifications (AIFEAT-04)
-- Phase 36: UX Polish (UXPOL-01..04)
-- Phase 37: Sidebar Transform-Based Architecture Refactor (merge with backlog 999.1)
+**Starting:** v3.0 — UX Polish + Notifications + Sidebar Refactor — opened 2026-04-27
+- See `## Current Milestone` for goal, scope, three phases (35 / 36 / 37), and carried-over residual work
+- Three v3.0-scope phases (continuing numbering from v2.0):
+  - Phase 35: Push Notifications (NOTIFY-01..03)
+  - Phase 36: UX Polish (UXPOL-01..04)
+  - Phase 37: Sidebar Transform-Based Architecture Refactor (REFACTOR-01..02 — absorbs backlog 999.1)
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
@@ -99,24 +101,28 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ### Active
 
-**v2.1 — Observability & Data Pipeline:**
-- [ ] Sentry error tracking (Python FastAPI + Next.js projects, DSN configuration)
-- [x] Convert 25/25 mock API Route Handlers to proxy to Railway Python backend — v3.0 Phase 30
-- [x] End-to-end user journey (register → token setup → first sync → real data displayed) — v3.0 Phase 31
-- [x] ANTHROPIC_API_KEY configuration for AI features — v3.0 Phase 31
-- [ ] Frontend CSP update for Railway backend connect-src
+**v3.0 — UX Polish + Notifications + Sidebar Refactor:**
 
-**v2.2 — Multi-User Ready:**
-- [ ] Custom SMTP (Resend/SendGrid) replacing Supabase built-in email
-- [ ] Token expiry auto-remind + re-authorization flow
-- [ ] User onboarding flow polish
-- [ ] Production email templates (branded signup confirmation, password reset)
+*Phase 35 — Push Notifications:*
+- [ ] **NOTIFY-01**: Users can opt-in to deadline reminder notifications via browser Push API or email channel
+- [ ] **NOTIFY-02**: Notifications fire at configurable intervals before deadline (24h, 6h, 1h)
+- [ ] **NOTIFY-03**: Notification preferences persist across sessions and sync cycles
 
-**v3.0 — AI Core Differentiation:**
-- [ ] AI study suggestions based on assessment weights
-- [ ] Course material QA (RAG on Ed Lessons with cited sources) — live with real data
-- [ ] GPA path planning with specific score targets
-- [ ] Push notifications (deadline reminders via browser push or email)
+*Phase 36 — UX Polish:*
+- [ ] **UXPOL-01**: AI Chat shows client-side validation when input < 3 chars (no raw 422)
+- [ ] **UXPOL-02**: AI request failures show specific backend error message (not generic "AI request failed")
+- [ ] **UXPOL-03**: Setup TokenStep skips re-validation for tokens that already passed
+- [ ] **UXPOL-04**: Setup SuccessStep shows per-domain sync progress bars
+
+*Phase 37 — Sidebar Transform-Based Architecture Refactor:*
+- [ ] **REFACTOR-01**: Sidebar uses transform-based positioning (no layout-thrashing on toggle)
+- [ ] **REFACTOR-02**: 60fps animation on Intel Mac (per memory: project_backdrop_filter_intel_mac.md GPU paint-cost family)
+
+*Carried-over residual work from v2.0 closure (tracked in STATE.md, not v3.0 scope):*
+- [ ] 6 `human_needed` UAT checkpoints (Phases 11.1, 26, 31, 33, 34, 38, 38.2)
+- [ ] /check-alerts pipeline (Gmail MCP) — Phase 31.1-03
+- [ ] SEED-002, SEED-003 (FK hygiene from PR #115/#117) — surface as v3.0 candidates if scope permits
+- [ ] 2 on-branch quick-task PRs (260423-ebp, 260423-gir) — held pending Ed-lessons-sync-degraded debug
 
 ### Out of Scope
 
@@ -208,21 +214,47 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | **Phase 38.2 force-dynamic reversal** | Phase 38 added `export const dynamic = "force-dynamic"` + `loading.tsx` Suspense fallback to drive RSC prefetch. Production observation revealed: (a) force-dynamic defeats Next.js 15 router cache — every sidebar click re-runs server RSC + prefetch; (b) `loading.tsx` rendered the full-page skeleton for ~2 s during prefetch waits, turning the invisible network wait into a visible skeleton flash. Fix: remove force-dynamic from 6 dashboard pages (Next.js auto-detects dynamic via `cookies()`/`auth.getSession()`), delete `loading.tsx`, set `experimental.staleTimes.dynamic = 30` for router-cache TTL. Result: skeleton-free sidebar nav restored. | ✓ Architectural correction (Phase 38.2 supersedes Phase 38 Truth #1) |
 | **ORM cascade alignment with Supabase reality** | ORM declarations diverged from actual DB: many FKs declared NO ACTION at ORM level while Supabase schema had CASCADE. Aligned 18 FKs across 15 model files (PR #117) — ORM diff only; alembic + supabase migrations reverted after audit confirmed Supabase already CASCADE. SEED-002 / SEED-003 planted for follow-up (parent-table drift on 5 user_id FKs + passive_deletes refinement). | ✓ Good — discovered Supabase reality matched intent; ORM-only diff |
 
-## Current Milestone: v3.0 — UX Polish + Push + Sidebar Refactor (planned)
+## Current Milestone: v3.0 — UX Polish + Notifications + Sidebar Refactor (active)
 
-**Goal:** Close the three out-of-scope phases that accumulated during v2.0 closure (35 Push Notifications, 36 UX Polish, 37 Sidebar Refactor). Formalise via `/gsd-new-milestone v3.0`.
+**Goal:** Polish v2.0's user experience (notifications, UX rough edges, sidebar architecture) before adding new product features. Focus on reducing user friction and modernizing frontend internals.
 
-**Target phases (candidate scope):**
-- Phase 35: Push Notifications (AIFEAT-04 — browser push API or email reminders)
-- Phase 36: UX Polish (UXPOL-01..04 — AI chat validation, request errors, TokenStep skip-revalidate, SuccessStep per-domain progress)
-- Phase 37: Sidebar Transform-Based Architecture Refactor (merge with backlog 999.1)
+**Bootstrapped:** 2026-04-27 via `/gsd-new-milestone v3.0` on branch `chore/milestone-v3.0-init`.
 
-**v2.0 deferred items carried into v3.0:**
+## v3.0 Goals
+
+The three active phases for v3.0:
+
+### Phase 35: Push Notifications
+- **Goal:** Browser push (Push API) or email-based deadline reminders
+- **Requirements:** NOTIFY-01, NOTIFY-02, NOTIFY-03
+- **Depends on:** Phase 34 (AI Features Live, shipped in v2.0)
+
+### Phase 36: UX Polish
+- **Goal:** Fix accumulated UX rough edges across AI chat, setup flow, error handling
+- **Requirements:** UXPOL-01, UXPOL-02, UXPOL-03, UXPOL-04
+- **Depends on:** Phase 31 (E2E Verification, shipped in v2.0)
+
+### Phase 37: Sidebar Transform-Based Architecture Refactor
+- **Goal:** Refactor sidebar to transform-based architecture for better animation perf and modularity
+- **Requirements:** REFACTOR-01, REFACTOR-02
+- **Depends on:** Phase 36 (UX Polish)
+- **Merge note:** Backlog Phase 999.1 was duplicate scope — absorbed into Phase 37 on 2026-04-27.
+
+## Next Milestone Goals
+
+After v3.0 ships, candidate v4.0 themes (deferred from v3.0 scope):
+
+- **AI Differentiation:** AI agent expansion, multi-step research, additional MCP tools
+- **Platform Expansion:** Mobile app / PWA, multi-university support, OAuth Canvas integration
+- **Schema Evolution:** Major DB schema migrations (currently stable at v2.0)
+
+**v2.0 deferred items carried into v3.0 (tracked in STATE.md, not v3.0 scope):**
 - 6 `human_needed` UAT checkpoints awaiting production walkthrough (Phases 11.1, 26, 31, 33, 34, 38, 38.2)
 - Phase 31.1-03 Gmail MCP `/check-alerts` automated monitoring pipeline
 - 2 on-branch quick-task PRs (260423-ebp, 260423-gir) held pending Ed-lessons-sync-degraded debug
 - 14 open debug sessions (auth/setup UAT diagnostics)
 - 3 dormant seeds: SEED-001 (react-hooks v7), SEED-002 (FK parent drift), SEED-003 (passive_deletes refinement)
+  - SEED-002 / SEED-003 are flagged as v3.0 candidates — review during `/gsd-discuss-phase 37`
 
 ## Evolution
 
@@ -242,4 +274,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-27 after v2.0 milestone complete. v2.0 — Production Foundation shipped 2026-04-25 with 39 phases / ~140 plans / 262 commits. Audit verdict: passed. Next: `/gsd-new-milestone v3.0` to absorb Phases 35/36/37.*
+*Last updated: 2026-04-27 — v3.0 milestone bootstrapped via `/gsd-new-milestone v3.0`. Three active phases: 35 Push Notifications, 36 UX Polish, 37 Sidebar Transform-Based Architecture Refactor (absorbs backlog 999.1). Working branch: `chore/milestone-v3.0-init`.*
