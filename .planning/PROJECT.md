@@ -10,16 +10,20 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ## Current State
 
-**Shipped:** UniBoard v2.0 complete (2026-04-05)
+**Shipped:** UniBoard v2.0 — Production Foundation complete (2026-04-25)
+- 39 phases / ~140 plans / 262 commits / 6 weeks (2026-03-15 → 2026-04-25)
 - M1 Frontend App — Phases 1-12, 11.1 (shipped 2026-03-25)
 - M2 Backend Core — Phases 13-17 (shipped 2026-03-27)
 - M3 AI/MCP/Skills — Phases 18-21 (shipped 2026-03-29)
 - M4 Hardening — Phases 22-28 (shipped 2026-04-04)
-**In Progress:** v3.0 Production Ready + AI Core
-- Phase 29 Sentry Hardening — complete
-- Phase 30 BFF Proxy Conversion — complete (2026-04-06). All 25 Route Handlers converted from mock fixtures to proxyRequest BFF proxy pattern
-- Phase 31 E2E Verification & AI Config — complete (2026-04-06). Setup flow wired to real backend, SSE streaming via BFF proxy, AI API key guard added, ANTHROPIC_API_KEY configured in Railway
-- Phase 38 First-Load Performance — complete (2026-04-21). RSC prefetch + HydrationBoundary across 6 pages (Dashboard, Courses, Deadlines, Predict, Digest, Timetable); Dashboard `/deadlines/upcoming → /courses/{nearest}` waterfall collapsed via `Promise.all`/`allSettled`; Railway cold-start measurement infra + conditional warmup workflow (disabled until human measurement justifies activation); Playwright pixel-diff regression suite scaffolded (baselines pending human checkpoint). Validates PERF-01, PERF-02, PERF-03
+- Production Hardening — Phases 29, 30, 31, 31.1, 32, 32.1, 33, 34, 38, 38.1, 38.2 (shipped 2026-04-04 → 2026-04-25)
+- Audit verdict: `passed` (39/39 v2.0-scope phases complete)
+- Archive: `.planning/milestones/v2.0-ROADMAP.md`, `.planning/milestones/v2.0-REQUIREMENTS.md`, `.planning/milestones/v2.0-MILESTONE-AUDIT.md`
+
+**Next milestone:** v3.0 (to be formalised via `/gsd-new-milestone v3.0`)
+- Phase 35: Push Notifications (AIFEAT-04)
+- Phase 36: UX Polish (UXPOL-01..04)
+- Phase 37: Sidebar Transform-Based Architecture Refactor (merge with backlog 999.1)
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
@@ -201,24 +205,24 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending (M3) |
 | i18n English + Chinese | Target Chinese international student community at USYD | ✓ Good — all 10 pages fully bilingual |
 | **Supabase email confirmation: permanently OFF** | USYD's Mimecast Secure Email Gateway quarantines `uniboard.uk` sender mail with 3-hour digest delays, making signup-time confirmation untenable. Mitigated by Google OAuth as primary auth path (AUTH-HARDEN-01), USYD-aware registration banner (AUTH-HARDEN-02), password-reset resend button with 60s cooldown (AUTH-HARDEN-03). Local dev keeps confirmations ON for parity testing (`supabase/config.toml`); production keeps them OFF in Supabase Studio. See `docs/UniBoard_TRD_v2.md` §7.5 and §16.9 for full rationale. | ✓ Decision documented (Phase 32-03 strategic resolution + Phase 33 AUTH-HARDEN-04) |
+| **Phase 38.2 force-dynamic reversal** | Phase 38 added `export const dynamic = "force-dynamic"` + `loading.tsx` Suspense fallback to drive RSC prefetch. Production observation revealed: (a) force-dynamic defeats Next.js 15 router cache — every sidebar click re-runs server RSC + prefetch; (b) `loading.tsx` rendered the full-page skeleton for ~2 s during prefetch waits, turning the invisible network wait into a visible skeleton flash. Fix: remove force-dynamic from 6 dashboard pages (Next.js auto-detects dynamic via `cookies()`/`auth.getSession()`), delete `loading.tsx`, set `experimental.staleTimes.dynamic = 30` for router-cache TTL. Result: skeleton-free sidebar nav restored. | ✓ Architectural correction (Phase 38.2 supersedes Phase 38 Truth #1) |
+| **ORM cascade alignment with Supabase reality** | ORM declarations diverged from actual DB: many FKs declared NO ACTION at ORM level while Supabase schema had CASCADE. Aligned 18 FKs across 15 model files (PR #117) — ORM diff only; alembic + supabase migrations reverted after audit confirmed Supabase already CASCADE. SEED-002 / SEED-003 planted for follow-up (parent-table drift on 5 user_id FKs + passive_deletes refinement). | ✓ Good — discovered Supabase reality matched intent; ORM-only diff |
 
-## Current Milestone: v3.0 Production Ready + AI Core
+## Current Milestone: v3.0 — UX Polish + Push + Sidebar Refactor (planned)
 
-**Goal:** Take UniBoard from deployed-with-mock-data to a fully functional production app with error tracking, real data flow, multi-user support, and AI-powered differentiation.
+**Goal:** Close the three out-of-scope phases that accumulated during v2.0 closure (35 Push Notifications, 36 UX Polish, 37 Sidebar Refactor). Formalise via `/gsd-new-milestone v3.0`.
 
-**Target features:**
-- Sentry error tracking setup (Python + Next.js, org: yuan-qin)
-- BFF proxy conversion (17/29 mock Route Handlers → Railway backend proxy)
-- End-to-end user journey with real data
-- Custom SMTP for production email
-- Token lifecycle management (expiry, re-auth)
-- AI study suggestions, course QA, GPA path planning with live data
-- Push notifications for deadline reminders
+**Target phases (candidate scope):**
+- Phase 35: Push Notifications (AIFEAT-04 — browser push API or email reminders)
+- Phase 36: UX Polish (UXPOL-01..04 — AI chat validation, request errors, TokenStep skip-revalidate, SuccessStep per-domain progress)
+- Phase 37: Sidebar Transform-Based Architecture Refactor (merge with backlog 999.1)
 
-## Current State
-
-- **Phase 33 complete (2026-04-16):** Token lifecycle + onboarding with auth hardening — Google OAuth primary auth path, recall emails for dormant users, setup flow polish (per-platform sync counts, token cache skip-revalidation), USYD banner, password-reset resend cooldown, email-confirmation-OFF documentation.
-- **Gap-closure fixes:** OAuth race condition (zustand hydration + TanStack Query gating), WelcomeStep email source (authStore vs backend API), Supabase redirect URL wildcard for preview deployments, supabase config.toml template path fix.
+**v2.0 deferred items carried into v3.0:**
+- 6 `human_needed` UAT checkpoints awaiting production walkthrough (Phases 11.1, 26, 31, 33, 34, 38, 38.2)
+- Phase 31.1-03 Gmail MCP `/check-alerts` automated monitoring pipeline
+- 2 on-branch quick-task PRs (260423-ebp, 260423-gir) held pending Ed-lessons-sync-degraded debug
+- 14 open debug sessions (auth/setup UAT diagnostics)
+- 3 dormant seeds: SEED-001 (react-hooks v7), SEED-002 (FK parent drift), SEED-003 (passive_deletes refinement)
 
 ## Evolution
 
@@ -238,4 +242,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 — Phase 31 (E2E verification & AI config) complete. Setup flow wired to real backend, AI features configured for production.*
+*Last updated: 2026-04-27 after v2.0 milestone complete. v2.0 — Production Foundation shipped 2026-04-25 with 39 phases / ~140 plans / 262 commits. Audit verdict: passed. Next: `/gsd-new-milestone v3.0` to absorb Phases 35/36/37.*

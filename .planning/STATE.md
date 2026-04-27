@@ -1,40 +1,114 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: milestone
-status: executing
-stopped_at: Phase 38.2 context gathered
-last_updated: "2026-04-22T07:28:27.362Z"
-last_activity: 2026-04-22 -- Phase 38.2 execution started
+milestone: v3.0
+milestone_name: planning
+status: between_milestones
+stopped_at: v2.0 milestone closed; awaiting `/gsd-new-milestone v3.0`
+last_updated: "2026-04-27T13:30:00.000Z"
+last_activity: 2026-04-27 -- v2.0 milestone closed via /gsd-complete-milestone (39 phases shipped, audit passed)
 progress:
-  total_phases: 24
-  completed_phases: 19
-  total_plans: 73
-  completed_plans: 71
-  percent: 97
+  total_phases: 39
+  completed_phases: 39
+  total_plans: 140
+  completed_plans: 140
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-05)
+See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 38.2 — navigation-cache-parity
+**Current focus:** v2.0 milestone closed. Plan v3.0 next: `/gsd-new-milestone v3.0` will formalise Phases 35 (Push Notifications), 36 (UX Polish), 37 (Sidebar Refactor — merge with backlog 999.1).
 
 ## Current Position
 
-Phase: 38.2 (navigation-cache-parity) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 38.2
-Last activity: 2026-04-23 -- Completed quick task 260423-gir: ORM cascade alignment (ORM diff only; alembic+supabase migrations reverted after code-review audit found Supabase FKs already CASCADE — PR #117)
+Phase: (none — between milestones)
+Status: v2.0 — Production Foundation shipped 2026-04-25
+Last activity: 2026-04-27 -- v2.0 milestone closed (`/gsd-complete-milestone v2.0`); local git tag `v2.0` created; archives written to `.planning/milestones/v2.0-*`
 
 ## Milestones Completed
 
-- **v2.0-m2 Backend Core** — Shipped 2026-03-27 (Phases 13-17, 13 plans, 149 tests)
+- **v2.0 — Production Foundation** — Shipped 2026-04-25 (39 phases, ~140 plans, 262 commits)
+  - See: .planning/MILESTONES.md
+  - Archive: .planning/milestones/v2.0-ROADMAP.md, .planning/milestones/v2.0-REQUIREMENTS.md, .planning/milestones/v2.0-MILESTONE-AUDIT.md
+- **v2.0-m2 Backend Core** — Shipped 2026-03-27 (Phases 13-17, 13 plans, 149 tests) — sub-milestone within v2.0
   - See: .planning/MILESTONES.md
   - Archive: .planning/milestones/v2.0-m2-ROADMAP.md
+
+## Deferred Items
+
+Items acknowledged and deferred at v2.0 milestone close on 2026-04-27 (audit-open scan: 41 items):
+
+### Debug sessions (12)
+
+| Slug | Status | Notes |
+|------|--------|-------|
+| auth-animation-book-opening | diagnosed | spring layout + RoughCard hover |
+| auth-blur-validation | diagnosed | react-hook-form mode confirmed |
+| auth-lang-switch-resets-form | investigating | locale route remount |
+| auth-scrollbar-shift | investigating | overflow-y rule |
+| course-deadlines-panel-gaps | diagnosed | badge format + Rough.js border |
+| edpostspanel-missing-features | diagnosed | author info omission |
+| phase12-settings-uat-gaps | diagnosed | 5 root causes documented |
+| roughcard-border-not-sketchy | investigating | rough.js gap geometry |
+| roughcard-border-snap | investigating | ResizeObserver redraw |
+| setup-lang-switch-reset | diagnosed | locale-route remount confirmed |
+| setup-success-step-bugs | diagnosed | 3 root causes confirmed |
+| setup-token-input-bugs | diagnosed | 2 independent bugs confirmed |
+
+### UAT gaps (14 phases — 11 fully resolved 0 pending; 3 with pending scenarios)
+
+| Phase | File | Status | Pending |
+|-------|------|--------|---------|
+| 03 | 03-UAT.md | diagnosed | 0 |
+| 04 | 04-UAT.md | diagnosed | 0 |
+| 07 | 07-UAT.md | resolved | 0 |
+| 09 | 09-UAT.md | resolved | 0 |
+| 10 | 10-UAT.md | diagnosed | 0 |
+| 12 | 12-UAT.md | diagnosed | 0 |
+| 19 | 19-UAT.md | resolved | 0 |
+| 26 | 26-HUMAN-UAT.md | partial | 3 |
+| 28 | 28-HUMAN-UAT.md | partial | 0 |
+| 28 | 28-UAT.md | passed | 0 |
+| 31 | 31-HUMAN-UAT.md | resolved | 1 |
+| 31 | 31-UAT.md | resolved | 0 |
+| 33 | 33-HUMAN-UAT.md | partial | 7 |
+| 38 | 38-HUMAN-UAT.md | partial | 1 |
+
+### Verification gaps (7 — all `human_needed`)
+
+| Phase | File | Status |
+|-------|------|--------|
+| 11.1 | 11.1-VERIFICATION.md | human_needed |
+| 26 | 26-VERIFICATION.md | human_needed |
+| 31 | 31-VERIFICATION.md | human_needed |
+| 33 | 33-VERIFICATION.md | human_needed |
+| 34 | 34-VERIFICATION.md | human_needed |
+| 38 | 38-VERIFICATION.md | human_needed |
+| 38.2 | 38.2-VERIFICATION.md | human_needed |
+
+### Quick tasks (5 missing)
+
+| Slug | Status |
+|------|--------|
+| platform-errors-post-domain (20260417) | missing |
+| 260420-n29-fix-gpu-paint-cost-stalls-on-intel-mac-4 | missing |
+| 260423-ebp-purge-null-canvas-courses | missing (on branch — not merged) |
+| 260423-gir-add-on-delete-cascade-to-all-course-prof | missing (on branch — not merged) |
+| 260423-i5k-strip-markdown-code-fences-in-ai-engine- | missing |
+
+### Seeds (3 dormant)
+
+| Seed ID | Status | Title |
+|---------|--------|-------|
+| SEED-001-react-hooks-v7-cleanup | dormant | react-hooks v7 strict-rule cleanup |
+| SEED-002-fk-parent-drift-auth-users-vs-profiles | dormant | Resolve ORM-vs-DB parent-table drift on 5 user_id FKs |
+| SEED-003-passive-deletes-cleanup-selectinload | dormant | passive_deletes=True + remove _CASCADE_LOAD_OPTIONS selectinload |
+
+**Disposition:** All 41 items intentionally deferred — automated coverage was uniformly green for v2.0 must-have requirements, and these are tracked human checkpoints / parked ideas / on-branch fixes awaiting other gates. The v3.0 milestone (next) should review SEED-002/003 promotion and decide on the 2 on-branch PRs.
 
 ## Performance Metrics
 
