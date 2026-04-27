@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: UX Polish + Notifications + Sidebar Refactor
-status: ready_to_plan
-stopped_at: v3.0 milestone bootstrapped; ready for `/gsd-discuss-phase 35` or `/gsd-plan-phase 35`
-last_updated: "2026-04-27T14:00:00.000Z"
-last_activity: 2026-04-27 -- v3.0 milestone setup (PROJECT.md, REQUIREMENTS.md, ROADMAP.md updated; 9 requirements across 3 phases)
+milestone_name: UI Polish & Cohesion (Claude 美学叠加层)
+status: defining_requirements
+stopped_at: v3.0 re-scoped to UI Polish & Cohesion; awaiting roadmapper for phase structure
+last_updated: "2026-04-27T15:30:00.000Z"
+last_activity: 2026-04-27 -- v3.0 re-scoped from UX Polish + Notifications + Sidebar to UI Polish & Cohesion (8 REQ categories: DESIGN/MOTION/TYPO/SHARED/STATES/A11Y/NEWVIS/DARK). Phase 36 UXPOL → NEWVIS. Phase 37 REFACTOR → SHARED-03. Phase 35 NOTIFY → deferred to v3.1.
 progress:
-  total_phases: 3
+  total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,13 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** v3.0 milestone bootstrapped 2026-04-27 — three active phases (35 Push Notifications, 36 UX Polish, 37 Sidebar Transform-Based Architecture Refactor). Working branch `chore/milestone-v3.0-init`. Next step: `/gsd-discuss-phase 35` or `/gsd-plan-phase 35`.
+**Current focus:** v3.0 — UI Polish & Cohesion (Claude 美学叠加层). 8 REQ categories awaiting roadmapper for phase structure. Working branch `chore/milestone-v3.0-init`. Next step: spawn `gsd-roadmapper` agent to derive phases from REQUIREMENTS.md.
 
 ## Current Position
 
-Phase: (none — v3.0 ready to plan; first phase is 35 Push Notifications)
-Status: v3.0 — UX Polish + Notifications + Sidebar Refactor (active, 0 / 3 phases complete)
-Last activity: 2026-04-27 -- v3.0 milestone bootstrapped on branch `chore/milestone-v3.0-init`; PROJECT.md, REQUIREMENTS.md (9 reqs), ROADMAP.md, STATE.md updated; backlog 999.1 absorbed into Phase 37
+Phase: Not started — defining requirements
+Plan: —
+Status: Defining requirements (v3.0 — UI Polish & Cohesion)
+Last activity: 2026-04-27 -- v3.0 re-scoped to UI Polish & Cohesion. PROJECT.md updated with 8 REQ categories (DESIGN/MOTION/TYPO/SHARED/STATES/A11Y/NEWVIS/DARK). REQUIREMENTS.md pending rewrite. ROADMAP.md pending roadmapper rewrite. Phase 36 UXPOL subsumed into NEWVIS, Phase 37 REFACTOR subsumed into SHARED-03, Phase 35 NOTIFY deferred to v3.1.
 
 ## Milestones Completed
 
