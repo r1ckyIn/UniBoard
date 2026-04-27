@@ -2,6 +2,7 @@
 
 **Defined:** 2026-04-27
 **Re-scoped:** 2026-04-27 (from auto-bootstrapped "UX Polish + Notifications + Sidebar Refactor" to UI-focused milestone per user direction)
+**Roadmapped:** 2026-04-27 (5 phases derived: 39 / 40 / 41 / 42 / 43)
 **Core Value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place, eliminating the need to switch between platforms.
 
 **Milestone Goal:** 在保留 v2.0 已验证的 Rough.js 手绘美学（边框、Rough Notation 高亮、纸张纹理、103 次原型迭代验证的"学生书桌笔记"气质）前提下，把 Anthropic/Claude 美学的其他维度（设计令牌 oklch 化、cubic-bezier 缓动、衬线层次、a11y polish、暖深棕 dark mode、新功能视觉收口）叠加上去，让整体气质从"学生笔记本"演化为"学生笔记本 × thoughtful product"。
@@ -24,7 +25,7 @@ These are NOT touched by v3.0:
 
 ## v3.0 Requirements
 
-8 REQ categories. Each will map to one or more phases via the roadmapper.
+8 REQ categories. Each maps to exactly one phase via the roadmapper (see Traceability section).
 
 ### Design Tokens
 
@@ -165,40 +166,47 @@ External inspiration docs (Context only, not code dependencies):
 
 ## Traceability
 
-Each v3.0 requirement will be mapped to its assigned phase by the roadmapper.
+Each v3.0 requirement maps to exactly one phase. 5 phases (39-43) derived by roadmapper on 2026-04-27.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DESIGN-01 | TBD | Pending |
-| DESIGN-02 | TBD | Pending |
-| DESIGN-03 | TBD | Pending |
-| MOTION-01 | TBD | Pending |
-| MOTION-02 | TBD | Pending |
-| TYPO-01 | TBD | Pending |
-| TYPO-02 | TBD | Pending |
-| SHARED-01 | TBD | Pending |
-| SHARED-02 | TBD | Pending |
-| SHARED-03 | TBD | Pending |
-| STATES-01 | TBD | Pending |
-| STATES-02 | TBD | Pending |
-| STATES-03 | TBD | Pending |
-| A11Y-01 | TBD | Pending |
-| A11Y-02 | TBD | Pending |
-| A11Y-03 | TBD | Pending |
-| A11Y-04 | TBD | Pending |
-| A11Y-05 | TBD | Pending |
-| NEWVIS-01 | TBD | Pending |
-| NEWVIS-02 | TBD | Pending |
-| NEWVIS-03 | TBD | Pending |
-| NEWVIS-04 | TBD | Pending |
-| DARK-01 | TBD (optional) | Pending |
-| DARK-02 | TBD (optional) | Pending |
-| DARK-03 | TBD (optional) | Pending |
+| DESIGN-01 | Phase 39 | Pending |
+| DESIGN-02 | Phase 39 | Pending |
+| DESIGN-03 | Phase 39 | Pending |
+| MOTION-01 | Phase 39 | Pending |
+| MOTION-02 | Phase 39 | Pending |
+| TYPO-01 | Phase 39 | Pending |
+| TYPO-02 | Phase 39 | Pending |
+| SHARED-01 | Phase 40 | Pending |
+| SHARED-02 | Phase 40 | Pending |
+| SHARED-03 | Phase 40 | Pending |
+| STATES-01 | Phase 41 | Pending |
+| STATES-02 | Phase 41 | Pending |
+| STATES-03 | Phase 41 | Pending |
+| A11Y-01 | Phase 41 | Pending |
+| A11Y-02 | Phase 41 | Pending |
+| A11Y-03 | Phase 41 | Pending |
+| A11Y-04 | Phase 41 | Pending |
+| A11Y-05 | Phase 41 | Pending |
+| NEWVIS-01 | Phase 42 | Pending |
+| NEWVIS-02 | Phase 42 | Pending |
+| NEWVIS-03 | Phase 42 | Pending |
+| NEWVIS-04 | Phase 42 | Pending |
+| DARK-01 | Phase 43 (optional) | Pending |
+| DARK-02 | Phase 43 (optional) | Pending |
+| DARK-03 | Phase 43 (optional) | Pending |
 
 **Coverage:**
 - v3.0 requirements: 25 total (22 core + 3 optional dark mode)
-- Mapped to phases: 0 (awaiting roadmapper)
-- Unmapped: 25
+- Mapped to phases: 25 / 25 ✓
+- Unmapped: 0
+
+**Phase distribution:**
+- Phase 39 (Design Token Foundation): 7 REQs (DESIGN-01..03 + MOTION-01..02 + TYPO-01..02)
+- Phase 40 (Shared Component Polish): 3 REQs (SHARED-01..03)
+- Phase 41 (State Coverage & A11y Pass): 8 REQs (STATES-01..03 + A11Y-01..05)
+- Phase 42 (New-Feature Visual Coverage): 4 REQs (NEWVIS-01..04)
+- Phase 43 (Dark Mode, optional): 3 REQs (DARK-01..03)
 
 **Category distribution:**
 - Design Tokens: 3
@@ -224,4 +232,4 @@ The following seeds were planted during v2.0 closure and are dormant. They are N
 
 ---
 *Requirements defined: 2026-04-27 during `/gsd-new-milestone v3.0` re-scope.*
-*Last updated: 2026-04-27 — re-scoped from auto-bootstrapped UX Polish + Notifications + Sidebar (NOTIFY-01..03 + UXPOL-01..04 + REFACTOR-01..02 = 9 reqs / 3 phases) to UI Polish & Cohesion (8 categories / 25 reqs / phase structure pending). Phase 35 NOTIFY → v3.1, Phase 36 UXPOL → NEWVIS-01..04, Phase 37 REFACTOR → SHARED-03.*
+*Last updated: 2026-04-27 — roadmapper assigned 25 REQs to 5 phases (39-43). Coverage 25/25 ✓. Phase 39 owns the design token foundation (7 REQs across DESIGN/MOTION/TYPO since they share the same dependency profile and are all "establish CSS variables" work). Phase 40 absorbs Phase 37 sidebar refactor via SHARED-03. Phase 42 absorbs Phase 36 UXPOL via NEWVIS-01..04. Phase 43 dark mode is optional (cost-benefit gate before kickoff).*
