@@ -961,7 +961,7 @@ export default eslintConfig;
 | A5 | The `--text-*` / `--leading-*` / `--tracking-*` Tailwind v4 namespaces will register utilities `text-hero`, `leading-hero`, `tracking-hero` correctly for tokens that don't clash with default v4 size names | §Q1 Answers, §Pitfall 4 | If `text-section` clashes with v4 default `text-section` (it shouldn't — v4 uses `text-sm/base/lg/xl/2xl/3xl` etc.), components could resolve to the wrong size. **Mitigation:** Add a vitest unit test that imports the compiled CSS string and checks for `.text-hero`, `.text-section`, `.text-body`, `.text-caption` rule presence. |
 | A6 | Adding `prefers-reduced-motion` stub block (empty body) at plan-3 has zero behavioral effect (no rules inside means browser ignores) | §Code Example 9, §Q5 Answers | A pure no-op CSS block can't affect runtime. Confidence: HIGH — verified by basic CSS spec knowledge. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 > The CONTEXT.md Discretion items (Q1-Q6) are addressed below as recommendations. None remain unresolved.
 
