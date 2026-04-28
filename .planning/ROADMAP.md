@@ -94,7 +94,11 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
   4. Source Serif 4 4-tier scale (hero/section/body/caption) renders with consistent line-height and letter-spacing across the dashboard hero, section headings, body copy, and small captions — visual diff with prototype reference shows no regression
   5. brand-guidelines skill values (color/font specs from anthropics/skills/skills/brand-guidelines) are quoted as the single source of truth in CSS variable comments
 
-**Plans:** TBD (promote via `/gsd-discuss-phase 39` → `/gsd-plan-phase 39`)
+**Plans:** 3 plans
+- [ ] 39-01-PLAN.md — Color (oklch + @supports hsl fallback) + 8-point spacing + dark-mode reservation (DESIGN-01, DESIGN-02)
+- [ ] 39-02-PLAN.md — 4-tier serif typography scale (text-hero/section/body/caption) + TYPO-USAGE.md reference doc (TYPO-01, TYPO-02)
+- [ ] 39-03-PLAN.md — Motion tokens + SSE keyframes (no alternate per Q7) + ESLint guard rule + transition className migration sweep (~56 occurrences) + Playwright visual regression spec (DESIGN-03, MOTION-01, MOTION-02)
+
 **UI hint**: yes
 
 ### Phase 40: Shared Component Polish
