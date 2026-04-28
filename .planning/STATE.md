@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: UI Polish & Cohesion (Claude 美学叠加层)
-status: roadmapped
-stopped_at: v3.0 roadmap complete (Phases 39-43); awaiting `/gsd-discuss-phase 39` to start design token foundation
-last_updated: "2026-04-27T16:00:00.000Z"
-last_activity: 2026-04-27 -- v3.0 roadmap created. 25 REQs mapped to 5 phases (39-43). Coverage 25/25. Phase 39 Design Token Foundation, Phase 40 Shared Component Polish, Phase 41 State Coverage & A11y, Phase 42 New-Feature Visual Coverage (subsumes Phase 36 UXPOL), Phase 43 Dark Mode (optional, cost-benefit gate before kickoff). Phase 35 NOTIFY deferred to v3.1. Branch `chore/milestone-v3.0-init` ready for ROADMAP/REQUIREMENTS commit.
+milestone_name: — UI Polish & Cohesion (Claude 美学叠加层)
+status: Roadmapped (v3.0 — UI Polish & Cohesion)
+stopped_at: Phase 39 context gathered
+last_updated: "2026-04-28T05:30:00.685Z"
+last_activity: 2026-04-27 -- v3.0 roadmap finalized. 5 phases derived from 25 REQs across 8 categories. Phase 39 owns the design token foundation (DESIGN-01..03 + MOTION-01..02 + TYPO-01..02 = 7 REQs). Phase 40 owns shared component polish + sidebar transform refactor (SHARED-01..03). Phase 41 owns state coverage + a11y pass (STATES-01..03 + A11Y-01..05). Phase 42 owns new-feature visual coverage (NEWVIS-01..04, subsumes Phase 36). Phase 43 dark mode optional (DARK-01..03).
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
@@ -269,5 +268,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27 v3.0 roadmapping
-Stopped at: v3.0 ROADMAP.md + REQUIREMENTS.md traceability + STATE.md updated. 5 phases (39-43) derived, 25 REQs mapped 1:1 with 100% coverage. Branch `chore/milestone-v3.0-init` ready for commit. Next step: `/gsd-discuss-phase 39` (Design Token Foundation — establish oklch color, spacing, motion, serif type tokens as CSS variables).
+Last session: --stopped-at
+Stopped at: Phase 39 context gathered
