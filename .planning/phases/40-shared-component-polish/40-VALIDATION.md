@@ -2,8 +2,8 @@
 phase: 40
 slug: shared-component-polish
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-30
 ---
 
@@ -72,7 +72,7 @@ created: 2026-04-30
 | 40-02-12 | 02 | 2 | SHARED-02 | — | N/A (build still passes after caller migration) | integration | `cd frontend && pnpm typecheck && pnpm build` | ✅ existing | ⬜ pending |
 | 40-03-01 | 03 | 2 | SHARED-03 | — | N/A | unit | `pnpm test __tests__/components/layout/Sidebar.test.tsx -t "two-layer DOM renders"` | ❌ W0 | ⬜ pending |
 | 40-03-02 | 03 | 2 | SHARED-03 | — | N/A | unit | `pnpm test __tests__/components/layout/Sidebar.test.tsx -t "outer 68px container fixed"` | ❌ W0 | ⬜ pending |
-| 40-03-03 | 03 | 2 | SHARED-03 | — | N/A | unit | `pnpm test __tests__/components/layout/Sidebar.test.tsx -t "inner panel translateX collapsed default"` | ❌ W0 | ⬜ pending |
+| 40-03-03 | 03 | 2 | SHARED-03 | — | N/A (Option A literal D-40-08 — translate-x assertions per BLOCKER-4/6 fix) | unit | `pnpm test __tests__/components/layout/Sidebar.test.tsx -t "inner panel translateX collapsed default"` | ❌ W0 | ⬜ pending |
 | 40-03-04 | 03 | 2 | SHARED-03 | — | N/A | unit | `pnpm test __tests__/components/layout/Sidebar.test.tsx -t "active highlight inside inner panel"` | ❌ W0 | ⬜ pending |
 | 40-03-05 | 03 | 2 | SHARED-03 | — | N/A (Phase 40 verbose-form sweep also touched Sidebar.tsx — verify shorthand applied) | grep | `cd frontend && grep -E "transition-claude-base" components/layout/Sidebar.tsx` | ✅ | ⬜ pending |
 | 40-03-06 | 03 | 2 | SHARED-03 | — | N/A (production human UAT — 60fps Intel Mac) | manual-only | human UAT post-deploy | n/a | ⬜ pending |
@@ -84,36 +84,38 @@ created: 2026-04-30
 
 ## Wave 0 Requirements
 
-- [ ] `frontend/components/ui/Button.tsx` + `frontend/__tests__/components/ui/Button.test.tsx` — covers SHARED-01 Button variants (primary/secondary/ghost/danger/iconOnly/loading/className-merge/focus-visible)
-- [ ] `frontend/components/ui/Input.tsx` + `frontend/__tests__/components/ui/Input.test.tsx` — covers SHARED-01 Input variants (default/search/leftIcon/rightIcon/error/disabled)
-- [ ] `frontend/hooks/useStreamingText.ts` + `frontend/__tests__/hooks/useStreamingText.test.ts` — covers SHARED-02 hook contract (initial empty / chunkIndex bumps / stream complete / isStreaming transition)
-- [ ] `frontend/components/shared/StreamingAssistant.tsx` + `frontend/__tests__/components/shared/StreamingAssistant.test.tsx` — covers SHARED-02 cursor mount/unmount + Source Serif 4 body class
-- [ ] `frontend/components/shared/UserMessage.tsx` + `frontend/__tests__/components/shared/UserMessage.test.tsx` — covers SHARED-02 right-aligned orange bubble + text rendering
-- [ ] `frontend/__tests__/components/layout/Sidebar.test.tsx` (extend or create) — covers SHARED-03 two-layer DOM + active-highlight-inside-inner-panel
-- [ ] `frontend/__tests__/eslint/no-raw-transition.test.ts` — EXTEND existing file with 4 new fixtures (verbose tokenized form positive + negative; `var(--ease)` positive + negative)
-- [ ] `frontend/tests/e2e/perf/phase40-sidebar-60fps.spec.ts` — env-gated stub (runs under Playwright; auto-skips without `PERF_TEST_PASSWORD`)
-- [ ] No new test framework install — all dependencies already in `package.json` (vitest, @testing-library/react, @playwright/test, eslint, tailwindcss, react). Add only `class-variance-authority` via `pnpm add class-variance-authority`.
+- [x] `frontend/components/ui/Button.tsx` + `frontend/__tests__/components/ui/Button.test.tsx` — covers SHARED-01 Button variants (primary/secondary/ghost/danger/iconOnly/loading/className-merge/focus-visible)
+- [x] `frontend/components/ui/Input.tsx` + `frontend/__tests__/components/ui/Input.test.tsx` — covers SHARED-01 Input variants (default/search/leftIcon/rightIcon/error/disabled)
+- [x] `frontend/hooks/useStreamingText.ts` + `frontend/__tests__/hooks/useStreamingText.test.ts` — covers SHARED-02 hook contract (initial empty / chunkIndex bumps / stream complete / isStreaming transition)
+- [x] `frontend/components/shared/StreamingAssistant.tsx` + `frontend/__tests__/components/shared/StreamingAssistant.test.tsx` — covers SHARED-02 cursor mount/unmount + Source Serif 4 body class
+- [x] `frontend/components/shared/UserMessage.tsx` + `frontend/__tests__/components/shared/UserMessage.test.tsx` — covers SHARED-02 right-aligned orange bubble + text rendering
+- [x] `frontend/__tests__/components/layout/Sidebar.test.tsx` (extend or create) — covers SHARED-03 two-layer DOM + active-highlight-inside-inner-panel
+- [x] `frontend/__tests__/eslint/no-raw-transition.test.ts` — EXTEND existing file with 4 new fixtures (verbose tokenized form positive + negative; `var(--ease)` positive + negative)
+- [x] `frontend/tests/e2e/perf/phase40-sidebar-60fps.spec.ts` — env-gated stub (runs under Playwright; auto-skips without `PERF_TEST_PASSWORD`)
+- [x] No new test framework install — all dependencies already in `package.json` (vitest, @testing-library/react, @playwright/test, eslint, tailwindcss, react). Add only `class-variance-authority` via `pnpm add class-variance-authority`.
 
 ---
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Sidebar 60fps stable on Intel Mac during hover-expand/collapse | SHARED-03 (success criterion #3) | CI lacks Intel Mac hardware; framerate signal varies by GPU/refresh-rate. Phase 39 SEED-39 pattern: env-gated Playwright spec stub authored, baseline generation deferred to production human UAT | Post-deploy on user's primary Intel Mac: open dashboard / predict / settings / timetable, open DevTools → Performance, record 5-second hover-expand interaction → confirm 60fps stable bar (no red layout-shift markers) |
-| Pixel-diff visual parity vs v2.0 baseline (Sidebar 4 pages, Button/Input across 10 pages) | SHARED-01, SHARED-03 (success criteria #1, #4) | Playwright baseline generation requires `PERF_TEST_PASSWORD` and provisioned auth state; deferred per SEED-39 closure procedure | Post-deploy: visual regression suite runs against production with credentials provisioned; or manual screenshot diff via Chrome DevTools Recorder against v2.0 reference deployment |
-| AI no-bubble flowing reply visual feel (assistant continuous narrative, user discrete bubble) | SHARED-02 (success criterion #2) | Subjective UX judgment; cannot be expressed as pixel-diff alone | Post-deploy: navigate to /deadlines, trigger AI summary, confirm assistant text flows in serif without bubble + cursor blinks at end while streaming + user replies show right-aligned orange bubble |
-| Rough.js hand-drawn borders preserved across all components | success criterion #5 (hard constraint) | RoughCard render uses random seed deterministic per component; visual smoke check confirms borders still render after any Tailwind/CSS variable change | Post-deploy: load each of 10 pages in production, confirm RoughCard borders visible on every card (sketchy hand-drawn aesthetic intact) |
+| ID | Behavior | Requirement | Why Manual | Test Instructions |
+|----|----------|-------------|------------|-------------------|
+| MANUAL-40-01 | Sidebar 60fps stable on Intel Mac during hover-expand/collapse | SHARED-03 (success criterion #3) | CI lacks Intel Mac hardware; framerate signal varies by GPU/refresh-rate. Phase 39 SEED-39 pattern: env-gated Playwright spec stub authored, baseline generation deferred to production human UAT | Post-deploy on user's primary Intel Mac: open dashboard / predict / settings / timetable, open DevTools → Performance, record 5-second hover-expand interaction → confirm 60fps stable bar (no red layout-shift markers) |
+| MANUAL-40-02 | Pixel-diff visual parity vs v2.0 baseline (Sidebar 4 pages, Button/Input across 10 pages) | SHARED-01, SHARED-03 (success criteria #1, #4) | Playwright baseline generation requires `PERF_TEST_PASSWORD` and provisioned auth state; deferred per SEED-39 closure procedure | Post-deploy: visual regression suite runs against production with credentials provisioned; or manual screenshot diff via Chrome DevTools Recorder against v2.0 reference deployment |
+| MANUAL-40-03 | AI no-bubble flowing reply visual feel (assistant continuous narrative, user discrete bubble) | SHARED-02 (success criterion #2) | Subjective UX judgment; cannot be expressed as pixel-diff alone | Post-deploy: navigate to /deadlines, trigger AI summary, confirm assistant text flows in serif without bubble + cursor blinks at end while streaming + user replies show right-aligned orange bubble |
+| MANUAL-40-04 | Rough.js hand-drawn borders preserved across all components | success criterion #5 (hard constraint) | RoughCard render uses random seed deterministic per component; visual smoke check confirms borders still render after any Tailwind/CSS variable change | Post-deploy: load each of 10 pages in production, confirm RoughCard borders visible on every card (sketchy hand-drawn aesthetic intact) |
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify (per-task quick-run keeps signal continuous)
-- [ ] Wave 0 covers all MISSING references (8 new test files; 1 ESLint test extension; 1 Playwright stub)
-- [ ] No watch-mode flags (Vitest invoked with `--run` for one-shot determinism)
-- [ ] Feedback latency < 30 s (quick run) and < 3 min (full suite)
-- [ ] `nyquist_compliant: true` set in frontmatter once planner confirms task↔test mapping above is complete
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify (per-task quick-run keeps signal continuous)
+- [x] Wave 0 covers all MISSING references (8 new test files; 1 ESLint test extension; 1 Playwright stub)
+- [x] No watch-mode flags (Vitest invoked with `--run` for one-shot determinism)
+- [x] Feedback latency < 30 s (quick run) and < 3 min (full suite)
+- [x] `nyquist_compliant: true` set in frontmatter once planner confirms task↔test mapping above is complete
+- [x] Manual-only verifications carry stable IDs (MANUAL-40-01..04) for Phase 41 traceability
+- [x] BLOCKER-4 + BLOCKER-6 resolution: 40-03-03 task↔test mapping locked to Option A literal (translate-x-[-156px] / group-hover:translate-x-0)
 
-**Approval:** pending
+**Approval:** confirmed 2026-04-30

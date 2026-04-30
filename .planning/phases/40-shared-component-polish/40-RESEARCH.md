@@ -1722,22 +1722,22 @@ See **Pattern 10** above.
 
 **If this table is empty:** N/A — assumptions exist; user confirmation needed for A6 (Sidebar geometry) before plan-3 execution.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **D-40-08 Sidebar geometry — does `translateX(-156px)` show icons or hide them in collapsed mode?**
+1. **D-40-08 Sidebar geometry — does `translateX(-156px)` show icons or hide them in collapsed mode?** **(RESOLVED — checker BLOCKER-4 fix, 2026-04-30)**
    - What we know: REQUIREMENTS.md SHARED-03 explicitly states "Default `translateX(-156px)`, `translateX(0)` on hover. GPU-composited."
    - What's unclear: Whether this geometry inverts the conventional "icons visible in left strip" UX. Q6 analysis showed two plausible interpretations.
-   - Recommendation: Plan-3 should start with a 30-min spike to mock both interpretations in a sandbox file; pick the one that matches the v2.0 prototype's UX (icons in collapsed strip + labels reveal on hover). Possibly revisit D-40-08 with user before plan-3 if neither interpretation works cleanly.
+   - **RESOLVED:** Plan-3 Task 1 SPIKE (`prototype/sidebar-geometry-spike.html`) authored to verify the geometry visually. Decision **locked to Option A (literal D-40-08 from CONTEXT.md)**: inner 224px panel `translateX(-156px)` default → `translateX(0)` on hover. The "right ~68px of inner panel visible while collapsed" interpretation per CONTEXT.md D-40-08 IS the spec — the rightmost edge of the inner panel containing the right portion of nav items + active highlight is the intended collapsed-state visual. The SPIKE's value is to **verify** the geometry produces the expected v2.0-parity outcome, NOT to redesign D-40-08. Default: Option A. Pause-for-user only if SPIKE reveals a v2.0-parity show-stopper requiring user-approved divergence.
 
-2. **`overflow-x` handling on inner panel — required, or can outer's `overflow:hidden` carry it?**
+2. **`overflow-x` handling on inner panel — required, or can outer's `overflow:hidden` carry it?** **(RESOLVED — checker BLOCKER-1 fix, 2026-04-30)**
    - What we know: D-40-08 says outer is `overflow-hidden`. Inner has no explicit overflow.
    - What's unclear: Whether inner needs `overflow-y:auto` for tall menus (post-MVP) or relies on parent.
-   - Recommendation: Default to no explicit overflow on inner. If user feedback indicates tall sidebars (e.g., 7+ nav items + scroll), revisit in Phase 41.
+   - **RESOLVED:** No explicit `overflow-x` on inner panel for Phase 40. Outer `overflow-hidden` carries clipping. Revisit Phase 41 if accessibility issue surfaces (e.g., tall sidebars with 7+ nav items + scroll, or focus-visible scroll-into-view interference).
 
-3. **Should plan-1 also sweep the 41 short-form `transition-colors`?**
+3. **Should plan-1 also sweep the 41 short-form `transition-colors`?** **(RESOLVED — checker BLOCKER-1 fix, 2026-04-30)**
    - What we know: 41 short-form occurrences exist; Phase 39 plan-04 explicitly only migrated explicit-duration form.
    - What's unclear: Whether v3.0 visual contract requires `--ease-claude-out` on these 41 or if Tailwind's default ease is acceptable.
-   - Recommendation: Leave them per A8. Phase 41 a11y pass picks up any tail when files are opened anyway.
+   - **RESOLVED:** Defer per A8 — Phase 41 a11y pass picks up the tail when files are opened anyway. Keep Phase 40 diff focused on the verbose-form sweep + cva primitives + AI no-bubble + Sidebar two-layer.
 
 ## Environment Availability
 
