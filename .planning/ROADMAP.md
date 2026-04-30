@@ -94,11 +94,11 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
   4. Source Serif 4 4-tier scale (hero/section/body/caption) renders with consistent line-height and letter-spacing across the dashboard hero, section headings, body copy, and small captions — visual diff with prototype reference shows no regression
   5. brand-guidelines skill values (color/font specs from anthropics/skills/skills/brand-guidelines) are quoted as the single source of truth in CSS variable comments
 
-**Plans:** 4 plans
+**Plans:** 4 plans (4/4 complete; Task 3 of plan-04 deferred to production visual UAT — see SEED-39-playwright-baselines.md)
 - [x] 39-01-PLAN.md — Color (oklch + @supports hsl fallback) + 8-point spacing + dark-mode reservation (DESIGN-01, DESIGN-02)
 - [x] 39-02-PLAN.md — 4-tier serif typography scale (text-hero/section/body/caption) + TYPO-USAGE.md reference doc (TYPO-01, TYPO-02)
-- [ ] 39-03-PLAN.md — Motion tokens + SSE keyframes (no alternate per Q7) + ESLint guard rule + Wave 0 test scaffolds (DESIGN-03, MOTION-02 keyframes, MOTION-01 rule install)
-- [ ] 39-04-PLAN.md — Transition className migration sweep (~56 occurrences across 36 files) + manual edge cases + Playwright visual regression baselines (checkpoint:human-verify) (MOTION-01 sweep + visual-regression closure)
+- [x] 39-03-PLAN.md — Motion tokens + SSE keyframes (no alternate per Q7) + ESLint guard rule + Wave 0 test scaffolds (DESIGN-03, MOTION-02 keyframes, MOTION-01 rule install)
+- [x] 39-04-PLAN.md — Transition className migration sweep (56 occurrences across 36 files + 21 Form C + 8 ease-in-out adjacencies) — Tasks 1+2 complete; Task 3 (Playwright visual regression baselines) **deferred to production visual UAT** per user decision 2026-04-30 (see 39-04-SUMMARY.md "Deferred Work" + SEED-39-playwright-baselines.md). MOTION-01 status: **partial** (sweep + ESLint enforcement complete; pixel-diff coverage deferred).
 
 **UI hint**: yes
 
@@ -184,7 +184,7 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 | 18-21 | v2.0 (M3) | 14/14 | Complete | 2026-03-29 |
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
-| 39. Design Token Foundation | v3.0 | 1/4 | In progress (Plan 01 complete 2026-04-30: oklch colors + 8-point spacing + dark-mode reservation) | - |
+| 39. Design Token Foundation | v3.0 | 4/4 | Complete (2026-04-30) — plan-01 oklch+spacing, plan-02 typography, plan-03 motion+SSE+ESLint, plan-04 transition sweep. Plan-04 Task 3 (Playwright baselines) deferred to production visual UAT per user; MOTION-01 status: **partial**. See SEED-39-playwright-baselines.md. | 2026-04-30 |
 | 40. Shared Component Polish | v3.0 | 0/0 | Not started — absorbs Phase 37 sidebar refactor | - |
 | 41. State Coverage & Accessibility Pass | v3.0 | 0/0 | Not started | - |
 | 42. New-Feature Visual Coverage | v3.0 | 0/0 | Not started — absorbs Phase 36 UXPOL | - |

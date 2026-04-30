@@ -36,7 +36,9 @@ These are NOT touched by v3.0:
 
 ### Motion
 
-- [ ] **MOTION-01**: All hover / focus / active state transitions use the motion constants (zero inline `transition: all 0.3s ease`)
+- [~] **MOTION-01** (partial): All hover / focus / active state transitions use the motion constants (zero inline `transition: all 0.3s ease`)
+  - **Sweep + ESLint enforcement:** COMPLETE — 56 raw `transition-{all|colors} duration-{N|[Xs]}` occurrences (across 36 files) plus 21 Form C `transition-[<property>] duration-N` cases plus 8 `ease-in-out` adjacency conflicts migrated to `var(--motion-fast|base|slow)` + `var(--ease-claude-out)` (Phase 39 plan-04, commits `40b6501` + `29f6cf9`). ESLint `no-restricted-syntax` rule from plan-3 blocks future regressions in CI; `pnpm lint` exits 0.
+  - **Pixel-diff visual regression coverage:** DEFERRED — D-11 specifies Playwright snapshot diff across 10 pages at `maxDiffPixelRatio: 0.005` per page. Baselines not generated this plan per user decision (defer to production visual UAT on Vercel preview). Tracked in `.planning/seeds/SEED-39-playwright-baselines.md`. Spec at `frontend/tests/e2e/phase39-transition-parity.spec.ts` is in-tree and env-gated; closing the seed flips this REQ to complete.
 - [x] **MOTION-02
 **: SSE streaming components (Digest, Predict, Deadlines AI chat) have unified streaming-cursor animation + chunk-arrival fade-in
 
