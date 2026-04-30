@@ -169,7 +169,7 @@ function ToggleRow({ label, checked, onChange, testId }: ToggleRowProps) {
         checked={checked}
         onChange={onChange}
         data-testid={testId}
-        className="appearance-none w-[44px] h-[24px] rounded-full bg-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[20px] after:h-[20px] after:rounded-full after:bg-white after:shadow-sm after:transition-all after:duration-200 checked:bg-[#d97757] checked:after:translate-x-[20px]"
+        className="appearance-none w-[44px] h-[24px] rounded-full bg-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[20px] after:h-[20px] after:rounded-full after:bg-white after:shadow-sm after:transition-all after:[transition-duration:var(--motion-fast)] after:[transition-timing-function:var(--ease-claude-out)] checked:bg-[#d97757] checked:after:translate-x-[20px]"
       />
     </label>
   );
