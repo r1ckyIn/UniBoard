@@ -96,7 +96,7 @@ export default function ProfileSection({ user }: ProfileSectionProps) {
             type="button"
             onClick={handleSave}
             disabled={updateProfile.isPending}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#d97757] text-white border-none cursor-pointer transition-all duration-150 hover:bg-[#c5674a]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#d97757] text-white border-none cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#c5674a]"
           >
             {t("profile.saveChanges")}
           </button>

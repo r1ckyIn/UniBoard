@@ -163,7 +163,7 @@ export default function DigestPage() {
           </div>
           <button
             onClick={handleRefresh}
-            className="text-[0.78rem] font-semibold py-[6px] px-[16px] rounded-[8px] bg-[rgba(217,119,87,0.11)] text-[#d97757] border-none cursor-pointer hover:bg-[rgba(217,119,87,0.18)] transition-colors duration-150"
+            className="text-[0.78rem] font-semibold py-[6px] px-[16px] rounded-[8px] bg-[rgba(217,119,87,0.11)] text-[#d97757] border-none cursor-pointer hover:bg-[rgba(217,119,87,0.18)] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
           >
             {t("retry")}
           </button>

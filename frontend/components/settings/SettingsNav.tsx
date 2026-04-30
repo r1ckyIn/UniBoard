@@ -49,7 +49,7 @@ export default function SettingsNav({ activeSection, onNavClick }: SettingsNavPr
                 onClick={() => onNavClick(item.id)}
                 className={cn(
                   "w-full flex items-center gap-[10px] py-[9px] px-[12px] rounded-[8px]",
-                  "text-[0.82rem] font-medium cursor-pointer transition-all duration-150",
+                  "text-[0.82rem] font-medium cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
                   "border-l-2 border-transparent",
                   "hover:bg-[#efede6] hover:text-[#2d2d2a]",
                   isActive && "bg-[rgba(217,119,87,0.11)] text-[#d97757] border-l-[#d97757] font-semibold",

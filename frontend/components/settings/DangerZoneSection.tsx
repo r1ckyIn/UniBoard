@@ -59,7 +59,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={() => disconnectDialogRef.current?.showModal()}
-            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-all duration-150 hover:bg-[rgba(204,68,85,0.11)]"
+            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[rgba(204,68,85,0.11)]"
           >
             {t("danger.disconnect.button")}
           </button>
@@ -78,7 +78,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={openDeleteDialog}
-            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-all duration-150 hover:bg-[rgba(204,68,85,0.11)]"
+            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[rgba(204,68,85,0.11)]"
           >
             {t("danger.delete.button")}
           </button>
@@ -101,7 +101,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={() => disconnectDialogRef.current?.close()}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-all duration-150 hover:bg-[#efede6]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6]"
           >
             {t("danger.disconnect.cancel")}
           </button>
@@ -109,7 +109,7 @@ export default function DangerZoneSection() {
             type="button"
             data-testid="disconnect-confirm"
             onClick={handleDisconnect}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-all duration-150 hover:bg-[#b33d4c]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#b33d4c]"
           >
             {t("danger.disconnect.confirmButton")}
           </button>
@@ -140,7 +140,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={() => deleteDialogRef.current?.close()}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-all duration-150 hover:bg-[#efede6]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6]"
           >
             {t("danger.delete.cancel")}
           </button>
@@ -149,7 +149,7 @@ export default function DangerZoneSection() {
             data-testid="delete-confirm"
             disabled={deleteConfirmText !== "DELETE"}
             onClick={handleDeleteAccount}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-all duration-150 hover:bg-[#b33d4c] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#b33d4c] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("danger.delete.confirmButton")}
           </button>
