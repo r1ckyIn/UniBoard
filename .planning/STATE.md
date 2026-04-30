@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — UI Polish & Cohesion (Claude 美学叠加层)
-status: Roadmapped (v3.0 — UI Polish & Cohesion)
-stopped_at: Phase 39 context gathered
-last_updated: "2026-04-28T05:30:00.685Z"
-last_activity: 2026-04-27 -- v3.0 roadmap finalized. 5 phases derived from 25 REQs across 8 categories. Phase 39 owns the design token foundation (DESIGN-01..03 + MOTION-01..02 + TYPO-01..02 = 7 REQs). Phase 40 owns shared component polish + sidebar transform refactor (SHARED-01..03). Phase 41 owns state coverage + a11y pass (STATES-01..03 + A11Y-01..05). Phase 42 owns new-feature visual coverage (NEWVIS-01..04, subsumes Phase 36). Phase 43 dark mode optional (DARK-01..03).
+status: executing
+stopped_at: Phase 39 plan-1 complete (oklch colors + 8-point spacing + dark-mode reservation)
+last_updated: "2026-04-30T00:46:16Z"
+last_activity: 2026-04-30 -- Phase 39 plan-1 GREEN (commits 726eb10 + c1de7c9)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
+  percent: 25
 ---
 
 # Project State
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** v3.0 — UI Polish & Cohesion (Claude 美学叠加层). 5 phases roadmapped (39-43), 25 REQs mapped 1:1. Working branch `chore/milestone-v3.0-init`. Next step: `/gsd-discuss-phase 39` (Design Token Foundation).
+**Current focus:** Phase 39 — design-token-foundation
 
 ## Current Position
 
-Phase: Phase 39 — Design Token Foundation (not started)
-Plan: —
-Status: Roadmapped (v3.0 — UI Polish & Cohesion)
-Last activity: 2026-04-27 -- v3.0 roadmap finalized. 5 phases derived from 25 REQs across 8 categories. Phase 39 owns the design token foundation (DESIGN-01..03 + MOTION-01..02 + TYPO-01..02 = 7 REQs). Phase 40 owns shared component polish + sidebar transform refactor (SHARED-01..03). Phase 41 owns state coverage + a11y pass (STATES-01..03 + A11Y-01..05). Phase 42 owns new-feature visual coverage (NEWVIS-01..04, subsumes Phase 36). Phase 43 dark mode optional (DARK-01..03).
+Phase: 39 (design-token-foundation) — EXECUTING
+Plan: 2 of 4 (plan 1 complete)
+Status: Plan 39-01 shipped — ready for plan 39-02 (typography)
+Last activity: 2026-04-30 -- Phase 39 plan-1 GREEN; commits 726eb10 (test/RED) + c1de7c9 (feat/GREEN); SUMMARY at .planning/phases/39-design-token-foundation/39-01-SUMMARY.md
 
 ## Milestones Completed
 
@@ -225,6 +226,7 @@ Items acknowledged and deferred at v2.0 milestone close on 2026-04-27 (audit-ope
 | Phase 33 P02 | 15min | 3 tasks | 8 files |
 | Phase 33 P05 | 9min | 3 tasks | 11 files |
 | Phase 33 P07 | 25min | 3 tasks | 11 files |
+| Phase 39 P01 | 15min | 2 tasks (TDD RED+GREEN) | 6 files |
 
 ## Accumulated Context
 
@@ -239,6 +241,11 @@ Recent decisions affecting current work:
 - [v3.0 Roadmap]: Phase 35 Push Notifications (NOTIFY-01..03) deferred to v3.1 — out of UI scope. Not duplicated, not subsumed. Carried in REQUIREMENTS.md "Future Requirements (Deferred)" section.
 - [v3.0 Roadmap]: Phase 43 Dark Mode marked optional with cost-benefit gate before kickoff. Rough.js dynamic stroke generation (DARK-02) may be expensive; if implementation cost > 2 plans, defer entire phase to v3.1.
 - [v3.0 Roadmap]: All 5 phases tagged with `**UI hint**: yes` since the entire milestone is UI-scoped. `/gsd-ui-phase` should fire on every phase plan.
+- [Phase 39 plan-1]: Adopted culori@4.0.2 + @types/culori@4.0.1 as the canonical hex→oklch pipeline; round-trip ΔE measured via mode-aware `differenceEuclidean('oklch')` (Pitfall 5).
+- [Phase 39 plan-1]: scripts/hex-to-oklch.mjs structured as library+CLI hybrid (`if (import.meta.url === \`file://${process.argv[1]}\`)` guard) so unit tests dynamic-import `convert()` instead of duplicating math. Pattern reusable for future build-time CSS generators.
+- [Phase 39 plan-1]: `@supports not (color: oklch(0% 0 0))` is the canonical feature-query test value (Pitfall 3) — `oklch(0)` parses as a number and fails on browsers that need the fallback.
+- [Phase 39 plan-1]: Brand SSOT (orange/blue/green) hex values cite anthropics/skills/brand-guidelines; project palette cites prototype/DESIGN_SYSTEM.md. Inline `/* source: ... */` comments preserve provenance in CSS itself per D-02.
+- [Phase 39 plan-1]: Empty `[data-theme="dark"] { }` block reserved for Phase 43 (warm-deep-brown #2b2a27); structural reservation keeps Phase 43 changes additive.
 
 (For v2.0 decisions log — 200+ entries — see archive at `.planning/milestones/v2.0-STATE.md` if extracted, otherwise consult PROJECT.md Key Decisions table.)
 
@@ -270,3 +277,5 @@ None.
 
 Last session: --stopped-at
 Stopped at: Phase 39 context gathered
+
+**Planned Phase:** 39 (design-token-foundation) — 4 plans — 2026-04-28T07:17:30.872Z

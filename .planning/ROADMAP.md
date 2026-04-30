@@ -184,7 +184,7 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 | 18-21 | v2.0 (M3) | 14/14 | Complete | 2026-03-29 |
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
-| 39. Design Token Foundation | v3.0 | 0/0 | Not started | - |
+| 39. Design Token Foundation | v3.0 | 1/4 | In progress (Plan 01 complete 2026-04-30: oklch colors + 8-point spacing + dark-mode reservation) | - |
 | 40. Shared Component Polish | v3.0 | 0/0 | Not started — absorbs Phase 37 sidebar refactor | - |
 | 41. State Coverage & Accessibility Pass | v3.0 | 0/0 | Not started | - |
 | 42. New-Feature Visual Coverage | v3.0 | 0/0 | Not started — absorbs Phase 36 UXPOL | - |
