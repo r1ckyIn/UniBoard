@@ -214,7 +214,6 @@ export default function PredictCard({
           className="overflow-hidden transition-[max-height] [transition-duration:var(--motion-slow)] [transition-timing-function:var(--ease-claude-out)]"
           style={{
             maxHeight: isExpanded ? "800px" : "0",
-            transitionTimingFunction: "cubic-bezier(.4,0,.2,1)",
           }}
           data-testid="expanded-section"
         >

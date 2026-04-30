@@ -252,7 +252,6 @@ export default function DeadlineCard({
           className="overflow-hidden transition-[max-height] [transition-duration:var(--motion-slow)] [transition-timing-function:var(--ease-claude-out)]"
           style={{
             maxHeight: isExpanded ? "1200px" : "0",
-            transitionTimingFunction: "cubic-bezier(.4,0,.2,1)",
           }}
         >
           <div className="px-[20px] pb-[20px] pl-[24px]">
