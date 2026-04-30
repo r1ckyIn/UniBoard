@@ -31,7 +31,13 @@ import { installFixedClock } from "./perf/helpers/clock";
 
 // 10 pages per Phase 39 D-11. Auth + setup don't require login but
 // exercise the migrated transition utilities; mark with noLogin.
-const PAGES = [
+type PageEntry = {
+  readonly path: string;
+  readonly name: string;
+  readonly noLogin?: boolean;
+};
+
+const PAGES: readonly PageEntry[] = [
   { path: "/zh-CN", name: "dashboard" },
   { path: "/zh-CN/courses", name: "courses" },
   { path: "/zh-CN/courses/comp2017", name: "course-detail" },
@@ -42,7 +48,7 @@ const PAGES = [
   { path: "/zh-CN/settings", name: "settings" },
   { path: "/zh-CN/auth", name: "auth", noLogin: true },
   { path: "/zh-CN/setup", name: "setup" },
-] as const;
+];
 
 test.describe(
   "@phase39 @transition-parity — interaction state pixel-diff (10 pages, zh-CN)",

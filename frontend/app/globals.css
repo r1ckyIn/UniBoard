@@ -125,6 +125,55 @@
   --animate-spin: spin 0.8s linear infinite;
   --animate-skeleton-shimmer: skeleton-shimmer 1.5s ease-in-out infinite;
 
+  /* === DESIGN-03 motion timing tokens (Phase 39 plan-3; v3.0 brand spec) === */
+  /* source: REQUIREMENTS.md DESIGN-03 + CONTEXT.md D-13 */
+  --motion-fast: 150ms; /* hover/focus feedback, color/opacity micro-transitions */
+  --motion-base: 250ms; /* layout shifts, dropdown drop-in, sidebar expand */
+  --motion-slow: 400ms; /* page-level entries, hero animations, large layout */
+  --ease-claude-out: cubic-bezier(0.165, 0.85, 0.45, 1);
+
+  /* v2.0 legacy aliases — new code MUST use --ease-claude-out + --motion-fast/base/slow */
+  /* Preserved per CONTEXT.md D-14 so existing 50+ var(--ease) / var(--ease-fast) */
+  /* call sites keep their visual rhythm. Phase 40 SHARED-01 deprecates. */
+  --ease: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-fast: 0.15s ease;
+
+  /* === MOTION-02 SSE primitives (consumed by Phase 40 SHARED-02) === */
+  /* source: REQUIREMENTS.md MOTION-02 + CONTEXT.md D-15 (RESEARCH Q7 correction applied) */
+  --motion-stream-cursor-period: 1s;
+  --motion-stream-chunk-fadein: var(--motion-fast);
+  --animate-streaming-cursor-blink: streaming-cursor-blink var(--motion-stream-cursor-period) step-end infinite;
+  --animate-streaming-chunk-fadein: streaming-chunk-fadein var(--motion-stream-chunk-fadein) var(--ease-claude-out) forwards;
+
+  @keyframes streaming-cursor-blink {
+    /* Per RESEARCH Q7 correction to D-15: D-15 originally said */
+    /* "1s step-end infinite alternate"; RESEARCH proves alternate is wrong */
+    /* (creates a 2s perceived period because the keyframe replays in reverse). */
+    /* Canonical pattern: opacity flips at the 50% / 50.01% boundary, */
+    /* no alternate. Source: amitmerchant.com/simple-blinking-cursor-animation-using-css/ */
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes streaming-chunk-fadein {
+    /* Each new SSE chunk fades in over --motion-fast (150ms) using Claude ease. */
+    /* Phase 40 SHARED-02's StreamingText component applies this per-chunk on append. */
+    from {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @keyframes skeleton-shimmer {
     0% {
       background-position: 200% 0;
@@ -226,6 +275,22 @@
 @theme inline {
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: var(--font-source-serif-4), Georgia, serif;
+}
+
+/* === A11Y-05 reduced-motion stub (Phase 39 plan-3; Phase 41 enforces) === */
+/* Empty media query reserved here so Phase 41 has a co-located target with */
+/* Phase 39 motion tokens. Cost: ~30 bytes. Per RESEARCH Q5. */
+/* Phase 41 will add e.g.:                                                  */
+/*   *, *::before, *::after {                                               */
+/*     animation-duration: 0.01ms !important;                               */
+/*     transition-duration: 0.01ms !important;                              */
+/*     animation-iteration-count: 1 !important;                             */
+/*     scroll-behavior: auto !important;                                    */
+/*   }                                                                      */
+/* ...except for SSE streaming-cursor-blink which is essential AI feedback  */
+/* (per Phase 41 ROADMAP success criterion 6).                              */
+@media (prefers-reduced-motion: reduce) {
+  /* Phase 41 A11Y-05 fills with universal-selector overrides. */
 }
 
 /* Base styles */

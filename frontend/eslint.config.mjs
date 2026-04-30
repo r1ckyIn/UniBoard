@@ -21,6 +21,34 @@ const eslintConfig = [
       "react-hooks/incompatible-library": "off",
     },
   },
+  // === Phase 39 D-16: Block raw transition utilities in JSX className ===
+  // Catches both shortcut form (duration-150) and bracket form (duration-[0.15s]).
+  // Migrate to: [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]
+  // See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.
+  {
+    files: ["**/*.{ts,tsx,js,jsx,mjs}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "Literal[value=/transition-(all|colors)\\s+duration-(\\[[^\\]]*\\]|\\d+)/]",
+          message:
+            "Raw `transition-{all,colors} duration-{N}` is forbidden. " +
+            "Use `transition-{all,colors} [transition-duration:var(--motion-fast|base|slow)] " +
+            "[transition-timing-function:var(--ease-claude-out)]` instead. " +
+            "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
+        },
+        {
+          selector:
+            "TemplateElement[value.raw=/transition-(all|colors)\\s+duration-(\\[[^\\]]*\\]|\\d+)/]",
+          message:
+            "Raw `transition-{all,colors} duration-{N}` in template literal is forbidden. " +
+            "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
+        },
+      ],
+    },
+  },
   {
     ignores: [
       "node_modules/**",
