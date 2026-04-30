@@ -30,7 +30,7 @@ export default function TutorialStep({ onNext, onBack }: TutorialStepProps) {
         <button
           type="button"
           onClick={onBack}
-          className="bg-transparent border-[1.5px] border-card-border text-text-2 font-semibold py-3 px-6 rounded-lg hover:bg-card-bg-hover hover:text-text-1 transition-all duration-150 ease-in-out"
+          className="bg-transparent border-[1.5px] border-card-border text-text-2 font-semibold py-3 px-6 rounded-lg hover:bg-card-bg-hover hover:text-text-1 transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
         >
           {t("back")}
         </button>
@@ -38,7 +38,7 @@ export default function TutorialStep({ onNext, onBack }: TutorialStepProps) {
         <button
           type="button"
           onClick={onNext}
-          className="bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-7 rounded-lg transition-all duration-150 ease-in-out hover:-translate-y-px"
+          className="bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-7 rounded-lg transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:-translate-y-px"
         >
           {t("cta")}
         </button>

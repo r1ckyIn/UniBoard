@@ -2,12 +2,12 @@
 
 ## Overview
 
-UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). v3.0 absorbs the three out-of-scope phases that accumulated during v2.0 closure (35 Push Notifications, 36 UX Polish, 37 Sidebar Refactor) and any new phases added after the v3.0 milestone is opened. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.
+UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). v3.0 is a UI Polish & Cohesion milestone (Claude 美学叠加层) — preserving v2.0's validated Rough.js hand-drawn aesthetic while overlaying Anthropic/Claude design dimensions (oklch tokens, cubic-bezier motion, serif hierarchy, a11y polish, optional warm-deep-brown dark mode, new-feature visual coverage). 5 phases derived from 8 REQ categories (25 REQs total). Phase 35 Push Notifications deferred to v3.1; Phase 36 UX Polish subsumed into Phase 42 NEWVIS; Phase 37 Sidebar Refactor subsumed into Phase 40 SHARED-03. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.
 
 ## Milestones
 
 - ✅ **v2.0 — Production Foundation** — Phases 1-12, 11.1, 13-34, 32.1, 38, 38.1, 38.2 (39 phases shipped 2026-04-25) [archive](milestones/v2.0-ROADMAP.md)
-- 📋 **v3.0 — UX Polish + Push Notifications + Sidebar Refactor** (planned — to be formalised via `/gsd-new-milestone v3.0`)
+- 🚧 **v3.0 — UI Polish & Cohesion (Claude 美学叠加层)** — Phases 39-43 (active, opened 2026-04-27)
 
 ## Phases
 
@@ -67,13 +67,113 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 
 </details>
 
-### 📋 v3.0 — Planned (formalise via `/gsd-new-milestone v3.0`)
+### 🚧 v3.0 — UI Polish & Cohesion (active, opened 2026-04-27)
 
-These phases were declared during v2.0 but were **out of v2.0 scope** (zero plans, zero artifacts at v2.0 close). They become candidate scope for v3.0:
+5 phases. Phase numbering continues from v2.0's last phase (38.2) → v3.0 starts at Phase 39. Each REQ from `.planning/REQUIREMENTS.md` maps to exactly one phase. Hard constraints preserved across all phases: Rough.js hand-drawn borders, Rough Notation highlights, paper texture, 10-page main visual layout, TanStack Query hooks signatures (0 changes), backend API (0 changes), i18n en/zh (100%).
 
-- [ ] **Phase 35: Push Notifications** — Browser push API or email notifications for deadline reminders. Requirement: AIFEAT-04. (0 plans)
-- [ ] **Phase 36: UX Polish** — Fix accumulated UX rough edges across AI chat, setup flow, error handling. Requirements: UXPOL-01..04. (0 plans)
-- [ ] **Phase 37: Sidebar Transform-Based Architecture Refactor** — Eliminate sidebar hover lag by replacing `transition: width` with GPU-composited `transform: translateX`. Two-layer DOM. Duplicate of backlog 999.1; **merge candidates when promoted**. (0 plans)
+- [ ] **Phase 39: Design Token Foundation** — Establish oklch color, spacing, shadow, motion, and serif typography token system as CSS variables (no component changes yet)
+- [ ] **Phase 40: Shared Component Polish** — Unify Card/Button/Input/Modal/Tooltip internals to design tokens, refactor Sidebar to transform-based positioning, adopt Claude no-bubble AI reply pattern
+- [ ] **Phase 41: State Coverage & Accessibility Pass** — Loading/Empty/Error states styled in Rough.js aesthetic across 10 pages + full a11y audit (focus, contrast, aria, keyboard, reduced-motion)
+- [ ] **Phase 42: New-Feature Visual Coverage** — TokenStep cached-state UI, SuccessStep per-domain progress bars, AI Chat client-side validation, AI failure error messages (subsumes auto-bootstrapped Phase 36 UX Polish)
+- [ ] **Phase 43: Dark Mode (optional)** — Warm-deep-brown root tokens, Rough.js stroke adaptation, paper texture opacity tuning. Cost-benefit gate before kickoff; defer to v3.1 if work cost exceeds value
+
+## Phase Details
+
+### Phase 39: Design Token Foundation
+
+**Goal:** Establish a complete design token system (color in oklch, spacing scale, elevation/shadow, motion timing, serif type scale) as CSS variables that every downstream phase consumes. No component visual changes in this phase — only the token layer is added; legacy hsl values remain as fallback.
+
+**Depends on:** Nothing (first phase of v3.0; v2.0 design system from Phase 1 remains intact)
+
+**Requirements:** DESIGN-01, DESIGN-02, DESIGN-03, MOTION-01, MOTION-02, TYPO-01, TYPO-02
+
+**Success Criteria** (what must be TRUE):
+  1. Color picker on shadcn.io/theme/claude produces the same hue on UniBoard's deepest button-primary state when verified in DevTools (oklch values match within ΔE < 1.0)
+  2. Every `transition: all 0.3s ease` inline style is replaced with a `var(--motion-*)` reference; grep on `transition: all` returns zero matches across `frontend/src/`
+  3. SSE streaming components (Digest, Predict, Deadlines AI chat) all use the same streaming-cursor + chunk-arrival animation primitive (single shared motion module)
+  4. Source Serif 4 4-tier scale (hero/section/body/caption) renders with consistent line-height and letter-spacing across the dashboard hero, section headings, body copy, and small captions — visual diff with prototype reference shows no regression
+  5. brand-guidelines skill values (color/font specs from anthropics/skills/skills/brand-guidelines) are quoted as the single source of truth in CSS variable comments
+
+**Plans:** 4 plans (4/4 complete; Task 3 of plan-04 deferred to production visual UAT — see SEED-39-playwright-baselines.md)
+- [x] 39-01-PLAN.md — Color (oklch + @supports hsl fallback) + 8-point spacing + dark-mode reservation (DESIGN-01, DESIGN-02)
+- [x] 39-02-PLAN.md — 4-tier serif typography scale (text-hero/section/body/caption) + TYPO-USAGE.md reference doc (TYPO-01, TYPO-02)
+- [x] 39-03-PLAN.md — Motion tokens + SSE keyframes (no alternate per Q7) + ESLint guard rule + Wave 0 test scaffolds (DESIGN-03, MOTION-02 keyframes, MOTION-01 rule install)
+- [x] 39-04-PLAN.md — Transition className migration sweep (56 occurrences across 36 files + 21 Form C + 8 ease-in-out adjacencies) — Tasks 1+2 complete; Task 3 (Playwright visual regression baselines) **deferred to production visual UAT** per user decision 2026-04-30 (see 39-04-SUMMARY.md "Deferred Work" + SEED-39-playwright-baselines.md). MOTION-01 status: **partial** (sweep + ESLint enforcement complete; pixel-diff coverage deferred).
+
+**UI hint**: yes
+
+### Phase 40: Shared Component Polish
+
+**Goal:** Unify the internal details (padding, focus ring, disabled state) of Card/Button/Input/Modal/Tooltip to the new design tokens, refactor the Sidebar to transform-based positioning to eliminate hover lag on Intel Mac, and adopt the assistant-ui Claude Clone no-bubble flowing AI reply pattern across Digest/Deadlines/Predict. Rough.js outer borders preserved — only internals change.
+
+**Depends on:** Phase 39 (tokens must exist before components can consume them)
+
+**Requirements:** SHARED-01, SHARED-02, SHARED-03
+
+**Success Criteria** (what must be TRUE):
+  1. Card/Button/Input/Modal/Tooltip across all 10 pages render with identical internal padding, focus ring color, and disabled state styling — pixel-diff regression test green against new token snapshots
+  2. AI reply visual style on Digest, Deadlines, and Predict pages renders Claude-style flowing text with typing cursor (no chat bubbles); user can read AI output as continuous narrative rather than discrete message blocks
+  3. Sidebar hover toggle shows zero layout-thrashing in DevTools Performance panel; animation measures 60fps stable on Intel Mac (user's primary device)
+  4. Sidebar visual parity with v2.0 implementation: pixel-diff regression on dashboard / predict / settings / timetable pages green; backlog Phase 999.1 scope fully absorbed (sidebar transform refactor done)
+  5. Rough.js hand-drawn borders remain visible and unchanged on every component (hard constraint check — visual smoke test)
+
+**Plans:** TBD (promote via `/gsd-discuss-phase 40` → `/gsd-plan-phase 40`)
+**UI hint**: yes
+
+### Phase 41: State Coverage & Accessibility Pass
+
+**Goal:** Add Rough.js-styled Loading/Empty/Error states across all 10 pages (no off-the-shelf shimmer libraries) and complete a full a11y pass — focus visible rings, AAA text contrast / AA UI chrome, aria-label on icon-only widgets, keyboard navigation across all pages, prefers-reduced-motion honored.
+
+**Depends on:** Phase 40 (state styles consume the same shared component tokens; a11y focus rings depend on the unified focus-ring token from SHARED-01)
+
+**Requirements:** STATES-01, STATES-02, STATES-03, A11Y-01, A11Y-02, A11Y-03, A11Y-04, A11Y-05
+
+**Success Criteria** (what must be TRUE):
+  1. All 10 pages render Loading skeletons in Rough.js aesthetic (verified via 10-page screenshot reel during initial load); zero off-the-shelf shimmer library imports detected
+  2. Empty states (no courses / no deadlines / no Ed posts) display restraint-first illustration + actionable CTA on every applicable page; user can recover from each empty state without navigating away
+  3. Error states (network failure / 401 expired / 500 backend) display helpful recovery actions (retry, re-auth, contact support); user can complete recovery action inline without page reload
+  4. Tabbing through any page lands on visible focus rings on every interactive element; keyboard-only user can complete the full register → setup → dashboard → settings → predict → digest workflow without touching mouse
+  5. Lighthouse / axe-core a11y audit reports zero AAA contrast violations on body text and zero AA violations on UI chrome across all 10 pages; all icon-only buttons have aria-label or aria-describedby
+  6. With `prefers-reduced-motion: reduce` set in OS, all transitions become instant; Rough Notation highlight animation collapses to instant render; SSE streaming-cursor still animates (essential to AI feedback) but chunk-arrival fade is replaced with instant append
+
+**Plans:** TBD (promote via `/gsd-discuss-phase 41` → `/gsd-plan-phase 41`)
+**UI hint**: yes
+
+### Phase 42: New-Feature Visual Coverage
+
+**Goal:** Apply the design tokens + shared component polish to the four v2.0-residual UX gaps that the auto-bootstrapped Phase 36 originally targeted — TokenStep cached-state UI, SuccessStep per-domain sync progress bars, AI Chat client-side validation, AI request failure error display. This phase closes the loop on Phase 36 UXPOL-01..04 with the new visual vocabulary.
+
+**Depends on:** Phase 39 (tokens) + Phase 40 (Shared component polish, especially SHARED-01 input/modal styling and SHARED-02 AI reply patterns)
+
+**Requirements:** NEWVIS-01, NEWVIS-02, NEWVIS-03, NEWVIS-04
+
+**Success Criteria** (what must be TRUE):
+  1. Setup TokenStep retry shows a styled "Token already validated — skipping re-check" cached-state card per design tokens (← absorbs Phase 36 UXPOL-03); session-storage 5-min TTL skip-revalidate works as documented in v2.0 Phase 33-07
+  2. Setup SuccessStep renders two distinct per-domain progress bars (Canvas / Ed) styled per design tokens — user sees Canvas at 60% while Ed is at 40% during sync (← absorbs Phase 36 UXPOL-04); single composite indicator removed
+  3. AI Chat input < 3 chars never shows a raw 422 error to the end user; instead a styled inline guidance message ("Please enter at least 3 characters to continue") appears below the input field (← absorbs Phase 36 UXPOL-01)
+  4. AI request failures display the specific backend error message in a toast or inline notice styled per design tokens (e.g., "Anthropic API rate limit reached, retrying in 30s") rather than the generic "AI request failed" string (← absorbs Phase 36 UXPOL-02)
+
+**Plans:** TBD (promote via `/gsd-discuss-phase 42` → `/gsd-plan-phase 42`)
+**UI hint**: yes
+
+### Phase 43: Dark Mode (optional)
+
+**Goal:** Apply warm-deep-brown (`#2b2a27` per Anthropic spec) dark mode root tokens, adapt Rough.js stroke generation for dark backgrounds, and re-tune paper texture (fractalNoise grain + ruled lines) opacity for dark surfaces. Optional milestone — kickoff conditional on cost-benefit review (Rough.js dynamic stroke generation may be expensive); deferable to v3.1.
+
+**Depends on:** Phase 39 (color tokens must exist in oklch with light/dark slots), Phase 40 (shared components must already be tokenized so dark variants apply uniformly), Phase 41 (state styles must already be tokenized so error/loading/empty work in dark mode)
+
+**Requirements:** DARK-01, DARK-02, DARK-03
+
+**Success Criteria** (what must be TRUE):
+  1. User toggles dark mode in Settings → root surface turns warm-deep-brown (`#2b2a27`); all 10 pages render in dark mode with zero contrast regressions per axe-core re-audit
+  2. Rough.js hand-drawn borders remain visible against the warm-deep-brown background — stroke color adapts dynamically (e.g., light cream stroke on dark) rather than hardcoded dark stroke disappearing
+  3. Paper texture (fractalNoise grain + ruled lines) renders with adjusted opacity (~0.06 grain / ~0.01 lines) on warm-deep-brown surface — texture visible but not overwhelming; switching back to light mode restores original 0.12 / 0.02 opacity
+
+**Plans:** TBD (promote via `/gsd-discuss-phase 43` → `/gsd-plan-phase 43`)
+
+**Cost-benefit gate:** Before kickoff, evaluate Rough.js dynamic stroke generation cost. If implementation cost > 2 plans worth of effort and user-facing benefit is marginal, defer entire phase to v3.1 (carry DARK-01..03 forward as deferred REQs).
+
+**UI hint**: yes
 
 ## Progress
 
@@ -84,28 +184,38 @@ These phases were declared during v2.0 but were **out of v2.0 scope** (zero plan
 | 18-21 | v2.0 (M3) | 14/14 | Complete | 2026-03-29 |
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
-| 35. Push Notifications | v3.0 (planned) | 0/0 | Not started | - |
-| 36. UX Polish | v3.0 (planned) | 0/0 | Not started | - |
-| 37. Sidebar Refactor | v3.0 (planned) | 0/0 | Not started — duplicate of 999.1 | - |
+| 39. Design Token Foundation | v3.0 | 4/4 | Complete (2026-04-30) — plan-01 oklch+spacing, plan-02 typography, plan-03 motion+SSE+ESLint, plan-04 transition sweep. Plan-04 Task 3 (Playwright baselines) deferred to production visual UAT per user; MOTION-01 status: **partial**. See SEED-39-playwright-baselines.md. | 2026-04-30 |
+| 40. Shared Component Polish | v3.0 | 0/0 | Not started — absorbs Phase 37 sidebar refactor | - |
+| 41. State Coverage & Accessibility Pass | v3.0 | 0/0 | Not started | - |
+| 42. New-Feature Visual Coverage | v3.0 | 0/0 | Not started — absorbs Phase 36 UXPOL | - |
+| 43. Dark Mode (optional) | v3.0 | 0/0 | Not started — cost-benefit gate before kickoff | - |
 
 ## Backlog
 
-### Phase 999.1: Sidebar transform-based architecture refactor (BACKLOG)
-**Goal**: [Captured for future planning] Eliminate sidebar hover lag on content-heavy pages by replacing `transition: width` with GPU-composited `transform: translateX`. Two-layer DOM: outer 68 px container always visible + inner 224 px panel absolutely positioned with `translateX(-156 px)` by default, `translateX(0)` on hover. Bypasses per-frame layout cost that `width` animation incurs (non-composited property). Expected ~50 line refactor, requires reworking icon positioning logic and careful visual verification.
-**Context**: Remaining issue from the 2026-04-17/18 5fps-lag investigation (.planning/debug/uniboard-5fps-lag-dashboard.md). PRs #80-87 drove INP 267→107 ms and cleared the Rough.js hotspots, but sidebar hover on dashboard/predict/settings/timetable still feels draggy because `transition: width` physically requires main-thread layout per frame.
-**Status**: **Duplicate of Phase 37 — to be merged when v3.0 milestone formalised.**
-**Requirements**: TBD
-**Plans**: 0 plans
-  - [ ] TBD (promote with /gsd-review-backlog when ready)
+### ~~Phase 35: Push Notifications~~ — DEFERRED to v3.1 on 2026-04-27
+
+NOTIFY-01..03 (browser Push API + email + persistence) is not UI-layer work; deferred to v3.1 — Notifications & Lifecycle milestone. v2.0-residual scope, was auto-bootstrapped during initial v3.0 milestone creation but explicitly removed during v3.0 re-scope to UI Polish & Cohesion.
+
+### ~~Phase 36: UX Polish~~ — SUBSUMED into Phase 42 on 2026-04-27
+
+Auto-bootstrapped UXPOL-01..04 fully mapped to NEWVIS-01..04 in REQUIREMENTS.md and consolidated into Phase 42 (New-Feature Visual Coverage). Mapping:
+- UXPOL-01 (AI Chat client-side validation) → NEWVIS-03
+- UXPOL-02 (AI request failure backend error) → NEWVIS-04
+- UXPOL-03 (TokenStep skip-revalidate) → NEWVIS-01
+- UXPOL-04 (SuccessStep per-domain progress) → NEWVIS-02
+
+### ~~Phase 37: Sidebar Transform-Based Architecture Refactor~~ — SUBSUMED into Phase 40 on 2026-04-27
+
+REFACTOR-01 (transform-based positioning) + REFACTOR-02 (60fps Intel Mac) fully absorbed into SHARED-03 in REQUIREMENTS.md and folded into Phase 40 (Shared Component Polish). The two-layer DOM `translateX(-156px)` → `translateX(0)` approach from absorbed backlog 999.1 is now Phase 40's SHARED-03 implementation strategy.
+
+### ~~Phase 999.1: Sidebar transform-based architecture refactor~~ — ABSORBED into SHARED-03 / Phase 40 on 2026-04-27
+
+Originally absorbed into auto-bootstrapped Phase 37; on v3.0 re-scope (2026-04-27) further consolidated into SHARED-03 / Phase 40.
 
 ### ~~Phase 999.2: Page mount lazy loading~~ — PROMOTED to Phase 38 on 2026-04-20
-Original scope ("viewport-driven progressive mount") superseded by Phase 38's eager-prefetch approach. Symptom and debug context preserved in Phase 38 archive.
 
-**Post-ship verdict (2026-04-21, pending final UAT sign-off):** retained — provisional until Phase 38 P04 baselines are captured and the 6-page pixel-diff run is green on a fresh PR. The expected verdict after that run is **obsolete** (superseded by Phase 38 RSC prefetch: all 6 pages render real data on first paint, eliminating the viewport lazy-mount symptom at its source). Rubric for closing this backlog:
-- If 0 of 6 pixel-diff baselines show any `SkeletonCard` pixels → flip status to `obsolete` and strike this backlog entry entirely.
-- If any baseline shows residual skeleton in a specific sub-region (e.g., below-the-fold card, a particular state transition) → keep as `retained + residual case` with the exact sub-region documented, so a future micro-phase can address it with a narrow viewport-gated remount.
-- If AI study-rec hero / deadline hero flashes despite RSC hydration → treat as Phase 38 bug (Rule 1), not a Phase 999.2 scope item; file a gap-closure plan against Phase 38.
+Original scope ("viewport-driven progressive mount") superseded by Phase 38's eager-prefetch approach. See v2.0 archive for full disposition rubric.
 
 ---
 
-*Roadmap reorganized 2026-04-27 by `/gsd-complete-milestone v2.0`. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.*
+*Roadmap reorganized 2026-04-27 by `/gsd-complete-milestone v2.0`. v3.0 milestone bootstrapped same day via `/gsd-new-milestone v3.0`, then re-scoped 2026-04-27 from "UX Polish + Notifications + Sidebar Refactor" (Phases 35/36/37) to **UI Polish & Cohesion (Claude 美学叠加层)** — 5 phases (39-43), 25 REQs across 8 categories. Phase 35 NOTIFY → v3.1, Phase 36 UXPOL → Phase 42 NEWVIS, Phase 37 REFACTOR → Phase 40 SHARED-03. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.*

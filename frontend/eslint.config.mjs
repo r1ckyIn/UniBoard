@@ -21,6 +21,53 @@ const eslintConfig = [
       "react-hooks/incompatible-library": "off",
     },
   },
+  // === Phase 39 D-16: Block raw transition utilities in JSX className ===
+  // Catches both shortcut form (duration-150) and bracket form (duration-[0.15s]).
+  // Migrate to: [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]
+  // See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.
+  {
+    files: ["**/*.{ts,tsx,js,jsx,mjs}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          // Matches `transition-{all,colors} duration-{N}` with optional
+          // modifier prefixes on either utility (e.g. `after:`, `before:`,
+          // `hover:`, `focus:`, `dark:`, `group-hover:`, `peer-hover:`).
+          // Both utilities may carry independent prefixes — Tailwind allows
+          // mixing (e.g. `hover:transition-colors duration-200`) — so each
+          // side gets its own optional `(?:[a-z][a-z0-9-]*:)*` group.
+          selector:
+            "Literal[value=/(?:[a-z][a-z0-9-]*:)*transition-(all|colors)\\s+(?:[a-z][a-z0-9-]*:)*duration-(\\[[^\\]]*\\]|\\d+)/]",
+          message:
+            "Raw `transition-{all,colors} duration-{N}` (with optional modifier prefix like `after:`, `hover:`, `focus:`) is forbidden. " +
+            "Use the migrated form with two arbitrary properties: " +
+            "transition-duration mapped to var(--motion-fast / --motion-base / --motion-slow), " +
+            "and transition-timing-function mapped to var(--ease-claude-out). " +
+            "Repeat the modifier prefix on each token (e.g. `after:[transition-duration:var(--motion-fast)] after:[transition-timing-function:var(--ease-claude-out)]`). " +
+            "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
+        },
+        {
+          selector:
+            "TemplateElement[value.raw=/(?:[a-z][a-z0-9-]*:)*transition-(all|colors)\\s+(?:[a-z][a-z0-9-]*:)*duration-(\\[[^\\]]*\\]|\\d+)/]",
+          message:
+            "Raw `transition-{all,colors} duration-{N}` in template literal (with optional modifier prefix) is forbidden. " +
+            "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
+        },
+      ],
+    },
+  },
+  // === Phase 39 D-16 test fixtures override: the rule's own TDD spec
+  // contains intentional violations as fixture strings (the test verifies
+  // the rule fires on these). Disabling no-restricted-syntax in this one
+  // test file lets `pnpm lint` pass while preserving the rule everywhere
+  // else. See __tests__/eslint/no-raw-transition.test.ts header for context.
+  {
+    files: ["__tests__/eslint/no-raw-transition.test.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
+    },
+  },
   {
     ignores: [
       "node_modules/**",

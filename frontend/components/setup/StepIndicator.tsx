@@ -30,7 +30,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
               <div
                 data-testid={`step-line-${index}`}
                 className={cn(
-                  "w-12 h-0.5 mx-2 transition-[background] duration-300 ease-in-out",
+                  "w-12 h-0.5 mx-2 transition-[background] [transition-duration:var(--motion-base)] [transition-timing-function:var(--ease-claude-out)]",
                   step <= stepNum || isSuccess
                     ? "bg-[#788c5d]"
                     : "bg-card-border",
@@ -41,7 +41,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
             <div
               aria-label={`Step ${step}`}
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ease-in-out",
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all [transition-duration:var(--motion-base)] [transition-timing-function:var(--ease-claude-out)]",
                 isCompleted && "bg-[#788c5d] text-white",
                 isActive && "bg-[#d97757] text-white",
                 !isCompleted &&

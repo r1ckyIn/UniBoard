@@ -69,7 +69,7 @@ export default function RegisterForm({
   const isPending = registerMutation.isPending;
 
   const inputBaseClass =
-    "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";
+    "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";
   const inputErrorClass = "border-[#cc4455]";
 
   // Post-registration "account created" state (email confirmation is OFF)
@@ -88,7 +88,7 @@ export default function RegisterForm({
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="w-full max-w-[240px] h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] transition-[background] duration-150"
+          className="w-full max-w-[240px] h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] transition-[background] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
         >
           {t("auth.checkEmail.goToLogin")}
         </button>
@@ -114,7 +114,7 @@ export default function RegisterForm({
         type="button"
         onClick={() => googleLogin.mutate()}
         disabled={googleLogin.isPending}
-        className="w-full h-[44px] flex items-center justify-center gap-2.5 bg-white border-[1.5px] border-card-border rounded-lg text-text-1 text-[0.86rem] font-semibold hover:bg-cream-2 disabled:opacity-60 transition-colors duration-150"
+        className="w-full h-[44px] flex items-center justify-center gap-2.5 bg-white border-[1.5px] border-card-border rounded-lg text-text-1 text-[0.86rem] font-semibold hover:bg-cream-2 disabled:opacity-60 transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
         aria-label={t("auth.google.continueWith")}
       >
         <GoogleIcon className="h-4 w-4" aria-hidden />
@@ -237,7 +237,7 @@ export default function RegisterForm({
         <button
           type="submit"
           disabled={isPending}
-          className="w-full h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] hover:-translate-y-px active:translate-y-0 disabled:opacity-60 disabled:cursor-default disabled:transform-none transition-[background,transform] duration-150"
+          className="w-full h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] hover:-translate-y-px active:translate-y-0 disabled:opacity-60 disabled:cursor-default disabled:transform-none transition-[background,transform] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
         >
           {isPending ? (
             <Loader2 className="w-5 h-5 animate-spin mx-auto" />
