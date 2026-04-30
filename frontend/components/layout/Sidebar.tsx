@@ -49,7 +49,7 @@ export default function Sidebar() {
         "bg-dark flex flex-col py-5 z-[100]",
         // Shortened from 0.28s — user perceives lag is halved; each frame's
         // layout cost is unchanged but fewer frames are painted total.
-        "transition-[width] duration-[0.14s] ease-[cubic-bezier(.4,0,.2,1)]",
+        "transition-[width] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] ease-[cubic-bezier(.4,0,.2,1)]",
         // Paint-cheap right-edge separator. The previous
         // `shadow-[2px_0_16px_rgba(20,20,19,.06)]` extended ~18 px into main
         // content; the `[contain:layout_paint]` below only isolates the

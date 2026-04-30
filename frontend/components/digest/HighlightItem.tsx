@@ -69,7 +69,7 @@ export default function HighlightItem({
 
   return (
     <>
-      <div className="flex items-start gap-[12px] py-[12px] border-b border-[#eae7e0] last:border-b-0 hover:bg-[rgba(0,0,0,0.01)] hover:mx-[-8px] hover:px-[8px] hover:rounded-[8px] transition-[background] duration-150">
+      <div className="flex items-start gap-[12px] py-[12px] border-b border-[#eae7e0] last:border-b-0 hover:bg-[rgba(0,0,0,0.01)] hover:mx-[-8px] hover:px-[8px] hover:rounded-[8px] transition-[background] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]">
         {/* Icon */}
         <div
           className={cn(

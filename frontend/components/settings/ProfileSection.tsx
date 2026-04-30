@@ -50,7 +50,7 @@ export default function ProfileSection({ user }: ProfileSectionProps) {
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="py-[9px] px-[12px] text-[0.84rem] border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]"
+            className="py-[9px] px-[12px] text-[0.84rem] border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none transition-[border-color,box-shadow] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]"
           />
         </div>
 

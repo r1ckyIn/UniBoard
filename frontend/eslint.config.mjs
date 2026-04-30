@@ -35,8 +35,9 @@ const eslintConfig = [
             "Literal[value=/transition-(all|colors)\\s+duration-(\\[[^\\]]*\\]|\\d+)/]",
           message:
             "Raw `transition-{all,colors} duration-{N}` is forbidden. " +
-            "Use `transition-{all,colors} [transition-duration:var(--motion-fast|base|slow)] " +
-            "[transition-timing-function:var(--ease-claude-out)]` instead. " +
+            "Use the migrated form with two arbitrary properties: " +
+            "transition-duration mapped to var(--motion-fast / --motion-base / --motion-slow), " +
+            "and transition-timing-function mapped to var(--ease-claude-out). " +
             "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
         },
         {
@@ -47,6 +48,17 @@ const eslintConfig = [
             "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
         },
       ],
+    },
+  },
+  // === Phase 39 D-16 test fixtures override: the rule's own TDD spec
+  // contains intentional violations as fixture strings (the test verifies
+  // the rule fires on these). Disabling no-restricted-syntax in this one
+  // test file lets `pnpm lint` pass while preserving the rule everywhere
+  // else. See __tests__/eslint/no-raw-transition.test.ts header for context.
+  {
+    files: ["__tests__/eslint/no-raw-transition.test.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
     },
   },
   {

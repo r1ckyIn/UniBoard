@@ -134,7 +134,7 @@ export default function DangerZoneSection() {
           value={deleteConfirmText}
           onChange={(e) => setDeleteConfirmText(e.target.value)}
           placeholder={t("danger.delete.confirmPlaceholder")}
-          className="w-full py-[9px] px-[12px] text-[0.84rem] border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none mb-[18px] transition-[border-color,box-shadow] duration-150 focus:border-[#cc4455] focus:shadow-[0_0_0_3px_rgba(204,68,85,0.11)]"
+          className="w-full py-[9px] px-[12px] text-[0.84rem] border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none mb-[18px] transition-[border-color,box-shadow] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] focus:border-[#cc4455] focus:shadow-[0_0_0_3px_rgba(204,68,85,0.11)]"
         />
         <div className="flex justify-end gap-[8px]">
           <button
