@@ -2,14 +2,18 @@
 phase: 39-design-token-foundation
 verified: 2026-04-30T02:30:00Z
 verifier: gsd-verifier
-status: partial
-score: 6/7 must-haves verified (1 partial)
+re_verified: 2026-04-30T03:00:00Z
+status: passed
+score: 7/7 must-haves verified (1 had pixel-diff coverage deferred → SEED-39)
 overrides_applied: 0
-re_verification: false
+re_verification: true
 gaps:
   - id: GAP-39-01
     severity: nonblocking
     type: human_needed
+    status: resolved
+    resolved_at: 2026-04-30T03:00:00Z
+    resolution: "User completed prod visual UAT on https://uniboard.uk and replied 'approved'. CSS verified live via Chrome DevTools MCP — token layer present in /_next/static/css/7cf4913a98f2a700.css (lastModified 2026-04-30T02:53:11Z, age <3min when fetched, etag W/d36483f...): oklch colors ✓, --motion-fast/base/slow ✓, --ease-claude-out (cubic-bezier(.165,.85,.45,1)) ✓, streaming-cursor-blink with step-end ✓, @supports hsl fallback ✓, --text-hero/body ✓, --spacing-1..16 ✓. Computed style of <html> element confirmed all token values resolve to expected v3.0 design contract. Phase 39 design intent (zero visual regression) honored — token layer functions as additive infrastructure for Phase 40-43."
     description: "Production visual UAT pending for MOTION-01 — user will click through 10 documented pages on Vercel preview after PR merge to confirm transition migration is visually preserved (no regressions on hover states, no rhythm shift on Intel Mac)"
     remediation: "Post-merge, open Vercel preview, log in as test user, click through dashboard / courses / course-detail/comp2017 / deadlines / predict / digest / timetable / settings / auth / setup, hover any button on each, verify smooth color transition. If all 10 pages look correct → comment 'approved' on PR."
     truth_failed: "MOTION-01 — visual contract preserved post-sweep (D-11 visual gate; verified manually since Playwright baselines deferred)"
