@@ -1,0 +1,154 @@
+// frontend/scripts/hex-to-oklch.mjs
+//
+// Convert the v2.0 UniBoard hex palette into oklch CSS variables.
+//
+// Inputs:
+//   PALETTE constant below (15 entries: 6 brand+project + 9 neutral).
+//   Brand colors (orange/blue/green) come from anthropics/skills/
+//   brand-guidelines (color SSOT per CLAUDE.md). All other colors
+//   come from prototype/DESIGN_SYSTEM.md and prototype/*.html.
+//
+// Output target:
+//   Paste the stdout into frontend/app/globals.css under the
+//   default `@theme { ... }` block. The script also emits the
+//   matching `@supports not (color: oklch(0% 0 0)) { :root {...} }`
+//   fallback block for browsers without oklch support
+//   (Safari < 16.4, Chrome < 111, Firefox < 113 — ~7% of global
+//   traffic per caniuse 2026-04).
+//
+// Round-trip check (success criterion #1, ROADMAP Phase 39):
+//   For every PALETTE entry, parse hex → oklch → format CSS →
+//   reparse → measure ΔE via differenceEuclidean('oklch'). If
+//   ΔE >= 1.0, emit a WARNING on stderr. The unit test in
+//   __tests__/scripts/hex-to-oklch.test.ts asserts the same
+//   threshold across the same fixtures.
+//
+// Pitfall 5 (RESEARCH): differenceEuclidean is mode-aware. Bare
+// `differenceEuclidean()` measures distance in the active space
+// (which after parse() is sRGB) and returns meaningless values.
+// Always pass the literal "oklch" mode argument.
+//
+// Regenerate via:
+//   cd frontend && node scripts/hex-to-oklch.mjs > /tmp/oklch-tokens.css
+
+import {
+  parse,
+  oklch,
+  formatCss,
+  differenceEuclidean,
+} from "culori";
+
+// === Source palette (provenance per token) ===
+const PALETTE = [
+  // brand-guidelines accents (color SSOT per CLAUDE.md note)
+  { name: "orange", hex: "#d97757", source: "brand-guidelines #d97757 (accent: primary)" },
+  { name: "blue", hex: "#6a9bcc", source: "brand-guidelines #6a9bcc (accent: secondary)" },
+  { name: "green", hex: "#788c5d", source: "brand-guidelines #788c5d (accent: tertiary)" },
+  // project palette
+  { name: "amber", hex: "#b08968", source: "prototype/DESIGN_SYSTEM.md #b08968" },
+  { name: "purple", hex: "#9b7bb8", source: "prototype #9b7bb8" },
+  { name: "red", hex: "#cc4455", source: "prototype #cc4455" },
+  // neutrals
+  { name: "dark", hex: "#e8ddd0", source: "prototype #e8ddd0 (sidebar bg)" },
+  { name: "cream", hex: "#faf9f5", source: "prototype #faf9f5 (page bg)" },
+  { name: "card-bg", hex: "#f6f5f0", source: "prototype #f6f5f0" },
+  { name: "card-bg-hover", hex: "#efede6", source: "prototype #efede6" },
+  { name: "card-border", hex: "#e8e5dd", source: "prototype #e8e5dd" },
+  { name: "text-1", hex: "#2d2d2a", source: "prototype #2d2d2a (primary)" },
+  { name: "text-2", hex: "#6b6b65", source: "prototype #6b6b65 (secondary)" },
+  { name: "text-3", hex: "#9b9b94", source: "prototype #9b9b94 (tertiary)" },
+  { name: "divider", hex: "#eae7e0", source: "prototype #eae7e0" },
+];
+
+// Names of color tokens that get a -soft variant emitted alongside the base
+// color (for tinted hover/focus surfaces). Brand AND project palette colors
+// share this treatment; neutrals do not.
+const SOFT_VARIANT_NAMES = new Set([
+  "orange",
+  "blue",
+  "green",
+  "amber",
+  "purple",
+  "red",
+]);
+
+// Mode-aware ΔE measure — see Pitfall 5 above.
+const dE = differenceEuclidean("oklch");
+
+/**
+ * Convert one palette entry to oklch + verify the round-trip ΔE.
+ *
+ * Library + CLI dual-use:
+ *   - Imported by __tests__/scripts/hex-to-oklch.test.ts (assertion source).
+ *   - Called by the CLI block at the bottom of this file when invoked as
+ *     `node scripts/hex-to-oklch.mjs`.
+ *
+ * @param {{ name: string, hex: string, source: string }} entry
+ * @returns {{ name: string, source: string, css: string, hex: string, delta: number }}
+ */
+export function convert({ name, hex, source }) {
+  const srcRgb = parse(hex);
+  if (!srcRgb) throw new Error(`Failed to parse hex: ${hex}`);
+  const okl = oklch(srcRgb);
+  // Round-trip verification — format then reparse and compare in oklch space.
+  const css = formatCss(okl);
+  const reparsed = parse(css);
+  const delta = dE(okl, reparsed);
+  if (delta >= 1.0) {
+    process.stderr.write(
+      `WARNING: ${name} round-trip ΔE = ${delta.toFixed(4)} (>= 1.0)\n`,
+    );
+  }
+  // Format with 4 decimals on l/c, 2 on h for readability. Hue may be
+  // undefined for neutrals (chroma ~0); fall back to "0" so the emitted
+  // CSS is always a valid oklch(L C H) literal.
+  const l = okl.l.toFixed(4);
+  const c = okl.c.toFixed(4);
+  const h = okl.h !== undefined ? okl.h.toFixed(2) : "0";
+  return { name, source, css: `oklch(${l} ${c} ${h})`, hex, delta };
+}
+
+// === CLI entry — only runs when invoked as a script ===
+// Allows the file to work as both a library (for unit tests) and a CLI
+// (for regenerating the tokens block during plan-1 development). Pattern
+// per PATTERNS.md §hex-to-oklch.mjs.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const results = PALETTE.map(convert);
+
+  // Emit the @theme block.
+  console.log(
+    "/* === Generated by scripts/hex-to-oklch.mjs at " +
+      new Date().toISOString() +
+      " === */",
+  );
+  console.log(
+    "/* DO NOT hand-edit — regenerate via: node scripts/hex-to-oklch.mjs */",
+  );
+  console.log("@theme {");
+  for (const { name, source, css, delta } of results) {
+    console.log(`  /* source: ${source}  ΔE=${delta.toFixed(4)} */`);
+    console.log(`  --color-${name}: ${css};`);
+    if (SOFT_VARIANT_NAMES.has(name)) {
+      // -soft variant at /0.11 alpha (matches v2.0 rgba(... , 0.11) pattern).
+      console.log(`  --color-${name}-soft: ${css.replace(/\)$/, " / 0.11)")};`);
+    }
+  }
+  console.log("}");
+  console.log("");
+
+  // Emit the @supports fallback block.
+  console.log("@supports not (color: oklch(0% 0 0)) {");
+  console.log("  :root {");
+  for (const { name, hex } of results) {
+    console.log(`    --color-${name}: ${hex};`);
+    if (SOFT_VARIANT_NAMES.has(name)) {
+      // Convert hex to rgba(...) for soft fallback (preserves v2.0 0.11 alpha).
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      console.log(`    --color-${name}-soft: rgba(${r}, ${g}, ${b}, 0.11);`);
+    }
+  }
+  console.log("  }");
+  console.log("}");
+}

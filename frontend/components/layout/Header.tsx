@@ -81,7 +81,7 @@ export default function Header() {
           className={cn(
             "flex items-center gap-2 bg-card-bg border border-card-border rounded-[10px]",
             "py-[7px] px-[14px] w-[220px]",
-            "transition-all duration-[0.15s]",
+            "transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
             "focus-within:border-orange focus-within:shadow-[0_0_0_3px_var(--color-orange-soft)] focus-within:bg-white"
           )}
         >
@@ -104,7 +104,7 @@ export default function Header() {
             className={cn(
               "w-9 h-9 rounded-[10px] border border-card-border bg-card-bg",
               "grid place-items-center cursor-pointer text-text-2",
-              "transition-all duration-[0.15s] hover:bg-card-bg-hover relative"
+              "transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-card-bg-hover relative"
             )}
           >
             <Bell className="w-4 h-4" />

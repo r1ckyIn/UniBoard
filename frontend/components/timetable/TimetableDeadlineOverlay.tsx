@@ -49,7 +49,7 @@ export default function TimetableDeadlineOverlay({
             style={{ top: yPos }}
           >
             <div
-              className="dl-dash flex-1 h-[2px] group-hover:h-[3px] transition-[height] duration-150"
+              className="dl-dash flex-1 h-[2px] group-hover:h-[3px] transition-[height] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
               style={{
                 background: `repeating-linear-gradient(90deg, ${color} 0, ${color} 7px, transparent 7px, transparent 13px)`,
               }}

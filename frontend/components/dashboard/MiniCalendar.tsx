@@ -145,7 +145,7 @@ export default function MiniCalendar({
         <button
           type="button"
           onClick={goToPrevMonth}
-          className="bg-transparent border-none cursor-pointer text-text-3 p-1 rounded-[6px] transition-all duration-150 hover:bg-card-bg-hover hover:text-text-1 grid place-items-center"
+          className="bg-transparent border-none cursor-pointer text-text-3 p-1 rounded-[6px] transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-card-bg-hover hover:text-text-1 grid place-items-center"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -155,7 +155,7 @@ export default function MiniCalendar({
         <button
           type="button"
           onClick={goToNextMonth}
-          className="bg-transparent border-none cursor-pointer text-text-3 p-1 rounded-[6px] transition-all duration-150 hover:bg-card-bg-hover hover:text-text-1 grid place-items-center"
+          className="bg-transparent border-none cursor-pointer text-text-3 p-1 rounded-[6px] transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-card-bg-hover hover:text-text-1 grid place-items-center"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

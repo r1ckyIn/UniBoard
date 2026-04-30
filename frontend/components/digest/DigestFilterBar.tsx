@@ -36,7 +36,7 @@ export default function DigestFilterBar({
           return (
             <button
               key={filter.key}
-              className={`text-[0.74rem] font-semibold py-[5px] px-[12px] rounded-[8px] border cursor-pointer transition-all duration-150 ${
+              className={`text-[0.74rem] font-semibold py-[5px] px-[12px] rounded-[8px] border cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] ${
                 isActive
                   ? "bg-[rgba(217,119,87,0.11)] text-[#d97757] border-[rgba(217,119,87,0.25)]"
                   : "bg-[#f6f5f0] text-[#6b6b65] border-[#e8e5dd] hover:bg-[#efede6]"

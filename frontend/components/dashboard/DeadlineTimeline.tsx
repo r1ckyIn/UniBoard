@@ -192,7 +192,7 @@ export default function DeadlineTimeline({
                 }}
                 className={cn(
                   "group py-3 px-4 mb-3 rounded-sm cursor-pointer",
-                  "transition-all duration-150 ease-out",
+                  "transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
                   "hover:translate-x-1",
                   isSelected && "translate-x-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
                 )}
