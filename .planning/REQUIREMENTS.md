@@ -31,12 +31,14 @@ These are NOT touched by v3.0:
 
 - [ ] **DESIGN-01**: All color tokens migrated to oklch space (light + dark variants); existing hsl values preserved as fallback for unsupported browsers
 - [ ] **DESIGN-02**: Spacing scale (4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 px) and elevation/shadow tokens defined as CSS variables and applied across shared components
-- [ ] **DESIGN-03**: Motion timing constants (`cubic-bezier(0.165, 0.85, 0.45, 1)` ease-out + 150 / 250 / 400 ms duration tiers) defined as CSS variables
+- [x] **DESIGN-03
+**: Motion timing constants (`cubic-bezier(0.165, 0.85, 0.45, 1)` ease-out + 150 / 250 / 400 ms duration tiers) defined as CSS variables
 
 ### Motion
 
 - [ ] **MOTION-01**: All hover / focus / active state transitions use the motion constants (zero inline `transition: all 0.3s ease`)
-- [ ] **MOTION-02**: SSE streaming components (Digest, Predict, Deadlines AI chat) have unified streaming-cursor animation + chunk-arrival fade-in
+- [x] **MOTION-02
+**: SSE streaming components (Digest, Predict, Deadlines AI chat) have unified streaming-cursor animation + chunk-arrival fade-in
 
 ### Typography
 

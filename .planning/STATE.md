@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — UI Polish & Cohesion (Claude 美学叠加层)
 status: executing
-stopped_at: Completed 39-02-PLAN.md (Typography Token Layer)
-last_updated: "2026-04-30T01:00:07.754Z"
+stopped_at: Completed 39-03 (Motion + SSE + ESLint foundation)
+last_updated: "2026-04-30T01:14:40.402Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Current Position
 
 Phase: 39 (design-token-foundation) — EXECUTING
-Plan: 3 of 4 (plan 1 complete)
+Plan: 4 of 4 (plan 1 complete)
 Status: Ready to execute
 Last activity: 2026-04-30
 
@@ -228,6 +228,7 @@ Items acknowledged and deferred at v2.0 milestone close on 2026-04-27 (audit-ope
 | Phase 33 P07 | 25min | 3 tasks | 11 files |
 | Phase 39 P01 | 15min | 2 tasks (TDD RED+GREEN) | 6 files |
 | Phase 39 P02 | 7min | 2 tasks (TDD RED+GREEN) tasks | 3 files files |
+| Phase 39 P03 | 8min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -253,6 +254,9 @@ Recent decisions affecting current work:
 - [Phase 39 plan-2]: Adopted Tailwind v4 namespaces --text-* / --leading-* / --tracking-* (RESEARCH §Q1) instead of D-06 names; D-06 names compile but generate zero utilities (Pitfall 4). Phase 40 needs the generated utilities.
 - [Phase 39 plan-2]: tracking-body intentionally omitted (browser default 'normal' per RESEARCH §Q6) — only hero/section get negative tracking and caption gets +0.06em uppercase rhythm.
 - [Phase 39 plan-2]: Multi-line CSS comments must avoid embedded literal */ patterns — PostCSS parses them as premature comment closure. Use --font-size-X notation in prose instead of --font-size-* glob to dodge build errors.
+- Q7-corrected SSE cursor pattern: --animate-streaming-cursor-blink uses 'step-end infinite' (NOT alternate) per RESEARCH §Q7 — D-15 'alternate' would create 2s perceived period; codified in CSS comment + sse-keyframes.test.ts negative regex
+- D-14 v2.0 legacy --ease/--ease-fast aliases re-installed in plan-3 motion block (plan-1 had not preserved them); deprecation comment added; Phase 40 SHARED-01 will deprecate site-wide
+- ESLint rule installed via inline no-restricted-syntax (no plugin); two selectors (Literal + TemplateElement) cover both static className strings and template-literal interpolations; createRequire rooted on eslint-config-next walks pnpm strict symlinks for parser
 
 ### Roadmap Evolution
 
@@ -280,7 +284,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-30T01:00:07.742Z
-Stopped at: Completed 39-02-PLAN.md (Typography Token Layer)
+Last session: 2026-04-30T01:14:27.827Z
+Stopped at: Completed 39-03 (Motion + SSE + ESLint foundation)
 
 **Planned Phase:** 39 (design-token-foundation) — 4 plans — 2026-04-28T07:17:30.872Z
