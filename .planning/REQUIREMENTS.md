@@ -40,8 +40,10 @@ These are NOT touched by v3.0:
 
 ### Typography
 
-- [ ] **TYPO-01**: 4-tier serif type scale defined (hero / section / body / caption) with consistent line-height + letter-spacing tokens
-- [ ] **TYPO-02**: Serif vs Inter usage clarified in design system doc — serif for narrative content, Inter for UI chrome and data labels
+- [x] **TYPO-01
+**: 4-tier serif type scale defined (hero / section / body / caption) with consistent line-height + letter-spacing tokens
+- [x] **TYPO-02
+**: Serif vs Inter usage clarified in design system doc — serif for narrative content, Inter for UI chrome and data labels
 
 ### Shared Components Polish
 

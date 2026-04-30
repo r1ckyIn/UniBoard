@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — UI Polish & Cohesion (Claude 美学叠加层)
 status: executing
-stopped_at: Phase 39 plan-1 complete (oklch colors + 8-point spacing + dark-mode reservation)
-last_updated: "2026-04-30T00:46:16Z"
-last_activity: 2026-04-30 -- Phase 39 plan-1 GREEN (commits 726eb10 + c1de7c9)
+stopped_at: Completed 39-02-PLAN.md (Typography Token Layer)
+last_updated: "2026-04-30T01:00:07.754Z"
+last_activity: 2026-04-30
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
-  percent: 25
+  completed_plans: 2
+  percent: 50
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Current Position
 
 Phase: 39 (design-token-foundation) — EXECUTING
-Plan: 2 of 4 (plan 1 complete)
-Status: Plan 39-01 shipped — ready for plan 39-02 (typography)
-Last activity: 2026-04-30 -- Phase 39 plan-1 GREEN; commits 726eb10 (test/RED) + c1de7c9 (feat/GREEN); SUMMARY at .planning/phases/39-design-token-foundation/39-01-SUMMARY.md
+Plan: 3 of 4 (plan 1 complete)
+Status: Ready to execute
+Last activity: 2026-04-30
 
 ## Milestones Completed
 
@@ -227,6 +227,7 @@ Items acknowledged and deferred at v2.0 milestone close on 2026-04-27 (audit-ope
 | Phase 33 P05 | 9min | 3 tasks | 11 files |
 | Phase 33 P07 | 25min | 3 tasks | 11 files |
 | Phase 39 P01 | 15min | 2 tasks (TDD RED+GREEN) | 6 files |
+| Phase 39 P02 | 7min | 2 tasks (TDD RED+GREEN) tasks | 3 files files |
 
 ## Accumulated Context
 
@@ -248,6 +249,10 @@ Recent decisions affecting current work:
 - [Phase 39 plan-1]: Empty `[data-theme="dark"] { }` block reserved for Phase 43 (warm-deep-brown #2b2a27); structural reservation keeps Phase 43 changes additive.
 
 (For v2.0 decisions log — 200+ entries — see archive at `.planning/milestones/v2.0-STATE.md` if extracted, otherwise consult PROJECT.md Key Decisions table.)
+
+- [Phase 39 plan-2]: Adopted Tailwind v4 namespaces --text-* / --leading-* / --tracking-* (RESEARCH §Q1) instead of D-06 names; D-06 names compile but generate zero utilities (Pitfall 4). Phase 40 needs the generated utilities.
+- [Phase 39 plan-2]: tracking-body intentionally omitted (browser default 'normal' per RESEARCH §Q6) — only hero/section get negative tracking and caption gets +0.06em uppercase rhythm.
+- [Phase 39 plan-2]: Multi-line CSS comments must avoid embedded literal */ patterns — PostCSS parses them as premature comment closure. Use --font-size-X notation in prose instead of --font-size-* glob to dodge build errors.
 
 ### Roadmap Evolution
 
@@ -275,7 +280,7 @@ None.
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 39 context gathered
+Last session: 2026-04-30T01:00:07.742Z
+Stopped at: Completed 39-02-PLAN.md (Typography Token Layer)
 
 **Planned Phase:** 39 (design-token-foundation) — 4 plans — 2026-04-28T07:17:30.872Z

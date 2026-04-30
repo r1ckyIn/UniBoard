@@ -95,8 +95,8 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
   5. brand-guidelines skill values (color/font specs from anthropics/skills/skills/brand-guidelines) are quoted as the single source of truth in CSS variable comments
 
 **Plans:** 4 plans
-- [ ] 39-01-PLAN.md — Color (oklch + @supports hsl fallback) + 8-point spacing + dark-mode reservation (DESIGN-01, DESIGN-02)
-- [ ] 39-02-PLAN.md — 4-tier serif typography scale (text-hero/section/body/caption) + TYPO-USAGE.md reference doc (TYPO-01, TYPO-02)
+- [x] 39-01-PLAN.md — Color (oklch + @supports hsl fallback) + 8-point spacing + dark-mode reservation (DESIGN-01, DESIGN-02)
+- [x] 39-02-PLAN.md — 4-tier serif typography scale (text-hero/section/body/caption) + TYPO-USAGE.md reference doc (TYPO-01, TYPO-02)
 - [ ] 39-03-PLAN.md — Motion tokens + SSE keyframes (no alternate per Q7) + ESLint guard rule + Wave 0 test scaffolds (DESIGN-03, MOTION-02 keyframes, MOTION-01 rule install)
 - [ ] 39-04-PLAN.md — Transition className migration sweep (~56 occurrences across 36 files) + manual edge cases + Playwright visual regression baselines (checkpoint:human-verify) (MOTION-01 sweep + visual-regression closure)
 
