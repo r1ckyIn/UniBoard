@@ -60,7 +60,10 @@ const PALETTE = [
   { name: "divider", hex: "#eae7e0", source: "prototype #eae7e0" },
 ];
 
-const BRAND_COLOR_NAMES = new Set([
+// Names of color tokens that get a -soft variant emitted alongside the base
+// color (for tinted hover/focus surfaces). Brand AND project palette colors
+// share this treatment; neutrals do not.
+const SOFT_VARIANT_NAMES = new Set([
   "orange",
   "blue",
   "green",
@@ -125,7 +128,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const { name, source, css, delta } of results) {
     console.log(`  /* source: ${source}  ΔE=${delta.toFixed(4)} */`);
     console.log(`  --color-${name}: ${css};`);
-    if (BRAND_COLOR_NAMES.has(name)) {
+    if (SOFT_VARIANT_NAMES.has(name)) {
       // -soft variant at /0.11 alpha (matches v2.0 rgba(... , 0.11) pattern).
       console.log(`  --color-${name}-soft: ${css.replace(/\)$/, " / 0.11)")};`);
     }
@@ -138,7 +141,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log("  :root {");
   for (const { name, hex } of results) {
     console.log(`    --color-${name}: ${hex};`);
-    if (BRAND_COLOR_NAMES.has(name)) {
+    if (SOFT_VARIANT_NAMES.has(name)) {
       // Convert hex to rgba(...) for soft fallback (preserves v2.0 0.11 alpha).
       const r = parseInt(hex.slice(1, 3), 16);
       const g = parseInt(hex.slice(3, 5), 16);

@@ -47,8 +47,8 @@ export default function Sidebar() {
       className={cn(
         "fixed inset-y-0 left-0 w-[var(--spacing-sidebar-w)]",
         "bg-dark flex flex-col py-5 z-[100]",
-        // Shortened from 0.28s — user perceives lag is halved; each frame's
-        // layout cost is unchanged but fewer frames are painted total.
+        // Width animation runs through layout, not just paint, so each frame
+        // is expensive. Use the fast tier so fewer frames are painted total.
         "transition-[width] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
         // Paint-cheap right-edge separator. The previous
         // `shadow-[2px_0_16px_rgba(20,20,19,.06)]` extended ~18 px into main
