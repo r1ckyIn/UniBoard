@@ -74,7 +74,7 @@ export default function LoginForm({
         type="button"
         onClick={() => googleLogin.mutate()}
         disabled={googleLogin.isPending}
-        className="w-full h-[44px] flex items-center justify-center gap-2.5 bg-white border-[1.5px] border-card-border rounded-lg text-text-1 text-[0.86rem] font-semibold hover:bg-cream-2 disabled:opacity-60 transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
+        className="w-full h-[44px] flex items-center justify-center gap-2.5 bg-white border-[1.5px] border-card-border rounded-lg text-text-1 text-[0.86rem] font-semibold hover:bg-cream-2 disabled:opacity-60 transition-claude-fast"
         aria-label={t("auth.google.continueWith")}
       >
         <GoogleIcon className="h-4 w-4" aria-hidden />

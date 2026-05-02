@@ -333,7 +333,7 @@ export default function TimetablePage() {
           </div>
           <button
             onClick={handleRefresh}
-            className="text-[0.78rem] font-semibold py-[6px] px-[16px] rounded-[8px] bg-[rgba(217,119,87,0.11)] text-[#d97757] border-none cursor-pointer hover:bg-[rgba(217,119,87,0.18)] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
+            className="text-[0.78rem] font-semibold py-[6px] px-[16px] rounded-[8px] bg-[rgba(217,119,87,0.11)] text-[#d97757] border-none cursor-pointer hover:bg-[rgba(217,119,87,0.18)] transition-claude-fast"
           >
             {t("retry")}
           </button>

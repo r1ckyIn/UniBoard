@@ -171,7 +171,7 @@ export default function GpaTargetSection({ user }: GpaTargetSectionProps) {
         <button
           type="button"
           onClick={handleSave}
-          className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] whitespace-nowrap bg-[#d97757] text-white border-none hover:bg-[#c5674a] flex items-center gap-[6px]"
+          className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] cursor-pointer transition-claude-fast whitespace-nowrap bg-[#d97757] text-white border-none hover:bg-[#c5674a] flex items-center gap-[6px]"
         >
           {showSaved ? (
             <>
