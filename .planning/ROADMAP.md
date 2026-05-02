@@ -72,7 +72,7 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 5 phases. Phase numbering continues from v2.0's last phase (38.2) → v3.0 starts at Phase 39. Each REQ from `.planning/REQUIREMENTS.md` maps to exactly one phase. Hard constraints preserved across all phases: Rough.js hand-drawn borders, Rough Notation highlights, paper texture, 10-page main visual layout, TanStack Query hooks signatures (0 changes), backend API (0 changes), i18n en/zh (100%).
 
 - [ ] **Phase 39: Design Token Foundation** — Establish oklch color, spacing, shadow, motion, and serif typography token system as CSS variables (no component changes yet)
-- [ ] **Phase 40: Shared Component Polish** — Unify Card/Button/Input/Modal/Tooltip internals to design tokens, refactor Sidebar to transform-based positioning, adopt Claude no-bubble AI reply pattern
+- [x] **Phase 40: Shared Component Polish** — Unify Card/Button/Input/Modal/Tooltip internals to design tokens, refactor Sidebar to transform-based positioning, adopt Claude no-bubble AI reply pattern (completed 2026-05-02)
 - [ ] **Phase 41: State Coverage & Accessibility Pass** — Loading/Empty/Error states styled in Rough.js aesthetic across 10 pages + full a11y audit (focus, contrast, aria, keyboard, reduced-motion)
 - [ ] **Phase 42: New-Feature Visual Coverage** — TokenStep cached-state UI, SuccessStep per-domain progress bars, AI Chat client-side validation, AI failure error messages (subsumes auto-bootstrapped Phase 36 UX Polish)
 - [ ] **Phase 43: Dark Mode (optional)** — Warm-deep-brown root tokens, Rough.js stroke adaptation, paper texture opacity tuning. Cost-benefit gate before kickoff; defer to v3.1 if work cost exceeds value
@@ -117,10 +117,10 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
   4. Sidebar visual parity with v2.0 implementation: pixel-diff regression on dashboard / predict / settings / timetable pages green; backlog Phase 999.1 scope fully absorbed (sidebar transform refactor done)
   5. Rough.js hand-drawn borders remain visible and unchanged on every component (hard constraint check — visual smoke test)
 
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 - [x] 40-01-PLAN.md — SHARED-01: cva primitives (Button + Input) + SEED-40 @utility motion shorthands + 56-caller verbose-form sweep + ESLint extension (Wave 1)
-- [ ] 40-02-PLAN.md — SHARED-02: useStreamingText hook + StreamingAssistant + UserMessage + 2-caller migration + AiChatBubble.tsx deletion (Wave 2)
-- [ ] 40-03-PLAN.md — SHARED-03: Sidebar two-layer transform-based DOM rewrite + env-gated 60fps Playwright stub (Wave 2, depends_on plan-01)
+- [x] 40-02-PLAN.md — SHARED-02: useStreamingText hook + StreamingAssistant + UserMessage + 2-caller migration + AiChatBubble.tsx deletion (Wave 2)
+- [x] 40-03-PLAN.md — SHARED-03: Sidebar two-layer transform-based DOM rewrite + env-gated 60fps Playwright stub (Wave 2, depends_on plan-01)
 
 **UI hint**: yes
 
@@ -189,7 +189,7 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
 | 39. Design Token Foundation | v3.0 | 4/4 | Complete (2026-04-30) — plan-01 oklch+spacing, plan-02 typography, plan-03 motion+SSE+ESLint, plan-04 transition sweep. Plan-04 Task 3 (Playwright baselines) deferred to production visual UAT per user; MOTION-01 status: **partial**. See SEED-39-playwright-baselines.md. | 2026-04-30 |
-| 40. Shared Component Polish | v3.0 | 1/3 | In Progress|  |
+| 40. Shared Component Polish | v3.0 | 3/3 | Complete   | 2026-05-02 |
 | 41. State Coverage & Accessibility Pass | v3.0 | 0/0 | Not started | - |
 | 42. New-Feature Visual Coverage | v3.0 | 0/0 | Not started — absorbs Phase 36 UXPOL | - |
 | 43. Dark Mode (optional) | v3.0 | 0/0 | Not started — cost-benefit gate before kickoff | - |
