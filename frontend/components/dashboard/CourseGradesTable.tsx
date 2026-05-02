@@ -130,7 +130,7 @@ export default function CourseGradesTable({ courses }: CourseGradesTableProps) {
                 <tr
                   key={course.course_id}
                   onClick={() => handleRowClick(course.course_id)}
-                  className="group cursor-pointer transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
+                  className="group cursor-pointer transition-claude-fast"
                   style={{
                     borderBottom: isLast ? "none" : "1px solid var(--color-divider)",
                   }}

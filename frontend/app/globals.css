@@ -231,6 +231,33 @@
   }
 }
 
+/* === Phase 40 plan-1: SEED-40 motion utility shorthands === */
+/* Source: tailwindcss.com/docs/adding-custom-styles + Phase 39 @theme tokens.
+   These DRY the verbose-form occurrences (56 across 36 files) of:
+     transition-{all|colors}
+     [transition-duration:var(--motion-fast/base/slow)]
+     [transition-timing-function:var(--ease-claude-out)]
+   Tailwind v4 auto-generates modifier-prefixed variants
+   (hover:transition-claude-fast, focus:transition-claude-fast, etc.)
+   and combines with state utilities. */
+@utility transition-claude-fast {
+  transition-property: all;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--ease-claude-out);
+}
+
+@utility transition-claude-base {
+  transition-property: all;
+  transition-duration: var(--motion-base);
+  transition-timing-function: var(--ease-claude-out);
+}
+
+@utility transition-claude-slow {
+  transition-property: all;
+  transition-duration: var(--motion-slow);
+  transition-timing-function: var(--ease-claude-out);
+}
+
 /* === Fallback for browsers without oklch support (~7% global per caniuse 2026-04) === */
 /* Re-declares the same color tokens with the v2.0 hex/rgba values so the visual
    contract stays identical on Safari < 16.4, Chrome < 111, Firefox < 113.

@@ -143,7 +143,7 @@ export default function NotificationPanel({
 
       {/* Footer */}
       <div
-        className="px-4 py-3 text-center text-[0.76rem] font-semibold text-orange border-t border-divider cursor-pointer transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-card-bg-hover"
+        className="px-4 py-3 text-center text-[0.76rem] font-semibold text-orange border-t border-divider cursor-pointer transition-claude-fast hover:bg-card-bg-hover"
         onClick={onViewAll}
       >
         {t("notifications.footer")}

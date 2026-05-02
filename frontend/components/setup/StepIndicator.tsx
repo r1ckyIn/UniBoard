@@ -41,7 +41,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
             <div
               aria-label={`Step ${step}`}
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all [transition-duration:var(--motion-base)] [transition-timing-function:var(--ease-claude-out)]",
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-claude-base",
                 isCompleted && "bg-[#788c5d] text-white",
                 isActive && "bg-[#d97757] text-white",
                 !isCompleted &&

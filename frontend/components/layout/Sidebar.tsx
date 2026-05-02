@@ -93,7 +93,7 @@ export default function Sidebar() {
                 prefetch={true}
                 className={cn(
                   "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
-                  "cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] whitespace-nowrap overflow-hidden no-underline",
+                  "cursor-pointer transition-claude-fast whitespace-nowrap overflow-hidden no-underline",
                   active
                     ? "bg-[rgba(217,119,87,.18)] text-orange"
                     : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
@@ -121,7 +121,7 @@ export default function Sidebar() {
               prefetch={true}
               className={cn(
                 "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
-                "cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] whitespace-nowrap overflow-hidden no-underline",
+                "cursor-pointer transition-claude-fast whitespace-nowrap overflow-hidden no-underline",
                 active
                   ? "bg-[rgba(217,119,87,.18)] text-orange"
                   : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
