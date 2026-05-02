@@ -117,8 +117,8 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
   4. Sidebar visual parity with v2.0 implementation: pixel-diff regression on dashboard / predict / settings / timetable pages green; backlog Phase 999.1 scope fully absorbed (sidebar transform refactor done)
   5. Rough.js hand-drawn borders remain visible and unchanged on every component (hard constraint check — visual smoke test)
 
-**Plans:** 3 plans (planned 2026-04-30)
-- [ ] 40-01-PLAN.md — SHARED-01: cva primitives (Button + Input) + SEED-40 @utility motion shorthands + 56-caller verbose-form sweep + ESLint extension (Wave 1)
+**Plans:** 1/3 plans executed
+- [x] 40-01-PLAN.md — SHARED-01: cva primitives (Button + Input) + SEED-40 @utility motion shorthands + 56-caller verbose-form sweep + ESLint extension (Wave 1)
 - [ ] 40-02-PLAN.md — SHARED-02: useStreamingText hook + StreamingAssistant + UserMessage + 2-caller migration + AiChatBubble.tsx deletion (Wave 2)
 - [ ] 40-03-PLAN.md — SHARED-03: Sidebar two-layer transform-based DOM rewrite + env-gated 60fps Playwright stub (Wave 2, depends_on plan-01)
 
@@ -189,7 +189,7 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
 | 39. Design Token Foundation | v3.0 | 4/4 | Complete (2026-04-30) — plan-01 oklch+spacing, plan-02 typography, plan-03 motion+SSE+ESLint, plan-04 transition sweep. Plan-04 Task 3 (Playwright baselines) deferred to production visual UAT per user; MOTION-01 status: **partial**. See SEED-39-playwright-baselines.md. | 2026-04-30 |
-| 40. Shared Component Polish | v3.0 | 0/3 | Planned (2026-04-30) — 3 plans across 2 waves; SHARED-01 (Wave 1) + SHARED-02/03 (Wave 2 parallel). HIGH-RISK A6 sidebar geometry SPIKE in plan-3 Task 1. | - |
+| 40. Shared Component Polish | v3.0 | 1/3 | In Progress|  |
 | 41. State Coverage & Accessibility Pass | v3.0 | 0/0 | Not started | - |
 | 42. New-Feature Visual Coverage | v3.0 | 0/0 | Not started — absorbs Phase 36 UXPOL | - |
 | 43. Dark Mode (optional) | v3.0 | 0/0 | Not started — cost-benefit gate before kickoff | - |
