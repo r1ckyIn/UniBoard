@@ -6,7 +6,9 @@
     "deadlines": "Deadlines",
     "predict": "Predict",
     "digest": "Digest",
-    "settings": "Settings"
+    "settings": "Settings",
+    "sidebarLandmark": "Sidebar",
+    "primaryNav": "Primary navigation"
   },
   "header": {
     "brand": "UniBoard",

@@ -6,7 +6,9 @@
     "deadlines": "截止日期",
     "predict": "成绩预测",
     "digest": "每日摘要",
-    "settings": "设置"
+    "settings": "设置",
+    "sidebarLandmark": "侧边栏",
+    "primaryNav": "主导航"
   },
   "header": {
     "brand": "UniBoard",

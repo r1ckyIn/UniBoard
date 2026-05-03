@@ -57,6 +57,12 @@ export default function Sidebar() {
     // 1px right border replaces the v2.0 bleeding shadow that caused
     // the original Intel Mac stall (Quick Task 260420-n29 fix).
     <aside
+      // Phase 40 code review WR-07: aria-label + role="navigation" inside
+      // give screen readers a named landmark instead of a generic
+      // "complementary" region. group-focus-within: hooks parallel the
+      // existing group-hover: hooks so keyboard-only users (Tab) see the
+      // expanded panel, not just mouse users.
+      aria-label={t("sidebarLandmark")}
       className={cn(
         "fixed inset-y-0 left-0 w-[var(--spacing-sidebar-w)] z-[100]",
         "overflow-hidden border-r border-[rgba(20,20,19,.08)]",
@@ -64,14 +70,17 @@ export default function Sidebar() {
         "group"
       )}
     >
-      {/* Inner 224px panel — translates from -156px to 0 on hover.
+      {/* Inner 224px panel — translates from -156px to 0 on hover OR when any
+          descendant receives keyboard focus.
           GPU-composited; no layout reflow on parent or main content.
           Per RESEARCH Pattern 5 + Task 1 SPIKE Option A literal D-40-08. */}
       <div
+        role="navigation"
+        aria-label={t("primaryNav")}
         className={cn(
           "absolute inset-y-0 left-0 w-[var(--spacing-sidebar-w-expanded)]",
           "bg-dark flex flex-col py-5",
-          "translate-x-[-156px] group-hover:translate-x-0",
+          "translate-x-[-156px] group-hover:translate-x-0 group-focus-within:translate-x-0",
           "transition-claude-base will-change-transform",
           "[contain:layout_paint]"
         )}
@@ -81,13 +90,13 @@ export default function Sidebar() {
           <div className="w-[34px] h-[34px] bg-orange rounded-[9px] grid place-items-center flex-shrink-0 font-serif font-bold text-[17px] text-white">
             U
           </div>
-          <span className="font-serif text-[1.18rem] font-bold text-[#4a3f34] opacity-0 group-hover:opacity-100 transition-claude-base">
+          <span className="font-serif text-[1.18rem] font-bold text-[#4a3f34] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-claude-base">
             UniBoard
           </span>
         </div>
 
         {/* Rule */}
-        <div className="w-[26px] h-px bg-[rgba(60,50,40,.1)] mx-auto mb-[10px] group-hover:w-[calc(100%-44px)] transition-claude-base" />
+        <div className="w-[26px] h-px bg-[rgba(60,50,40,.1)] mx-auto mb-[10px] group-hover:w-[calc(100%-44px)] group-focus-within:w-[calc(100%-44px)] transition-claude-base" />
 
         {/* Main nav */}
         <ul className="list-none w-full flex-1 flex flex-col gap-[2px] px-[10px]">
@@ -115,7 +124,7 @@ export default function Sidebar() {
                   )}
                 >
                   <Icon className="flex-shrink-0 w-5 h-5" />
-                  <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 transition-claude-base">
+                  <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-claude-base">
                     {t(item.key)}
                   </span>
                 </Link>
@@ -145,7 +154,10 @@ export default function Sidebar() {
                 )}
               >
                 <Icon className="flex-shrink-0 w-5 h-5" />
-                <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 transition-claude-base">
+                {/* WR-07: bottom-nav span uses same group-focus-within: hook
+                    as the main nav loop above so the Settings label appears
+                    when keyboard focus enters the sidebar. */}
+                <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-claude-base">
                   {t(item.key)}
                 </span>
               </Link>

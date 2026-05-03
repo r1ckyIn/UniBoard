@@ -33,6 +33,9 @@ vi.mock("next-intl", () => ({
       predict: "Predict",
       digest: "Digest",
       settings: "Settings",
+      // WR-07: a11y landmarks added in Phase 40 review fix.
+      sidebarLandmark: "Sidebar",
+      primaryNav: "Primary navigation",
     };
     return map[key] ?? key;
   },
@@ -117,5 +120,24 @@ describe("<Sidebar>", () => {
     // target is the transform property; transition-claude-base applies an
     // all-property transition with --motion-base duration.
     expect(inner.className).toContain("transition-claude-base");
+  });
+
+  it("WR-07: a11y landmarks + keyboard focus expansion", () => {
+    const { container } = render(<Sidebar />);
+    const outer = container.querySelector("aside");
+    // Aside is now a labelled landmark (no longer a generic "complementary").
+    expect(outer?.getAttribute("aria-label")).toBe("Sidebar");
+    const inner = outer?.firstElementChild as HTMLElement;
+    // Inner panel exposes a labelled navigation region for SR users.
+    expect(inner.getAttribute("role")).toBe("navigation");
+    expect(inner.getAttribute("aria-label")).toBe("Primary navigation");
+    // Inner panel translates open on group-focus-within (keyboard Tab),
+    // not just group-hover (mouse).
+    expect(inner.className).toContain("group-focus-within:translate-x-0");
+    // Nav-item label spans become visible on group-focus-within.
+    const labelSpans = inner.querySelectorAll("a span");
+    labelSpans.forEach((span) => {
+      expect(span.className).toContain("group-focus-within:opacity-100");
+    });
   });
 });
