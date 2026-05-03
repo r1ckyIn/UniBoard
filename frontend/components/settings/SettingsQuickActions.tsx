@@ -79,7 +79,7 @@ export default function SettingsQuickActions() {
             key={action.key}
             type="button"
             onClick={() => handleAction(action.key)}
-            className={`flex items-center gap-[10px] py-[10px] px-[14px] rounded-[8px] w-full text-left transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6] ${
+            className={`flex items-center gap-[10px] py-[10px] px-[14px] rounded-[8px] w-full text-left transition-claude-fast hover:bg-[#efede6] ${
               idx < ACTIONS.length - 1 ? "border-b border-[#eae7e0]" : ""
             }`}
           >

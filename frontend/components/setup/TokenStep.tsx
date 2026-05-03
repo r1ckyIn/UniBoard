@@ -319,7 +319,7 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
         <button
           type="button"
           onClick={handleBack}
-          className="bg-transparent border-[1.5px] border-card-border text-text-2 font-semibold py-3 px-6 rounded-lg hover:bg-card-bg-hover hover:text-text-1 transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
+          className="bg-transparent border-[1.5px] border-card-border text-text-2 font-semibold py-3 px-6 rounded-lg hover:bg-card-bg-hover hover:text-text-1 transition-claude-fast"
         >
           {t("back")}
         </button>
@@ -331,7 +331,7 @@ export default function TokenStep({ onBack, onSuccess }: TokenStepProps) {
           className={
             validating
               ? "bg-[#d97757] text-white font-semibold py-3 px-7 rounded-lg opacity-60 cursor-default"
-              : "bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-7 rounded-lg transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:-translate-y-px"
+              : "bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-7 rounded-lg transition-claude-fast hover:-translate-y-px"
           }
         >
           {validating ? t("validating") : t("cta")}

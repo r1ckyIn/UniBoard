@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Phase 40 SHARED-03 — Sidebar Geometry Spike (D-40-08 verification)</title>
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Inter", sans-serif;
+    background: #faf9f5;
+    color: #2d2d2a;
+  }
+  h1, h2, h3 {
+    font-family: "Source Serif 4", Georgia, serif;
+  }
+  .demo-row {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+  }
+  .demo-col {
+    flex: 1;
+    min-width: 0;
+  }
+  .demo-title {
+    font-weight: bold;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .stage {
+    position: relative;
+    height: 400px;
+    border: 1px solid #ccc;
+    overflow: hidden;
+    background: #f6f5f0;
+  }
+  .main-content {
+    padding-left: 68px;
+    padding-top: 16px;
+    font-size: 14px;
+    color: #6b6b65;
+    line-height: 1.5;
+  }
+
+  /* === Geometry (a): D-40-08 LITERAL — outer overflow-hidden + inner translate-x-[-156px] -> 0
+         Default state shows the rightmost 68px of the 224px inner panel.
+         This means right edge of nav items (and right portion of orange highlight bar)
+         is what the user sees when collapsed. */
+  .a-outer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 68px;
+    overflow: hidden;
+    border-right: 1px solid rgba(20, 20, 19, .08);
+    contain: layout paint;
+  }
+  .a-inner {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 224px;
+    background: #e8ddd0;
+    transform: translateX(-156px);
+    transition: transform 250ms cubic-bezier(.165, .85, .45, 1);
+    will-change: transform;
+    padding-top: 16px;
+    contain: layout paint;
+  }
+  .a-outer:hover .a-inner {
+    transform: translateX(0);
+  }
+  .a-nav-item {
+    padding: 11px 14px;
+    margin: 0 10px 2px 10px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    border-radius: 10px;
+    color: rgba(60, 50, 40, .65);
+  }
+  .a-nav-item.active {
+    background: rgba(217, 119, 87, .18); /* bg-orange-soft equivalent */
+    color: #d97757;                       /* text-orange */
+  }
+  .a-icon {
+    width: 20px;
+    height: 20px;
+    background: currentColor;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .a-label {
+    font-size: 14px;
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 250ms cubic-bezier(.165, .85, .45, 1);
+  }
+  .a-outer:hover .a-label {
+    opacity: 1;
+  }
+
+  /* === Geometry (c): conventional alternate (kept for visual comparison only — historical analysis,
+         NOT the implementation per BLOCKER-4 lock to Option A). */
+  .c-outer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 68px;
+    overflow: hidden;
+    border-right: 1px solid rgba(20, 20, 19, .08);
+    transition: overflow 0s 250ms;
+  }
+  .c-inner {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 224px;
+    background: #e8ddd0;
+    padding-top: 16px;
+  }
+  .c-outer:hover {
+    overflow: visible;
+    transition: overflow 0s 0s;
+  }
+  .c-nav-item {
+    padding: 11px 14px;
+    margin: 0 10px 2px 10px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    border-radius: 10px;
+    color: rgba(60, 50, 40, .65);
+  }
+  .c-nav-item.active {
+    background: rgba(217, 119, 87, .18);
+    color: #d97757;
+  }
+  .c-icon {
+    width: 20px;
+    height: 20px;
+    background: currentColor;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .c-label {
+    font-size: 14px;
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 250ms cubic-bezier(.165, .85, .45, 1);
+  }
+  .c-outer:hover .c-label {
+    opacity: 1;
+  }
+
+  .resolved-block {
+    padding: 24px;
+    background: #fff3e0;
+    border-top: 1px solid #ddd;
+    margin-top: 24px;
+  }
+  .resolved-block h3 {
+    margin-top: 0;
+    color: #d97757;
+  }
+  code {
+    background: rgba(60, 50, 40, .08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+  <h1 style="padding: 24px;">Phase 40 SHARED-03 — Sidebar Geometry Spike</h1>
+  <p style="padding: 0 24px 12px 24px; color: #6b6b65;">
+    Verifies CONTEXT.md D-40-08 (LOCKED) Option A literal geometry before the
+    structural rewrite of <code>frontend/components/layout/Sidebar.tsx</code>.
+    Hover each sidebar to see the expand-on-hover behaviour.
+  </p>
+
+  <div class="demo-row">
+    <div class="demo-col">
+      <div class="demo-title">(a) D-40-08 LITERAL — outer overflow-hidden + inner translate-x-[-156px] -> 0 (LOCKED Option A)</div>
+      <div class="stage">
+        <div class="a-outer">
+          <div class="a-inner">
+            <div class="a-nav-item"><div class="a-icon"></div><span class="a-label">Dashboard</span></div>
+            <div class="a-nav-item active"><div class="a-icon"></div><span class="a-label">Timetable</span></div>
+            <div class="a-nav-item"><div class="a-icon"></div><span class="a-label">Courses</span></div>
+            <div class="a-nav-item"><div class="a-icon"></div><span class="a-label">Deadlines</span></div>
+            <div class="a-nav-item"><div class="a-icon"></div><span class="a-label">Predict</span></div>
+          </div>
+        </div>
+        <div class="main-content">
+          Hover the sidebar (left edge). In (a), the inner 224px panel sits at translateX(-156px)
+          by default, so the user sees the rightmost 68px of the inner panel: the right edge of
+          nav items + the right portion of the orange highlight bar on the active "Timetable" row.
+          On hover the panel translates to 0; icons + labels become visible inside the now
+          224px-wide hover surface (the inner panel overflows the 68px outer clip box on the right).
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-col">
+      <div class="demo-title">(c) CONVENTIONAL alternate (NOT shipping — comparison only) — outer overflow:hidden -> hover:visible</div>
+      <div class="stage">
+        <div class="c-outer">
+          <div class="c-inner">
+            <div class="c-nav-item"><div class="c-icon"></div><span class="c-label">Dashboard</span></div>
+            <div class="c-nav-item active"><div class="c-icon"></div><span class="c-label">Timetable</span></div>
+            <div class="c-nav-item"><div class="c-icon"></div><span class="c-label">Courses</span></div>
+            <div class="c-nav-item"><div class="c-icon"></div><span class="c-label">Deadlines</span></div>
+            <div class="c-nav-item"><div class="c-icon"></div><span class="c-label">Predict</span></div>
+          </div>
+        </div>
+        <div class="main-content">
+          Hover the sidebar. In (c), icons sit at the left of the inner panel and ARE visible in
+          the collapsed 68px window because the panel is naturally left-anchored at translateX(0).
+          On hover the outer becomes overflow:visible so the right 156px reveals labels.
+          Reference only — does NOT ship per BLOCKER-4 lock to Option A literal D-40-08.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="resolved-block">
+    <h3>RESOLVED: Option A (literal D-40-08) — locked per checker BLOCKER-4 fix</h3>
+    <p>
+      Per CONTEXT.md D-40-08 LOCKED with explicit values <code>translate-x-[-156px]</code> +
+      <code>hover:translate-x-0</code>. The inner 224px panel is shifted left 156px in collapsed
+      state; right ~68px visible inside outer 68px clipping window shows rightmost edge of nav
+      items + active highlight. On hover the inner panel translates to 0; the leftmost 68px of
+      the panel is visible (icons + start of labels) while the right 156px overflows the outer
+      clip box.
+    </p>
+    <p>
+      Implementation reference: RESEARCH Pattern 5 lines 791-887 (literal D-40-08 reading).
+      Task 2 GREEN code template follows Option A verbatim — no divergence shipped from the
+      LOCKED CONTEXT decision.
+    </p>
+    <p>
+      <strong>Escalation policy</strong>: if user inspection of this SPIKE reveals an unacceptable
+      v2.0-parity violation (e.g., user determines that "right edge of nav items" is insufficient
+      signal in collapsed state to be usable as a navigation surface), pause and ask user to
+      confirm Option A acceptance OR approve a documented geometry divergence. Default path:
+      ship Option A.
+    </p>
+    <p>
+      Geometry (c) is preserved in this spike for visual comparison only and is NOT the
+      implementation. Geometry (b) "inverted-anchor" was documented in PLAN.md objective text
+      as historical analysis context only and is also NOT shipping.
+    </p>
+  </div>
+</body>
+</html>
