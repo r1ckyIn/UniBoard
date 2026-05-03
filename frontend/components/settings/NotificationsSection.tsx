@@ -44,23 +44,37 @@ export default function NotificationsSection() {
     }
   }, []);
 
-  // Save to localStorage on every change
-  const savePrefs = useCallback((updated: NotificationPrefs) => {
-    setPrefs(updated);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      // Silently fail if storage is full
-    }
-  }, []);
+  // Save to localStorage on every change.
+  // Phase 40 code review WR-03: previously this took a fully-baked next-state
+  // object as an argument, which forced callers to read `prefs` from closure
+  // (`{ ...prefs, [key]: !prefs[key] }`). That works today because togglePref
+  // is recreated each render, but if anyone wraps togglePref in useCallback
+  // or passes it to a memoised child, the closure goes stale and rapid-fire
+  // toggles silently drop. Refactor to functional updater so savePrefs never
+  // depends on the closure value of `prefs`.
+  const savePrefs = useCallback(
+    (updater: (prev: NotificationPrefs) => NotificationPrefs) => {
+      setPrefs((prev) => {
+        const next = updater(prev);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // Silently fail if storage is full
+        }
+        return next;
+      });
+    },
+    [],
+  );
 
   function togglePref(key: keyof Omit<NotificationPrefs, "digestFrequency">) {
-    savePrefs({ ...prefs, [key]: !prefs[key] });
+    savePrefs((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
   function setDigestFrequency(freq: "daily" | "weekly") {
-    if (prefs.digestFrequency === freq) return;
-    savePrefs({ ...prefs, digestFrequency: freq });
+    savePrefs((prev) =>
+      prev.digestFrequency === freq ? prev : { ...prev, digestFrequency: freq },
+    );
   }
 
   return (
