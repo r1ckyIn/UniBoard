@@ -727,7 +727,9 @@
         "confirmTitle": "断开所有令牌？",
         "confirmDesc": "这将移除你的 Canvas 和 Ed API 令牌。你可以随时从设置页面重新连接。",
         "confirmButton": "是的，断开连接",
-        "cancel": "取消"
+        "cancel": "取消",
+        "successAll": "Canvas 和 Ed 令牌均已断开连接。",
+        "partialFailure": "部分令牌断开失败，请重试。"
       },
       "delete": {
         "title": "删除账户",

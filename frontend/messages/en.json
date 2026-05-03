@@ -727,7 +727,9 @@
         "confirmTitle": "Disconnect All Tokens?",
         "confirmDesc": "This will remove your Canvas and Ed API tokens. You can reconnect anytime from this settings page.",
         "confirmButton": "Yes, Disconnect",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "successAll": "Both Canvas and Ed tokens were disconnected.",
+        "partialFailure": "One or both tokens failed to disconnect. Please try again."
       },
       "delete": {
         "title": "Delete account",

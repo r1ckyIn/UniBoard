@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { useDeleteToken, useDeleteAccount } from "@/hooks/use-user";
 
@@ -18,10 +19,27 @@ export default function DangerZoneSection() {
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  const handleDisconnect = () => {
-    deleteToken.mutate({ platform: "canvas" });
-    deleteToken.mutate({ platform: "ed" });
-    disconnectDialogRef.current?.close();
+  // Phase 40 code review WR-02: previously this fired both mutations
+  // unguarded and closed the dialog synchronously regardless of outcome.
+  // The user got no feedback whether one or both deletes succeeded, and a
+  // partial failure (Canvas deleted, Ed failed) silently desynced state.
+  // Fix: await both via mutateAsync + Promise.allSettled so one failure does
+  // not block the other from attempting, then surface success/partial-failure
+  // via toast and close the dialog only on full success. Leaving the dialog
+  // open on partial failure lets the user retry without re-opening.
+  const handleDisconnect = async () => {
+    const results = await Promise.allSettled([
+      deleteToken.mutateAsync({ platform: "canvas" }),
+      deleteToken.mutateAsync({ platform: "ed" }),
+    ]);
+    const allOk = results.every((r) => r.status === "fulfilled");
+    if (allOk) {
+      toast.success(t("danger.disconnect.successAll"));
+      disconnectDialogRef.current?.close();
+    } else {
+      toast.error(t("danger.disconnect.partialFailure"));
+      // Dialog stays open so user can see the failure and retry.
+    }
   };
 
   const handleDeleteAccount = () => {
