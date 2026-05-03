@@ -12,6 +12,12 @@ updates:
     labels:
       - "dependencies"
       - "javascript"
+    ignore:
+      # ky 2.0 introduces breaking hook signature changes (single state object),
+      # prefixUrl rename, and .json() throwing on 204. Defer to a dedicated
+      # post-v3.0 migration phase rather than absorbing it mid-milestone.
+      - dependency-name: "ky"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
