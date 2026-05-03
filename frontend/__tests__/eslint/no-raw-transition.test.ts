@@ -106,14 +106,19 @@ describe("Phase 39 no-restricted-syntax rule (D-16)", () => {
     expect(messages.length).toBeGreaterThan(0);
   });
 
-  it("does NOT flag the migrated form [transition-duration:var(--motion-fast)]", () => {
+  it("does NOT flag the migrated form (now: shorthand transition-claude-fast)", () => {
     if (!parserAvailable) {
       return;
     }
-    const code = `const x = <div className="transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]" />;`;
-    const messages = lintCode(code);
+    // Phase 40 D-40-03: the verbose `[transition-duration:...]
+    // [transition-timing-function:...]` form is now itself forbidden
+    // (encourages SEED-40 shorthand). The "migrated form" semantic
+    // assertion — that the rule does NOT false-flag a legal post-migration
+    // utility — now validates against the @utility shorthand instead.
     // Filter to rule-specific messages — parser may emit unrelated
     // diagnostics (e.g. unused vars) that we don't care about.
+    const code = `const x = <div className="transition-claude-fast hover:bg-orange" />;`;
+    const messages = lintCode(code);
     const restricted = messages.filter(
       (m) => m.ruleId === "no-restricted-syntax",
     );
@@ -130,6 +135,42 @@ describe("Phase 39 no-restricted-syntax rule (D-16)", () => {
     const restricted = messages.filter(
       (m) => m.ruleId === "no-restricted-syntax",
     );
+    expect(restricted.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────
+  // Phase 40 D-40-03 + D-40-04 fixtures (NEW — 4 tests)
+  // ──────────────────────────────────────────────────────────
+
+  it("flags verbose tokenized form (D-40-03 SEED-40 shorthand encouragement)", () => {
+    if (!parserAvailable) return;
+    const code = `const x = <div className="transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]" />;`;
+    const messages = lintCode(code);
+    const restricted = messages.filter((m) => m.ruleId === "no-restricted-syntax");
+    expect(restricted.length).toBeGreaterThan(0);
+  });
+
+  it("does NOT flag the shorthand form transition-claude-fast (D-40-03)", () => {
+    if (!parserAvailable) return;
+    const code = `const x = <div className="transition-claude-fast hover:bg-orange" />;`;
+    const messages = lintCode(code);
+    const restricted = messages.filter((m) => m.ruleId === "no-restricted-syntax");
+    expect(restricted).toEqual([]);
+  });
+
+  it("flags var(--ease) legacy alias (D-40-04 deprecation)", () => {
+    if (!parserAvailable) return;
+    const code = `const x = <div className="transition" style={{ transition: "color 0.28s var(--ease)" }} />;`;
+    const messages = lintCode(code);
+    const restricted = messages.filter((m) => m.ruleId === "no-restricted-syntax");
+    expect(restricted.length).toBeGreaterThan(0);
+  });
+
+  it("flags var(--ease-fast) legacy alias (D-40-04 deprecation)", () => {
+    if (!parserAvailable) return;
+    const code = `const x = <div style={{ transition: "opacity 0.15s var(--ease-fast)" }} />;`;
+    const messages = lintCode(code);
+    const restricted = messages.filter((m) => m.ruleId === "no-restricted-syntax");
     expect(restricted.length).toBeGreaterThan(0);
   });
 });

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { useDeleteToken, useDeleteAccount } from "@/hooks/use-user";
 
@@ -18,10 +19,27 @@ export default function DangerZoneSection() {
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  const handleDisconnect = () => {
-    deleteToken.mutate({ platform: "canvas" });
-    deleteToken.mutate({ platform: "ed" });
-    disconnectDialogRef.current?.close();
+  // Phase 40 code review WR-02: previously this fired both mutations
+  // unguarded and closed the dialog synchronously regardless of outcome.
+  // The user got no feedback whether one or both deletes succeeded, and a
+  // partial failure (Canvas deleted, Ed failed) silently desynced state.
+  // Fix: await both via mutateAsync + Promise.allSettled so one failure does
+  // not block the other from attempting, then surface success/partial-failure
+  // via toast and close the dialog only on full success. Leaving the dialog
+  // open on partial failure lets the user retry without re-opening.
+  const handleDisconnect = async () => {
+    const results = await Promise.allSettled([
+      deleteToken.mutateAsync({ platform: "canvas" }),
+      deleteToken.mutateAsync({ platform: "ed" }),
+    ]);
+    const allOk = results.every((r) => r.status === "fulfilled");
+    if (allOk) {
+      toast.success(t("danger.disconnect.successAll"));
+      disconnectDialogRef.current?.close();
+    } else {
+      toast.error(t("danger.disconnect.partialFailure"));
+      // Dialog stays open so user can see the failure and retry.
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -59,7 +77,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={() => disconnectDialogRef.current?.showModal()}
-            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[rgba(204,68,85,0.11)]"
+            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-claude-fast hover:bg-[rgba(204,68,85,0.11)]"
           >
             {t("danger.disconnect.button")}
           </button>
@@ -78,7 +96,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={openDeleteDialog}
-            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[rgba(204,68,85,0.11)]"
+            className="py-[7px] px-[16px] text-[0.76rem] font-semibold rounded-[8px] bg-transparent border-[1.5px] border-[#cc4455] text-[#cc4455] cursor-pointer transition-claude-fast hover:bg-[rgba(204,68,85,0.11)]"
           >
             {t("danger.delete.button")}
           </button>
@@ -101,7 +119,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={() => disconnectDialogRef.current?.close()}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-claude-fast hover:bg-[#efede6]"
           >
             {t("danger.disconnect.cancel")}
           </button>
@@ -109,7 +127,7 @@ export default function DangerZoneSection() {
             type="button"
             data-testid="disconnect-confirm"
             onClick={handleDisconnect}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#b33d4c]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-claude-fast hover:bg-[#b33d4c]"
           >
             {t("danger.disconnect.confirmButton")}
           </button>
@@ -140,7 +158,7 @@ export default function DangerZoneSection() {
           <button
             type="button"
             onClick={() => deleteDialogRef.current?.close()}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6]"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#faf9f5] text-[#6b6b65] border border-[#e8e5dd] cursor-pointer transition-claude-fast hover:bg-[#efede6]"
           >
             {t("danger.delete.cancel")}
           </button>
@@ -149,7 +167,7 @@ export default function DangerZoneSection() {
             data-testid="delete-confirm"
             disabled={deleteConfirmText !== "DELETE"}
             onClick={handleDeleteAccount}
-            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#b33d4c] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] bg-[#cc4455] text-white border-none cursor-pointer transition-claude-fast hover:bg-[#b33d4c] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("danger.delete.confirmButton")}
           </button>
