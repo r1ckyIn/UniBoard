@@ -90,17 +90,20 @@ describe("<Sidebar>", () => {
     const { container } = render(<Sidebar />);
     const outer = container.querySelector("aside");
     const inner = outer?.firstElementChild as HTMLElement;
-    // The active nav item (matching usePathname() -> "/timetable") should have
-    // bg-orange-soft text-orange classes RENDERED INSIDE the inner panel,
-    // not on the outer <aside>.
+    // The active nav item (matching usePathname() -> "/timetable") should
+    // carry the v2.0 0.18-opacity active highlight class plus text-orange,
+    // RENDERED INSIDE the inner panel, not on the outer <aside>.
+    // Per CR-02 fix: literal bg-[rgba(217,119,87,0.18)] is the active-state
+    // contract — bg-orange-soft (0.11) was a saturation regression and is
+    // intentionally NOT used here.
     const activeLink = inner.querySelector(
-      "a.bg-orange-soft, a[class*='bg-orange-soft']"
+      "a[class*='bg-[rgba(217,119,87,0.18)]']"
     );
     expect(activeLink).toBeInTheDocument();
     expect(activeLink?.className).toContain("text-orange");
     // Outer must NOT carry the highlight directly (single source of truth — D-40-09).
     const outerHighlight = outer?.querySelector(
-      ":scope > .bg-orange-soft, :scope > [class*='bg-orange-soft']"
+      ":scope > [class*='bg-[rgba(217,119,87,0.18)]']"
     );
     expect(outerHighlight).toBeNull();
   });

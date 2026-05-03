@@ -103,7 +103,14 @@ export default function Sidebar() {
                     "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
                     "cursor-pointer transition-claude-fast whitespace-nowrap overflow-hidden no-underline",
                     active
-                      ? "bg-orange-soft text-orange"
+                      // Active highlight uses the v2.0 0.18 opacity literal.
+                      // Phase 40 code review CR-02: an earlier sweep replaced
+                      // this with bg-orange-soft (0.11), which dropped the
+                      // active-state saturation by ~39%. Keeping the literal
+                      // here is the lower-blast-radius fix vs. mutating the
+                      // shared --color-orange-soft token (which is also used
+                      // by Header focus rings and other consumers at 0.11).
+                      ? "bg-[rgba(217,119,87,0.18)] text-orange"
                       : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
                   )}
                 >
@@ -131,7 +138,9 @@ export default function Sidebar() {
                   "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
                   "cursor-pointer transition-claude-fast whitespace-nowrap overflow-hidden no-underline",
                   active
-                    ? "bg-orange-soft text-orange"
+                    // Same active-highlight contract as the main nav loop above
+                    // (CR-02). Bottom nav (Settings) shares the v2.0 0.18 baseline.
+                    ? "bg-[rgba(217,119,87,0.18)] text-orange"
                     : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
                 )}
               >
