@@ -140,10 +140,20 @@
 
   /* === MOTION-02 SSE primitives (consumed by Phase 40 SHARED-02) === */
   /* source: REQUIREMENTS.md MOTION-02 + CONTEXT.md D-15 (RESEARCH Q7 correction applied) */
+  /* Phase 40 code review WR-06: the previously-declared --animate-streaming-*
+     tokens generated `animate-streaming-cursor-blink` /
+     `animate-streaming-chunk-fadein` utility classes that NO consumer used.
+     StreamingAssistant uses an inline `animation: streaming-cursor-blink ...`
+     for the cursor and `animate-[streaming-chunk-fadein_...]` arbitrary-value
+     Tailwind utility for the chunk fade. Neither path goes through these
+     tokens, so editing the tokens to globally swap timing would silently
+     no-op. Removed to eliminate the maintenance trap; the keyframes
+     themselves stay (referenced by name from inline + arbitrary-value paths).
+     If a future consumer wants the utility-class approach, re-introduce the
+     --animate-* tokens AND switch consumers to className="animate-streaming-*"
+     in the same change. */
   --motion-stream-cursor-period: 1s;
   --motion-stream-chunk-fadein: var(--motion-fast);
-  --animate-streaming-cursor-blink: streaming-cursor-blink var(--motion-stream-cursor-period) step-end infinite;
-  --animate-streaming-chunk-fadein: streaming-chunk-fadein var(--motion-stream-chunk-fadein) var(--ease-claude-out) forwards;
 
   @keyframes streaming-cursor-blink {
     /* Per RESEARCH Q7 correction to D-15: D-15 originally said */
