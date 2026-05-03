@@ -98,7 +98,12 @@ export default function Header() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setNotifOpen(!notifOpen);
+              // Phase 40 code review WR-05: use functional updater so the
+              // toggle is always derived from the latest committed state.
+              // The previous `setNotifOpen(!notifOpen)` read notifOpen from
+              // the prior render's closure, which under rapid clicks could
+              // cancel a true→true toggle the user expected.
+              setNotifOpen((prev) => !prev);
               setAvatarOpen(false);
             }}
             className={cn(
@@ -132,7 +137,8 @@ export default function Header() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setAvatarOpen(!avatarOpen);
+              // WR-05: same functional-updater pattern as the bell button.
+              setAvatarOpen((prev) => !prev);
               setNotifOpen(false);
             }}
             className={cn(
