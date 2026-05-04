@@ -15,14 +15,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 
 interface NavItem {
-  key:
-    | "dashboard"
-    | "timetable"
-    | "courses"
-    | "deadlines"
-    | "predict"
-    | "digest"
-    | "settings";
+  key: "dashboard" | "timetable" | "courses" | "deadlines" | "predict" | "digest" | "settings";
   icon: LucideIcon;
   href: string;
 }
@@ -50,120 +43,97 @@ export default function Sidebar() {
   }
 
   return (
-    // Outer 68px shell — stable layout occupier; main content's
-    // padding-left:68px never shifts. `group` enables hover detection
-    // for the inner panel transform. `[contain:layout_paint]` confines
-    // paint cost to this subtree (Phase 39 LEARNINGS — preserved).
-    // 1px right border replaces the v2.0 bleeding shadow that caused
-    // the original Intel Mac stall (Quick Task 260420-n29 fix).
     <aside
-      // Phase 40 code review WR-07: aria-label + role="navigation" inside
-      // give screen readers a named landmark instead of a generic
-      // "complementary" region. group-focus-within: hooks parallel the
-      // existing group-hover: hooks so keyboard-only users (Tab) see the
-      // expanded panel, not just mouse users.
-      aria-label={t("sidebarLandmark")}
       className={cn(
-        "fixed inset-y-0 left-0 w-[var(--spacing-sidebar-w)] z-[100]",
+        "fixed inset-y-0 left-0 w-[var(--spacing-sidebar-w)]",
+        "bg-dark flex flex-col py-5 z-[100]",
+        // Shortened from 0.28s — user perceives lag is halved; each frame's
+        // layout cost is unchanged but fewer frames are painted total.
+        "transition-[width] duration-[0.14s] ease-[cubic-bezier(.4,0,.2,1)]",
+        // Paint-cheap right-edge separator. The previous
+        // `shadow-[2px_0_16px_rgba(20,20,19,.06)]` extended ~18 px into main
+        // content; the `[contain:layout_paint]` below only isolates the
+        // sidebar's INTERNAL paint, not the blur that bleeds out. During the
+        // width animation the browser re-rasterised the shadow region on
+        // every frame, which on content-dense pages (timetable: 7×30 grid
+        // lines + events + overlays) stalled the compositor. A 1 px border
+        // paints inside the contain box, costs nothing per frame, and keeps
+        // the visual separation.
         "overflow-hidden border-r border-[rgba(20,20,19,.08)]",
-        "[contain:layout_paint]",
-        "group"
+        "hover:w-[var(--spacing-sidebar-w-expanded)] group",
+        // Isolate layout + paint so the width-transition redraw cost stays
+        // inside the sidebar subtree and does not ripple into main content
+        // on every animation frame.
+        "[contain:layout_paint]"
       )}
     >
-      {/* Inner 224px panel — translates from -156px to 0 on hover OR when any
-          descendant receives keyboard focus.
-          GPU-composited; no layout reflow on parent or main content.
-          Per RESEARCH Pattern 5 + Task 1 SPIKE Option A literal D-40-08. */}
-      <div
-        role="navigation"
-        aria-label={t("primaryNav")}
-        className={cn(
-          "absolute inset-y-0 left-0 w-[var(--spacing-sidebar-w-expanded)]",
-          "bg-dark flex flex-col py-5",
-          "translate-x-[-156px] group-hover:translate-x-0 group-focus-within:translate-x-0",
-          "transition-claude-base will-change-transform",
-          "[contain:layout_paint]"
-        )}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-[17px] pb-6 pt-[6px] whitespace-nowrap w-full">
-          <div className="w-[34px] h-[34px] bg-orange rounded-[9px] grid place-items-center flex-shrink-0 font-serif font-bold text-[17px] text-white">
-            U
-          </div>
-          <span className="font-serif text-[1.18rem] font-bold text-[#4a3f34] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-claude-base">
-            UniBoard
-          </span>
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-[17px] pb-6 pt-[6px] whitespace-nowrap w-full">
+        <div className="w-[34px] h-[34px] bg-orange rounded-[9px] grid place-items-center flex-shrink-0 font-serif font-bold text-[17px] text-white">
+          U
         </div>
+        <span className="font-serif text-[1.18rem] font-bold text-[#4a3f34] opacity-0 group-hover:opacity-100 transition-opacity duration-[0.28s]">
+          UniBoard
+        </span>
+      </div>
 
-        {/* Rule */}
-        <div className="w-[26px] h-px bg-[rgba(60,50,40,.1)] mx-auto mb-[10px] group-hover:w-[calc(100%-44px)] group-focus-within:w-[calc(100%-44px)] transition-claude-base" />
+      {/* Rule — hover-expand is instantaneous; an animated calc() width
+          compounded style-recalc cost across every sidebar hover frame. */}
+      <div className="w-[26px] h-px bg-[rgba(60,50,40,.1)] mx-auto mb-[10px] group-hover:w-[calc(100%-44px)]" />
 
-        {/* Main nav */}
-        <ul className="list-none w-full flex-1 flex flex-col gap-[2px] px-[10px]">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            const Icon = item.icon;
-            return (
-              <li key={item.key}>
-                <Link
-                  href={item.href}
-                  prefetch={true}
-                  className={cn(
-                    "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
-                    "cursor-pointer transition-claude-fast whitespace-nowrap overflow-hidden no-underline",
-                    active
-                      // Active highlight uses the v2.0 0.18 opacity literal.
-                      // Phase 40 code review CR-02: an earlier sweep replaced
-                      // this with bg-orange-soft (0.11), which dropped the
-                      // active-state saturation by ~39%. Keeping the literal
-                      // here is the lower-blast-radius fix vs. mutating the
-                      // shared --color-orange-soft token (which is also used
-                      // by Header focus rings and other consumers at 0.11).
-                      ? "bg-[rgba(217,119,87,0.18)] text-orange"
-                      : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
-                  )}
-                >
-                  <Icon className="flex-shrink-0 w-5 h-5" />
-                  <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-claude-base">
-                    {t(item.key)}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Bottom nav */}
-        <div className="mt-auto px-[10px]">
-          {bottomItems.map((item) => {
-            const active = isActive(item.href);
-            const Icon = item.icon;
-            return (
+      {/* Main nav */}
+      <ul className="list-none w-full flex-1 flex flex-col gap-[2px] px-[10px]">
+        {navItems.map((item) => {
+          const active = isActive(item.href);
+          const Icon = item.icon;
+          return (
+            <li key={item.key}>
               <Link
-                key={item.key}
                 href={item.href}
                 prefetch={true}
                 className={cn(
                   "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
-                  "cursor-pointer transition-claude-fast whitespace-nowrap overflow-hidden no-underline",
+                  "cursor-pointer transition-all duration-[0.15s] whitespace-nowrap overflow-hidden no-underline",
                   active
-                    // Same active-highlight contract as the main nav loop above
-                    // (CR-02). Bottom nav (Settings) shares the v2.0 0.18 baseline.
-                    ? "bg-[rgba(217,119,87,0.18)] text-orange"
+                    ? "bg-[rgba(217,119,87,.18)] text-orange"
                     : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
                 )}
               >
                 <Icon className="flex-shrink-0 w-5 h-5" />
-                {/* WR-07: bottom-nav span uses same group-focus-within: hook
-                    as the main nav loop above so the Settings label appears
-                    when keyboard focus enters the sidebar. */}
-                <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-claude-base">
+                <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-[0.28s]">
                   {t(item.key)}
                 </span>
               </Link>
-            );
-          })}
-        </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Bottom nav */}
+      <div className="mt-auto px-[10px]">
+        {bottomItems.map((item) => {
+          const active = isActive(item.href);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              prefetch={true}
+              className={cn(
+                "flex items-center gap-[14px] py-[11px] px-[14px] rounded-[10px]",
+                "cursor-pointer transition-all duration-[0.15s] whitespace-nowrap overflow-hidden no-underline",
+                active
+                  ? "bg-[rgba(217,119,87,.18)] text-orange"
+                  : "text-[rgba(60,50,40,.65)] hover:bg-[rgba(60,50,40,.06)] hover:text-[rgba(60,50,40,.75)]"
+              )}
+            >
+              <Icon className="flex-shrink-0 w-5 h-5" />
+              <span className="text-[0.84rem] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-[0.28s]">
+                {t(item.key)}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </aside>
   );

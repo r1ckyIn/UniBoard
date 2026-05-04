@@ -44,37 +44,23 @@ export default function NotificationsSection() {
     }
   }, []);
 
-  // Save to localStorage on every change.
-  // Phase 40 code review WR-03: previously this took a fully-baked next-state
-  // object as an argument, which forced callers to read `prefs` from closure
-  // (`{ ...prefs, [key]: !prefs[key] }`). That works today because togglePref
-  // is recreated each render, but if anyone wraps togglePref in useCallback
-  // or passes it to a memoised child, the closure goes stale and rapid-fire
-  // toggles silently drop. Refactor to functional updater so savePrefs never
-  // depends on the closure value of `prefs`.
-  const savePrefs = useCallback(
-    (updater: (prev: NotificationPrefs) => NotificationPrefs) => {
-      setPrefs((prev) => {
-        const next = updater(prev);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-        } catch {
-          // Silently fail if storage is full
-        }
-        return next;
-      });
-    },
-    [],
-  );
+  // Save to localStorage on every change
+  const savePrefs = useCallback((updated: NotificationPrefs) => {
+    setPrefs(updated);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Silently fail if storage is full
+    }
+  }, []);
 
   function togglePref(key: keyof Omit<NotificationPrefs, "digestFrequency">) {
-    savePrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+    savePrefs({ ...prefs, [key]: !prefs[key] });
   }
 
   function setDigestFrequency(freq: "daily" | "weekly") {
-    savePrefs((prev) =>
-      prev.digestFrequency === freq ? prev : { ...prev, digestFrequency: freq },
-    );
+    if (prefs.digestFrequency === freq) return;
+    savePrefs({ ...prefs, digestFrequency: freq });
   }
 
   return (
@@ -128,7 +114,7 @@ export default function NotificationsSection() {
           <button
             type="button"
             onClick={() => setDigestFrequency("daily")}
-            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-claude-fast cursor-pointer ${
+            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-all duration-150 cursor-pointer ${
               prefs.digestFrequency === "daily"
                 ? "bg-[#d97757] text-white border-[#d97757]"
                 : "bg-[#faf9f5] text-[#6b6b65] border-[#e8e5dd] hover:bg-[#efede6]"
@@ -139,7 +125,7 @@ export default function NotificationsSection() {
           <button
             type="button"
             onClick={() => setDigestFrequency("weekly")}
-            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-claude-fast cursor-pointer ${
+            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-all duration-150 cursor-pointer ${
               prefs.digestFrequency === "weekly"
                 ? "bg-[#d97757] text-white border-[#d97757]"
                 : "bg-[#faf9f5] text-[#6b6b65] border-[#e8e5dd] hover:bg-[#efede6]"
@@ -183,7 +169,7 @@ function ToggleRow({ label, checked, onChange, testId }: ToggleRowProps) {
         checked={checked}
         onChange={onChange}
         data-testid={testId}
-        className="appearance-none w-[44px] h-[24px] rounded-full bg-[#e8e5dd] cursor-pointer transition-claude-fast relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[20px] after:h-[20px] after:rounded-full after:bg-white after:shadow-sm after:transition-all after:[transition-duration:var(--motion-fast)] after:[transition-timing-function:var(--ease-claude-out)] checked:bg-[#d97757] checked:after:translate-x-[20px]"
+        className="appearance-none w-[44px] h-[24px] rounded-full bg-[#e8e5dd] cursor-pointer transition-all duration-200 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[20px] after:h-[20px] after:rounded-full after:bg-white after:shadow-sm after:transition-all after:duration-200 checked:bg-[#d97757] checked:after:translate-x-[20px]"
       />
     </label>
   );

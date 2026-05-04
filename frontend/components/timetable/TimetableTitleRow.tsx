@@ -77,7 +77,7 @@ export default function TimetableTitleRow({
       <div className="flex items-center gap-[8px]">
         <button
           className={cn(
-            "w-[30px] h-[30px] rounded-[8px] border border-[#e8e5dd] bg-[#f6f5f0] grid place-items-center cursor-pointer text-[#6b6b65] transition-claude-fast hover:bg-[#efede6] hover:text-[#2d2d2a]",
+            "w-[30px] h-[30px] rounded-[8px] border border-[#e8e5dd] bg-[#f6f5f0] grid place-items-center cursor-pointer text-[#6b6b65] transition-all duration-150 hover:bg-[#efede6] hover:text-[#2d2d2a]",
             weekPosition <= 1 && "opacity-40 cursor-default pointer-events-none"
           )}
           disabled={weekPosition <= 1 || mode === "all"}
@@ -92,7 +92,7 @@ export default function TimetableTitleRow({
 
         <button
           className={cn(
-            "w-[30px] h-[30px] rounded-[8px] border border-[#e8e5dd] bg-[#f6f5f0] grid place-items-center cursor-pointer text-[#6b6b65] transition-claude-fast hover:bg-[#efede6] hover:text-[#2d2d2a]",
+            "w-[30px] h-[30px] rounded-[8px] border border-[#e8e5dd] bg-[#f6f5f0] grid place-items-center cursor-pointer text-[#6b6b65] transition-all duration-150 hover:bg-[#efede6] hover:text-[#2d2d2a]",
             weekPosition >= 14 && "opacity-40 cursor-default pointer-events-none"
           )}
           disabled={weekPosition >= 14 || mode === "all"}
@@ -104,7 +104,7 @@ export default function TimetableTitleRow({
         <div className="flex border border-[#e8e5dd] rounded-[8px] overflow-hidden">
           <button
             className={cn(
-              "text-[0.72rem] font-semibold px-[12px] py-[5px] border-r border-[#e8e5dd] cursor-pointer transition-claude-fast whitespace-nowrap",
+              "text-[0.72rem] font-semibold px-[12px] py-[5px] border-r border-[#e8e5dd] cursor-pointer transition-all duration-150 whitespace-nowrap",
               mode === "all"
                 ? "bg-[rgba(217,119,87,0.11)] text-[#d97757]"
                 : "bg-white text-[#9b9b94] hover:text-[#2d2d2a] hover:bg-[#efede6]"
@@ -115,7 +115,7 @@ export default function TimetableTitleRow({
           </button>
           <button
             className={cn(
-              "text-[0.72rem] font-semibold px-[12px] py-[5px] cursor-pointer transition-claude-fast whitespace-nowrap",
+              "text-[0.72rem] font-semibold px-[12px] py-[5px] cursor-pointer transition-all duration-150 whitespace-nowrap",
               mode === "week"
                 ? "bg-[rgba(217,119,87,0.11)] text-[#d97757]"
                 : "bg-white text-[#9b9b94] hover:text-[#2d2d2a] hover:bg-[#efede6]"

@@ -64,7 +64,7 @@ export default function DeadlineTitleRow({
         <div className="flex border border-[#e8e5dd] rounded-[8px] overflow-hidden">
           <button
             type="button"
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-r border-[#e8e5dd] transition-claude-fast ${
+            className={`text-[0.72rem] font-semibold px-3 py-[5px] border-r border-[#e8e5dd] transition-colors duration-150 ${
               filterMode === "all"
                 ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
                 : "bg-white text-[#9b9b94]"
@@ -76,7 +76,7 @@ export default function DeadlineTitleRow({
           </button>
           <button
             type="button"
-            className={`text-[0.72rem] font-semibold px-3 py-[5px] transition-claude-fast ${
+            className={`text-[0.72rem] font-semibold px-3 py-[5px] transition-colors duration-150 ${
               filterMode === "week"
                 ? "bg-[rgba(217,119,87,.1)] text-[#d97757]"
                 : "bg-white text-[#9b9b94]"

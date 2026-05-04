@@ -197,7 +197,7 @@ export default function SuccessStep() {
         <button
           type="button"
           onClick={handleGoToDashboard}
-          className="mt-8 bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-10 rounded-lg transition-claude-fast hover:-translate-y-px inline-flex items-center gap-2"
+          className="mt-8 bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-10 rounded-lg transition-all duration-150 ease-in-out hover:-translate-y-px inline-flex items-center gap-2"
         >
           <LayoutDashboard size={16} />
           {t("cta")}

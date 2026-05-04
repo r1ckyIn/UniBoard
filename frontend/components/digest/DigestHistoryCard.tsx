@@ -54,7 +54,7 @@ export default function DigestHistoryCard({
               key={item.digest_id}
               onClick={() => onSelect(item.digest_id)}
               className={cn(
-                "flex items-center gap-[10px] py-[9px] border-b border-[#eae7e0] last:border-b-0 cursor-pointer transition-[background] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
+                "flex items-center gap-[10px] py-[9px] border-b border-[#eae7e0] last:border-b-0 cursor-pointer transition-[background] duration-150",
                 "hover:bg-[rgba(0,0,0,0.015)] hover:mx-[-6px] hover:px-[6px] hover:rounded-[8px]",
                 selectedId === item.digest_id &&
                   "bg-[rgba(217,119,87,0.11)] hover:bg-[rgba(217,119,87,0.15)] mx-[-6px] px-[6px] rounded-[8px]"

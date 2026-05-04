@@ -47,7 +47,7 @@ export default function DigestTitleRow({
             {t("generatedAgo", { time: formatDistanceToNow(date, { locale: dateFnsLocale }) })}
           </span>
           <button
-            className="flex items-center gap-[5px] text-[0.74rem] font-semibold py-[6px] px-[12px] rounded-[8px] bg-[#f6f5f0] border border-[#e8e5dd] text-[#6b6b65] cursor-pointer hover:bg-[#efede6] hover:text-[#2d2d2a] transition-claude-fast"
+            className="flex items-center gap-[5px] text-[0.74rem] font-semibold py-[6px] px-[12px] rounded-[8px] bg-[#f6f5f0] border border-[#e8e5dd] text-[#6b6b65] cursor-pointer hover:bg-[#efede6] hover:text-[#2d2d2a] transition-all duration-150"
             disabled={isFetching}
             onClick={onRefresh}
           >

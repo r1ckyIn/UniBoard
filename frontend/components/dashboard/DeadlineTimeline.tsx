@@ -117,12 +117,8 @@ export default function DeadlineTimeline({
   }, []);
 
   useEffect(() => {
-    // Double rAF to ensure layout is stable.
-    // Per Phase 40 code review WR-01: innerRafId may be undefined if cleanup
-    // runs before the outer rAF callback fires (cancelAnimationFrame(undefined)
-    // is a per-spec no-op, but the explicit guard documents intent and
-    // prevents misbehaviour if this ever swaps to a different scheduler).
-    let innerRafId: number | undefined;
+    // Double rAF to ensure layout is stable
+    let innerRafId: number;
     const outerRafId = requestAnimationFrame(() => {
       innerRafId = requestAnimationFrame(() => {
         drawTimeline();
@@ -131,7 +127,7 @@ export default function DeadlineTimeline({
 
     return () => {
       cancelAnimationFrame(outerRafId);
-      if (innerRafId !== undefined) cancelAnimationFrame(innerRafId);
+      cancelAnimationFrame(innerRafId);
     };
   // selectedDeadlineId is excluded: selection styling is handled in JSX, not SVG
   }, [drawTimeline, deadlines]);
@@ -196,7 +192,7 @@ export default function DeadlineTimeline({
                 }}
                 className={cn(
                   "group py-3 px-4 mb-3 rounded-sm cursor-pointer",
-                  "transition-claude-fast",
+                  "transition-all duration-150 ease-out",
                   "hover:translate-x-1",
                   isSelected && "translate-x-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
                 )}

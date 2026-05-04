@@ -44,7 +44,7 @@ export default function SuccessOverlay({
           <button
             type="button"
             onClick={onContinue}
-            className="w-auto px-8 h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] hover:-translate-y-px active:translate-y-0 transition-[background,transform] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
+            className="w-auto px-8 h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] hover:-translate-y-px active:translate-y-0 transition-[background,transform] duration-150"
           >
             {t("auth.success.continueButton")}
           </button>
