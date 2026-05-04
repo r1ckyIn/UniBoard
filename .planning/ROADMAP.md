@@ -1,13 +1,15 @@
-# Roadmap: UniBoard v3.0
+# Roadmap: UniBoard v3.0 (CANCELLED 2026-05-04)
+
+> ⚠️ **v3.0 CANCELLED** — Phase 39 (Design Token Foundation, PR #127) and Phase 40 (Shared Component Polish, PR #128) shipped to production then **reverted via PR #133 (12e218b) on 2026-05-04** after a UI regression on `uniboard.uk`. UI work paused indefinitely; user is prioritizing functional/backend stability. Phases 41/42/43 deferred to backlog (see Backlog section). All Phase 39+40 planning artifacts (CONTEXT/PLAN/SUMMARY/REVIEW/LEARNINGS) preserved on `chore/milestone-v3.0-init` branch (local-only, unpushed) for future reference.
 
 ## Overview
 
-UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). v3.0 is a UI Polish & Cohesion milestone (Claude 美学叠加层) — preserving v2.0's validated Rough.js hand-drawn aesthetic while overlaying Anthropic/Claude design dimensions (oklch tokens, cubic-bezier motion, serif hierarchy, a11y polish, optional warm-deep-brown dark mode, new-feature visual coverage). 5 phases derived from 8 REQ categories (25 REQs total). Phase 35 Push Notifications deferred to v3.1; Phase 36 UX Polish subsumed into Phase 42 NEWVIS; Phase 37 Sidebar Refactor subsumed into Phase 40 SHARED-03. v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.
+UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). v3.0 was scoped as a UI Polish & Cohesion milestone (Claude 美学叠加层) — preserving v2.0's validated Rough.js hand-drawn aesthetic while overlaying Anthropic/Claude design dimensions (oklch tokens, cubic-bezier motion, serif hierarchy, a11y polish, optional warm-deep-brown dark mode, new-feature visual coverage). 5 phases derived from 8 REQ categories (25 REQs total). Phase 35 Push Notifications deferred to v3.1; Phase 36 UX Polish subsumed into Phase 42 NEWVIS; Phase 37 Sidebar Refactor subsumed into Phase 40 SHARED-03. **v3.0 cancelled mid-flight on 2026-05-04 — see banner above.** v2.0 archive: `.planning/milestones/v2.0-ROADMAP.md`.
 
 ## Milestones
 
 - ✅ **v2.0 — Production Foundation** — Phases 1-12, 11.1, 13-34, 32.1, 38, 38.1, 38.2 (39 phases shipped 2026-04-25) [archive](milestones/v2.0-ROADMAP.md)
-- 🚧 **v3.0 — UI Polish & Cohesion (Claude 美学叠加层)** — Phases 39-43 (active, opened 2026-04-27)
+- ❌ **v3.0 — UI Polish & Cohesion (Claude 美学叠加层)** — CANCELLED 2026-05-04. Phases 39+40 reverted; Phases 41-43 deferred indefinitely.
 
 ## Phases
 
@@ -79,7 +81,9 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 
 ## Phase Details
 
-### Phase 39: Design Token Foundation
+### ~~Phase 39: Design Token Foundation~~ — REVERTED 2026-05-04
+
+> Shipped 2026-04-30 (PR #127 / `c86b07f`); **reverted via PR #133 (`12e218b`) on 2026-05-04** with the v3.0 milestone cancellation. Original goal preserved below for reference.
 
 **Goal:** Establish a complete design token system (color in oklch, spacing scale, elevation/shadow, motion timing, serif type scale) as CSS variables that every downstream phase consumes. No component visual changes in this phase — only the token layer is added; legacy hsl values remain as fallback.
 
@@ -102,7 +106,9 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 
 **UI hint**: yes
 
-### Phase 40: Shared Component Polish
+### ~~Phase 40: Shared Component Polish~~ — REVERTED 2026-05-04
+
+> Shipped 2026-05-02 (PR #128 / `5eded11`); **reverted via PR #133 (`12e218b`) on 2026-05-04** with the v3.0 milestone cancellation. Original goal preserved below for reference. Production UI regression on `uniboard.uk/zh` (greeting username + dashboard widgets disappeared) drove the rollback.
 
 **Goal:** Unify the internal details (padding, focus ring, disabled state) of Card/Button/Input/Modal/Tooltip to the new design tokens, refactor the Sidebar to transform-based positioning to eliminate hover lag on Intel Mac, and adopt the assistant-ui Claude Clone no-bubble flowing AI reply pattern across Digest/Deadlines/Predict. Rough.js outer borders preserved — only internals change.
 
@@ -124,7 +130,9 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 
 **UI hint**: yes
 
-### Phase 41: State Coverage & Accessibility Pass
+### ~~Phase 41: State Coverage & Accessibility Pass~~ — DEFERRED INDEFINITELY (2026-05-04)
+
+> Cancelled with v3.0 milestone. Original goal preserved below for reference if a future a11y-focused milestone wants to absorb STATES-01..03 + A11Y-01..05 REQs. Note: the underlying STATES/A11Y REQs are still real product gaps — they should be picked up under a future functional milestone (not as UI polish).
 
 **Goal:** Add Rough.js-styled Loading/Empty/Error states across all 10 pages (no off-the-shelf shimmer libraries) and complete a full a11y pass — focus visible rings, AAA text contrast / AA UI chrome, aria-label on icon-only widgets, keyboard navigation across all pages, prefers-reduced-motion honored.
 
@@ -143,7 +151,9 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 **Plans:** TBD (promote via `/gsd-discuss-phase 41` → `/gsd-plan-phase 41`)
 **UI hint**: yes
 
-### Phase 42: New-Feature Visual Coverage
+### ~~Phase 42: New-Feature Visual Coverage~~ — DEFERRED INDEFINITELY (2026-05-04)
+
+> Cancelled with v3.0 milestone. The 4 Phase 36 UXPOL gaps (TokenStep cached-state, SuccessStep per-domain sync, AI Chat input validation, AI failure error display) are still real UX issues but should be addressed individually via `/gsd-quick` patches under whatever functional milestone is active, NOT as a coordinated "visual coverage" phase.
 
 **Goal:** Apply the design tokens + shared component polish to the four v2.0-residual UX gaps that the auto-bootstrapped Phase 36 originally targeted — TokenStep cached-state UI, SuccessStep per-domain sync progress bars, AI Chat client-side validation, AI request failure error display. This phase closes the loop on Phase 36 UXPOL-01..04 with the new visual vocabulary.
 
@@ -160,7 +170,9 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 **Plans:** TBD (promote via `/gsd-discuss-phase 42` → `/gsd-plan-phase 42`)
 **UI hint**: yes
 
-### Phase 43: Dark Mode (optional)
+### ~~Phase 43: Dark Mode (optional)~~ — DEFERRED INDEFINITELY (2026-05-04)
+
+> Cancelled with v3.0 milestone. Was already optional/cost-gated. Original goal preserved below for reference.
 
 **Goal:** Apply warm-deep-brown (`#2b2a27` per Anthropic spec) dark mode root tokens, adapt Rough.js stroke generation for dark backgrounds, and re-tune paper texture (fractalNoise grain + ruled lines) opacity for dark surfaces. Optional milestone — kickoff conditional on cost-benefit review (Rough.js dynamic stroke generation may be expensive); deferable to v3.1.
 
@@ -188,11 +200,11 @@ UniBoard v3.0 begins after v2.0 — Production Foundation shipped (2026-04-25). 
 | 18-21 | v2.0 (M3) | 14/14 | Complete | 2026-03-29 |
 | 22-28 | v2.0 (M4) | 21/21 | Complete | 2026-04-04 |
 | 29-34, 32.1, 38, 38.1, 38.2 | v2.0 (production hardening) | ~45/45 | Complete | 2026-04-25 |
-| 39. Design Token Foundation | v3.0 | 4/4 | Complete (2026-04-30) — plan-01 oklch+spacing, plan-02 typography, plan-03 motion+SSE+ESLint, plan-04 transition sweep. Plan-04 Task 3 (Playwright baselines) deferred to production visual UAT per user; MOTION-01 status: **partial**. See SEED-39-playwright-baselines.md. | 2026-04-30 |
-| 40. Shared Component Polish | v3.0 | 3/3 | Complete   | 2026-05-02 |
-| 41. State Coverage & Accessibility Pass | v3.0 | 0/0 | Not started | - |
-| 42. New-Feature Visual Coverage | v3.0 | 0/0 | Not started — absorbs Phase 36 UXPOL | - |
-| 43. Dark Mode (optional) | v3.0 | 0/0 | Not started — cost-benefit gate before kickoff | - |
+| 39. Design Token Foundation | v3.0 | 4/4 | **REVERTED 2026-05-04** (PR #133 / 12e218b) — was Complete 2026-04-30 (PR #127 / c86b07f); reverted with v3.0 cancellation | 2026-04-30 → reverted 2026-05-04 |
+| 40. Shared Component Polish | v3.0 | 3/3 | **REVERTED 2026-05-04** (PR #133 / 12e218b) — was Complete 2026-05-02 (PR #128 / 5eded11); reverted with v3.0 cancellation | 2026-05-02 → reverted 2026-05-04 |
+| ~~41. State Coverage & Accessibility Pass~~ | ~~v3.0~~ | 0/0 | **DEFERRED INDEFINITELY** (v3.0 cancelled) | - |
+| ~~42. New-Feature Visual Coverage~~ | ~~v3.0~~ | 0/0 | **DEFERRED INDEFINITELY** (v3.0 cancelled) | - |
+| ~~43. Dark Mode (optional)~~ | ~~v3.0~~ | 0/0 | **DEFERRED INDEFINITELY** (v3.0 cancelled) | - |
 
 ## Backlog
 

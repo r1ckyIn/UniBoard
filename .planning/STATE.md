@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: — UI Polish & Cohesion (Claude 美学叠加层)
-status: executing
-stopped_at: "Phase 40 shipped (PR #128 merged as 5eded11) and learnings extracted; ready for Phase 41"
-last_updated: "2026-05-03T06:54:35.292Z"
-last_activity: 2026-05-03
+milestone_name: — UI Polish & Cohesion (CANCELLED 2026-05-04)
+status: cancelled
+stopped_at: "v3.0 cancelled — Phases 39+40 reverted via PR #133 (12e218b); UI work paused indefinitely; functional milestones take precedence going forward"
+last_updated: "2026-05-04T05:58:00.000Z"
+last_activity: 2026-05-04
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Help students get the highest possible GPA by surfacing only grade-relevant information from Canvas and Ed in one place
-**Current focus:** Phase 40 — shared-component-polish
+**Current focus:** None — between milestones. v3.0 cancelled; awaiting new functional milestone definition.
 
 ## Current Position
 
-Phase: 40 (shared-component-polish) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 40
-Last activity: 2026-05-03
+Status: BETWEEN MILESTONES (v3.0 cancelled)
+Last activity: 2026-05-04
+
+### v3.0 Cancellation Note
+- **Phases shipped then reverted:** 39 (Design Token Foundation, PR #127) + 40 (Shared Component Polish, PR #128)
+- **Reverted via:** PR #133 (12e218b) on 2026-05-04 after production UI regression
+- **Phases never started:** 41 (STATES — A11Y), 42 (NEWVIS — New-Feature Visual Coverage), 43 (DARK — Dark Mode) — all moved to backlog as DEFERRED INDEFINITELY
+- **Why:** UI work pause; user prioritizing functional/backend stability over visual polish
+- **Planning artifacts retained:** Phase 39+40 CONTEXT/PLAN/SUMMARY/REVIEW/LEARNINGS preserved on `chore/milestone-v3.0-init` branch (local-only, unpushed) for future reference if v3.0 is ever revisited
 
 ## Milestones Completed
 
