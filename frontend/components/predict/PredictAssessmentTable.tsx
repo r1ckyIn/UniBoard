@@ -82,7 +82,7 @@ export default function PredictAssessmentTable({
           return (
             <tr
               key={`${a.name}-${i}`}
-              className="transition-claude-fast hover:bg-[rgba(0,0,0,0.015)]"
+              className="transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[rgba(0,0,0,0.015)]"
             >
               {/* Assessment name */}
               <td
@@ -143,7 +143,7 @@ export default function PredictAssessmentTable({
                         type="text"
                         inputMode="decimal"
                         pattern="[0-9]*\.?[0-9]*"
-                        className="score-input w-[56px] border-0 border-b-2 border-dashed border-[#d0cdc4] bg-transparent font-serif font-bold text-[1.05rem] text-center outline-none px-[4px] py-[2px] transition-claude-fast focus:border-b-current"
+                        className="score-input w-[56px] border-0 border-b-2 border-dashed border-[#d0cdc4] bg-transparent font-serif font-bold text-[1.05rem] text-center outline-none px-[4px] py-[2px] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] focus:border-b-current"
                         style={
                           {
                             color: courseColor,

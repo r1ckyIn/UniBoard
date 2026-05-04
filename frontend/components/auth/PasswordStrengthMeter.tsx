@@ -39,7 +39,7 @@ export default function PasswordStrengthMeter({
           <div
             key={i}
             data-testid="pw-bar"
-            className={`h-[3px] flex-1 rounded-sm transition-claude-fast ${
+            className={`h-[3px] flex-1 rounded-sm transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] ${
               i < strength ? BAR_COLORS[strength] : "bg-divider"
             }`}
           />

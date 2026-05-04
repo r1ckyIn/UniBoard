@@ -47,7 +47,7 @@ export default function TokenInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={t(`${platform}.placeholder`)}
           className={cn(
-            "w-full font-mono text-sm py-3 px-4 border-[1.5px] rounded-lg bg-cream transition-claude-fast placeholder:font-sans",
+            "w-full font-mono text-sm py-3 px-4 border-[1.5px] rounded-lg bg-cream transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] placeholder:font-sans",
             "outline-none focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,.11)]",
             status === "idle" && "border-card-border",
             status === "valid" && "border-[#788c5d]",

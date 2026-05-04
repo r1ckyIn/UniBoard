@@ -54,43 +54,6 @@ const eslintConfig = [
             "Raw `transition-{all,colors} duration-{N}` in template literal (with optional modifier prefix) is forbidden. " +
             "See .planning/phases/39-design-token-foundation/39-RESEARCH.md §Pattern 4.",
         },
-        // === Phase 40 D-40-03 + D-40-04: Block verbose tokenized form +
-        // === legacy --ease/--ease-fast aliases ===
-        // Phase 40 plan-1 added @utility transition-claude-fast/base/slow
-        // shorthands to globals.css (per SEED-40 closure). Encourage their
-        // use over the verbose 102-character tokenized form. Also block
-        // v2.0 legacy --ease/--ease-fast aliases at the new-debt boundary
-        // (D-40-04 deprecation; aliases retained in globals.css for
-        // forward-compat but no new occurrences).
-        {
-          selector:
-            "Literal[value=/(?:[a-z][a-z0-9-]*:)*transition-(all|colors)\\s+\\[transition-duration:var\\(--motion-(fast|base|slow)\\)\\]\\s+\\[transition-timing-function:var\\(--ease-claude-out\\)\\]/]",
-          message:
-            "Verbose `transition-{all,colors} [transition-duration:var(--motion-X)] [transition-timing-function:var(--ease-claude-out)]` is forbidden. " +
-            "Use the shorthand: transition-claude-fast / transition-claude-base / transition-claude-slow (defined in globals.css @utility blocks). " +
-            "See .planning/phases/40-shared-component-polish/40-RESEARCH.md §Pattern 6.",
-        },
-        {
-          selector:
-            "TemplateElement[value.raw=/(?:[a-z][a-z0-9-]*:)*transition-(all|colors)\\s+\\[transition-duration:var\\(--motion-(fast|base|slow)\\)\\]\\s+\\[transition-timing-function:var\\(--ease-claude-out\\)\\]/]",
-          message:
-            "Verbose tokenized transition form in template literal is forbidden. Use shorthand. See Phase 40 PATTERNS.md.",
-        },
-        {
-          selector:
-            "Literal[value=/var\\(--ease(?:-fast)?\\)/]",
-          message:
-            "v2.0 legacy `var(--ease)` / `var(--ease-fast)` are deprecated (D-40-04). " +
-            "New code MUST use `var(--ease-claude-out)` + `var(--motion-fast/base/slow)` " +
-            "or the @utility shorthand transition-claude-fast/base/slow. " +
-            "Aliases remain in globals.css for forward-compat, but no new occurrences.",
-        },
-        {
-          selector:
-            "TemplateElement[value.raw=/var\\(--ease(?:-fast)?\\)/]",
-          message:
-            "Legacy --ease/--ease-fast in template literal is deprecated. See D-40-04.",
-        },
       ],
     },
   },
@@ -101,17 +64,6 @@ const eslintConfig = [
   // else. See __tests__/eslint/no-raw-transition.test.ts header for context.
   {
     files: ["__tests__/eslint/no-raw-transition.test.ts"],
-    rules: {
-      "no-restricted-syntax": "off",
-    },
-  },
-  // === Phase 40 D-40-04 self-reference override: the rule selectors
-  // themselves contain the forbidden `var(--ease)` substring as part
-  // of their regex source, which self-trips when ESLint lints its own
-  // config file. Disabling no-restricted-syntax in this one config file
-  // lets `pnpm lint` pass while preserving the rule everywhere else.
-  {
-    files: ["eslint.config.mjs"],
     rules: {
       "no-restricted-syntax": "off",
     },

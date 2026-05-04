@@ -267,7 +267,7 @@ export default function DeadlineCard({
                 <div
                   key={mat.title}
                   data-mat-item
-                  className="flex items-center gap-[14px] py-[10px] px-[12px] rounded-[8px] transition-claude-fast cursor-pointer border-b border-[#eae7e0] last:border-b-0 hover:bg-[#efede6]"
+                  className="flex items-center gap-[14px] py-[10px] px-[12px] rounded-[8px] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] cursor-pointer border-b border-[#eae7e0] last:border-b-0 hover:bg-[#efede6]"
                 >
                   <span
                     className="text-[0.64rem] font-bold py-[3px] px-[8px] rounded-[5px] whitespace-nowrap flex-shrink-0 min-w-[48px] text-center"

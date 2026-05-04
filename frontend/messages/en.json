@@ -6,9 +6,7 @@
     "deadlines": "Deadlines",
     "predict": "Predict",
     "digest": "Digest",
-    "settings": "Settings",
-    "sidebarLandmark": "Sidebar",
-    "primaryNav": "Primary navigation"
+    "settings": "Settings"
   },
   "header": {
     "brand": "UniBoard",
@@ -729,9 +727,7 @@
         "confirmTitle": "Disconnect All Tokens?",
         "confirmDesc": "This will remove your Canvas and Ed API tokens. You can reconnect anytime from this settings page.",
         "confirmButton": "Yes, Disconnect",
-        "cancel": "Cancel",
-        "successAll": "Both Canvas and Ed tokens were disconnected.",
-        "partialFailure": "One or both tokens failed to disconnect. Please try again."
+        "cancel": "Cancel"
       },
       "delete": {
         "title": "Delete account",

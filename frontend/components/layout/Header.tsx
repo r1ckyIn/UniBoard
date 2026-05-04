@@ -81,7 +81,7 @@ export default function Header() {
           className={cn(
             "flex items-center gap-2 bg-card-bg border border-card-border rounded-[10px]",
             "py-[7px] px-[14px] w-[220px]",
-            "transition-claude-fast",
+            "transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
             "focus-within:border-orange focus-within:shadow-[0_0_0_3px_var(--color-orange-soft)] focus-within:bg-white"
           )}
         >
@@ -98,18 +98,13 @@ export default function Header() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              // Phase 40 code review WR-05: use functional updater so the
-              // toggle is always derived from the latest committed state.
-              // The previous `setNotifOpen(!notifOpen)` read notifOpen from
-              // the prior render's closure, which under rapid clicks could
-              // cancel a true→true toggle the user expected.
-              setNotifOpen((prev) => !prev);
+              setNotifOpen(!notifOpen);
               setAvatarOpen(false);
             }}
             className={cn(
               "w-9 h-9 rounded-[10px] border border-card-border bg-card-bg",
               "grid place-items-center cursor-pointer text-text-2",
-              "transition-claude-fast hover:bg-card-bg-hover relative"
+              "transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-card-bg-hover relative"
             )}
           >
             <Bell className="w-4 h-4" />
@@ -137,8 +132,7 @@ export default function Header() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              // WR-05: same functional-updater pattern as the bell button.
-              setAvatarOpen((prev) => !prev);
+              setAvatarOpen(!avatarOpen);
               setNotifOpen(false);
             }}
             className={cn(

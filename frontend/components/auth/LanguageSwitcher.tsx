@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
     <button
       type="button"
       onClick={toggleLocale}
-      className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-card-bg/80 backdrop-blur-sm border border-divider text-text-2 hover:text-text-1 hover:bg-card-bg transition-claude-fast"
+      className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-card-bg/80 backdrop-blur-sm border border-divider text-text-2 hover:text-text-1 hover:bg-card-bg transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
       aria-label={`Switch to ${locale === "en" ? "Chinese" : "English"}`}
     >
       <Globe size={14} />

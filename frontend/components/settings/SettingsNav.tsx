@@ -47,21 +47,12 @@ export default function SettingsNav({ activeSection, onNavClick }: SettingsNavPr
               <button
                 type="button"
                 onClick={() => onNavClick(item.id)}
-                // Phase 40 code review WR-04: previously the className had
-                // `border-l-2 border-transparent` plus an active-state
-                // `border-l-[#d97757]` AND an inline `style.borderLeftColor`.
-                // Inline style always overrides Tailwind utilities, so the
-                // className portion controlling the left border was dead
-                // code that would silently shadow any future className tweak.
-                // Single source of truth: the inline style block owns
-                // border-left-{width,style,color}. The className keeps only
-                // background + text-color + the bg-transparent baseline so
-                // there is no overlap with the inline style.
                 className={cn(
                   "w-full flex items-center gap-[10px] py-[9px] px-[12px] rounded-[8px]",
-                  "text-[0.82rem] font-medium cursor-pointer transition-claude-fast",
+                  "text-[0.82rem] font-medium cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]",
+                  "border-l-2 border-transparent",
                   "hover:bg-[#efede6] hover:text-[#2d2d2a]",
-                  isActive && "bg-[rgba(217,119,87,0.11)] text-[#d97757] font-semibold",
+                  isActive && "bg-[rgba(217,119,87,0.11)] text-[#d97757] border-l-[#d97757] font-semibold",
                   !isActive && "text-[#6b6b65]",
                   "bg-transparent border-0"
                 )}

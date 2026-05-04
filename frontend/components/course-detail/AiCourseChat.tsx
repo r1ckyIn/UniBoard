@@ -4,8 +4,7 @@ import { useState, useRef, useEffect, Fragment } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ArrowUp, Info } from "lucide-react";
 import { useAiStream } from "@/hooks/use-ai-stream";
-import StreamingAssistant from "@/components/shared/StreamingAssistant";
-import UserMessage from "@/components/shared/UserMessage";
+import AiChatBubble from "@/components/shared/AiChatBubble";
 import Sources from "@/components/shared/Sources";
 import RoughCard from "@/components/design-system/RoughCard";
 
@@ -81,14 +80,11 @@ export default function AiCourseChat({
               const isLatestAssistant = isLatest && msg.role === "assistant";
               return (
                 <Fragment key={i}>
-                  {msg.role === "user" ? (
-                    <UserMessage content={msg.content} />
-                  ) : (
-                    <StreamingAssistant
-                      content={msg.content}
-                      isStreaming={isStreaming && isLatestAssistant}
-                    />
-                  )}
+                  <AiChatBubble
+                    role={msg.role}
+                    content={msg.content}
+                    isStreaming={isStreaming && isLatestAssistant}
+                  />
                   {/* Phase 34 AIFEAT-02: Sources panel only below latest assistant answer */}
                   {isLatestAssistant && sources.length > 0 && (
                     <Sources sources={sources} />
