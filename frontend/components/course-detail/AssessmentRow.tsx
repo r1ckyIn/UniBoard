@@ -45,7 +45,7 @@ const AssessmentRow = React.memo(function AssessmentRow({
     : t("assessment.variousDates");
 
   return (
-    <tr className="transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[rgba(106,155,204,0.03)]">
+    <tr className="transition-colors duration-150 hover:bg-[rgba(106,155,204,0.03)]">
       {/* Assessment name */}
       <td className="px-[10px] py-[14px] text-[0.84rem] text-[#6b6b65] align-middle border-b border-[#eae7e0]">
         <div className="assess-name font-semibold text-[#2d2d2a] text-[0.84rem]">
@@ -103,7 +103,7 @@ const AssessmentRow = React.memo(function AssessmentRow({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                className="score-input w-[60px] border-0 border-b-2 border-dashed border-[#e8e5dd] bg-transparent font-serif font-bold text-[1.05rem] text-center outline-none px-[4px] py-[2px] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] focus:border-b-[var(--focus-color)]"
+                className="score-input w-[60px] border-0 border-b-2 border-dashed border-[#e8e5dd] bg-transparent font-serif font-bold text-[1.05rem] text-center outline-none px-[4px] py-[2px] transition-colors duration-150 focus:border-b-[var(--focus-color)]"
                 style={
                   {
                     color: courseColor,

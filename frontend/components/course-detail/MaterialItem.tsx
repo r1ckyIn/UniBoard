@@ -43,7 +43,7 @@ export default function MaterialItem({
 
   return (
     <div
-      className={`mat-item flex items-center gap-[14px] px-[14px] py-[12px] rounded-[8px] border-b border-[#eae7e0] last:border-b-0 transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6] ${url && onPreview ? "cursor-pointer" : "cursor-default"}`}
+      className={`mat-item flex items-center gap-[14px] px-[14px] py-[12px] rounded-[8px] border-b border-[#eae7e0] last:border-b-0 transition-colors duration-150 hover:bg-[#efede6] ${url && onPreview ? "cursor-pointer" : "cursor-default"}`}
       onClick={url && onPreview ? () => onPreview(url, title) : undefined}
     >
       {/* Week badge */}

@@ -62,7 +62,7 @@ export default function LanguageSection() {
             key={option.value}
             type="button"
             onClick={() => handleLanguageChange(option.value)}
-            className={`px-[20px] py-[10px] rounded-[10px] text-[0.84rem] font-semibold border-[1.5px] transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] cursor-pointer ${
+            className={`px-[20px] py-[10px] rounded-[10px] text-[0.84rem] font-semibold border-[1.5px] transition-all duration-200 cursor-pointer ${
               currentLang === option.value
                 ? "border-[#d97757] bg-[rgba(217,119,87,0.08)] text-[#d97757]"
                 : "border-[#e8e5dd] bg-[#f6f5f0] text-[#6b6b65] hover:border-[#d0cdc4]"

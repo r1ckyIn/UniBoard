@@ -1,60 +1,44 @@
 # Milestones
 
-## v2.0 — Production Foundation (Shipped: 2026-04-25)
+## v2.0 UniBoard Full Stack (Shipped: 2026-04-04)
 
-**Scope:** 39 phases, ~140 plans across M1 Frontend, M2 Backend, M3 AI/MCP/Skills, M4 Hardening, and v3.0-bridge production hardening.
-**Audit verdict:** `passed` (39/39 v2.0-scope phases complete)
-**Audit:** `.planning/milestones/v2.0-MILESTONE-AUDIT.md`
-**Archive:** `.planning/milestones/v2.0-ROADMAP.md`, `.planning/milestones/v2.0-REQUIREMENTS.md`
-**Timeline:** 2026-03-15 → 2026-04-25 (~6 weeks)
-**Stats:** 262 commits | 2,434 files changed | +257K / -41K lines | ~34K LOC source + ~1K SQL across 326 source files | 451 backend tests + ~70 frontend component tests
+**Phases completed:** 11 phases, 35 plans, 63 tasks
 
-**Sub-milestones absorbed:**
-- M1 Frontend App (Phases 1-12, 11.1 — shipped 2026-03-25)
-- M2 Backend Core (Phases 13-17 — shipped 2026-03-27)
-- M3 AI/MCP/Skills (Phases 18-21 — shipped 2026-03-29)
-- M4 Hardening (Phases 22-28 — shipped 2026-04-04)
-- Production Hardening (Phases 29, 30, 31, 31.1, 32, 32.1, 33, 34, 38, 38.1, 38.2 — shipped 2026-04-04 → 2026-04-25)
+**Key accomplishments:**
 
-**Key accomplishments (8-12 highlights):**
-
-1. **10-page dashboard (M1)** — 10 HTML prototypes (~7000 lines) converted to Next.js 15 with Anthropic-inspired warm design (Rough.js hand-drawn borders, Source Serif 4 + Inter, paper texture); full i18n English+Chinese; OpenAPI contract-first with 30 mock Route Handlers + 26 TanStack Query hooks
-2. **Backend stack (M2)** — Supabase PostgreSQL with 15 tables + 60 RLS policies; Supabase Auth (bridge pattern preserves all 26 M1 hooks unchanged); 4 platform adapters (Canvas, Ed Discussion, Ed Lessons, USYD Unit Outline) with rate limiting + circuit breaker + defensive Pydantic; 13 REST endpoints matching M1 OpenAPI contracts (zero frontend changes); APScheduler sync engine (grades 15min, deadlines 1h, modules daily, outline per-semester); 149 backend tests
-3. **AI/MCP layer (M3)** — Claude Agent with MCP tools for cross-platform research (Deadline Chat, Course QA, Unit Review); SSE streaming with Anthropic tool_use agent loop; 13 seeded skills with auto-generation from execution traces; ROI ranking; MCP server for Claude Desktop access; AI quality gate (F1 < 75% auto-fallback)
-4. **Production hardening (M4)** — Multi-stage Docker + tini + non-root; fail-fast startup config validation; sync/tasks.py god module split into 7 domain modules (max 294 lines); EdRequestMixin DRY consolidation + 275 lines dead code removed; security headers (HSTS, CSP, X-Frame-Options); structured HTTP logging with request_id; slowapi rate limiting (60/min general, 10/min AI); error.tsx + global-error.tsx
-5. **CI/CD + Production deploy (M4 P26 + 31.1)** — GitHub Actions split backend/frontend pipelines with path filters; Dependabot; Railway DOCKERFILE deploy + Vercel; Sentry on both stacks with release tracking, fingerprinting, tunnel route bypass, DBAPIError filtering, DB pool fix
-6. **BFF proxy + E2E real data (Phase 30/31)** — All 25 mock Route Handlers converted to `proxyRequest` against Railway Python backend; Supabase JWT auto-forwarded; end-to-end user journey verified (register → token setup → first sync → real Canvas/Ed data); ANTHROPIC_API_KEY configured for Railway
-7. **Sync integration fixes (Phase 32.1)** — All 5 SYNC-FIX requirements: Unit Outline weight extraction, Canvas grades current_mark/grade_letter, Ed Discussion ed_course_id matching, Canvas deadlines null-safe due_at handling, "Final Exam for:" / Concession / Supplementary shell-course filtering; Wave 0 RED-state TDD with env-gated real-data integration harness
-8. **Auth hardening + Mimecast pivot (Phase 32 → 33)** — Resend custom SMTP + branded email templates shipped; Supabase email confirmation **permanently OFF** after USYD Mimecast Secure Email Gateway quarantine discovery (3-hour digest delays untenable); Google OAuth as primary auth path bypassing email entirely; USYD-aware registration banner; ResendForm 60s cooldown; recall email service with in-app-first + 14-day fallback strategy; full TRD §7.5/§16.9 documentation
-9. **AI features live (Phase 34)** — AI study recommendations prioritizing assessments by weight; RAG course material QA on Ed Lessons with cited sources via numeric `[N]` citations; GPA path planner (`calculate_multi_course_path` with Decimal-precise math); APScheduler 7am AEST daily study-rec job; 30-min hot-set embedding worker
-10. **First-load performance (Phase 38 + 38.1 + 38.2)** — RSC prefetch + HydrationBoundary across 6 dashboard pages eliminates skeleton flash on cached-auth revisit; Dashboard `/deadlines/upcoming → /courses/{nearest}` waterfall collapsed via `Promise.all`/`allSettled`; `createPrefetchedPage` HOF as reusable contract; static-invariant prefetch-consumer parity test prevents future drift; force-dynamic reversal + `loading.tsx` deletion (Phase 38.2 architectural correction) restored Next.js 15 router cache + 30s `staleTimes` for skeleton-free sidebar nav; Railway warmup cron
-11. **ORM cascade alignment (PR #117)** — 18 FKs aligned across 15 model files to declare CASCADE matching actual Supabase schema reality; alembic migration reverted after audit found Supabase already CASCADE; SEED-002/003 planted for follow-up FK hygiene
-12. **Hot-fixes shipped during v2.0** — AIEngine markdown code-fence stripping (PR #116), stale `canvas_course_id=NULL` Course row purge (PR #115), Ed Lessons due_at coercion + SAVEPOINT-isolated upsert (PR #114), Intel Mac GPU paint-cost fixes across Header backdrop-blur / Sidebar bleeding shadow / Timetable skeleton shimmer / Grid entry fade (PRs #89-92, INP 267→107 ms)
-
-**Key Decisions:**
-
-| Decision | Outcome |
-|----------|---------|
-| Full rebuild, contract-first OpenAPI mock + Supabase hybrid | ✓ Good — M1+M2 in 11 days, zero frontend changes on backend integration |
-| MCP Agent for cross-platform AI research | ✓ Good — Phase 19/20/21 shipped |
-| Anthropic-inspired warm design (Rough.js, paper texture) | ✓ Good — 103 prototype iterations, 10 pages consistent |
-| **Supabase email confirmation: permanently OFF** | ✓ Documented (32-03 strategic resolution + 33 AUTH-HARDEN-04) — Mimecast 3-hour digest untenable for signup UX |
-| **Phase 38 → 38.2 force-dynamic reversal** | ✓ Architectural correction restored router cache + skeleton-free nav |
-| ORM cascade alignment with Supabase reality | ✓ Discovered FKs already CASCADE; ORM-only diff (PR #117) |
-
-**Known Deferred Items (carried into v3.0):**
-
-- 6 `human_needed` UAT checkpoints (Phases 11.1, 26, 31, 33, 34, 38, 38.2) — automated coverage uniformly green; awaiting human production walkthrough
-- Phase 31.1-03 Gmail MCP `/check-alerts` automated monitoring pipeline — infrastructure deferred
-- 2 on-branch quick-task PRs (260423-ebp purge stale Course rows, 260423-gir ON DELETE CASCADE) — held pending Ed-lessons-sync-degraded debug
-- 14 open debug sessions (auth/setup UAT diagnostics) — all `diagnosed` or `investigating`
-- 3 dormant seeds: SEED-001 (react-hooks v7), SEED-002 (FK parent drift), SEED-003 (passive_deletes refinement)
-- 5 incomplete quick_tasks (`STATE.md` records)
-
-**Out-of-scope phases deferred to v3.0:**
-- Phase 35: Push Notifications (AIFEAT-04)
-- Phase 36: UX Polish (UXPOL-01..04)
-- Phase 37: Sidebar Transform Refactor (duplicate of backlog 999.1)
+- Ed Discussion thread sync task with post-sync AI batch evaluation, 20-thread batch limit, daily counter reset, and intelligence route refactored to read pre-computed scores
+- Feedback endpoint with UPSERT, quality gate F1 auto-fallback at 75%, and bilingual action-oriented digest prompts with urgency sorting
+- Shared FeedbackButton with thumbs up/down on digest highlights and Ed posts, plus SCORE_URGENCY_MAP for 1-5 score-to-color urgency display per D-12
+- SSE streaming AIEngine with Anthropic tool_use agent loop, QAService MCP fallback, bilingual prompts, and DB migration for language/translation columns
+- Batch AI translation service translating course names, module names, lesson/deadline titles into Chinese via Claude API, integrated into sync pipeline for non-English users
+- SSE client utility with POST/GET async generators, useAiStream hook, DeadlineAiChat/AiCourseChat/UnitReviewSection streaming components replacing Coming Soon placeholders
+- LanguageSection component with English/Chinese toggle that persists language_preference to backend and auto-switches next-intl locale
+- RoughCard hand-drawn borders on 3 AI chat components + page-level auto-scroll for streaming unit review
+- Skill + SkillExecution ORM models with JSONB workflow columns, lifecycle enums, and Alembic migration 007
+- ToolExecutor routing 3 MCP tools to Canvas/Ed adapters with graceful error handling, plus SkillService managing two-phase lookup, trace recording, auto-generation from similar traces, lifecycle transitions, and 13 seeded skills
+- ToolExecutor + SkillService wired into QAService replacing placeholder with real adapter calls, traced execution recording, and auto-generation checks on every agent_stream workflow
+- ROI service ranking assignments by weight/difficulty ratio with historical grade scoring and AI fallback, exposed via REST API
+- ROI ranking card in Predict page right panel with TanStack Query hook, priority indicators, and bilingual i18n
+- Migrated VoyageAI embed() from blocking synchronous Client to native AsyncClient in both QAService call sites, verified by 2 new tests
+- Fail-fast startup validation rejects known-insecure JWT/encryption/DB defaults in production mode; CORS origins configurable via CORS_ORIGINS env var
+- Multi-stage Docker build with tini init, non-root user, and Railway PORT support for production deployment
+- Split 1147-line sync/tasks.py god module into 7 domain modules (max 294 lines), all 20 unit tests passing
+- EdRequestMixin extracts shared Ed adapter _request() logic; 275+ lines of dead code removed across 4 files, 4 imports, and 4 dependencies, fixing language_preference bug
+- EdLessonsAdapter finally cleanup, dual engine disposal on shutdown, and health endpoint 503 for degraded state
+- Zero ruff violations (55 fixed) and zero mypy --strict errors (18 fixed) with StrEnum migration and type-safe tool executor
+- Zero-failure pytest suite via stale import fixes, Supabase Auth alignment, and DB-dependent test auto-skip infrastructure
+- Fixed 8 TypeScript errors (missing course_id + beforeEach import) and 23 ESLint warnings (10 unused vars + 13 exhaustive-deps) across 12 frontend files
+- Defense-in-depth security headers (HSTS, CSP, X-Frame-Options) and structured HTTP access logging with request_id propagation via structlog contextvars
+- slowapi-based per-user rate limiting with JWT key extraction: 60 req/min general, 10 req/min AI endpoints, structured 429 ErrorResponse
+- global-error.tsx
+- Backend and frontend CI pipelines with path-filtered triggers, uv/pnpm caching, and Dependabot for automated dependency updates
+- Railway DOCKERFILE deployment config with health checks, updated frontend .env.example, and bilingual deployment guide documenting all env vars for Railway + Vercel + Supabase
+- Sentry error tracking integrated into both Python FastAPI backend and Next.js frontend with conditional initialization, CSP updates, and 4 unit tests
+- 1. [Rule 1 - Bug] Fixed deadline type classification check
+- Problem:
+- Inline material viewer with right-side slide-out iframe panel, Escape/close dismissal, and Open-in-new-tab fallback on Course Detail page
+- Deadline pin/delete persistence layer with Supabase migration, RLS policies, service methods, and two REST endpoints
+- urgency.ts
 
 ---
 

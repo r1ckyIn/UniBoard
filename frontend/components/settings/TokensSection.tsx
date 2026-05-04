@@ -147,7 +147,7 @@ export default function TokensSection({ user }: TokensSectionProps) {
                     state.setError("");
                   }}
                   placeholder={t(`tokens.${platform}Placeholder`)}
-                  className="w-full font-mono text-[0.8rem] py-[9px] px-[12px] pr-[34px] border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] placeholder:font-sans placeholder:text-[#9b9b94] focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,.11)]"
+                  className="w-full font-mono text-[0.8rem] py-[9px] px-[12px] pr-[34px] border-[1.5px] border-[#e8e5dd] rounded-[8px] bg-[#faf9f5] text-[#2d2d2a] outline-none transition-all duration-150 placeholder:font-sans placeholder:text-[#9b9b94] focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,.11)]"
                 />
                 <button
                   type="button"
@@ -162,7 +162,7 @@ export default function TokensSection({ user }: TokensSectionProps) {
                 type="button"
                 disabled={!state.value.trim()}
                 onClick={() => handleUpdate(platform)}
-                className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] whitespace-nowrap bg-[#d97757] text-white border-none hover:bg-[#c5674a] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="py-[8px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] cursor-pointer transition-all duration-150 whitespace-nowrap bg-[#d97757] text-white border-none hover:bg-[#c5674a] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t("tokens.update")}
               </button>
@@ -182,7 +182,7 @@ export default function TokensSection({ user }: TokensSectionProps) {
           type="button"
           onClick={handleSync}
           disabled={syncTrigger.isPending}
-          className="w-full flex items-center justify-center gap-[8px] py-[10px] text-[0.82rem] font-semibold text-[#6b6b65] bg-[#faf9f5] border border-[#e8e5dd] rounded-[8px] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:bg-[#efede6] hover:text-[#2d2d2a] disabled:opacity-70"
+          className="w-full flex items-center justify-center gap-[8px] py-[10px] text-[0.82rem] font-semibold text-[#6b6b65] bg-[#faf9f5] border border-[#e8e5dd] rounded-[8px] cursor-pointer transition-all duration-150 hover:bg-[#efede6] hover:text-[#2d2d2a] disabled:opacity-70"
         >
           <RefreshCw
             size={14}

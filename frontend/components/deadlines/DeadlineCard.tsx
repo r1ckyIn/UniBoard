@@ -249,9 +249,10 @@ export default function DeadlineCard({
 
         {/* Expanded section */}
         <div
-          className="overflow-hidden transition-[max-height] [transition-duration:var(--motion-slow)] [transition-timing-function:var(--ease-claude-out)]"
+          className="overflow-hidden transition-[max-height] duration-[400ms]"
           style={{
             maxHeight: isExpanded ? "1200px" : "0",
+            transitionTimingFunction: "cubic-bezier(.4,0,.2,1)",
           }}
         >
           <div className="px-[20px] pb-[20px] pl-[24px]">
@@ -267,7 +268,7 @@ export default function DeadlineCard({
                 <div
                   key={mat.title}
                   data-mat-item
-                  className="flex items-center gap-[14px] py-[10px] px-[12px] rounded-[8px] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] cursor-pointer border-b border-[#eae7e0] last:border-b-0 hover:bg-[#efede6]"
+                  className="flex items-center gap-[14px] py-[10px] px-[12px] rounded-[8px] transition-colors duration-150 cursor-pointer border-b border-[#eae7e0] last:border-b-0 hover:bg-[#efede6]"
                 >
                   <span
                     className="text-[0.64rem] font-bold py-[3px] px-[8px] rounded-[5px] whitespace-nowrap flex-shrink-0 min-w-[48px] text-center"

@@ -94,7 +94,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
       <button
         type="button"
         onClick={onNext}
-        className="mt-8 bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-10 rounded-lg transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:-translate-y-px"
+        className="mt-8 bg-[#d97757] hover:bg-[#c5674a] text-white font-semibold py-3 px-10 rounded-lg transition-all duration-150 ease-in-out hover:-translate-y-px"
       >
         {t("cta")}
       </button>

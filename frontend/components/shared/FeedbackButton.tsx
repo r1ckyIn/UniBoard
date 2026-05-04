@@ -36,7 +36,7 @@ export default function FeedbackButton({
 
   const iconSize = size === "sm" ? 13 : 15;
   const btnBase =
-    "p-[3px] rounded-[4px] transition-colors [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] cursor-pointer border-none bg-transparent";
+    "p-[3px] rounded-[4px] transition-colors duration-150 cursor-pointer border-none bg-transparent";
 
   return (
     <span className="inline-flex items-center gap-[4px] ml-[6px]">

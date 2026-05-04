@@ -92,7 +92,7 @@ export default function ForgotPasswordForm({
   };
 
   const inputBaseClass =
-    "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";
+    "w-full px-3.5 py-2.5 text-[0.84rem] border-[1.5px] border-card-border rounded-lg bg-cream text-text-1 outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-text-3 focus:border-[#d97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.11)]";
   const inputErrorClass = "border-[#cc4455]";
 
   // Success state: show check-email UI with resend button + cooldown
@@ -177,7 +177,7 @@ export default function ForgotPasswordForm({
         <button
           type="submit"
           disabled={resetMutation.isPending}
-          className="w-full h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] hover:-translate-y-px active:translate-y-0 disabled:opacity-60 disabled:cursor-default disabled:transform-none transition-[background,transform] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)]"
+          className="w-full h-[44px] font-semibold text-[0.86rem] text-white bg-[#d97757] rounded-lg hover:bg-[#c5674a] hover:-translate-y-px active:translate-y-0 disabled:opacity-60 disabled:cursor-default disabled:transform-none transition-[background,transform] duration-150"
         >
           {resetMutation.isPending ? (
             <Loader2 className="w-5 h-5 animate-spin mx-auto" />

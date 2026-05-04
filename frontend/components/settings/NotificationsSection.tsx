@@ -114,7 +114,7 @@ export default function NotificationsSection() {
           <button
             type="button"
             onClick={() => setDigestFrequency("daily")}
-            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] cursor-pointer ${
+            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-all duration-150 cursor-pointer ${
               prefs.digestFrequency === "daily"
                 ? "bg-[#d97757] text-white border-[#d97757]"
                 : "bg-[#faf9f5] text-[#6b6b65] border-[#e8e5dd] hover:bg-[#efede6]"
@@ -125,7 +125,7 @@ export default function NotificationsSection() {
           <button
             type="button"
             onClick={() => setDigestFrequency("weekly")}
-            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] cursor-pointer ${
+            className={`py-[7px] px-[16px] text-[0.78rem] font-semibold rounded-[8px] border transition-all duration-150 cursor-pointer ${
               prefs.digestFrequency === "weekly"
                 ? "bg-[#d97757] text-white border-[#d97757]"
                 : "bg-[#faf9f5] text-[#6b6b65] border-[#e8e5dd] hover:bg-[#efede6]"
@@ -169,7 +169,7 @@ function ToggleRow({ label, checked, onChange, testId }: ToggleRowProps) {
         checked={checked}
         onChange={onChange}
         data-testid={testId}
-        className="appearance-none w-[44px] h-[24px] rounded-full bg-[#e8e5dd] cursor-pointer transition-all [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[20px] after:h-[20px] after:rounded-full after:bg-white after:shadow-sm after:transition-all after:[transition-duration:var(--motion-fast)] after:[transition-timing-function:var(--ease-claude-out)] checked:bg-[#d97757] checked:after:translate-x-[20px]"
+        className="appearance-none w-[44px] h-[24px] rounded-full bg-[#e8e5dd] cursor-pointer transition-all duration-200 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[20px] after:h-[20px] after:rounded-full after:bg-white after:shadow-sm after:transition-all after:duration-200 checked:bg-[#d97757] checked:after:translate-x-[20px]"
       />
     </label>
   );

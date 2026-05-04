@@ -49,7 +49,7 @@ export default function TimetableEvent({
 
   return (
     <div
-      className="absolute rounded-[4px] px-[5px] py-[3px] overflow-hidden cursor-pointer z-[5] text-[0.66rem] leading-[1.3] transition-[transform,box-shadow] [transition-duration:var(--motion-fast)] [transition-timing-function:var(--ease-claude-out)] hover:scale-[1.02] hover:-translate-y-[1px] hover:shadow-[0_3px_10px_rgba(0,0,0,0.1)] hover:z-[20]"
+      className="absolute rounded-[4px] px-[5px] py-[3px] overflow-hidden cursor-pointer z-[5] text-[0.66rem] leading-[1.3] transition-[transform,box-shadow] duration-150 hover:scale-[1.02] hover:-translate-y-[1px] hover:shadow-[0_3px_10px_rgba(0,0,0,0.1)] hover:z-[20]"
       style={{
         top,
         height,

@@ -10,22 +10,16 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ## Current State
 
-**Shipped:** UniBoard v2.0 — Production Foundation complete (2026-04-25)
-- 39 phases / ~140 plans / 262 commits / 6 weeks (2026-03-15 → 2026-04-25)
+**Shipped:** UniBoard v2.0 complete (2026-04-05)
 - M1 Frontend App — Phases 1-12, 11.1 (shipped 2026-03-25)
 - M2 Backend Core — Phases 13-17 (shipped 2026-03-27)
 - M3 AI/MCP/Skills — Phases 18-21 (shipped 2026-03-29)
 - M4 Hardening — Phases 22-28 (shipped 2026-04-04)
-- Production Hardening — Phases 29, 30, 31, 31.1, 32, 32.1, 33, 34, 38, 38.1, 38.2 (shipped 2026-04-04 → 2026-04-25)
-- Audit verdict: `passed` (39/39 v2.0-scope phases complete)
-- Archive: `.planning/milestones/v2.0-ROADMAP.md`, `.planning/milestones/v2.0-REQUIREMENTS.md`, `.planning/milestones/v2.0-MILESTONE-AUDIT.md`
-
-**Starting:** v3.0 — UI Polish & Cohesion (Claude 美学叠加层) — opened 2026-04-27
-- See `## Current Milestone` for goal, scope, hard constraints, reference materials
-- Disposition of v2.0-residual candidate phases:
-  - Phase 35 Push Notifications (NOTIFY-01..03) → **deferred to v3.1** (out of UI scope)
-  - Phase 36 UX Polish (UXPOL-01..04) → **subsumed** into v3.0 NEWVIS-01..04 REQs
-  - Phase 37 Sidebar Transform Refactor (REFACTOR-01..02) → **subsumed** into v3.0 SHARED-03 REQ (still absorbs backlog 999.1)
+**In Progress:** v3.0 Production Ready + AI Core
+- Phase 29 Sentry Hardening — complete
+- Phase 30 BFF Proxy Conversion — complete (2026-04-06). All 25 Route Handlers converted from mock fixtures to proxyRequest BFF proxy pattern
+- Phase 31 E2E Verification & AI Config — complete (2026-04-06). Setup flow wired to real backend, SSE streaming via BFF proxy, AI API key guard added, ANTHROPIC_API_KEY configured in Railway
+- Phase 38 First-Load Performance — complete (2026-04-21). RSC prefetch + HydrationBoundary across 6 pages (Dashboard, Courses, Deadlines, Predict, Digest, Timetable); Dashboard `/deadlines/upcoming → /courses/{nearest}` waterfall collapsed via `Promise.all`/`allSettled`; Railway cold-start measurement infra + conditional warmup workflow (disabled until human measurement justifies activation); Playwright pixel-diff regression suite scaffolded (baselines pending human checkpoint). Validates PERF-01, PERF-02, PERF-03
 **Codebase:** ~34K LOC source (TypeScript + Python) + ~1K SQL, 326 source files
 **Tests:** 451 backend tests + ~70 frontend component tests
 **Tech stack:** Next.js 15 + FastAPI + Supabase (PostgreSQL + Auth) + APScheduler
@@ -101,56 +95,24 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 ### Active
 
-**v3.0 — UI Polish & Cohesion (Claude 美学叠加层):**
+**v2.1 — Observability & Data Pipeline:**
+- [ ] Sentry error tracking (Python FastAPI + Next.js projects, DSN configuration)
+- [x] Convert 25/25 mock API Route Handlers to proxy to Railway Python backend — v3.0 Phase 30
+- [x] End-to-end user journey (register → token setup → first sync → real data displayed) — v3.0 Phase 31
+- [x] ANTHROPIC_API_KEY configuration for AI features — v3.0 Phase 31
+- [ ] Frontend CSP update for Railway backend connect-src
 
-*Design tokens & motion system:*
-- [ ] **DESIGN-01**: Color tokens migrated to oklch space with light/dark variants (existing hsl values preserved as fallback)
-- [ ] **DESIGN-02**: Spacing scale (4/8/12/16/24/32/48/64) and elevation/shadow tokens defined and applied across shared components
-- [ ] **DESIGN-03**: Motion timing constants (`cubic-bezier(0.165, 0.85, 0.45, 1)` ease-out; 150/250/400ms duration tiers) defined as CSS variables
-- [ ] **MOTION-01**: All hover/focus/active transitions use motion constants (no inline `transition: all 0.3s ease`)
-- [ ] **MOTION-02**: SSE streaming components (Digest, Predict, Deadlines AI chat) unified streaming-cursor + chunk-arrival animations
+**v2.2 — Multi-User Ready:**
+- [ ] Custom SMTP (Resend/SendGrid) replacing Supabase built-in email
+- [ ] Token expiry auto-remind + re-authorization flow
+- [ ] User onboarding flow polish
+- [ ] Production email templates (branded signup confirmation, password reset)
 
-*Typography polish:*
-- [ ] **TYPO-01**: 4-tier serif scale (hero / section / body / caption) with consistent line-height and letter-spacing tokens
-- [ ] **TYPO-02**: Serif vs Inter usage clarified — serif for narrative content, Inter for UI chrome / data labels
-
-*Shared component polish (Rough.js outer borders preserved):*
-- [ ] **SHARED-01**: Card / Button / Input / Modal / Tooltip internal padding, focus ring, disabled state unified to design tokens
-- [ ] **SHARED-02**: AI reply visual style (Digest / Deadlines / Predict) adopts no-bubble Claude-style flowing text with typing cursor
-- [ ] **SHARED-03**: Sidebar transform-based positioning eliminates hover lag (subsumes Phase 37 / backlog 999.1; REFACTOR-01..02 mapped here)
-
-*State coverage:*
-- [ ] **STATES-01**: Loading skeletons for 10 pages styled in Rough.js aesthetic (no off-the-shelf shimmer)
-- [ ] **STATES-02**: Empty states styled with restraint-first illustration + actionable CTA
-- [ ] **STATES-03**: Error states (network / 401 / 500) styled with helpful recovery actions
-
-*Accessibility:*
-- [ ] **A11Y-01**: Focus visible ring on all interactive elements
-- [ ] **A11Y-02**: Color contrast AAA on text, AA on UI chrome (audit + fix)
-- [ ] **A11Y-03**: Aria-label / aria-describedby on icon-only buttons and complex widgets
-- [ ] **A11Y-04**: Keyboard navigation on all pages (no mouse-only paths)
-- [ ] **A11Y-05**: `prefers-reduced-motion` honored
-
-*New-feature visual coverage (subsumes Phase 36 UX Polish):*
-- [ ] **NEWVIS-01**: TokenStep skip-revalidate cached state UI (← Phase 36 UXPOL-03)
-- [ ] **NEWVIS-02**: SuccessStep per-domain sync progress bars (← Phase 36 UXPOL-04)
-- [ ] **NEWVIS-03**: AI Chat < 3 chars client-side validation message styled per design tokens (← Phase 36 UXPOL-01)
-- [ ] **NEWVIS-04**: AI request failure shows specific backend error message (← Phase 36 UXPOL-02)
-
-*Dark mode (optional, roadmapper evaluates):*
-- [ ] **DARK-01**: Dark mode root tokens (warm-deep-brown `#2b2a27` background) defined
-- [ ] **DARK-02**: Rough.js stroke color adapts to dark mode
-- [ ] **DARK-03**: Paper texture opacity adapts for dark backgrounds
-
-*Carried-over residual work from v2.0 closure (tracked in STATE.md, parallel to v3.0 — not in scope):*
-- [ ] 6 `human_needed` UAT checkpoints (Phases 11.1, 26, 31, 33, 34, 38, 38.2)
-- [ ] /check-alerts pipeline (Gmail MCP) — Phase 31.1-03
-- [ ] SEED-002, SEED-003 (FK hygiene from PR #115/#117) — v3.1 candidates
-- [ ] 2 on-branch quick-task PRs (260423-ebp, 260423-gir) — held pending Ed-lessons-sync-degraded debug
-
-**Deferred to v3.1+:**
-- Phase 35 Push Notifications (NOTIFY-01..03) — out of UI scope, separate milestone
-- AI study suggestions / GPA path planning / RAG (from old "v3.0 — AI Core" placeholder)
+**v3.0 — AI Core Differentiation:**
+- [ ] AI study suggestions based on assessment weights
+- [ ] Course material QA (RAG on Ed Lessons with cited sources) — live with real data
+- [ ] GPA path planning with specific score targets
+- [ ] Push notifications (deadline reminders via browser push or email)
 
 ### Out of Scope
 
@@ -212,16 +174,10 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 
 | Milestone | Scope | Status |
 |-----------|-------|--------|
-| **v2.0 — Production Foundation** | M1+M2+M3+M4 + production hardening tail (39 phases, 1-38.2) | ✅ Shipped 2026-04-25 |
-| **v3.0 — UI Polish & Cohesion** | Claude 美学叠加层 — design tokens, motion, typography, shared polish, states, a11y, new-feature visual, dark mode | 🚧 Active (opened 2026-04-27) |
-| **v3.1+ — Notifications & AI Differentiation** | Push notifications, AI study suggestions, RAG improvements, GPA path planning | 📋 Backlog |
-
-**v2.0 sub-milestones (archived):**
-- M1 Frontend App — 10 HTML → Next.js (Phases 1-12, 11.1) ✅ shipped 2026-03-25
-- M2 Backend Core — Supabase + FastAPI + Adapters + Sync (Phases 13-17) ✅ shipped 2026-03-27
-- M3 AI/MCP/Skills — Intelligence layer (Phases 18-21) ✅ shipped 2026-03-29
-- M4 Hardening — Build health, security, observability, deployment (Phases 22-28) ✅ shipped 2026-04-04
-- Production Hardening tail — Phases 29-34, 31.1, 32.1, 38, 38.1, 38.2 ✅ shipped 2026-04-25
+| **M1: Frontend App** | 10 HTML → Next.js (Phases 1-12, 11.1) | ✅ Shipped |
+| **M2: Backend Core** | Supabase + FastAPI + Adapters + Sync (Phases 13-17) | ✅ Shipped 2026-03-27 |
+| **M3: AI/MCP/Skills** | Intelligence layer (Phases 18-21) | ✅ Shipped 2026-03-29 |
+| **M4: Hardening** | Audit-driven fixes, build health, security, observability, deployment (Phases 22+) | 🚧 Active |
 
 ## Key Decisions
 
@@ -245,78 +201,24 @@ UniBoard is a GPA maximization dashboard for University of Sydney students. It a
 | Skill-based MCP agent | Each operation codified as reusable prompt template — per-course customization | — Pending (M3) |
 | i18n English + Chinese | Target Chinese international student community at USYD | ✓ Good — all 10 pages fully bilingual |
 | **Supabase email confirmation: permanently OFF** | USYD's Mimecast Secure Email Gateway quarantines `uniboard.uk` sender mail with 3-hour digest delays, making signup-time confirmation untenable. Mitigated by Google OAuth as primary auth path (AUTH-HARDEN-01), USYD-aware registration banner (AUTH-HARDEN-02), password-reset resend button with 60s cooldown (AUTH-HARDEN-03). Local dev keeps confirmations ON for parity testing (`supabase/config.toml`); production keeps them OFF in Supabase Studio. See `docs/UniBoard_TRD_v2.md` §7.5 and §16.9 for full rationale. | ✓ Decision documented (Phase 32-03 strategic resolution + Phase 33 AUTH-HARDEN-04) |
-| **Phase 38.2 force-dynamic reversal** | Phase 38 added `export const dynamic = "force-dynamic"` + `loading.tsx` Suspense fallback to drive RSC prefetch. Production observation revealed: (a) force-dynamic defeats Next.js 15 router cache — every sidebar click re-runs server RSC + prefetch; (b) `loading.tsx` rendered the full-page skeleton for ~2 s during prefetch waits, turning the invisible network wait into a visible skeleton flash. Fix: remove force-dynamic from 6 dashboard pages (Next.js auto-detects dynamic via `cookies()`/`auth.getSession()`), delete `loading.tsx`, set `experimental.staleTimes.dynamic = 30` for router-cache TTL. Result: skeleton-free sidebar nav restored. | ✓ Architectural correction (Phase 38.2 supersedes Phase 38 Truth #1) |
-| **ORM cascade alignment with Supabase reality** | ORM declarations diverged from actual DB: many FKs declared NO ACTION at ORM level while Supabase schema had CASCADE. Aligned 18 FKs across 15 model files (PR #117) — ORM diff only; alembic + supabase migrations reverted after audit confirmed Supabase already CASCADE. SEED-002 / SEED-003 planted for follow-up (parent-table drift on 5 user_id FKs + passive_deletes refinement). | ✓ Good — discovered Supabase reality matched intent; ORM-only diff |
 
-## Current Milestone: v3.0 — UI Polish & Cohesion (Claude 美学叠加层)
+## Current Milestone: v3.0 Production Ready + AI Core
 
-**Opened:** 2026-04-27 (re-scoped from auto-bootstrapped UX Polish + Notifications + Sidebar to UI-focused milestone per user direction)
-**Branch:** `chore/milestone-v3.0-init` (planning) → per-phase feature branches
-**Phase numbering:** Continue from v2.0 last phase (38.2) → v3.0 starts at Phase 39
+**Goal:** Take UniBoard from deployed-with-mock-data to a fully functional production app with error tracking, real data flow, multi-user support, and AI-powered differentiation.
 
-**Goal:** 在保留 v2.0 已验证的 Rough.js 手绘美学（边框、Rough Notation 高亮、纸张纹理、103 次原型迭代验证的"学生书桌笔记"气质）前提下，把 Anthropic/Claude 美学的其他维度（设计令牌 oklch 化、cubic-bezier 缓动、衬线层次、a11y polish、暖深棕 dark mode、新功能视觉收口）叠加上去，让整体气质从"学生笔记本"演化为"学生笔记本 × thoughtful product"。
+**Target features:**
+- Sentry error tracking setup (Python + Next.js, org: yuan-qin)
+- BFF proxy conversion (17/29 mock Route Handlers → Railway backend proxy)
+- End-to-end user journey with real data
+- Custom SMTP for production email
+- Token lifecycle management (expiry, re-auth)
+- AI study suggestions, course QA, GPA path planning with live data
+- Push notifications for deadline reminders
 
-**Hard constraints (not touched in this milestone):**
-- 🚫 Rough.js 手绘边框 — preserved (差异化灵魂)
-- 🚫 Rough Notation 高亮 — preserved
-- 🚫 纸张纹理（fractalNoise grain + ruled lines）— preserved
-- 🚫 10 页主体视觉布局 — preserved (已 UAT)
-- 🚫 TanStack Query hooks 接口 — 0 变动
-- 🚫 后端 API + i18n — 不在 UI scope
+## Current State
 
-**8 REQ categories (full list in REQUIREMENTS.md):**
-
-| Category | Focus |
-|---|---|
-| `DESIGN-01..03` | oklch 颜色、阴影、间距、缓动函数常量 |
-| `MOTION-01..02` | 全局 transition 统一 (`cubic-bezier(0.165, 0.85, 0.45, 1)`) |
-| `TYPO-01..02` | Source Serif 4 4-tier 层次（hero/section/body/caption） |
-| `SHARED-01..03` | Card/Button/Input/Modal 内部细节统一（外壳 Rough.js 保留）+ Sidebar transform 重构 |
-| `STATES-01..03` | Loading/Empty/Error 三态统一 |
-| `A11Y-01..05` | Focus visible / contrast / aria / 键盘 / reduced-motion |
-| `NEWVIS-01..04` | TokenStep skip-revalidate / SuccessStep progress / AI chat validation (subsumes Phase 36 UXPOL) |
-| `DARK-01..03` | 暖深棕 `#2b2a27` 背景 + Rough.js 适配 (optional, roadmapper evaluates) |
-
-**Reference materials (4 of 9 from gallery — see `~/Downloads/claude-ui-libraries.html`):**
-
-| Tier | Resource | Role |
-|---|---|---|
-| 🟢 Direct adoption | `anthropics/skills/skills/brand-guidelines` | DESIGN-01..03 source of truth (一手色板字体) |
-| 🟡 Strong reference | `https://www.shadcn.io/theme/claude` | hsl→oklch conversion + dark mode color values |
-| 🟡 Strong reference | `assistant-ui Claude Clone` | AI no-bubble reply pattern (SHARED-02) |
-| 🔵 Light reference | `tweakcn` | oklch tuning tool (spike-time only, no code import) |
-
-**Out-of-milestone references (5 of 9 from gallery — explicitly NOT used):**
-- `jnahian/vscode-claude-theme` (VS Code, irrelevant)
-- `Damienchakma/Open-claude` (already have SSE chat)
-- `chihebnabil/claude-ui` (Nuxt stack incompatible)
-- `VoltAgent/awesome-claude-design` (no new pages = no DESIGN.md template need)
-- `OpenCoworkAI/open-codesign` (no slides/PDF generation)
-
-**External inspiration docs (Context only, not code dependencies):**
-- `~/Downloads/compass_artifact_wf-69687d8e-7507-4007-8393-a96ef153519f_text_markdown.md` — Anthropic 美学深度解析
-- `~/Downloads/claude-ui-libraries.html` — 9-library curated gallery (4 used / 5 unused)
-
-**Phase 35/36/37 disposition:**
-- Phase 35 Push Notifications → **deferred to v3.1** (NOTIFY-01..03 not UI-layer work)
-- Phase 36 UX Polish → **subsumed** into v3.0 NEWVIS-01..04 (UXPOL-01 → NEWVIS-03, UXPOL-02 → NEWVIS-04, UXPOL-03 → NEWVIS-01, UXPOL-04 → NEWVIS-02)
-- Phase 37 Sidebar Transform Refactor → **subsumed** into v3.0 SHARED-03 (still absorbs backlog 999.1)
-
-## Next Milestone Goals
-
-After v3.0 ships, candidate v3.1+ themes (deferred from v3.0 scope):
-
-- **v3.1 Notifications & Lifecycle:** Push notifications (NOTIFY-01..03), token expiry auto-remind, FK hygiene seeds (SEED-002, SEED-003)
-- **v3.2+ AI Differentiation:** AI agent expansion, multi-step research, additional MCP tools, RAG improvements, GPA path planning
-- **v4.0+ Platform Expansion:** Mobile app / PWA, multi-university support, OAuth Canvas integration
-- **Schema Evolution:** Major DB schema migrations (currently stable at v2.0)
-
-**v2.0 deferred items carried into v3.0 (tracked in STATE.md, parallel to v3.0 — not in scope):**
-- 6 `human_needed` UAT checkpoints awaiting production walkthrough (Phases 11.1, 26, 31, 33, 34, 38, 38.2)
-- Phase 31.1-03 Gmail MCP `/check-alerts` automated monitoring pipeline
-- 2 on-branch quick-task PRs (260423-ebp, 260423-gir) held pending Ed-lessons-sync-degraded debug
-- 14 open debug sessions (auth/setup UAT diagnostics)
-- 3 dormant seeds: SEED-001 (react-hooks v7), SEED-002 (FK parent drift), SEED-003 (passive_deletes refinement)
+- **Phase 33 complete (2026-04-16):** Token lifecycle + onboarding with auth hardening — Google OAuth primary auth path, recall emails for dormant users, setup flow polish (per-platform sync counts, token cache skip-revalidation), USYD banner, password-reset resend cooldown, email-confirmation-OFF documentation.
+- **Gap-closure fixes:** OAuth race condition (zustand hydration + TanStack Query gating), WelcomeStep email source (authStore vs backend API), Supabase redirect URL wildcard for preview deployments, supabase config.toml template path fix.
 
 ## Evolution
 
@@ -336,4 +238,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-27 — v3.0 milestone re-scoped from auto-bootstrapped "UX Polish + Notifications + Sidebar Refactor" to **UI Polish & Cohesion (Claude 美学叠加层)** per user direction. 8 REQ categories: DESIGN/MOTION/TYPO/SHARED/STATES/A11Y/NEWVIS/DARK. Phase 36 UXPOL subsumed into NEWVIS, Phase 37 REFACTOR subsumed into SHARED-03, Phase 35 NOTIFY deferred to v3.1. Hard constraint: Rough.js handcraft aesthetic preserved (差异化灵魂). Working branch: `chore/milestone-v3.0-init`.*
+*Last updated: 2026-04-06 — Phase 31 (E2E verification & AI config) complete. Setup flow wired to real backend, AI features configured for production.*
