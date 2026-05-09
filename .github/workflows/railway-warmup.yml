@@ -1,20 +1,29 @@
 name: Railway Warmup
 
-# ACTIVE — pings `/health` every 10 minutes to keep the Railway container
-# warm. Activated by Phase 38.2 (2026-04-22) per CONTEXT.md D-06. Railway
-# Serverless idle threshold is 10 min of zero outbound packets; this cron
-# plus the backend's `SELECT 1` in `/health` keeps the container awake.
+# DISABLED — 2026-05-09 — UniBoard project paused. The cron schedule
+# below is commented out so we stop pinging Railway every 10 minutes
+# while the project is inactive. The Railway service itself is also
+# paused (manual user step in Railway dashboard).
 #
-# Endpoint fix: Phase 38-03 originally targeted the wrong endpoint (404 on
-# backend). Corrected to /health in 38.2 per RESEARCH R5 (live curl check).
+# ACTIVE behaviour (when re-enabled): pings `/health` every 10 minutes
+# to keep the Railway container warm. Activated by Phase 38.2
+# (2026-04-22) per CONTEXT.md D-06. Railway Serverless idle threshold
+# is 10 min of zero outbound packets; this cron plus the backend's
+# `SELECT 1` in `/health` keeps the container awake.
 #
-# To disable: re-comment the `schedule:` block (leading `# ` on both lines)
-# and commit as `chore: disable railway warmup cron`.
+# Endpoint fix: Phase 38-03 originally targeted the wrong endpoint
+# (404 on backend). Corrected to /health in 38.2 per RESEARCH R5
+# (live curl check).
+#
+# To re-enable: uncomment the `schedule:` block (remove the leading
+# `# ` on both lines) and commit as `chore: re-enable railway warmup
+# cron`. Also re-activate Railway + Supabase via their dashboards
+# before pushing.
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/10 * * * *" # every 10 minutes — keeps Railway warm (Phase 38.2 D-06)
+  # schedule:
+  #   - cron: "*/10 * * * *" # every 10 minutes — keeps Railway warm (Phase 38.2 D-06)
 
 jobs:
   warmup:
