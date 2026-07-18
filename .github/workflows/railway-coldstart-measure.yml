@@ -42,7 +42,7 @@ jobs:
           # Pin to match packageManager in frontend/package.json.
           # action-setup@v6 no longer reliably infers from package_json_file.
           version: 10.28.2
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: "pnpm"
