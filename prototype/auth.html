@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --red:#c45;--red-soft:rgba(204,68,85,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+    }
+    html{font-size:15px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* LAYOUT */
+    .auth-page{display:flex;min-height:100vh;position:relative}
+
+    /* DOODLES */
+    .hero-doodles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:.07;overflow:visible}
+
+    /* LEFT PANEL — brand showcase */
+    .brand-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;position:relative;z-index:2}
+    .brand-logo{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+    .brand-mark{width:52px;height:52px;background:var(--orange);border-radius:14px;display:grid;place-items:center;font-family:'Source Serif 4',serif;font-weight:700;font-size:26px;color:#fff;flex-shrink:0}
+    .brand-name{font-family:'Source Serif 4',serif;font-size:2rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em}
+    .brand-tagline{font-family:'Source Serif 4',serif;font-size:1.1rem;color:var(--text-2);line-height:1.65;text-align:center;max-width:320px;margin-bottom:40px}
+
+    /* Feature highlights */
+    .brand-features{display:flex;flex-direction:column;gap:14px;max-width:300px}
+    .brand-feature{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);background:rgba(246,245,240,.6);border:1px solid rgba(232,229,221,.5)}
+    .feature-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+    .feature-text{flex:1}
+    .feature-title{font-size:.82rem;font-weight:600;color:var(--text-1);margin-bottom:2px}
+    .feature-desc{font-size:.72rem;color:var(--text-3);line-height:1.45}
+
+    /* RIGHT PANEL — auth form */
+    .form-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:2}
+    .form-card{width:100%;max-width:420px;position:relative;overflow:visible;padding:10px}
+    .form-card-inner{background:var(--card-bg);padding:36px 32px;overflow:hidden}
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+
+    /* TAB TOGGLE */
+    .auth-tabs{display:flex;border:1px solid var(--card-border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:28px}
+    .auth-tab{flex:1;font-family:inherit;font-size:.82rem;font-weight:600;padding:10px 16px;border:none;background:#fff;color:var(--text-3);cursor:pointer;transition:all var(--ease-fast);text-align:center}
+    .auth-tab:first-child{border-right:1px solid var(--card-border)}
+    .auth-tab:hover{color:var(--text-1);background:var(--card-bg-hover)}
+    .auth-tab.active{background:var(--orange-soft);color:var(--orange)}
+
+    /* FORM */
+    .auth-form{display:flex;flex-direction:column;gap:16px}
+    .form-group{display:flex;flex-direction:column;gap:5px}
+    .form-label{font-size:.8rem;font-weight:600;color:var(--text-2)}
+    .form-input{width:100%;padding:10px 14px;font-family:inherit;font-size:.84rem;border:1.5px solid var(--card-border);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-1);outline:none;transition:border-color var(--ease-fast),box-shadow var(--ease-fast)}
+    .form-input::placeholder{color:var(--text-3)}
+    .form-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+    .form-input.error{border-color:var(--red)}
+    .form-helper{font-size:.7rem;color:var(--text-3)}
+    .form-error{font-size:.72rem;color:var(--red);display:none}
+    .form-error.visible{display:block}
+
+    /* BUTTONS */
+    .btn-primary{width:100%;padding:11px 20px;font-family:inherit;font-size:.86rem;font-weight:600;color:#fff;background:var(--orange);border:none;border-radius:var(--radius-sm);cursor:pointer;transition:background var(--ease-fast),transform var(--ease-fast);height:44px}
+    .btn-primary:hover{background:#c5674a;transform:translateY(-1px)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-primary:disabled{opacity:.6;cursor:default;transform:none}
+
+    /* DIVIDER */
+    .auth-divider{display:flex;align-items:center;gap:12px;margin:4px 0}
+    .auth-divider-line{flex:1;height:1px;background:var(--divider)}
+    .auth-divider-text{font-size:.72rem;color:var(--text-3);font-weight:500;white-space:nowrap}
+
+    /* FOOTER LINK */
+    .auth-footer{text-align:center;margin-top:20px;font-size:.82rem;color:var(--text-3)}
+    .auth-footer a{color:var(--orange);text-decoration:none;font-weight:600;transition:opacity var(--ease-fast)}
+    .auth-footer a:hover{opacity:.8}
+
+    /* PASSWORD STRENGTH */
+    .pw-strength{display:flex;gap:4px;margin-top:4px}
+    .pw-bar{flex:1;height:3px;border-radius:2px;background:var(--divider);transition:background var(--ease-fast)}
+    .pw-bar.weak{background:var(--red)}
+    .pw-bar.medium{background:var(--amber)}
+    .pw-bar.strong{background:var(--green)}
+    .pw-label{font-size:.66rem;font-weight:600;margin-top:2px;transition:color var(--ease-fast)}
+
+    /* FORM SECTIONS — crossfade, not display toggle */
+    .sections-wrapper{position:relative;overflow:hidden;transition:height .4s cubic-bezier(.4,0,.2,1)}
+    .form-section{width:100%;transition:opacity .3s ease}
+    .form-section.out{position:absolute;top:0;left:0;right:0;opacity:0;pointer-events:none}
+
+    /* SUCCESS STATE */
+    .success-overlay{display:none;position:absolute;inset:0;background:var(--card-bg);z-index:10;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;border-radius:var(--radius)}
+    .success-overlay.visible{display:flex}
+    .success-icon{width:56px;height:56px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;color:var(--green);margin-bottom:16px}
+    .success-title{font-family:'Source Serif 4',serif;font-size:1.3rem;font-weight:600;margin-bottom:8px}
+    .success-desc{font-size:.84rem;color:var(--text-2);margin-bottom:20px;line-height:1.6}
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}
+    .d4{animation-delay:.28s}.d5{animation-delay:.36s}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .brand-panel{display:none}
+      .form-panel{padding:20px 16px}
+    }
+  </style>
+</head>
+<body>
+<div class="auth-page">
+  <!-- BACKGROUND DOODLES -->
+  <svg class="hero-doodles" id="hero-doodles" preserveAspectRatio="none" viewBox="0 0 1200 600"></svg>
+
+  <!-- LEFT — BRAND SHOWCASE -->
+  <div class="brand-panel anim d1">
+    <div class="brand-logo">
+      <div class="brand-mark">U</div>
+      <span class="brand-name">UniBoard</span>
+    </div>
+    <p class="brand-tagline">Your GPA, Maximized.</p>
+
+    <div class="brand-features">
+      <div class="brand-feature">
+        <div class="feature-icon" style="background:var(--orange-soft);color:var(--orange)">
+          <i data-lucide="target" style="width:16px;height:16px"></i>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">GPA Tracking & Prediction</div>
+          <div class="feature-desc">Real-time grades across all courses with what-if scenarios</div>
+        </div>
+      </div>
+      <div class="brand-feature">
+        <div class="feature-icon" style="background:var(--blue-soft);color:var(--blue)">
+          <i data-lucide="radio" style="width:16px;height:16px"></i>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">Smart Digest</div>
+          <div class="feature-desc">AI-curated updates from Canvas &amp; Ed Discussion</div>
+        </div>
+      </div>
+      <div class="brand-feature">
+        <div class="feature-icon" style="background:var(--green-soft);color:var(--green)">
+          <i data-lucide="calendar" style="width:16px;height:16px"></i>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">Deadline Intelligence</div>
+          <div class="feature-desc">Three-source aggregation with AI prep summaries</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — AUTH FORM -->
+  <div class="form-panel">
+    <div class="form-card anim d2" data-hand-border id="form-card">
+      <div class="form-card-inner" style="position:relative">
+
+        <!-- TAB TOGGLE -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login">Sign In</button>
+          <button class="auth-tab" id="tab-register">Create Account</button>
+        </div>
+
+        <div class="sections-wrapper" id="sections-wrapper">
+        <!-- LOGIN FORM -->
+        <div class="form-section" id="section-login">
+          <h1 style="font-size:1.6rem;margin-bottom:6px">Welcome back</h1>
+          <p style="font-size:.84rem;color:var(--text-2);margin-bottom:24px">Sign in to continue to your dashboard</p>
+
+          <form class="auth-form" id="login-form">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="login-email" placeholder="you@uni.sydney.edu.au" required>
+            </div>
+            <div class="form-group">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <label class="form-label">Password</label>
+                <a href="#" style="font-size:.72rem;color:var(--orange);text-decoration:none;font-weight:500">Forgot password?</a>
+              </div>
+              <input type="password" class="form-input" id="login-password" placeholder="Enter your password" required>
+            </div>
+            <p class="form-error" id="login-error">Invalid email or password. Please try again.</p>
+            <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
+          </form>
+
+          <div class="auth-footer">
+            Don&rsquo;t have an account? <a href="#" id="link-to-register">Create one</a>
+          </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="form-section out" id="section-register">
+          <h1 style="font-size:1.6rem;margin-bottom:6px">Create your account</h1>
+          <p style="font-size:.84rem;color:var(--text-2);margin-bottom:24px">Start maximizing your GPA today</p>
+
+          <form class="auth-form" id="register-form">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" class="form-input" id="reg-name" placeholder="Ricky" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="reg-email" placeholder="you@uni.sydney.edu.au" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" id="reg-password" placeholder="At least 8 characters" required minlength="8">
+              <div class="pw-strength" id="pw-strength">
+                <div class="pw-bar" id="pw-bar-1"></div>
+                <div class="pw-bar" id="pw-bar-2"></div>
+                <div class="pw-bar" id="pw-bar-3"></div>
+                <div class="pw-bar" id="pw-bar-4"></div>
+              </div>
+              <div class="pw-label" id="pw-label" style="color:var(--text-3)"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" class="form-input" id="reg-confirm" placeholder="Re-enter your password" required>
+            </div>
+            <p class="form-error" id="reg-error"></p>
+            <button type="submit" class="btn-primary" id="reg-btn">Create Account</button>
+          </form>
+
+          <div class="auth-footer">
+            Already have an account? <a href="#" id="link-to-login">Sign in</a>
+          </div>
+        </div>
+
+        </div><!-- /sections-wrapper -->
+
+        <!-- SUCCESS OVERLAY -->
+        <div class="success-overlay" id="success-overlay">
+          <div class="success-icon"><i data-lucide="check" style="width:28px;height:28px"></i></div>
+          <div class="success-title">Account Created!</div>
+          <div class="success-desc">Welcome to UniBoard. Let&rsquo;s connect your Canvas and Ed accounts to get started.</div>
+          <a href="setup.html" class="btn-primary" style="width:auto;padding:11px 32px;text-decoration:none;display:inline-block;text-align:center">Continue to Setup</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  var formCard=document.getElementById('form-card');
+  var formInner=formCard.querySelector('.form-card-inner');
+
+  // ---- Rough.js border with deterministic seed ----
+  var BORDER_SEED=42;
+  var BORDER_OPTS={stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none',seed:BORDER_SEED};
+  var borderSvg=null;
+
+  function drawBorderToSvg(svg,w,h){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    svg.setAttribute('viewBox','-4 -4 '+(w+8)+' '+(h+8));
+    svg.appendChild(rough.svg(svg).rectangle(0,0,w,h,BORDER_OPTS));
+  }
+
+  function initBorder(){
+    borderSvg=document.createElementNS(NS,'svg');
+    borderSvg.setAttribute('class','hand-border-svg');
+    formCard.prepend(borderSvg);
+    drawBorderToSvg(borderSvg,formCard.offsetWidth,formCard.offsetHeight);
+  }
+
+  function syncBorder(){
+    if(!borderSvg)return;
+    drawBorderToSvg(borderSvg,formCard.offsetWidth,formCard.offsetHeight);
+  }
+
+  // ---- Animated tab switch (crossfade + center expand) ----
+  var tabLogin=document.getElementById('tab-login');
+  var tabReg=document.getElementById('tab-register');
+  var secLogin=document.getElementById('section-login');
+  var secReg=document.getElementById('section-register');
+  var wrapper=document.getElementById('sections-wrapper');
+  var isAnimating=false;
+  var animRaf=0;
+
+  function switchTab(showSec,hideSec,activeTab,inactiveTab,title){
+    if(isAnimating||!showSec.classList.contains('out'))return;
+    isAnimating=true;
+
+    // 1. Measure current height
+    var h0=wrapper.offsetHeight;
+
+    // 2. Old section → absolute overlay, keep visible for crossfade
+    hideSec.classList.add('out');       // position:absolute, CSS opacity:0
+    hideSec.style.opacity='1';         // override: stay visible during crossfade
+
+    // 3. New section → relative flow, start transparent
+    showSec.classList.remove('out');    // position:static, CSS opacity:1
+    showSec.style.opacity='0';         // override: start invisible
+
+    // 4. Update tabs & title
+    activeTab.classList.add('active');
+    inactiveTab.classList.remove('active');
+    document.title=title;
+
+    // 5. Measure target height BEFORE locking (auto height from showSec)
+    var h1=wrapper.offsetHeight;
+
+    // 6. Lock at original height, force reflow, then animate to target
+    wrapper.style.height=h0+'px';
+    wrapper.offsetHeight;
+
+    // 7. Animate: wrapper height + opacity crossfade
+    wrapper.style.height=h1+'px';
+    showSec.style.opacity='';   // removes override → CSS 1, transition 0→1
+    hideSec.style.opacity='';   // removes override → CSS .out 0, transition 1→0
+
+    // 8. RAF loop: redraw border at actual rendered size each frame
+    function tick(){
+      syncBorder();
+      if(isAnimating)animRaf=requestAnimationFrame(tick);
+    }
+    animRaf=requestAnimationFrame(tick);
+
+    // 9. Cleanup after transition
+    function cleanup(){
+      wrapper.removeEventListener('transitionend',onEnd);
+      cancelAnimationFrame(animRaf);
+      wrapper.style.height='';
+      syncBorder();
+      isAnimating=false;
+    }
+    function onEnd(e){
+      if(e.target!==wrapper||e.propertyName!=='height')return;
+      cleanup();
+    }
+    wrapper.addEventListener('transitionend',onEnd);
+    setTimeout(function(){if(isAnimating)cleanup()},600);
+  }
+
+  function showLogin(){
+    switchTab(secLogin,secReg,tabLogin,tabReg,'UniBoard \u2014 Sign In');
+  }
+  function showRegister(){
+    switchTab(secReg,secLogin,tabReg,tabLogin,'UniBoard \u2014 Create Account');
+  }
+
+  tabLogin.addEventListener('click',showLogin);
+  tabReg.addEventListener('click',showRegister);
+  document.getElementById('link-to-register').addEventListener('click',function(e){e.preventDefault();showRegister()});
+  document.getElementById('link-to-login').addEventListener('click',function(e){e.preventDefault();showLogin()});
+
+  // ---- Password strength ----
+  var pwInput=document.getElementById('reg-password');
+  var bars=[document.getElementById('pw-bar-1'),document.getElementById('pw-bar-2'),document.getElementById('pw-bar-3'),document.getElementById('pw-bar-4')];
+  var pwLabel=document.getElementById('pw-label');
+
+  function checkStrength(pw){
+    var score=0;
+    if(pw.length>=8)score++;
+    if(pw.length>=12)score++;
+    if(/[A-Z]/.test(pw)&&/[a-z]/.test(pw))score++;
+    if(/[0-9]/.test(pw))score++;
+    if(/[^A-Za-z0-9]/.test(pw))score++;
+    return Math.min(score,4);
+  }
+
+  pwInput.addEventListener('input',function(){
+    var pw=this.value;
+    var strength=checkStrength(pw);
+    var labels=['','Weak','Fair','Good','Strong'];
+    var cls=['','weak','medium','medium','strong'];
+
+    bars.forEach(function(bar,i){
+      if(i<strength){bar.className='pw-bar '+cls[strength]}
+      else{bar.className='pw-bar'}
+    });
+    if(pw.length===0){pwLabel.textContent='';return}
+    pwLabel.textContent=labels[strength];
+    pwLabel.style.color=strength<=1?'var(--red)':strength<=2?'var(--amber)':'var(--green)';
+  });
+
+  // ---- Login form ----
+  document.getElementById('login-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=document.getElementById('login-btn');
+    var errEl=document.getElementById('login-error');
+    btn.disabled=true;btn.textContent='Signing in\u2026';
+    errEl.classList.remove('visible');
+
+    // Simulate API call
+    setTimeout(function(){
+      // Demo: always redirect to dashboard
+      window.location.href='dashboard.html';
+    },1200);
+  });
+
+  // ---- Register form ----
+  document.getElementById('register-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var pw=document.getElementById('reg-password').value;
+    var confirm=document.getElementById('reg-confirm').value;
+    var errEl=document.getElementById('reg-error');
+    var btn=document.getElementById('reg-btn');
+
+    errEl.classList.remove('visible');
+
+    if(pw.length<8){
+      errEl.textContent='Password must be at least 8 characters.';
+      errEl.classList.add('visible');return;
+    }
+    if(pw!==confirm){
+      errEl.textContent='Passwords do not match.';
+      errEl.classList.add('visible');
+      document.getElementById('reg-confirm').classList.add('error');return;
+    }
+
+    btn.disabled=true;btn.textContent='Creating account\u2026';
+
+    // Simulate API call
+    setTimeout(function(){
+      document.getElementById('success-overlay').classList.add('visible');
+      lucide.createIcons();
+    },1500);
+  });
+
+  // ---- Rough.js hand-drawn card border (initial) ----
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    initBorder();
+  })});
+
+  // ---- Background doodles ----
+  (function(){
+    var svg=document.getElementById('hero-doodles');
+    if(!svg)return;
+    var rc=rough.svg(svg);
+    var col='#d0cdc4';
+
+    // Star (top-right)
+    svg.appendChild(rc.line(980,100,980,128,{stroke:col,strokeWidth:.8,roughness:1.5}));
+    svg.appendChild(rc.line(966,114,994,114,{stroke:col,strokeWidth:.8,roughness:1.5}));
+
+    // Dots cluster (top-left)
+    [[120,80],[138,92],[125,110]].forEach(function(p){
+      svg.appendChild(rc.circle(p[0],p[1],4,{stroke:col,fill:col,fillStyle:'solid',roughness:1.2,strokeWidth:.5}));
+    });
+
+    // Wave (bottom-left)
+    svg.appendChild(rc.path('M 100 450 Q 130 435, 160 450 Q 190 465, 220 450 Q 250 435, 280 450',{stroke:col,strokeWidth:.8,roughness:1.5,fill:'none'}));
+
+    // Circle (middle-right)
+    svg.appendChild(rc.circle(1050,300,20,{stroke:col,strokeWidth:.6,roughness:1.8,fill:'none'}));
+
+    // Star (bottom-right)
+    svg.appendChild(rc.line(1100,480,1100,500,{stroke:col,strokeWidth:.8,roughness:1.5}));
+    svg.appendChild(rc.line(1090,490,1110,490,{stroke:col,strokeWidth:.8,roughness:1.5}));
+
+    // Additional circles (left area)
+    svg.appendChild(rc.circle(80,280,14,{stroke:col,strokeWidth:.6,roughness:2,fill:'none'}));
+    svg.appendChild(rc.circle(60,310,8,{stroke:col,strokeWidth:.5,roughness:1.5,fill:'none'}));
+
+    // Zigzag (top-center)
+    svg.appendChild(rc.path('M 500 60 L 515 48 L 530 60 L 545 48 L 560 60',{stroke:col,strokeWidth:.8,roughness:1.5,fill:'none'}));
+
+    // Small diamond (center-left)
+    svg.appendChild(rc.polygon([[180,350],[190,340],[200,350],[190,360]],{stroke:col,strokeWidth:.7,roughness:1.5,fill:'none'}));
+  })();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --red:#c45;--red-soft:rgba(204,68,85,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --sidebar-w:68px;--sidebar-w-expanded:224px;--header-h:56px;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+    }
+    html{font-size:15px;overflow-y:scroll}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* LAYOUT */
+    .app{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;padding:20px 0;z-index:100;transition:width var(--ease);overflow:hidden;box-shadow:2px 0 16px rgba(20,20,19,.06)}
+    .sidebar:hover{width:var(--sidebar-w-expanded)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 17px 24px;white-space:nowrap}
+    .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:17px;color:#fff}
+    .logo-text{font-family:'Source Serif 4',serif;font-size:1.18rem;font-weight:700;color:#4a3f34;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .logo-text{opacity:1}
+    .sidebar-rule{width:26px;height:1px;background:rgba(60,50,40,.1);margin:0 auto 10px;transition:width var(--ease)}
+    .sidebar:hover .sidebar-rule{width:calc(100% - 44px)}
+    .sidebar-nav{list-style:none;width:100%;flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+    .nav-item{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:rgba(60,50,40,.65);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap;overflow:hidden;text-decoration:none}
+    .nav-item:hover{background:rgba(60,50,40,.06);color:rgba(60,50,40,.75)}
+    .nav-item.active{background:rgba(217,119,87,.18);color:var(--orange)}
+    .nav-icon{flex-shrink:0;width:20px;height:20px}
+    .nav-label{font-size:.84rem;font-weight:500;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .nav-label{opacity:1}
+    .sidebar-bottom{padding:0 10px;width:100%}
+
+    /* MAIN WRAPPER */
+    .main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* HEADER */
+    .header{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(250,249,245,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+    .header-brand{font-family:'Source Serif 4',serif;font-size:.95rem;font-weight:600;color:var(--text-2)}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:7px 14px;width:220px}
+    .search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.82rem;color:var(--text-1);width:100%}
+    .search-bar input::placeholder{color:var(--text-3)}
+    .search-icon{color:var(--text-3);flex-shrink:0}
+    .hdr-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast);position:relative}
+    .hdr-btn:hover{background:var(--card-bg-hover)}
+    .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--card-bg)}
+    .avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;cursor:pointer;margin-left:4px}
+
+    /* CONTENT — 3-column layout */
+    .content-area{flex:1;padding:20px 24px;display:flex;gap:22px}
+    .settings-nav{width:170px;flex-shrink:0;position:sticky;top:calc(var(--header-h) + 20px);align-self:flex-start}
+    .main-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:20px}
+    .right-panel{width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(var(--header-h) + 20px);align-self:flex-start;max-height:calc(100vh - var(--header-h) - 40px);overflow-y:auto;overflow-x:hidden}
+    .right-panel{scrollbar-width:none}
+    .right-panel::-webkit-scrollbar{display:none}
+
+    /* LEFT NAV */
+    .snav-title{font-family:'Source Serif 4',serif;font-size:.78rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:0 12px;margin-bottom:10px}
+    .snav-list{list-style:none;display:flex;flex-direction:column;gap:2px}
+    .snav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:500;color:var(--text-2);cursor:pointer;transition:all var(--ease-fast);text-decoration:none;border-left:2px solid transparent;position:relative}
+    .snav-item:hover{background:var(--card-bg-hover);color:var(--text-1)}
+    .snav-item.active{background:var(--orange-soft);color:var(--orange);border-left-color:var(--orange);font-weight:600}
+    .snav-item .snav-icon{width:16px;height:16px;flex-shrink:0}
+    .snav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-right:-2px}
+
+    /* RIGHT PANEL CARDS */
+    .rp-card{background:var(--card-bg);border:none;border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:visible}
+    .rp-title{font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:14px;color:var(--text-1)}
+    .rp-title-icon{color:var(--orange);flex-shrink:0}
+
+    /* Account card */
+    .rp-account{text-align:center;padding:24px 20px}
+    .rp-avatar{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:700;font-size:20px;margin:0 auto 12px;font-family:'Source Serif 4',serif}
+    .rp-name{font-family:'Source Serif 4',serif;font-size:1.1rem;font-weight:600;margin-bottom:2px}
+    .rp-email{font-size:.74rem;color:var(--text-3);margin-bottom:12px}
+    .rp-stat-row{display:flex;justify-content:center;gap:16px;padding-top:12px;border-top:1px solid var(--divider)}
+    .rp-stat{text-align:center}
+    .rp-stat-val{font-family:'Source Serif 4',serif;font-size:1.1rem;font-weight:700}
+    .rp-stat-lbl{font-size:.64rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em}
+
+    /* Sync status */
+    .rp-sync-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider)}
+    .rp-sync-item:last-child{border-bottom:none}
+    .rp-sync-icon{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+    .rp-sync-info{flex:1;min-width:0}
+    .rp-sync-name{font-size:.78rem;font-weight:600;color:var(--text-1)}
+    .rp-sync-time{font-size:.66rem;color:var(--text-3)}
+    .rp-sync-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0}
+
+    /* Quick actions */
+    .rp-action{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:500;color:var(--text-1);text-decoration:none;transition:background var(--ease-fast);cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:inherit;border-bottom:1px solid var(--divider)}
+    .rp-action:last-child{border-bottom:none}
+    .rp-action:hover{background:var(--card-bg-hover)}
+    .rp-action-icon{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+
+    /* TITLE ROW */
+    .st-title-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+    .st-title-icon{width:24px;height:24px;color:var(--orange);flex-shrink:0}
+    .st-h1{font-family:'Source Serif 4',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em}
+    .st-subtitle{font-size:.84rem;color:var(--text-3);margin-bottom:4px}
+
+    /* SECTION CARD */
+    .section-card{background:transparent;border:none;border-radius:0;box-shadow:none;overflow:visible;position:relative;padding:10px}
+    .section-card-inner{background:var(--card-bg);padding:24px 26px;overflow:hidden}
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+    .section-title{font-size:1.1rem;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+    .section-desc{font-size:.82rem;color:var(--text-3);margin-bottom:18px}
+
+    /* PLATFORM ROW */
+    .platform-row{padding:16px;border-radius:var(--radius-sm);border:1px solid var(--divider);margin-bottom:12px}
+    .platform-row:last-of-type{margin-bottom:0}
+    .platform-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .platform-left{display:flex;align-items:center;gap:8px}
+    .platform-icon{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+    .platform-name{font-size:.88rem;font-weight:600;color:var(--text-1)}
+    .status-badge{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:5px;display:flex;align-items:center;gap:4px}
+    .status-badge.active{background:var(--green-soft);color:var(--green)}
+    .status-badge.invalid{background:var(--orange-soft);color:var(--orange)}
+    .status-badge.not-configured{background:var(--card-bg-hover);color:var(--text-3)}
+    .platform-meta{font-size:.72rem;color:var(--text-3);margin-bottom:10px}
+    .token-input-row{display:flex;align-items:center;gap:8px}
+    .token-input{flex:1;padding:9px 12px;font-family:'SF Mono',Menlo,monospace;font-size:.8rem;border:1.5px solid var(--card-border);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-1);outline:none;transition:border-color var(--ease-fast),box-shadow var(--ease-fast)}
+    .token-input::placeholder{color:var(--text-3);font-family:'Inter',sans-serif}
+    .token-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+    .token-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);padding:2px}
+    .token-toggle:hover{color:var(--text-2)}
+    .btn-sm{padding:8px 16px;font-family:inherit;font-size:.78rem;font-weight:600;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap}
+    .btn-orange{background:var(--orange);color:#fff;border:none}
+    .btn-orange:hover{background:#c5674a}
+    .btn-outline{background:var(--cream);color:var(--text-2);border:1px solid var(--card-border)}
+    .btn-outline:hover{background:var(--card-bg-hover);color:var(--text-1)}
+
+    /* SYNC BUTTON */
+    .sync-row{margin-top:16px}
+    .sync-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;font-family:inherit;font-size:.82rem;font-weight:600;color:var(--text-2);background:var(--cream);border:1px solid var(--card-border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--ease-fast)}
+    .sync-btn:hover{background:var(--card-bg-hover);color:var(--text-1)}
+    .sync-btn .spinning{animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* GPA TARGET */
+    .gpa-display{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+    .gpa-current{display:flex;flex-direction:column}
+    .gpa-label{font-size:.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+    .gpa-value{font-family:'Source Serif 4',serif;font-size:2.2rem;font-weight:700;color:var(--orange);line-height:1}
+    .gpa-band{font-size:.78rem;font-weight:600;padding:4px 12px;border-radius:6px;background:var(--green-soft);color:var(--green)}
+    .gpa-input-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+    .gpa-slider{-webkit-appearance:none;appearance:none;flex:1;height:6px;background:var(--divider);border-radius:3px;outline:none;cursor:pointer}
+    .gpa-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--orange);border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+    .gpa-num{width:60px;padding:7px 10px;font-family:'Source Serif 4',serif;font-size:1rem;font-weight:700;text-align:center;border:1.5px solid var(--card-border);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-1);outline:none}
+    .gpa-num:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+    .gpa-scale{font-size:.72rem;color:var(--text-3);padding-top:12px;margin-top:12px;border-top:1px solid var(--divider)}
+
+    /* COURSE TABLE */
+    .course-table{width:100%;border-collapse:collapse}
+    .course-table th{font-size:.68rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;text-align:left;border-bottom:1.5px solid var(--divider)}
+    .course-table td{padding:12px 10px;font-size:.84rem;color:var(--text-2);border-bottom:1px solid var(--divider);vertical-align:middle}
+    .course-table tr:last-child td{border-bottom:none}
+    .course-table tr:hover td{background:rgba(0,0,0,.01)}
+    .course-code{font-weight:600;color:var(--text-1)}
+    .course-name-sm{font-size:.72rem;color:var(--text-3);margin-left:6px}
+    .link-badge{font-size:.64rem;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--green-soft);color:var(--green)}
+
+    /* PROFILE */
+    .profile-form{display:flex;flex-direction:column;gap:16px}
+    .form-group{display:flex;flex-direction:column;gap:4px}
+    .form-label-sm{font-size:.72rem;font-weight:600;color:var(--text-3)}
+    .form-input-sm{padding:9px 12px;font-family:inherit;font-size:.84rem;border:1.5px solid var(--card-border);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-1);outline:none;transition:border-color var(--ease-fast),box-shadow var(--ease-fast)}
+    .form-input-sm:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+    .form-input-sm.readonly{background:var(--card-bg-hover);color:var(--text-3);cursor:default}
+    .form-hint{font-size:.66rem;color:var(--text-3)}
+    .profile-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--divider)}
+    .disabled-group{opacity:.45;pointer-events:none}
+
+    /* DANGER ZONE */
+    .danger-section{margin-top:4px}
+    .danger-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--divider)}
+    .danger-row:last-child{border-bottom:none}
+    .danger-info{flex:1}
+    .danger-title{font-size:.84rem;font-weight:600;color:var(--text-1);margin-bottom:2px}
+    .danger-desc{font-size:.72rem;color:var(--text-3)}
+    .btn-danger{padding:7px 16px;font-family:inherit;font-size:.76rem;font-weight:600;border-radius:var(--radius-sm);cursor:pointer;background:transparent;border:1.5px solid var(--red);color:var(--red);transition:all var(--ease-fast)}
+    .btn-danger:hover{background:var(--red-soft)}
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.09s}.d3{animation-delay:.14s}
+    .d4{animation-delay:.19s}.d5{animation-delay:.28s}.d6{animation-delay:.38s}
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:6px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .3s ease}
+    html:hover::-webkit-scrollbar-thumb{background:var(--card-border)}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+
+    /* RESPONSIVE */
+    @media(max-width:1200px){.right-panel{display:none}}
+    @media(max-width:900px){.content-area{padding:16px 12px}.settings-nav{display:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">U</div><span class="logo-text">UniBoard</span></div>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a class="nav-item" href="dashboard.html"><i data-lucide="layout-dashboard" class="nav-icon"></i><span class="nav-label">Dashboard</span></a></li>
+      <li><a class="nav-item" href="timetable.html"><i data-lucide="table" class="nav-icon"></i><span class="nav-label">Timetable</span></a></li>
+      <li><a class="nav-item" href="courses.html"><i data-lucide="book-open" class="nav-icon"></i><span class="nav-label">Courses</span></a></li>
+      <li><a class="nav-item" href="deadline.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Deadlines</span></a></li>
+      <li><a class="nav-item" href="predict.html"><i data-lucide="target" class="nav-icon"></i><span class="nav-label">Predict</span></a></li>
+      <li><a class="nav-item" href="digest.html"><i data-lucide="radio" class="nav-icon"></i><span class="nav-label">Digest</span></a></li>
+    </ul>
+    <div class="sidebar-bottom"><a class="nav-item active" href="settings.html"><i data-lucide="settings" class="nav-icon"></i><span class="nav-label">Settings</span></a></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-brand">UniBoard</div>
+      <div class="header-right">
+        <div class="search-bar"><i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i><input type="text" placeholder="Search courses, files&hellip;"></div>
+        <button class="hdr-btn"><i data-lucide="bell" style="width:17px;height:17px"></i><span class="notif-dot"></span></button>
+        <div class="avatar">RQ</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- LEFT SETTINGS NAV -->
+      <nav class="settings-nav anim d1">
+        <div class="snav-title">Settings</div>
+        <ul class="snav-list">
+          <li><a class="snav-item active" href="#sec-tokens" data-section="sec-tokens">
+            <i data-lucide="key" class="snav-icon"></i> API Tokens
+          </a></li>
+          <li><a class="snav-item" href="#sec-gpa" data-section="sec-gpa">
+            <i data-lucide="target" class="snav-icon"></i> GPA Target
+          </a></li>
+          <li><a class="snav-item" href="#sec-courses" data-section="sec-courses">
+            <i data-lucide="link-2" class="snav-icon"></i> Course Linking
+          </a></li>
+          <li><a class="snav-item" href="#sec-profile" data-section="sec-profile">
+            <i data-lucide="user" class="snav-icon"></i> Profile
+          </a></li>
+          <li><a class="snav-item" href="#sec-danger" data-section="sec-danger">
+            <i data-lucide="alert-triangle" class="snav-icon" style="color:var(--red)"></i> Danger Zone
+          </a></li>
+        </ul>
+      </nav>
+
+      <div class="main-content">
+
+        <!-- TITLE -->
+        <div class="anim d1">
+          <div class="st-title-row">
+            <i data-lucide="settings" class="st-title-icon"></i>
+            <h1 class="st-h1">Settings</h1>
+          </div>
+          <p class="st-subtitle">Manage your tokens, preferences, and account</p>
+        </div>
+
+        <!-- 1. API TOKENS -->
+        <div class="section-card anim d2" data-hand-border id="sec-tokens">
+          <div class="section-card-inner">
+            <div class="section-title"><i data-lucide="key" style="width:18px;height:18px;color:var(--orange)"></i> API Tokens</div>
+            <p class="section-desc">Connect your university platforms to sync course data</p>
+
+            <!-- Canvas -->
+            <div class="platform-row">
+              <div class="platform-header">
+                <div class="platform-left">
+                  <div class="platform-icon" style="background:rgba(217,60,50,.08);color:#d93c32"><i data-lucide="graduation-cap" style="width:15px;height:15px"></i></div>
+                  <span class="platform-name">Canvas LMS</span>
+                </div>
+                <span class="status-badge active"><i data-lucide="check" style="width:11px;height:11px"></i> Active</span>
+              </div>
+              <div class="platform-meta">Last synced: 12 minutes ago</div>
+              <div class="token-input-row">
+                <div style="position:relative;flex:1">
+                  <input type="password" class="token-input" id="canvas-token" placeholder="Paste new Canvas token..." style="width:100%;padding-right:34px">
+                  <button class="token-toggle" id="canvas-toggle"><i data-lucide="eye" style="width:14px;height:14px"></i></button>
+                </div>
+                <button class="btn-sm btn-orange" id="canvas-update">Update</button>
+              </div>
+            </div>
+
+            <!-- Ed -->
+            <div class="platform-row">
+              <div class="platform-header">
+                <div class="platform-left">
+                  <div class="platform-icon" style="background:var(--blue-soft);color:var(--blue)"><i data-lucide="message-square" style="width:15px;height:15px"></i></div>
+                  <span class="platform-name">Ed Discussion</span>
+                </div>
+                <span class="status-badge active"><i data-lucide="check" style="width:11px;height:11px"></i> Active</span>
+              </div>
+              <div class="platform-meta">Last synced: 12 minutes ago</div>
+              <div class="token-input-row">
+                <div style="position:relative;flex:1">
+                  <input type="password" class="token-input" id="ed-token" placeholder="Paste new Ed token..." style="width:100%;padding-right:34px">
+                  <button class="token-toggle" id="ed-toggle"><i data-lucide="eye" style="width:14px;height:14px"></i></button>
+                </div>
+                <button class="btn-sm btn-orange" id="ed-update">Update</button>
+              </div>
+            </div>
+
+            <!-- Sync -->
+            <div class="sync-row">
+              <button class="sync-btn" id="sync-btn">
+                <i data-lucide="refresh-cw" style="width:14px;height:14px" id="sync-icon"></i>
+                Sync Now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. GPA TARGET -->
+        <div class="section-card anim d3" data-hand-border id="sec-gpa">
+          <div class="section-card-inner">
+            <div class="section-title"><i data-lucide="target" style="width:18px;height:18px;color:var(--orange)"></i> GPA Target</div>
+            <p class="section-desc">Set your WAM target to track progress on the Predict page</p>
+
+            <div class="gpa-display">
+              <div class="gpa-current">
+                <span class="gpa-label">Current Target</span>
+                <span class="gpa-value" id="gpa-display-val">75.0</span>
+              </div>
+              <span class="gpa-band" id="gpa-band">D</span>
+            </div>
+
+            <div class="gpa-input-row">
+              <input type="range" class="gpa-slider" id="gpa-slider" min="0" max="100" step="0.5" value="75">
+              <input type="number" class="gpa-num" id="gpa-num" min="0" max="100" step="0.5" value="75">
+              <button class="btn-sm btn-orange" id="gpa-save">Save Target</button>
+            </div>
+
+            <div class="gpa-scale">Scale: USYD 7-point (HD &ge; 85, D &ge; 75, CR &ge; 65, P &ge; 50)</div>
+          </div>
+        </div>
+
+        <!-- 3. COURSE LINKING -->
+        <div class="section-card anim d4" data-hand-border id="sec-courses">
+          <div class="section-card-inner">
+            <div class="section-title"><i data-lucide="link-2" style="width:18px;height:18px;color:var(--blue)"></i> Course Linking</div>
+            <p class="section-desc">Your synced courses and data sources</p>
+
+            <table class="course-table">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>Semester</th>
+                  <th>Sources</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="course-code">COMP2017</span><span class="course-name-sm">Systems Programming</span></td>
+                  <td>2026 S1</td>
+                  <td style="font-size:.72rem">Canvas + Ed</td>
+                  <td><span class="link-badge">Auto-linked</span></td>
+                </tr>
+                <tr>
+                  <td><span class="course-code">COMP3221</span><span class="course-name-sm">Distributed Systems</span></td>
+                  <td>2026 S1</td>
+                  <td style="font-size:.72rem">Canvas + Ed</td>
+                  <td><span class="link-badge">Auto-linked</span></td>
+                </tr>
+                <tr>
+                  <td><span class="course-code">STAT2011</span><span class="course-name-sm">Probability &amp; Estimation</span></td>
+                  <td>2026 S1</td>
+                  <td style="font-size:.72rem">Canvas + Ed</td>
+                  <td><span class="link-badge">Auto-linked</span></td>
+                </tr>
+                <tr>
+                  <td><span class="course-code">EDGU1003</span><span class="course-name-sm">Diet &amp; Nutrition</span></td>
+                  <td>2026 S1</td>
+                  <td style="font-size:.72rem">Canvas only</td>
+                  <td><span class="link-badge">Auto-linked</span></td>
+                </tr>
+                <tr>
+                  <td><span class="course-code">MATH2021</span><span class="course-name-sm">Vector Calculus</span></td>
+                  <td>2026 S1</td>
+                  <td style="font-size:.72rem">Canvas + Ed</td>
+                  <td><span class="link-badge">Auto-linked</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="font-size:.72rem;color:var(--text-3);margin-top:12px;font-style:italic">Manual linking for unmatched courses coming soon.</p>
+          </div>
+        </div>
+
+        <!-- 4. PROFILE -->
+        <div class="section-card anim d5" data-hand-border id="sec-profile">
+          <div class="section-card-inner">
+            <div class="section-title"><i data-lucide="user" style="width:18px;height:18px;color:var(--text-2)"></i> Profile</div>
+            <p class="section-desc">Your account information</p>
+
+            <div class="profile-form">
+              <div class="form-group">
+                <label class="form-label-sm">Display Name</label>
+                <input type="text" class="form-input-sm" value="Ricky" id="profile-name">
+              </div>
+              <div class="form-group">
+                <label class="form-label-sm">Email</label>
+                <input type="email" class="form-input-sm readonly" value="ricky@uni.sydney.edu.au" readonly>
+                <span class="form-hint">Email cannot be changed</span>
+              </div>
+              <div class="disabled-group">
+                <div class="form-group">
+                  <label class="form-label-sm">Password</label>
+                  <input type="password" class="form-input-sm" placeholder="Current password" disabled style="margin-bottom:8px">
+                  <input type="password" class="form-input-sm" placeholder="New password" disabled>
+                  <span class="form-hint">Password change coming soon</span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button class="btn-sm btn-orange" id="profile-save">Save Changes</button>
+                <span style="font-size:.72rem;color:var(--text-3)">Account created: 15 Mar 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. DANGER ZONE -->
+        <div class="section-card anim d6" data-hand-border id="sec-danger">
+          <div class="section-card-inner">
+            <div class="section-title" style="color:var(--red)"><i data-lucide="alert-triangle" style="width:18px;height:18px;color:var(--red)"></i> Danger Zone</div>
+            <div class="danger-section">
+              <div class="danger-row">
+                <div class="danger-info">
+                  <div class="danger-title">Disconnect all tokens</div>
+                  <div class="danger-desc">Remove all Canvas and Ed tokens. You can reconnect anytime.</div>
+                </div>
+                <button class="btn-danger">Disconnect</button>
+              </div>
+              <div class="danger-row">
+                <div class="danger-info">
+                  <div class="danger-title">Delete account</div>
+                  <div class="danger-desc">Permanently delete your account and all associated data. This cannot be undone.</div>
+                </div>
+                <button class="btn-danger">Delete Account</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <!-- Account Card -->
+        <div class="rp-card rp-account anim d2" data-hand-border>
+          <div class="rp-avatar">RQ</div>
+          <div class="rp-name">Ricky Qin</div>
+          <div class="rp-email">ricky@uni.sydney.edu.au</div>
+          <div class="rp-stat-row">
+            <div class="rp-stat">
+              <div class="rp-stat-val" style="color:var(--orange)">5</div>
+              <div class="rp-stat-lbl">Courses</div>
+            </div>
+            <div class="rp-stat">
+              <div class="rp-stat-val" style="color:var(--green)">77.5</div>
+              <div class="rp-stat-lbl">WAM</div>
+            </div>
+            <div class="rp-stat">
+              <div class="rp-stat-val" style="color:var(--blue)">D</div>
+              <div class="rp-stat-lbl">Band</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sync Status -->
+        <div class="rp-card anim d3" data-hand-border>
+          <div class="rp-title"><i data-lucide="activity" class="rp-title-icon" style="width:16px;height:16px"></i> Sync Status</div>
+          <div class="rp-sync-item">
+            <div class="rp-sync-icon" style="background:rgba(217,60,50,.08);color:#d93c32"><i data-lucide="graduation-cap" style="width:14px;height:14px"></i></div>
+            <div class="rp-sync-info">
+              <div class="rp-sync-name">Canvas LMS</div>
+              <div class="rp-sync-time">12 min ago &middot; 5 courses</div>
+            </div>
+            <span class="rp-sync-badge" style="background:var(--green-soft);color:var(--green)">OK</span>
+          </div>
+          <div class="rp-sync-item">
+            <div class="rp-sync-icon" style="background:var(--blue-soft);color:var(--blue)"><i data-lucide="message-square" style="width:14px;height:14px"></i></div>
+            <div class="rp-sync-info">
+              <div class="rp-sync-name">Ed Discussion</div>
+              <div class="rp-sync-time">12 min ago &middot; 4 courses</div>
+            </div>
+            <span class="rp-sync-badge" style="background:var(--green-soft);color:var(--green)">OK</span>
+          </div>
+          <div class="rp-sync-item">
+            <div class="rp-sync-icon" style="background:var(--amber-soft);color:var(--amber)"><i data-lucide="file-text" style="width:14px;height:14px"></i></div>
+            <div class="rp-sync-info">
+              <div class="rp-sync-name">Unit Outlines</div>
+              <div class="rp-sync-time">3 days ago &middot; 5 parsed</div>
+            </div>
+            <span class="rp-sync-badge" style="background:var(--green-soft);color:var(--green)">OK</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="rp-card anim d4" data-hand-border>
+          <div class="rp-title"><i data-lucide="zap" class="rp-title-icon" style="width:16px;height:16px"></i> Quick Actions</div>
+          <button class="rp-action">
+            <div class="rp-action-icon" style="background:var(--orange-soft);color:var(--orange)"><i data-lucide="refresh-cw" style="width:14px;height:14px"></i></div>
+            Force Full Sync
+          </button>
+          <button class="rp-action">
+            <div class="rp-action-icon" style="background:var(--blue-soft);color:var(--blue)"><i data-lucide="download" style="width:14px;height:14px"></i></div>
+            Export My Data
+          </button>
+          <button class="rp-action">
+            <div class="rp-action-icon" style="background:var(--green-soft);color:var(--green)"><i data-lucide="help-circle" style="width:14px;height:14px"></i></div>
+            Help &amp; Support
+          </button>
+          <button class="rp-action">
+            <div class="rp-action-icon" style="background:var(--purple-soft);color:var(--purple)"><i data-lucide="message-circle" style="width:14px;height:14px"></i></div>
+            Send Feedback
+          </button>
+        </div>
+
+        <!-- App Info -->
+        <div class="rp-card anim d5" data-hand-border>
+          <div class="rp-title"><i data-lucide="info" class="rp-title-icon" style="width:16px;height:16px"></i> About</div>
+          <div style="font-size:.76rem;color:var(--text-3);display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between"><span>Version</span><span style="font-weight:600;color:var(--text-2)">1.0.0-beta</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Member since</span><span style="font-weight:600;color:var(--text-2)">15 Mar 2026</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Data stored</span><span style="font-weight:600;color:var(--text-2)">2.4 MB</span></div>
+            <div style="margin-top:6px;padding-top:8px;border-top:1px solid var(--divider);text-align:center">
+              <a href="#" style="color:var(--orange);text-decoration:none;font-weight:600;font-size:.72rem">Terms</a>
+              <span style="margin:0 6px;color:var(--divider)">&middot;</span>
+              <a href="#" style="color:var(--orange);text-decoration:none;font-weight:600;font-size:.72rem">Privacy</a>
+              <span style="margin:0 6px;color:var(--divider)">&middot;</span>
+              <a href="#" style="color:var(--orange);text-decoration:none;font-weight:600;font-size:.72rem">GitHub</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  // ---- Rough.js hand-drawn card borders ----
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    document.querySelectorAll('[data-hand-border]').forEach(function(el){
+      var w=el.offsetWidth,h=el.offsetHeight;
+      var svg=document.createElementNS(NS,'svg');
+      svg.setAttribute('class','hand-border-svg');
+      // If card uses shell+inner pattern (section-card), draw border at inner position
+      var inner=el.querySelector('.section-card-inner');
+      var pad=inner?10:0;
+      svg.setAttribute('viewBox','-4 -4 '+(w+8)+' '+(h+8));
+      el.prepend(svg);
+      svg.appendChild(rough.svg(svg).rectangle(pad,pad,w-2*pad,h-2*pad,{
+        stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none'
+      }));
+    });
+  })});
+
+  // ---- Token visibility toggle ----
+  function setupToggle(inputId,toggleId){
+    var input=document.getElementById(inputId);
+    var btn=document.getElementById(toggleId);
+    btn.addEventListener('click',function(){
+      var isPassword=input.type==='password';
+      input.type=isPassword?'text':'password';
+      var icon=btn.querySelector('svg,i');
+      if(icon){
+        icon.setAttribute('data-lucide',isPassword?'eye-off':'eye');
+        lucide.createIcons();
+      }
+    });
+  }
+  setupToggle('canvas-token','canvas-toggle');
+  setupToggle('ed-token','ed-toggle');
+
+  // ---- Sync button ----
+  document.getElementById('sync-btn').addEventListener('click',function(){
+    var btn=this;
+    var icon=document.getElementById('sync-icon');
+    btn.disabled=true;
+    btn.style.opacity='.6';
+    icon.classList.add('spinning');
+    btn.childNodes[btn.childNodes.length-1].textContent=' Syncing\u2026';
+    setTimeout(function(){
+      btn.disabled=false;
+      btn.style.opacity='';
+      icon.classList.remove('spinning');
+      btn.childNodes[btn.childNodes.length-1].textContent=' Sync Now';
+    },2000);
+  });
+
+  // ---- GPA Target ----
+  var slider=document.getElementById('gpa-slider');
+  var numInput=document.getElementById('gpa-num');
+  var displayVal=document.getElementById('gpa-display-val');
+  var bandEl=document.getElementById('gpa-band');
+
+  function gradeBand(v){
+    if(v>=85)return'HD';
+    if(v>=75)return'D';
+    if(v>=65)return'CR';
+    if(v>=50)return'P';
+    return'F';
+  }
+  function updateGPA(v){
+    displayVal.textContent=parseFloat(v).toFixed(1);
+    bandEl.textContent=gradeBand(v);
+    // Slider fill
+    var pct=((v)/100)*100;
+    slider.style.background='linear-gradient(to right,var(--orange) 0%,var(--orange) '+pct+'%,var(--divider) '+pct+'%,var(--divider) 100%)';
+  }
+  slider.addEventListener('input',function(){numInput.value=this.value;updateGPA(this.value)});
+  numInput.addEventListener('input',function(){
+    var v=Math.max(0,Math.min(100,parseFloat(this.value)||0));
+    slider.value=v;updateGPA(v);
+  });
+  updateGPA(75);
+
+  // ---- Scroll-spy for left nav ----
+  var snavItems=document.querySelectorAll('.snav-item[data-section]');
+  var sections=['sec-tokens','sec-gpa','sec-courses','sec-profile','sec-danger'];
+  function updateNav(){
+    var scrollY=window.scrollY+120;
+    var activeId=sections[0];
+    sections.forEach(function(id){
+      var el=document.getElementById(id);
+      if(el&&el.offsetTop<=scrollY)activeId=id;
+    });
+    snavItems.forEach(function(item){
+      item.classList.toggle('active',item.dataset.section===activeId);
+    });
+  }
+  window.addEventListener('scroll',updateNav,{passive:true});
+  snavItems.forEach(function(item){
+    item.addEventListener('click',function(e){
+      e.preventDefault();
+      var target=document.getElementById(item.dataset.section);
+      if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+
+  // ---- Save feedback ----
+  function flashSaved(btn){
+    var orig=btn.textContent;
+    btn.textContent='Saved!';
+    btn.style.background='var(--green)';
+    setTimeout(function(){
+      btn.textContent=orig;
+      btn.style.background='';
+    },2000);
+  }
+  document.getElementById('gpa-save').addEventListener('click',function(){flashSaved(this)});
+  document.getElementById('profile-save').addEventListener('click',function(){flashSaved(this)});
+  document.getElementById('canvas-update').addEventListener('click',function(){
+    var input=document.getElementById('canvas-token');
+    if(input.value.trim()){flashSaved(this);input.value=''}
+  });
+  document.getElementById('ed-update').addEventListener('click',function(){
+    var input=document.getElementById('ed-token');
+    if(input.value.trim()){flashSaved(this);input.value=''}
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — Timetable</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --sidebar-w:68px;--sidebar-w-expanded:224px;--right-panel-w:300px;--header-h:56px;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+      --gutter-w:52px;--now-color:#e74c3c;
+    }
+    html{font-size:15px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+    .app{display:flex;min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;padding:20px 0;z-index:100;transition:width var(--ease);overflow:hidden;box-shadow:2px 0 16px rgba(20,20,19,.06)}
+    .sidebar:hover{width:var(--sidebar-w-expanded)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 17px 24px;white-space:nowrap}
+    .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:17px;color:#fff}
+    .logo-text{font-family:'Source Serif 4',serif;font-size:1.18rem;font-weight:700;color:#4a3f34;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .logo-text{opacity:1}
+    .sidebar-rule{width:26px;height:1px;background:rgba(60,50,40,.1);margin:0 auto 10px;transition:width var(--ease)}
+    .sidebar:hover .sidebar-rule{width:calc(100% - 44px)}
+    .sidebar-nav{list-style:none;width:100%;flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+    .nav-item{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:rgba(60,50,40,.65);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap;overflow:hidden;text-decoration:none}
+    .nav-item:hover{background:rgba(60,50,40,.06);color:rgba(60,50,40,.75)}
+    .nav-item.active{background:rgba(217,119,87,.18);color:var(--orange)}
+    .nav-icon{flex-shrink:0;width:20px;height:20px}
+    .nav-label{font-size:.84rem;font-weight:500;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .nav-label{opacity:1}
+    .sidebar-bottom{padding:0 10px;width:100%}
+    .main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .header{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(250,249,245,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+    .header-brand{font-family:'Source Serif 4',serif;font-size:.95rem;font-weight:600;color:var(--text-2)}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:7px 14px;width:220px}
+    .search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.82rem;color:var(--text-1);width:100%}
+    .search-bar input::placeholder{color:var(--text-3)}
+    .search-icon{color:var(--text-3);flex-shrink:0}
+    .hdr-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast);position:relative}
+    .hdr-btn:hover{background:var(--card-bg-hover)}
+    .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--card-bg)}
+    .avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;cursor:pointer;margin-left:4px}
+    .content-area{display:flex;flex:1;padding:20px 24px;gap:22px}
+    .main-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+    .right-panel{width:var(--right-panel-w);flex-shrink:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(var(--header-h) + 20px);align-self:flex-start;max-height:calc(100vh - var(--header-h) - 40px);overflow-y:auto;overflow-x:hidden}
+    .card{background:var(--card-bg);border:none;border-radius:var(--radius);box-shadow:var(--shadow);position:relative;overflow:visible}
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .card-title{font-size:.92rem;font-weight:600;display:flex;align-items:center;gap:8px}
+    .card-title-icon{color:var(--orange)}
+    .card-badge{font-size:.68rem;padding:3px 9px;border-radius:6px;font-weight:600;background:var(--orange-soft);color:var(--orange)}
+
+    /* TITLE ROW */
+    .tt-title-row{display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:8px}
+    .tt-title-left{display:flex;align-items:center;gap:10px}
+    .tt-title-icon{width:22px;height:22px;color:var(--orange);flex-shrink:0}
+    .tt-h1{font-family:'Source Serif 4',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em}
+    .tt-semester-badge{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:6px;background:var(--orange-soft);color:var(--orange)}
+    .tt-title-center{display:flex;flex-direction:column;align-items:center;gap:1px}
+    .tt-slider-label{font-family:'Source Serif 4',serif;font-size:.64rem;font-weight:600;color:var(--text-3);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
+    .tt-slider{-webkit-appearance:none;appearance:none;width:200px;height:5px;background:var(--divider);border-radius:3px;outline:none;cursor:pointer;margin:0}
+    .tt-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--orange);border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+    .tt-title-right{display:flex;align-items:center;gap:8px}
+    .tt-nav-btn{width:30px;height:30px;border-radius:var(--radius-sm);border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast)}
+    .tt-nav-btn:hover{background:var(--card-bg-hover);color:var(--text-1)}
+    .tt-week-dates{font-family:'Source Serif 4',serif;font-weight:600;font-size:.86rem;color:var(--text-1);min-width:180px;text-align:center}
+    .tt-mode-toggle{display:flex;border:1px solid var(--card-border);border-radius:var(--radius-sm);overflow:hidden}
+    .tt-mode-btn{font-family:inherit;font-size:.72rem;font-weight:600;padding:5px 12px;border:none;background:#fff;color:var(--text-3);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap}
+    .tt-mode-btn:first-child{border-right:1px solid var(--card-border)}
+    .tt-mode-btn:hover{color:var(--text-1);background:var(--card-bg-hover)}
+    .tt-mode-btn.active{background:var(--orange-soft);color:var(--orange)}
+
+    /* GRID */
+    .card.tt-card{padding:0;overflow:hidden}
+    .tt-day-headers{display:flex;border-bottom:1px solid var(--divider);background:rgba(246,245,240,.6)}
+    .tt-dh-spacer{width:var(--gutter-w);flex-shrink:0}
+    .tt-dh-grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr)}
+    .tt-dh{text-align:center;padding:10px 4px 8px;font-size:.72rem;font-weight:600;color:var(--text-2);border-left:1px solid var(--divider)}
+    .tt-dh:first-child{border-left:none}
+    .tt-dh .dh-date{font-size:.68rem;font-weight:500;color:var(--text-3)}
+    .tt-dh.today{color:var(--orange);background:rgba(217,119,87,.04)}
+    .tt-dh.today .dh-date{color:var(--orange)}
+    .tt-body{display:flex;overflow-y:auto;max-height:calc(100vh - var(--header-h) - 200px)}
+    .tt-gutter{width:var(--gutter-w);flex-shrink:0;position:relative;height:800px;border-right:1px solid var(--divider)}
+    .tt-time{position:absolute;right:8px;transform:translateY(-50%);font-size:.65rem;font-weight:500;color:var(--text-3);white-space:nowrap}
+    .tt-time.compressed{font-size:.58rem;opacity:.6}
+    .tt-grid{flex:1;position:relative;height:800px}
+    .tt-hline{position:absolute;left:0;right:0;height:1px;background:var(--divider);z-index:1;pointer-events:none}
+    .tt-hline.half{background:rgba(234,231,224,.45)}
+    .tt-hline.compressed{opacity:.45}
+    .tt-compress-sep{position:absolute;left:0;right:0;top:660px;height:1px;z-index:3;background:repeating-linear-gradient(90deg,var(--amber) 0,var(--amber) 5px,transparent 5px,transparent 10px);opacity:.25}
+    .tt-compress-bg{position:absolute;left:0;right:0;top:660px;bottom:0;background:rgba(176,137,104,.02);pointer-events:none;z-index:0}
+    .tt-columns{display:grid;grid-template-columns:repeat(7,1fr);position:absolute;inset:0;z-index:4}
+    .tt-col{position:relative;border-left:1px solid var(--divider);overflow:visible}
+    .tt-col:first-child{border-left:none}
+    .tt-col.today{background:rgba(217,119,87,.018)}
+    .tt-break-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;background:rgba(250,249,245,.6)}
+    .tt-break-inner{text-align:center;padding:40px}
+    .tt-break-inner h3{font-size:1.2rem;margin-bottom:6px;color:var(--amber)}
+    .tt-break-inner p{font-size:.82rem;color:var(--text-3)}
+
+    /* EVENTS */
+    .tt-event{position:absolute;border-radius:4px;padding:3px 5px;overflow:hidden;cursor:pointer;transition:transform var(--ease-fast),box-shadow var(--ease-fast);z-index:5;font-size:.66rem;line-height:1.3}
+    .tt-event:hover{transform:scale(1.02) translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.1);z-index:20}
+    .ev-time{font-size:.6rem;color:var(--text-2);margin-bottom:1px;opacity:.8}
+    .ev-code{font-weight:700;font-size:.72rem;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ev-name{font-size:.58rem;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ev-type{font-size:.58rem;color:var(--text-2)}
+    .ev-room{font-size:.54rem;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ev-comp2017{background:rgba(217,119,87,.13);border-left:3px solid #d97757}
+    .ev-comp3221{background:rgba(106,155,204,.13);border-left:3px solid #6a9bcc}
+    .ev-stat2011{background:rgba(176,137,104,.13);border-left:3px solid #b08968}
+    .ev-edgu1003{background:rgba(120,140,93,.13);border-left:3px solid #788c5d}
+    .ev-math2021{background:rgba(155,123,184,.13);border-left:3px solid #9b7bb8}
+
+    /* NOW + DEADLINE */
+    .tt-now{position:absolute;left:0;right:0;height:2px;background:var(--now-color);z-index:12;pointer-events:none}
+    .tt-now::before{content:'';position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--now-color)}
+    .tt-dl{position:absolute;left:0;right:0;height:14px;z-index:15;cursor:pointer;display:flex;align-items:center}
+    .tt-dl .dl-dash{flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--dl-color) 0,var(--dl-color) 7px,transparent 7px,transparent 13px)}
+    .tt-dl .dl-dot{width:10px;height:10px;border-radius:3px;background:var(--dl-color);transform:rotate(45deg);flex-shrink:0}
+    .tt-dl .dl-tag{font-size:.56rem;font-weight:700;padding:2px 5px;border-radius:3px;background:var(--dl-color);color:#fff;white-space:nowrap;flex-shrink:0;margin:0 2px}
+    .dl-tip{display:none;position:absolute;bottom:18px;left:4px;background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 6px 24px rgba(20,20,19,.12),0 2px 6px rgba(20,20,19,.06);z-index:200;min-width:200px;border:1px solid var(--card-border)}
+    .dl-tip::after{content:'';position:absolute;bottom:-6px;left:16px;width:10px;height:10px;background:#fff;border-bottom:1px solid var(--card-border);border-right:1px solid var(--card-border);transform:rotate(45deg)}
+    .tt-dl:hover .dl-tip{display:block}
+    .tt-dl:hover .dl-dash{height:3px}
+    .tt-dl:hover .dl-dot{transform:rotate(45deg) scale(1.2)}
+    .dl-tip-badge{display:inline-block;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:6px;text-transform:uppercase}
+    .dl-tip-badge.urgent{background:var(--orange-soft);color:var(--orange)}
+    .dl-tip-badge.warning{background:var(--amber-soft);color:var(--amber)}
+    .dl-tip-badge.normal{background:var(--blue-soft);color:var(--blue)}
+    .dl-tip-badge.later{background:var(--green-soft);color:var(--green)}
+    .dl-tip-title{font-family:'Source Serif 4',serif;font-weight:600;font-size:.82rem;color:var(--text-1);margin-bottom:2px}
+    .dl-tip-course{font-size:.68rem;font-weight:600;margin-bottom:4px}
+    .dl-tip-time{font-size:.68rem;color:var(--text-2);margin-bottom:6px}
+    .dl-tip-link{font-size:.66rem;font-weight:600;color:var(--orange);text-decoration:none}
+    .dl-comp2017{--dl-color:#d97757}.dl-comp3221{--dl-color:#6a9bcc}.dl-stat2011{--dl-color:#b08968}.dl-math2021{--dl-color:#9b7bb8}
+
+    /* RIGHT PANEL */
+    .rp-card{padding:16px 18px}
+    .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .cal-month{font-family:'Source Serif 4',serif;font-weight:600;font-size:.88rem}
+    .cal-btn{background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px;border-radius:6px;transition:all var(--ease-fast);display:grid;place-items:center}
+    .cal-btn:hover{background:var(--card-bg-hover);color:var(--text-1)}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
+    .cal-h{font-size:.62rem;font-weight:600;color:var(--text-3);padding:4px 0;text-transform:uppercase}
+    .cal-d{font-size:.74rem;padding:5px 0;border-radius:6px;color:var(--text-2);cursor:default}
+    .cal-d.today{background:var(--orange);color:#fff;font-weight:600}
+    .cal-d.heat-1{background:rgba(217,119,87,.12);color:var(--orange);font-weight:600}
+    .cal-d.heat-2{background:rgba(217,119,87,.25);color:var(--orange);font-weight:600}
+    .cal-d.heat-3{background:rgba(217,119,87,.45);color:#fff;font-weight:600}
+    .cal-d.muted{color:var(--text-3);opacity:.35}
+    .rp-dl-list{display:flex;flex-direction:column;gap:6px}
+    .rp-dl-item{display:flex;gap:10px;align-items:stretch;padding:10px;border-radius:var(--radius-sm);transition:background var(--ease-fast);cursor:pointer;position:relative}
+    .rp-dl-item:hover{background:var(--card-bg-hover)}
+    .rp-dl-item.urgent{background:rgba(217,119,87,.04)}
+    .rp-dl-item.warning{background:rgba(176,137,104,.04)}
+    .rp-dl-stripe{width:3px;border-radius:2px;flex-shrink:0}
+    .rp-dl-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+    .rp-dl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+    .rp-dl-course{font-size:.7rem;font-weight:700}
+    .rp-dl-badge{font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:5px;white-space:nowrap;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
+    .rp-dl-name{font-size:.72rem;font-weight:500;color:var(--text-1);margin-bottom:1px}
+    .rp-dl-time{font-size:.64rem;color:var(--text-3)}
+    .rp-legend{display:flex;flex-direction:column;gap:6px}
+    .rp-legend-item{display:flex;align-items:center;gap:8px;font-size:.72rem}
+    .rp-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+    .rp-legend-code{font-weight:600;color:var(--text-1)}
+    .rp-legend-name{color:var(--text-3);font-size:.64rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:3px}
+    @media(max-width:1200px){.right-panel{display:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">U</div><span class="logo-text">UniBoard</span></div>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a class="nav-item" href="dashboard.html"><i data-lucide="layout-dashboard" class="nav-icon"></i><span class="nav-label">Dashboard</span></a></li>
+      <li><a class="nav-item active" href="#"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Timetable</span></a></li>
+      <li><a class="nav-item" href="courses.html"><i data-lucide="book-open" class="nav-icon"></i><span class="nav-label">Courses</span></a></li>
+      <li><a class="nav-item" href="deadline.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Deadlines</span></a></li>
+      <li><a class="nav-item" href="predict.html"><i data-lucide="target" class="nav-icon"></i><span class="nav-label">Predict</span></a></li>
+      <li><a class="nav-item" href="#"><i data-lucide="radio" class="nav-icon"></i><span class="nav-label">Digest</span></a></li>
+    </ul>
+    <div class="sidebar-bottom"><a class="nav-item" href="#"><i data-lucide="settings" class="nav-icon"></i><span class="nav-label">Settings</span></a></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="header">
+      <div class="header-brand">UniBoard</div>
+      <div class="header-right">
+        <div class="search-bar"><i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i><input type="text" placeholder="Search courses, files&hellip;"></div>
+        <button class="hdr-btn"><i data-lucide="bell" style="width:17px;height:17px"></i><span class="notif-dot"></span></button>
+        <div class="avatar">RQ</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="main-content">
+        <!-- TITLE ROW -->
+        <div class="tt-title-row">
+          <div class="tt-title-left">
+            <i data-lucide="calendar" class="tt-title-icon"></i>
+            <h1 class="tt-h1">Timetable</h1>
+            <span class="tt-semester-badge">2026 S1</span>
+          </div>
+          <div class="tt-title-center">
+            <span class="tt-slider-label">Weeks</span>
+            <input type="range" class="tt-slider" id="week-slider" min="1" max="14" value="4" step="1">
+          </div>
+          <div class="tt-title-right">
+            <button class="tt-nav-btn" id="tt-prev"><i data-lucide="chevron-left" style="width:15px;height:15px"></i></button>
+            <span class="tt-week-dates" id="week-dates">16/03 — 22/03/2026</span>
+            <button class="tt-nav-btn" id="tt-next"><i data-lucide="chevron-right" style="width:15px;height:15px"></i></button>
+            <div class="tt-mode-toggle">
+              <button class="tt-mode-btn" id="mode-all">All Weeks</button>
+              <button class="tt-mode-btn active" id="mode-current">Current Week</button>
+            </div>
+          </div>
+        </div>
+        <!-- TIMETABLE -->
+        <div class="card tt-card" data-hand-border>
+          <div class="tt-day-headers"><div class="tt-dh-spacer"></div>
+            <div class="tt-dh-grid" id="dh-grid">
+              <div class="tt-dh">Mon</div><div class="tt-dh">Tue</div><div class="tt-dh">Wed</div>
+              <div class="tt-dh">Thu</div><div class="tt-dh">Fri</div><div class="tt-dh">Sat</div><div class="tt-dh">Sun</div>
+            </div>
+          </div>
+          <div class="tt-body" id="tt-body">
+            <div class="tt-gutter">
+              <span class="tt-time" style="top:0">8 AM</span><span class="tt-time" style="top:60px">9 AM</span>
+              <span class="tt-time" style="top:120px">10 AM</span><span class="tt-time" style="top:180px">11 AM</span>
+              <span class="tt-time" style="top:240px">12 PM</span><span class="tt-time" style="top:300px">1 PM</span>
+              <span class="tt-time" style="top:360px">2 PM</span><span class="tt-time" style="top:420px">3 PM</span>
+              <span class="tt-time" style="top:480px">4 PM</span><span class="tt-time" style="top:540px">5 PM</span>
+              <span class="tt-time" style="top:600px">6 PM</span>
+              <span class="tt-time compressed" style="top:660px">7 PM</span><span class="tt-time compressed" style="top:688px">8 PM</span>
+              <span class="tt-time compressed" style="top:716px">9 PM</span><span class="tt-time compressed" style="top:744px">10 PM</span>
+              <span class="tt-time compressed" style="top:772px">11 PM</span>
+            </div>
+            <div class="tt-grid" id="tt-grid">
+              <div class="tt-hline" style="top:0"></div><div class="tt-hline half" style="top:30px"></div>
+              <div class="tt-hline" style="top:60px"></div><div class="tt-hline half" style="top:90px"></div>
+              <div class="tt-hline" style="top:120px"></div><div class="tt-hline half" style="top:150px"></div>
+              <div class="tt-hline" style="top:180px"></div><div class="tt-hline half" style="top:210px"></div>
+              <div class="tt-hline" style="top:240px"></div><div class="tt-hline half" style="top:270px"></div>
+              <div class="tt-hline" style="top:300px"></div><div class="tt-hline half" style="top:330px"></div>
+              <div class="tt-hline" style="top:360px"></div><div class="tt-hline half" style="top:390px"></div>
+              <div class="tt-hline" style="top:420px"></div><div class="tt-hline half" style="top:450px"></div>
+              <div class="tt-hline" style="top:480px"></div><div class="tt-hline half" style="top:510px"></div>
+              <div class="tt-hline" style="top:540px"></div><div class="tt-hline half" style="top:570px"></div>
+              <div class="tt-hline" style="top:600px"></div><div class="tt-hline half" style="top:630px"></div>
+              <div class="tt-hline compressed" style="top:660px"></div><div class="tt-hline compressed" style="top:688px"></div>
+              <div class="tt-hline compressed" style="top:716px"></div><div class="tt-hline compressed" style="top:744px"></div>
+              <div class="tt-hline compressed" style="top:772px"></div><div class="tt-hline compressed" style="top:800px"></div>
+              <div class="tt-compress-sep"></div><div class="tt-compress-bg"></div>
+              <div class="tt-columns" id="tt-cols">
+                <div class="tt-col" id="col-0"></div><div class="tt-col" id="col-1"></div>
+                <div class="tt-col" id="col-2"></div><div class="tt-col" id="col-3"></div>
+                <div class="tt-col" id="col-4"></div><div class="tt-col" id="col-5"></div>
+                <div class="tt-col" id="col-6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <div class="card rp-card" data-hand-border>
+          <div class="cal-nav">
+            <button class="cal-btn" id="cal-prev"><i data-lucide="chevron-left" style="width:15px;height:15px"></i></button>
+            <div class="cal-month" id="cal-month">March 2026</div>
+            <button class="cal-btn" id="cal-next"><i data-lucide="chevron-right" style="width:15px;height:15px"></i></button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="card rp-card" data-hand-border>
+          <div class="card-header"><div class="card-title"><i data-lucide="clock" class="card-title-icon" style="width:16px;height:16px"></i> Upcoming Deadlines</div></div>
+          <div class="rp-dl-list">
+            <div class="rp-dl-item urgent"><div class="rp-dl-stripe" style="background:#d97757"></div><div class="rp-dl-info"><div class="rp-dl-top"><span class="rp-dl-course" style="color:#d97757">COMP2017</span><span class="rp-dl-badge" style="background:var(--orange-soft);color:var(--orange)">2 days</span></div><div class="rp-dl-name">Lab 5 — Memory Management</div><div class="rp-dl-time">Wed 18/3 · 11:59 PM</div></div></div>
+            <div class="rp-dl-item warning"><div class="rp-dl-stripe" style="background:#b08968"></div><div class="rp-dl-info"><div class="rp-dl-top"><span class="rp-dl-course" style="color:#b08968">STAT2011</span><span class="rp-dl-badge" style="background:var(--amber-soft);color:var(--amber)">3 days</span></div><div class="rp-dl-name">Assignment 1 Draft</div><div class="rp-dl-time">Thu 19/3 · 5:00 PM</div></div></div>
+            <div class="rp-dl-item"><div class="rp-dl-stripe" style="background:#9b7bb8"></div><div class="rp-dl-info"><div class="rp-dl-top"><span class="rp-dl-course" style="color:#9b7bb8">MATH2021</span><span class="rp-dl-badge" style="background:var(--blue-soft);color:var(--blue)">4 days</span></div><div class="rp-dl-name">Online Quiz 4</div><div class="rp-dl-time">Fri 20/3 · 9:00 PM</div></div></div>
+            <div class="rp-dl-item"><div class="rp-dl-stripe" style="background:#6a9bcc"></div><div class="rp-dl-info"><div class="rp-dl-top"><span class="rp-dl-course" style="color:#6a9bcc">COMP3221</span><span class="rp-dl-badge" style="background:var(--green-soft);color:var(--green)">6 days</span></div><div class="rp-dl-name">Project Milestone 2</div><div class="rp-dl-time">Sun 22/3 · 11:59 PM</div></div></div>
+          </div>
+        </div>
+        <div class="card rp-card" data-hand-border>
+          <div class="card-header"><div class="card-title"><i data-lucide="palette" class="card-title-icon" style="width:16px;height:16px"></i> Courses</div><span class="card-badge">5 enrolled</span></div>
+          <div class="rp-legend">
+            <div class="rp-legend-item"><div class="rp-legend-dot" style="background:#d97757"></div><span class="rp-legend-code">COMP2017</span><span class="rp-legend-name">Systems Programming</span></div>
+            <div class="rp-legend-item"><div class="rp-legend-dot" style="background:#6a9bcc"></div><span class="rp-legend-code">COMP3221</span><span class="rp-legend-name">Distributed Systems</span></div>
+            <div class="rp-legend-item"><div class="rp-legend-dot" style="background:#b08968"></div><span class="rp-legend-code">STAT2011</span><span class="rp-legend-name">Probability & Estimation</span></div>
+            <div class="rp-legend-item"><div class="rp-legend-dot" style="background:#788c5d"></div><span class="rp-legend-code">EDGU1003</span><span class="rp-legend-name">Diet & Nutrition</span></div>
+            <div class="rp-legend-item"><div class="rp-legend-dot" style="background:#9b7bb8"></div><span class="rp-legend-code">MATH2021</span><span class="rp-legend-name">Vector Calculus</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  /* ====== DATA from ICS ====== */
+  var WEEKS=[
+    {pos:1,w:1,label:'Week 1',mon:'2026-02-23'},{pos:2,w:2,label:'Week 2',mon:'2026-03-02'},
+    {pos:3,w:3,label:'Week 3',mon:'2026-03-09'},{pos:4,w:4,label:'Week 4',mon:'2026-03-16'},
+    {pos:5,w:5,label:'Week 5',mon:'2026-03-23'},{pos:6,w:6,label:'Week 6',mon:'2026-03-30'},
+    {pos:7,w:0,label:'Break',mon:'2026-04-06'},
+    {pos:8,w:7,label:'Week 7',mon:'2026-04-13'},{pos:9,w:8,label:'Week 8',mon:'2026-04-20'},
+    {pos:10,w:9,label:'Week 9',mon:'2026-04-27'},{pos:11,w:10,label:'Week 10',mon:'2026-05-04'},
+    {pos:12,w:11,label:'Week 11',mon:'2026-05-11'},{pos:13,w:12,label:'Week 12',mon:'2026-05-18'},
+    {pos:14,w:13,label:'Week 13',mon:'2026-05-25'}
+  ];
+  var CUR=4;
+  var SE=[
+    {c:'COMP2017',n:'Systems Programming',t:'Lecture',u:'01',d:4,s:12,e:14,r:'Eastern Ave Auditorium',k:'comp2017',w:[1,2,3,4,5,7,8,9,10,11,12,13]},
+    {c:'COMP2017',n:'Systems Programming',t:'TutorialA',u:'20',d:1,s:9,e:10,r:'SIT Lab 114',k:'comp2017',w:[2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'COMP2017',n:'Systems Programming',t:'TutorialB',u:'02',d:3,s:10,e:11,r:'SIT Lab 117',k:'comp2017',w:[2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'COMP3221',n:'Distributed Systems',t:'Lecture',u:'01',d:1,s:14,e:16,r:'Law Annex LT 101',k:'comp3221',w:[1,2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'COMP3221',n:'Distributed Systems',t:'Tutorial',u:'06',d:3,s:11,e:13,r:'Madsen Lab 211',k:'comp3221',w:[2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'EDGU1003',n:'Diet & Nutrition',t:'Lecture',u:'01',d:1,s:9,e:11,r:'Online',k:'edgu1003',w:[1,2,3,4,5,6,7,8,9,10,11,12]},
+    {c:'EDGU1003',n:'Diet & Nutrition',t:'Tutorial',u:'410',d:3,s:14,e:15,r:'Education 508',k:'edgu1003',w:[1,2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'EDGU1003',n:'Diet & Nutrition',t:'Workshop-SCANA',u:'01',d:3,s:18,e:19.5,r:'Online',k:'edgu1003',w:[8]},
+    {c:'MATH2021',n:'Vector Calculus',t:'Lecture',u:'02-P1',d:2,s:11,e:13,r:'Online',k:'math2021',w:[1,2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'MATH2021',n:'Vector Calculus',t:'Lecture',u:'02-P2',d:4,s:10,e:11,r:'Online',k:'math2021',w:[1,2,3,4,5,7,8,9,10,11,12,13]},
+    {c:'MATH2021',n:'Vector Calculus',t:'Seminar',u:'01',d:4,s:11,e:12,r:'Carslaw LT 159',k:'math2021',w:[1,2,3,4,5,8,9,10,11,12]},
+    {c:'MATH2021',n:'Vector Calculus',t:'Tutorial',u:'08',d:1,s:10,e:11,r:'EA Seminar 119',k:'math2021',w:[2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'MATH2021',n:'Vector Calculus',t:'Assessment',u:'03',d:4,s:11,e:12,r:'Chem LT 3',k:'math2021',w:[7,13]},
+    {c:'STAT2011',n:'Probability & Estimation',t:'Lecture',u:'02-P1',d:0,s:15,e:16,r:'Online',k:'stat2011',w:[1,2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'STAT2011',n:'Probability & Estimation',t:'Lecture',u:'02-P2',d:1,s:11,e:12,r:'Online',k:'stat2011',w:[1,2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'STAT2011',n:'Probability & Estimation',t:'Lecture',u:'02-P3',d:2,s:10,e:11,r:'Online',k:'stat2011',w:[1,2,3,4,6,7,8,9,10,12,13]},
+    {c:'STAT2011',n:'Probability & Estimation',t:'Tutorial',u:'12',d:3,s:16,e:17,r:'Carslaw 356',k:'stat2011',w:[2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'STAT2011',n:'Probability & Estimation',t:'Workshop',u:'12',d:3,s:17,e:18,r:'Law Annex 030',k:'stat2011',w:[2,3,4,5,6,7,8,9,10,11,12,13]},
+    {c:'STAT2011',n:'Probability & Estimation',t:'Assessment',u:'01',d:2,s:10,e:11,r:'Chem LT 1',k:'stat2011',w:[5,11]}
+  ];
+  var DL=[
+    {d:2,h:23.98,tag:'Lab 5',title:'Lab 5 \u2014 Memory Management',urg:'urgent',time:'Wed 18/3 \xb7 11:59 PM',course:'COMP2017 Systems Programming',color:'#d97757',k:'comp2017',wk:4},
+    {d:3,h:17,tag:'Draft Due',title:'Assignment 1 Draft',urg:'warning',time:'Thu 19/3 \xb7 5:00 PM',course:'STAT2011 Probability & Estimation',color:'#b08968',k:'stat2011',wk:4},
+    {d:4,h:21,tag:'Quiz 4',title:'Online Quiz 4',urg:'normal',time:'Fri 20/3 \xb7 9:00 PM',course:'MATH2021 Vector Calculus',color:'#9b7bb8',k:'math2021',wk:4},
+    {d:6,h:23.98,tag:'Project M2',title:'Project Milestone 2',urg:'later',time:'Sun 22/3 \xb7 11:59 PM',course:'COMP3221 Distributed Systems',color:'#6a9bcc',k:'comp3221',wk:4}
+  ];
+
+  /* ====== HELPERS ====== */
+  function tY(h){return h<19?(h-8)*60:660+(h-19)*28}
+  function ft(h){var hr=Math.floor(h),m=Math.round((h-hr)*60);return(hr<10?'0':'')+hr+':'+(m<10?'0':'')+m}
+  function pMon(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+  function fd(d){return d.getDate()+'/'+(d.getMonth()+1)}
+  function fdf(d){var dd=d.getDate(),mm=d.getMonth()+1,y=d.getFullYear();return(dd<10?'0':'')+dd+'/'+(mm<10?'0':'')+mm+'/'+y}
+  var DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  /* ====== STATE ====== */
+  var mode='week',sPos=CUR,slider=document.getElementById('week-slider');
+
+
+  /* ====== OVERLAP (group-aware) ====== */
+  function assignCols(evs){
+    evs.sort(function(a,b){return a.s-b.s||a.e-b.e});
+    // Build overlap groups: events that transitively overlap share a group
+    var groups=[],visited=new Array(evs.length);
+    for(var i=0;i<evs.length;i++){
+      if(visited[i])continue;
+      var grp=[i];visited[i]=true;
+      var maxEnd=evs[i].e;
+      for(var j=i+1;j<evs.length;j++){
+        if(evs[j].s<maxEnd){grp.push(j);visited[j]=true;if(evs[j].e>maxEnd)maxEnd=evs[j].e}
+      }
+      groups.push(grp);
+    }
+    // Assign columns per group independently
+    groups.forEach(function(grp){
+      var cols=[];
+      grp.forEach(function(idx){
+        var ev=evs[idx],placed=false;
+        for(var c=0;c<cols.length;c++){if(ev.s>=cols[c]){cols[c]=ev.e;ev._col=c;placed=true;break}}
+        if(!placed){ev._col=cols.length;cols.push(ev.e)}
+      });
+      var mx=cols.length;
+      grp.forEach(function(idx){evs[idx]._cc=mx});
+    });
+    return evs;
+  }
+
+  /* ====== BUILD DOM SAFELY ====== */
+  function mkEv(ev,top,h){
+    var el=document.createElement('div');
+    el.className='tt-event ev-'+ev.k;
+    el.style.top=top+'px';el.style.height=h+'px';
+    if(ev._cc>1){var cw=100/ev._cc;el.style.left=ev._col*cw+'%';el.style.width='calc('+cw+'% - 3px)'}
+    else{el.style.left='2px';el.style.right='2px'}
+    var t1=document.createElement('div');t1.className='ev-time';t1.textContent=ft(ev.s)+' \u2013 '+ft(ev.e);
+    var t2=document.createElement('div');t2.className='ev-code';t2.textContent=ev.c;
+    var t3=document.createElement('div');t3.className='ev-name';t3.textContent=ev.n;
+    var t4=document.createElement('div');t4.className='ev-type';t4.textContent=ev.t+' '+ev.u;
+    el.appendChild(t1);el.appendChild(t2);el.appendChild(t3);el.appendChild(t4);
+    if(h>65){var t5=document.createElement('div');t5.className='ev-room';t5.textContent=ev.r;el.appendChild(t5)}
+    return el;
+  }
+
+  function mkDl(dl){
+    var y=tY(dl.h);
+    var el=document.createElement('div');el.className='tt-dl dl-'+dl.k;el.style.top=y+'px';
+    var dot=document.createElement('div');dot.className='dl-dot';
+    var dash=document.createElement('div');dash.className='dl-dash';
+    var tag=document.createElement('div');tag.className='dl-tag';tag.textContent=dl.tag;
+    var tip=document.createElement('div');tip.className='dl-tip';
+    var badge=document.createElement('div');badge.className='dl-tip-badge '+dl.urg;badge.textContent=dl.urg;
+    var title=document.createElement('div');title.className='dl-tip-title';title.textContent=dl.title;
+    var course=document.createElement('div');course.className='dl-tip-course';course.style.color=dl.color;course.textContent=dl.course;
+    var time=document.createElement('div');time.className='dl-tip-time';time.textContent=dl.time;
+    var link=document.createElement('a');link.className='dl-tip-link';link.href='#';link.textContent='View details \u2192';
+    tip.appendChild(badge);tip.appendChild(title);tip.appendChild(course);tip.appendChild(time);tip.appendChild(link);
+    el.appendChild(dash);el.appendChild(tag);el.appendChild(dot);el.appendChild(tip);
+    return el;
+  }
+
+  /* ====== RENDER ====== */
+  function render(){
+    var wd=WEEKS[sPos-1],wn=wd.w,isAll=mode==='all',isBrk=!isAll&&wn===0;
+    var vis;
+    if(isAll)vis=SE.slice();
+    else if(isBrk)vis=[];
+    else vis=SE.filter(function(ev){return ev.w.indexOf(wn)>=0});
+
+    updateChrome(wd,isAll);
+    updateSliderFill();
+    updateModeButtons();
+
+    // Clear columns
+    for(var i=0;i<7;i++){var col=document.getElementById('col-'+i);col.textContent='';col.classList.remove('today')}
+    var ob=document.getElementById('break-msg');if(ob)ob.remove();
+
+    if(isBrk){
+      var bm=document.createElement('div');bm.className='tt-break-msg';bm.id='break-msg';
+      var bi=document.createElement('div');bi.className='tt-break-inner';
+      var bh=document.createElement('h3');bh.textContent='Mid-semester Break';
+      var bp=document.createElement('p');bp.textContent='No classes this week. Enjoy!';
+      bi.appendChild(bh);bi.appendChild(bp);bm.appendChild(bi);
+      document.getElementById('tt-grid').appendChild(bm);return;
+    }
+
+    // Group by day
+    var byDay={};
+    vis.forEach(function(ev){var day=ev.d;if(!byDay[day])byDay[day]=[];byDay[day].push({s:ev.s,e:ev.e,c:ev.c,n:ev.n,t:ev.t,u:ev.u,r:ev.r,k:ev.k})});
+
+    for(var day=0;day<7;day++){
+      if(!byDay[day])continue;
+      var evs=assignCols(byDay[day]);
+      var col=document.getElementById('col-'+day);
+      evs.forEach(function(ev){
+        var top=tY(ev.s),h=tY(ev.e)-top;
+        col.appendChild(mkEv(ev,top,h));
+      });
+    }
+
+    // Deadline lines
+    DL.forEach(function(dl){
+      if(isAll||dl.wk!==wn)return;
+      document.getElementById('col-'+dl.d).appendChild(mkDl(dl));
+    });
+
+    // Now line (Wed of week 4)
+    if(!isAll&&wn===4){
+      var nc=document.getElementById('col-2');
+      var now=document.createElement('div');now.className='tt-now';now.style.top='390px';
+      nc.appendChild(now);nc.classList.add('today');
+    }
+  }
+
+  function updateChrome(wd,isAll){
+    var dhs=document.querySelectorAll('#dh-grid .tt-dh');
+    // Always show dates to keep consistent height; use current week dates for All Weeks
+    var refWd=isAll?WEEKS[CUR-1]:wd;
+    var mon=pMon(refWd.mon);
+    for(var i=0;i<7;i++){
+      var dt=new Date(mon.getTime()+i*864e5);
+      dhs[i].textContent='';
+      dhs[i].appendChild(document.createTextNode(DN[i]));
+      dhs[i].appendChild(document.createElement('br'));
+      var sp=document.createElement('span');sp.className='dh-date';
+      sp.textContent=isAll?'\u00a0':fd(dt); // non-breaking space placeholder in All Weeks
+      if(isAll)sp.style.visibility='hidden';
+      dhs[i].appendChild(sp);
+      dhs[i].classList.toggle('today',!isAll&&wd.pos===CUR&&i===2);
+    }
+    if(isAll){
+      document.getElementById('week-dates').textContent='Semester 1, 2026';
+    }else{
+      var sun=new Date(mon.getTime()+6*864e5);
+      document.getElementById('week-dates').textContent=fdf(mon)+' \u2014 '+fdf(sun);
+    }
+  }
+
+  function updatePanel(){}
+
+  function updateModeButtons(){
+    document.getElementById('mode-all').classList.toggle('active',mode==='all');
+    document.getElementById('mode-current').classList.toggle('active',mode==='week');
+  }
+
+  /* ====== SLIDER FILL ====== */
+  function updateSliderFill(){
+    var pct=((sPos-1)/13)*100;
+    slider.style.background='linear-gradient(to right,var(--orange) 0%,var(--orange) '+pct+'%,var(--divider) '+pct+'%,var(--divider) 100%)';
+    slider.style.borderRadius='3px';
+  }
+
+  /* ====== INTERACTIONS ====== */
+  slider.addEventListener('input',function(){sPos=+this.value;mode='week';render()});
+  document.getElementById('tt-prev').addEventListener('click',function(){if(sPos>1){sPos--;slider.value=sPos;mode='week';render()}});
+  document.getElementById('tt-next').addEventListener('click',function(){if(sPos<14){sPos++;slider.value=sPos;mode='week';render()}});
+  document.getElementById('mode-all').addEventListener('click',function(){mode='all';render()});
+  document.getElementById('mode-current').addEventListener('click',function(){mode='week';sPos=CUR;slider.value=CUR;render()});
+
+  /* ====== ROUGH.JS ====== */
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    // Hand-drawn card borders
+    document.querySelectorAll('[data-hand-border]').forEach(function(el){
+      var w=el.offsetWidth,h=el.offsetHeight;
+      var svg=document.createElementNS(NS,'svg');svg.setAttribute('class','hand-border-svg');
+      svg.setAttribute('viewBox','-4 -4 '+(w+8)+' '+(h+8));el.prepend(svg);
+      svg.appendChild(rough.svg(svg).rectangle(0,0,w,h,{stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none'}));
+    });
+
+
+
+  })});
+
+  /* ====== MINI CALENDAR (deadline heatmap) ====== */
+  var calMonth=2,calYear=2026; // 0-indexed: 2=March
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  // Deadline dates with counts (simulate more data across semester)
+  var DL_DATES={
+    '2026-03-04':1,'2026-03-06':1,'2026-03-12':2,'2026-03-14':1,
+    '2026-03-18':1,'2026-03-19':1,'2026-03-20':1,'2026-03-22':1,
+    '2026-03-27':2,'2026-03-30':1,
+    '2026-04-03':1,'2026-04-10':2,'2026-04-17':1,'2026-04-24':3,
+    '2026-05-01':1,'2026-05-08':2,'2026-05-15':1,'2026-05-22':3,'2026-05-29':2
+  };
+  function dlKey(y,m,d){return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d}
+  function renderCal(){
+    var grid=document.getElementById('cal-grid');
+    grid.textContent='';
+    document.getElementById('cal-month').textContent=MONTHS[calMonth]+' '+calYear;
+    var headers=['S','M','T','W','T','F','S'];
+    headers.forEach(function(h){var el=document.createElement('div');el.className='cal-h';el.textContent=h;grid.appendChild(el)});
+    var first=new Date(calYear,calMonth,1).getDay();
+    var days=new Date(calYear,calMonth+1,0).getDate();
+    // Previous month padding
+    var prevDays=new Date(calYear,calMonth,0).getDate();
+    for(var i=first-1;i>=0;i--){var el=document.createElement('div');el.className='cal-d muted';el.textContent=prevDays-i;grid.appendChild(el)}
+    // Current month
+    for(var d=1;d<=days;d++){
+      var el=document.createElement('div');el.className='cal-d';el.textContent=d;
+      var key=dlKey(calYear,calMonth,d);
+      var cnt=DL_DATES[key]||0;
+      var isToday=calYear===2026&&calMonth===2&&d===18;
+      if(isToday){el.classList.add('today')}
+      else if(cnt>=3){el.classList.add('heat-3')}
+      else if(cnt===2){el.classList.add('heat-2')}
+      else if(cnt===1){el.classList.add('heat-1')}
+      grid.appendChild(el);
+    }
+    // Next month padding
+    var total=first+days;var rem=total%7===0?0:7-total%7;
+    for(var i=1;i<=rem;i++){var el=document.createElement('div');el.className='cal-d muted';el.textContent=i;grid.appendChild(el)}
+  }
+  document.getElementById('cal-prev').addEventListener('click',function(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCal()});
+  document.getElementById('cal-next').addEventListener('click',function(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCal()});
+  renderCal();
+
+  /* ====== INIT ====== */
+  render();
+  var body=document.getElementById('tt-body');if(body)body.scrollTop=40;
+})();
+</script>
+</body>
+</html>

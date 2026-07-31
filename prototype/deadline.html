@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — Deadlines</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --sidebar-w:68px;--sidebar-w-expanded:224px;--header-h:56px;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+    }
+    html{font-size:15px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* LAYOUT */
+    .app{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;padding:20px 0;z-index:100;transition:width var(--ease);overflow:hidden;box-shadow:2px 0 16px rgba(20,20,19,.06)}
+    .sidebar:hover{width:var(--sidebar-w-expanded)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 17px 24px;white-space:nowrap}
+    .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:17px;color:#fff}
+    .logo-text{font-family:'Source Serif 4',serif;font-size:1.18rem;font-weight:700;color:#4a3f34;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .logo-text{opacity:1}
+    .sidebar-rule{width:26px;height:1px;background:rgba(60,50,40,.1);margin:0 auto 10px;transition:width var(--ease)}
+    .sidebar:hover .sidebar-rule{width:calc(100% - 44px)}
+    .sidebar-nav{list-style:none;width:100%;flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+    .nav-item{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:rgba(60,50,40,.65);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap;overflow:hidden;text-decoration:none}
+    .nav-item:hover{background:rgba(60,50,40,.06);color:rgba(60,50,40,.75)}
+    .nav-item.active{background:rgba(217,119,87,.18);color:var(--orange)}
+    .nav-icon{flex-shrink:0;width:20px;height:20px}
+    .nav-label{font-size:.84rem;font-weight:500;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .nav-label{opacity:1}
+    .sidebar-bottom{padding:0 10px;width:100%}
+
+    /* MAIN WRAPPER */
+    .main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* HEADER */
+    .header{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(250,249,245,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+    .header-brand{font-family:'Source Serif 4',serif;font-size:.95rem;font-weight:600;color:var(--text-2)}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:7px 14px;width:220px}
+    .search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.82rem;color:var(--text-1);width:100%}
+    .search-bar input::placeholder{color:var(--text-3)}
+    .search-icon{color:var(--text-3);flex-shrink:0}
+    .hdr-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast);position:relative}
+    .hdr-btn:hover{background:var(--card-bg-hover)}
+    .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--card-bg)}
+    .avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;cursor:pointer;margin-left:4px}
+
+    /* CONTENT AREA */
+    .content-area{flex:1;padding:20px 24px}
+    .main-content{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+    /* CARD BASE (hand-border-svg unused on this page — cards use CSS border) */
+
+    /* TITLE ROW */
+    .dl-title-row{display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:8px}
+    .dl-title-left{display:flex;align-items:center;gap:10px}
+    .dl-title-icon{width:22px;height:22px;color:var(--orange);flex-shrink:0}
+    .dl-h1{font-family:'Source Serif 4',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em}
+    .dl-semester-badge{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:6px;background:var(--orange-soft);color:var(--orange)}
+    .dl-title-right{display:flex;align-items:center;gap:8px}
+    .dl-filter-badge{font-size:.7rem;font-weight:600;padding:4px 12px;border-radius:6px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-2);cursor:default}
+    .dl-mode-toggle{display:flex;border:1px solid var(--card-border);border-radius:var(--radius-sm);overflow:hidden}
+    .dl-mode-btn{font-family:inherit;font-size:.72rem;font-weight:600;padding:5px 12px;border:none;background:#fff;color:var(--text-3);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap}
+    .dl-mode-btn:first-child{border-right:1px solid var(--card-border)}
+    .dl-mode-btn:hover{color:var(--text-1);background:var(--card-bg-hover)}
+    .dl-mode-btn.active{background:var(--orange-soft);color:var(--orange)}
+
+    /* DEADLINE TIMELINE */
+    .dl-timeline{position:relative;padding-left:30px;display:flex;flex-direction:column;gap:14px;min-height:200px}
+    /* CSS vertical line — never redraws */
+    .dl-timeline::before{content:'';position:absolute;left:9px;top:24px;bottom:24px;width:2px;background:#d5d2ca;border-radius:1px;pointer-events:none}
+
+    /* Per-card Rough.js dot — positioned at card top, never redraws */
+    .dl-dot{position:absolute;left:-30px;top:16px;width:20px;height:20px;pointer-events:none;overflow:visible}
+
+    /* DEADLINE CARD */
+    .dl-card{position:relative;overflow:visible;cursor:pointer}
+    .dl-card:hover .dl-card-wrap{box-shadow:var(--shadow-hover)}
+    .dl-card.expanded{cursor:default}
+    /* Inner wrapper — clips the stripe to border-radius */
+    .dl-card-wrap{background:var(--card-bg);border:1.5px solid #d0cdc4;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;position:relative}
+    /* Color stripe — pseudo on wrap, clipped by overflow:hidden + border-radius */
+    .dl-card-wrap::after{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--stripe-color,#d0cdc4);z-index:3;pointer-events:none}
+    .dl-card-inner{overflow:hidden}
+
+    /* Collapsed content */
+    .dl-summary{padding:16px 20px 16px 24px;min-width:0}
+    .dl-summary-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+    .dl-name{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:.95rem;color:var(--text-1);line-height:1.3}
+    .dl-days-badge{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:5px;white-space:nowrap;flex-shrink:0}
+    .dl-days-badge.urgent{background:var(--orange-soft);color:var(--orange)}
+    .dl-days-badge.soon{background:var(--blue-soft);color:var(--blue)}
+    .dl-days-badge.later{background:var(--green-soft);color:var(--green)}
+    .dl-course{font-size:.76rem;font-weight:600;margin-bottom:4px}
+    .dl-due{font-size:.72rem;color:var(--text-3);margin-bottom:8px}
+    .dl-ai-summary{font-size:.78rem;color:var(--text-2);line-height:1.5;font-style:italic;border-top:1px solid var(--divider);padding-top:8px}
+    .dl-expand-hint{font-size:.64rem;color:var(--text-3);margin-top:6px;display:flex;align-items:center;gap:4px;transition:color var(--ease-fast),opacity .3s ease .35s;opacity:1}
+    .dl-card:hover .dl-expand-hint{color:var(--text-2)}
+    .dl-card.expanded .dl-expand-hint{opacity:0;transition:opacity .1s ease 0s;pointer-events:none}
+
+    /* Expanded content */
+    .dl-expanded{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+    .dl-card.expanded .dl-expanded{max-height:800px}
+    .dl-expanded-inner{padding:0 20px 20px 24px}
+    .dl-section-title{font-family:'Source Serif 4',Georgia,serif;font-size:.84rem;font-weight:600;color:var(--text-1);margin:12px 0 8px;display:flex;align-items:center;gap:6px}
+    .dl-section-icon{width:16px;height:16px;color:var(--orange);flex-shrink:0}
+
+    /* Materials (reuse course-detail.html pattern) */
+    .mat-item{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:var(--radius-sm);transition:background var(--ease-fast);cursor:pointer;border-bottom:1px solid var(--divider)}
+    .mat-item:last-child{border-bottom:none}
+    .mat-item:hover{background:var(--card-bg-hover)}
+    .mat-week{font-size:.64rem;font-weight:700;padding:3px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;min-width:48px;text-align:center}
+    .mat-icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+    .mat-info{flex:1;min-width:0}
+    .mat-title{font-size:.8rem;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mat-type{font-size:.66rem;color:var(--text-3);margin-top:1px}
+
+    /* AI chat (reuse course-detail.html pattern) */
+    .ai-section{margin-top:8px;padding:0 2px}
+    .ai-context-note{font-size:.66rem;color:var(--text-3);font-style:italic;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+    .ai-input-row{display:flex;align-items:center;gap:10px}
+    .ai-input{flex:1;border:1.5px solid var(--card-border);border-radius:24px;background:var(--card-bg);padding:10px 18px;font-family:inherit;font-size:.82rem;color:var(--text-1);outline:none;transition:border-color var(--ease-fast),box-shadow var(--ease-fast)}
+    .ai-input::placeholder{color:var(--text-3)}
+    .ai-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft);background:#fff}
+    .ai-send{width:36px;height:36px;border-radius:50%;border:none;background:var(--orange);color:#fff;display:grid;place-items:center;cursor:pointer;transition:transform var(--ease-fast),background var(--ease-fast);flex-shrink:0}
+    .ai-send:hover{background:#c5674a;transform:scale(1.06)}
+    .ai-disclaimer{font-size:.64rem;color:var(--text-3);margin-top:6px;text-align:center;font-style:italic}
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.09s}.d3{animation-delay:.14s}
+    .d4{animation-delay:.19s}.d5{animation-delay:.28s}.d6{animation-delay:.38s}
+    .d7{animation-delay:.48s}.d8{animation-delay:.56s}.d9{animation-delay:.64s}
+    .d10{animation-delay:.72s}
+
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:3px}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){.content-area{padding:16px 12px}.dl-title-row{flex-direction:column;align-items:flex-start;gap:10px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">U</div><span class="logo-text">UniBoard</span></div>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a class="nav-item" href="dashboard.html"><i data-lucide="layout-dashboard" class="nav-icon"></i><span class="nav-label">Dashboard</span></a></li>
+      <li><a class="nav-item" href="timetable.html"><i data-lucide="table" class="nav-icon"></i><span class="nav-label">Timetable</span></a></li>
+      <li><a class="nav-item" href="courses.html"><i data-lucide="book-open" class="nav-icon"></i><span class="nav-label">Courses</span></a></li>
+      <li><a class="nav-item active" href="deadline.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Deadlines</span></a></li>
+      <li><a class="nav-item" href="predict.html"><i data-lucide="target" class="nav-icon"></i><span class="nav-label">Predict</span></a></li>
+      <li><a class="nav-item" href="#"><i data-lucide="radio" class="nav-icon"></i><span class="nav-label">Digest</span></a></li>
+    </ul>
+    <div class="sidebar-bottom"><a class="nav-item" href="#"><i data-lucide="settings" class="nav-icon"></i><span class="nav-label">Settings</span></a></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-brand">UniBoard</div>
+      <div class="header-right">
+        <div class="search-bar"><i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i><input type="text" placeholder="Search courses, files&hellip;"></div>
+        <button class="hdr-btn"><i data-lucide="bell" style="width:17px;height:17px"></i><span class="notif-dot"></span></button>
+        <div class="avatar">RQ</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="main-content">
+        <!-- TITLE ROW -->
+        <div class="dl-title-row anim d1">
+          <div class="dl-title-left">
+            <i data-lucide="calendar" class="dl-title-icon"></i>
+            <h1 class="dl-h1">Deadlines</h1>
+            <span class="dl-semester-badge">2026 S1</span>
+          </div>
+          <div class="dl-title-right">
+            <span class="dl-filter-badge" id="filter-count">8 upcoming</span>
+            <div class="dl-mode-toggle">
+              <button class="dl-mode-btn active" id="mode-all">All</button>
+              <button class="dl-mode-btn" id="mode-week">This Week</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEADLINE TIMELINE -->
+        <div class="dl-timeline anim d2" id="deadline-timeline">
+          <!-- Cards rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  // ---- Helper: create SVG icon element using Lucide data-lucide ----
+  function mkIcon(name,size){
+    var i=document.createElement('i');
+    i.setAttribute('data-lucide',name);
+    i.style.width=(size||16)+'px';
+    i.style.height=(size||16)+'px';
+    return i;
+  }
+
+  // ---- Deadline data ----
+  var DEADLINES=[
+    {
+      id:1, name:'Lab 5 \u2014 Memory Management', course:'COMP2017', courseName:'Systems Programming',
+      color:'#d97757', colorSoft:'rgba(217,119,87,.11)',
+      due:new Date(2026,2,23,23,59), dueLabel:'Sun 23 Mar \xb7 11:59 PM',
+      summary:'Focus on malloc/free implementations and memory leak detection. Review pointer arithmetic from Week 3 lecture before attempting the valgrind section.',
+      materials:[
+        {week:'Wk 4',title:'Pointers & Memory Management',type:'Lecture Slides \xb7 PDF',icon:'file-text'},
+        {week:'Lab 5',title:'Lab 5 Specification',type:'Lab Sheet \xb7 PDF',icon:'clipboard'}
+      ]
+    },
+    {
+      id:2, name:'Essay Draft \u2014 Estimation Theory', course:'STAT2011', courseName:'Probability & Estimation',
+      color:'#b08968', colorSoft:'rgba(176,137,104,.11)',
+      due:new Date(2026,2,25,17,0), dueLabel:'Tue 25 Mar \xb7 5:00 PM',
+      summary:'Draft should cover maximum likelihood estimation with at least two worked examples. Check the rubric for formatting requirements \u2014 LaTeX is recommended.',
+      materials:[
+        {week:'Wk 3',title:'Estimation & MLE',type:'Lecture Notes \xb7 PDF',icon:'file-text'},
+        {week:'Ref',title:'Essay Rubric & Guidelines',type:'Assessment Brief \xb7 PDF',icon:'clipboard'}
+      ]
+    },
+    {
+      id:3, name:'Project Milestone 2', course:'COMP3221', courseName:'Distributed Systems',
+      color:'#6a9bcc', colorSoft:'rgba(106,155,204,.11)',
+      due:new Date(2026,2,26,23,59), dueLabel:'Wed 26 Mar \xb7 11:59 PM',
+      summary:'Implement the peer-to-peer file sync protocol. Milestone 2 requires a working demo of consistency guarantees across 3+ nodes.',
+      materials:[
+        {week:'Ref',title:'Project Specification',type:'Assessment Brief \xb7 PDF',icon:'clipboard'},
+        {week:'Wk 3',title:'Consistency Protocols',type:'Lecture Slides \xb7 PDF',icon:'file-text'},
+        {week:'Wk 4',title:'Replication Strategies',type:'Lecture Slides \xb7 PDF',icon:'file-text'}
+      ]
+    },
+    {
+      id:4, name:'Online Quiz 4', course:'MATH2021', courseName:'Vector Calculus',
+      color:'#9b7bb8', colorSoft:'rgba(155,123,184,.11)',
+      due:new Date(2026,2,27,21,0), dueLabel:'Thu 27 Mar \xb7 9:00 PM',
+      summary:'Covers line integrals and Green\u2019s theorem. Practice problems from the Week 4 tutorial are highly recommended preparation.',
+      materials:[
+        {week:'Wk 4',title:'Tutorial 4 \u2014 Line Integrals',type:'Problem Set \xb7 PDF',icon:'file-text'},
+        {week:'Ref',title:'Practice Quiz Solutions',type:'Solutions \xb7 PDF',icon:'check-circle'}
+      ]
+    },
+    {
+      id:5, name:'Reflection Journal Week 4', course:'EDGU1003', courseName:'Diet & Nutrition',
+      color:'#788c5d', colorSoft:'rgba(120,140,93,.11)',
+      due:new Date(2026,2,28,23,59), dueLabel:'Fri 28 Mar \xb7 11:59 PM',
+      summary:'Reflect on this week\u2019s dietary analysis exercise. Include at least 3 references to course readings and connect to the Australian Dietary Guidelines.',
+      materials:[
+        {week:'Wk 4',title:'Dietary Guidelines Overview',type:'Reading \xb7 PDF',icon:'book-open'},
+        {week:'Ref',title:'Journal Template',type:'Template \xb7 DOCX',icon:'file'}
+      ]
+    },
+    {
+      id:6, name:'Quiz 3 \u2014 Naming & Discovery', course:'COMP3221', courseName:'Distributed Systems',
+      color:'#6a9bcc', colorSoft:'rgba(106,155,204,.11)',
+      due:new Date(2026,2,30,18,0), dueLabel:'Mon 30 Mar \xb7 6:00 PM',
+      summary:'Online quiz covering DNS, DHTs, and name resolution in distributed systems. Review the Week 3 lecture on naming abstractions.',
+      materials:[
+        {week:'Wk 3',title:'Naming & Discovery',type:'Lecture Slides \xb7 PDF',icon:'file-text'},
+        {week:'Tut 3',title:'Tutorial 3 Solutions',type:'Solutions \xb7 PDF',icon:'check-circle'}
+      ]
+    },
+    {
+      id:7, name:'Assignment 1 \u2014 Systems Programming', course:'COMP2017', courseName:'Systems Programming',
+      color:'#d97757', colorSoft:'rgba(217,119,87,.11)',
+      due:new Date(2026,3,3,23,59), dueLabel:'Fri 3 Apr \xb7 11:59 PM',
+      summary:'Build a custom shell with pipe support and signal handling. Start early \u2014 the autograder is strict on edge cases around EOF and broken pipes.',
+      materials:[
+        {week:'Ref',title:'Assignment 1 Specification',type:'Assessment Brief \xb7 PDF',icon:'clipboard'},
+        {week:'Wk 1\u20134',title:'All Lecture Slides',type:'Lecture Bundle \xb7 ZIP',icon:'archive'}
+      ]
+    },
+    {
+      id:8, name:'Mid-semester Exam', course:'STAT2011', courseName:'Probability & Estimation',
+      color:'#b08968', colorSoft:'rgba(176,137,104,.11)',
+      due:new Date(2026,3,7,14,0), dueLabel:'Tue 7 Apr \xb7 2:00 PM',
+      summary:'Covers probability axioms through to MLE. Closed-book, 90 minutes. Past papers from 2024-2025 are available on Canvas.',
+      materials:[
+        {week:'All',title:'Lecture Notes Weeks 1\u20135',type:'Lecture Bundle \xb7 PDF',icon:'archive'},
+        {week:'Ref',title:'Past Exam Papers (2024\u20132025)',type:'Practice Material \xb7 PDF',icon:'file-text'}
+      ]
+    }
+  ];
+
+  // Sort by due date (urgency)
+  DEADLINES.sort(function(a,b){return a.due-b.due});
+
+  // ---- Utility functions ----
+  function daysRemaining(due){
+    var now=new Date();
+    now.setHours(0,0,0,0);
+    var d=new Date(due);d.setHours(0,0,0,0);
+    return Math.ceil((d-now)/(1000*60*60*24));
+  }
+
+  function urgencyClass(days){
+    if(days<=3)return'urgent';
+    if(days<=7)return'soon';
+    return'later';
+  }
+
+  function urgencyLabel(days){
+    if(days<=0)return'Past due';
+    if(days===1)return'1 day';
+    return days+' days';
+  }
+
+  // ---- Build card DOM ----
+  function buildCard(dl,index){
+    var days=daysRemaining(dl.due);
+    var urg=urgencyClass(days);
+    var card=document.createElement('div');
+    card.className='dl-card anim';
+    card.style.animationDelay=(0.08+index*0.06)+'s';
+    card.dataset.id=dl.id;
+    card.dataset.days=days;
+    card.style.setProperty('--stripe-color',dl.color);
+
+    var inner=document.createElement('div');
+    inner.className='dl-card-inner';
+
+    // Summary section (always visible)
+    var summary=document.createElement('div');
+    summary.className='dl-summary';
+
+    // Top row: name + days badge
+    var top=document.createElement('div');
+    top.className='dl-summary-top';
+    var nameEl=document.createElement('div');
+    nameEl.className='dl-name';
+    nameEl.textContent=dl.name;
+    var badge=document.createElement('span');
+    badge.className='dl-days-badge '+urg;
+    badge.textContent=urgencyLabel(days);
+    top.appendChild(nameEl);
+    top.appendChild(badge);
+
+    // Course
+    var courseEl=document.createElement('div');
+    courseEl.className='dl-course';
+    courseEl.style.color=dl.color;
+    courseEl.textContent=dl.course+' \xb7 '+dl.courseName;
+
+    // Due date
+    var dueEl=document.createElement('div');
+    dueEl.className='dl-due';
+    dueEl.textContent=dl.dueLabel;
+
+    // AI summary
+    var aiSum=document.createElement('div');
+    aiSum.className='dl-ai-summary';
+    aiSum.textContent=dl.summary;
+
+    // Expand hint
+    var hint=document.createElement('div');
+    hint.className='dl-expand-hint';
+    hint.appendChild(mkIcon('chevron-down',12));
+    hint.appendChild(document.createTextNode(' Click to expand materials & AI chat'));
+
+    summary.appendChild(top);
+    summary.appendChild(courseEl);
+    summary.appendChild(dueEl);
+    summary.appendChild(aiSum);
+    summary.appendChild(hint);
+
+    // Expanded section
+    var expanded=document.createElement('div');
+    expanded.className='dl-expanded';
+    var expandedInner=document.createElement('div');
+    expandedInner.className='dl-expanded-inner';
+
+    // Materials section title
+    var matTitle=document.createElement('div');
+    matTitle.className='dl-section-title';
+    var matIconEl=mkIcon('folder',16);
+    matIconEl.className='dl-section-icon';
+    matTitle.appendChild(matIconEl);
+    matTitle.appendChild(document.createTextNode(' Related Materials'));
+
+    expandedInner.appendChild(matTitle);
+
+    // Material items
+    dl.materials.forEach(function(mat){
+      var item=document.createElement('div');
+      item.className='mat-item';
+      item.addEventListener('click',function(e){e.stopPropagation()});
+
+      var week=document.createElement('span');
+      week.className='mat-week';
+      week.style.color=dl.color;
+      week.style.background=dl.colorSoft;
+      week.textContent=mat.week;
+
+      var icon=document.createElement('div');
+      icon.className='mat-icon';
+      icon.style.background=dl.colorSoft;
+      icon.style.color=dl.color;
+      icon.appendChild(mkIcon(mat.icon,15));
+
+      var info=document.createElement('div');
+      info.className='mat-info';
+      var title=document.createElement('div');
+      title.className='mat-title';
+      title.textContent=mat.title;
+      var type=document.createElement('div');
+      type.className='mat-type';
+      type.textContent=mat.type;
+      info.appendChild(title);
+      info.appendChild(type);
+
+      item.appendChild(week);
+      item.appendChild(icon);
+      item.appendChild(info);
+      expandedInner.appendChild(item);
+    });
+
+    // AI chat section
+    var aiSection=document.createElement('div');
+    aiSection.className='ai-section';
+
+    var aiTitle=document.createElement('div');
+    aiTitle.className='dl-section-title';
+    var chatIconEl=mkIcon('message-circle',16);
+    chatIconEl.className='dl-section-icon';
+    aiTitle.appendChild(chatIconEl);
+    aiTitle.appendChild(document.createTextNode(' Ask about this deadline'));
+
+    var aiNote=document.createElement('div');
+    aiNote.className='ai-context-note';
+    aiNote.appendChild(mkIcon('info',12));
+    aiNote.appendChild(document.createTextNode(' Materials auto-included in context'));
+
+    var aiRow=document.createElement('div');
+    aiRow.className='ai-input-row';
+    var aiInput=document.createElement('input');
+    aiInput.type='text';
+    aiInput.className='ai-input';
+    aiInput.placeholder='Ask about this deadline\u2026';
+    aiInput.addEventListener('click',function(e){e.stopPropagation()});
+    var aiSend=document.createElement('button');
+    aiSend.className='ai-send';
+    aiSend.appendChild(mkIcon('arrow-up',16));
+    aiSend.addEventListener('click',function(e){e.stopPropagation()});
+    aiRow.appendChild(aiInput);
+    aiRow.appendChild(aiSend);
+
+    var aiDisclaimer=document.createElement('div');
+    aiDisclaimer.className='ai-disclaimer';
+    aiDisclaimer.textContent='AI responses are for study reference only';
+
+    aiSection.appendChild(aiTitle);
+    aiSection.appendChild(aiNote);
+    aiSection.appendChild(aiRow);
+    aiSection.appendChild(aiDisclaimer);
+    expandedInner.appendChild(aiSection);
+
+    expanded.appendChild(expandedInner);
+    inner.appendChild(summary);
+
+    // Wrap inner + expanded in .dl-card-wrap (overflow:hidden clips stripe to border-radius)
+    var wrap=document.createElement('div');
+    wrap.className='dl-card-wrap';
+    wrap.appendChild(inner);
+    wrap.appendChild(expanded);
+
+    // Per-card Rough.js dot (drawn once, never redrawn)
+    var dot=document.createElement('div');
+    dot.className='dl-dot';
+    card.appendChild(dot);
+
+    card.appendChild(wrap);
+
+    // Click to toggle expand
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.ai-input-row')||e.target.closest('.mat-item'))return;
+      // Collapse all others
+      document.querySelectorAll('.dl-card.expanded').forEach(function(c){
+        if(c!==card)c.classList.remove('expanded');
+      });
+      card.classList.toggle('expanded');
+      // Re-init Lucide icons inside newly expanded content
+      if(card.classList.contains('expanded')){
+        setTimeout(function(){lucide.createIcons()},50);
+      }
+    });
+
+    return card;
+  }
+
+  // ---- Draw per-card Rough.js dot (once, never redrawn) ----
+  function drawDot(card){
+    var dotEl=card.querySelector('.dl-dot');
+    if(!dotEl)return;
+    var days=parseInt(card.dataset.days);
+    var urg=urgencyClass(days);
+    var col=urg==='urgent'?'#d97757':urg==='soon'?'#6a9bcc':'#788c5d';
+    var isFirst=!card.previousElementSibling||!card.previousElementSibling.classList.contains('dl-card');
+
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('width','20');
+    svg.setAttribute('height','20');
+    svg.setAttribute('viewBox','-2 -2 14 14');
+    svg.style.overflow='visible';
+    var rc=rough.svg(svg);
+    svg.appendChild(rc.circle(5,5,10,{
+      stroke:col,strokeWidth:1.2,roughness:1.5,
+      fill:isFirst?col:'none',
+      fillStyle:'solid'
+    }));
+    dotEl.appendChild(svg);
+  }
+
+  // ---- Render cards ----
+  var timeline=document.getElementById('deadline-timeline');
+  var mode='all';
+
+  function render(){
+    timeline.textContent='';
+    var filtered=DEADLINES.filter(function(dl){
+      var days=daysRemaining(dl.due);
+      if(days<0)return false;
+      if(mode==='week')return days<=7;
+      return true;
+    });
+
+    // Update filter count
+    document.getElementById('filter-count').textContent=filtered.length+' upcoming';
+
+    // Build cards
+    filtered.forEach(function(dl,i){
+      timeline.appendChild(buildCard(dl,i));
+    });
+
+    // Draw timeline dots once
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      document.querySelectorAll('.dl-card').forEach(function(el){
+        drawDot(el);
+      });
+      lucide.createIcons();
+    })});
+  }
+
+  // ---- Filter toggle ----
+  var btnAll=document.getElementById('mode-all');
+  var btnWeek=document.getElementById('mode-week');
+
+  btnAll.addEventListener('click',function(){
+    mode='all';
+    btnAll.classList.add('active');
+    btnWeek.classList.remove('active');
+    render();
+  });
+
+  btnWeek.addEventListener('click',function(){
+    mode='week';
+    btnWeek.classList.add('active');
+    btnAll.classList.remove('active');
+    render();
+  });
+
+  // ---- Initial render ----
+  render();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — Grade Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+  <script src="https://unpkg.com/rough-notation/lib/rough-notation.iife.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --red:#c45;--red-soft:rgba(204,68,85,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --sidebar-w:68px;--sidebar-w-expanded:224px;--header-h:56px;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+    }
+    html{font-size:15px;overflow-y:scroll}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* LAYOUT */
+    .app{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;padding:20px 0;z-index:100;transition:width var(--ease);overflow:hidden;box-shadow:2px 0 16px rgba(20,20,19,.06)}
+    .sidebar:hover{width:var(--sidebar-w-expanded)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 17px 24px;white-space:nowrap}
+    .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:17px;color:#fff}
+    .logo-text{font-family:'Source Serif 4',serif;font-size:1.18rem;font-weight:700;color:#4a3f34;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .logo-text{opacity:1}
+    .sidebar-rule{width:26px;height:1px;background:rgba(60,50,40,.1);margin:0 auto 10px;transition:width var(--ease)}
+    .sidebar:hover .sidebar-rule{width:calc(100% - 44px)}
+    .sidebar-nav{list-style:none;width:100%;flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+    .nav-item{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:rgba(60,50,40,.65);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap;overflow:hidden;text-decoration:none}
+    .nav-item:hover{background:rgba(60,50,40,.06);color:rgba(60,50,40,.75)}
+    .nav-item.active{background:rgba(217,119,87,.18);color:var(--orange)}
+    .nav-icon{flex-shrink:0;width:20px;height:20px}
+    .nav-label{font-size:.84rem;font-weight:500;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .nav-label{opacity:1}
+    .sidebar-bottom{padding:0 10px;width:100%}
+
+    /* MAIN WRAPPER */
+    .main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* HEADER */
+    .header{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(250,249,245,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+    .header-brand{font-family:'Source Serif 4',serif;font-size:.95rem;font-weight:600;color:var(--text-2)}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:7px 14px;width:220px}
+    .search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.82rem;color:var(--text-1);width:100%}
+    .search-bar input::placeholder{color:var(--text-3)}
+    .search-icon{color:var(--text-3);flex-shrink:0}
+    .hdr-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast);position:relative}
+    .hdr-btn:hover{background:var(--card-bg-hover)}
+    .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--card-bg)}
+    .avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;cursor:pointer;margin-left:4px}
+
+    /* CONTENT AREA */
+    .content-area{flex:1;padding:20px 24px;display:flex;gap:22px}
+    .main-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+    .right-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:18px;position:sticky;top:calc(var(--header-h) + 20px);align-self:flex-start;max-height:calc(100vh - var(--header-h) - 40px);overflow-y:auto;overflow-x:hidden}
+
+    /* TITLE ROW */
+    .pr-title-row{display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:8px}
+    .pr-title-left{display:flex;align-items:center;gap:10px}
+    .pr-title-icon{width:22px;height:22px;color:var(--orange);flex-shrink:0}
+    .pr-h1{font-family:'Source Serif 4',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em}
+    .pr-semester-badge{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:6px;background:var(--orange-soft);color:var(--orange)}
+    .pr-title-right{display:flex;align-items:center;gap:8px}
+    .pr-cp-badge{font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:6px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-2);cursor:default}
+
+    /* Right panel: hidden scrollbar (scroll via trackpad/wheel) */
+    .right-panel{scrollbar-width:none}
+    .right-panel::-webkit-scrollbar{display:none}
+
+    /* PREDICTION CARD — expandable, CSS border + ::after stripe (deadline.html pattern) */
+    .pc-card{position:relative;overflow:visible;cursor:pointer;margin-bottom:14px}
+    .pc-card:hover .pc-card-wrap{box-shadow:var(--shadow-hover)}
+    .pc-card.expanded{cursor:default}
+    .pc-card-wrap{background:var(--card-bg);border:1.5px solid #d0cdc4;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;position:relative;transition:box-shadow var(--ease-fast)}
+    .pc-card-wrap::after{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--stripe-color,#d0cdc4);z-index:3;pointer-events:none}
+
+    /* Card header — always visible */
+    .pc-header{padding:16px 20px 16px 24px;display:flex;align-items:center;gap:14px;min-width:0}
+    .pc-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .pc-course-info{flex:1;min-width:0}
+    .pc-course-code{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:.95rem;color:var(--text-1);line-height:1.3}
+    .pc-course-name{font-size:.72rem;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pc-assessed-badge{font-size:.64rem;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0}
+    .pc-marks{display:flex;align-items:center;gap:16px;flex-shrink:0}
+    .pc-mark-item{display:flex;flex-direction:column;align-items:center;gap:1px}
+    .pc-mark-label{font-size:.6rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em}
+    .pc-mark-value{font-family:'Source Serif 4',serif;font-size:1.1rem;font-weight:700;line-height:1.1}
+    .pc-grade-badge{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+    .pc-expand-chevron{width:16px;height:16px;color:var(--text-3);flex-shrink:0;transition:transform var(--ease)}
+    .pc-card.expanded .pc-expand-chevron{transform:rotate(180deg)}
+
+    /* Expanded section — hidden by default */
+    .pc-expanded{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+    .pc-card.expanded .pc-expanded{max-height:800px}
+    .pc-expanded-inner{padding:0 20px 20px 24px}
+
+    /* Assessment table inside expanded card */
+    .pc-assess-table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .pc-assess-table th{font-size:.7rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;text-align:left;border-bottom:1.5px solid var(--divider)}
+    .pc-assess-table th:nth-child(2),.pc-assess-table th:nth-child(3){text-align:center}
+    .pc-assess-table td{padding:12px 10px;font-size:.84rem;color:var(--text-2);border-bottom:1px solid var(--divider);vertical-align:middle}
+    .pc-assess-table tr:last-child td{border-bottom:none}
+    .pc-assess-table tr{transition:background var(--ease-fast)}
+    .pc-assess-table tr:hover td{background:rgba(0,0,0,.015)}
+    .pc-assess-table td:nth-child(2){text-align:center;font-weight:500}
+    .pc-assess-table td:nth-child(3){text-align:center}
+    .assess-name{font-weight:600;color:var(--text-1);font-size:.84rem}
+    .assess-score{font-family:'Source Serif 4',serif;font-weight:700;font-size:1.05rem}
+    .assess-graded-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle}
+    .score-input{width:56px;border:none;border-bottom:2px dashed var(--card-border);background:transparent;font-family:'Source Serif 4',serif;font-weight:700;font-size:1.05rem;text-align:center;outline:none;padding:2px 4px;transition:border-color var(--ease-fast)}
+    .score-input::placeholder{color:var(--text-3);font-weight:500;font-size:.82rem}
+    .score-input:focus{border-bottom-color:currentColor}
+    .score-denominator{font-family:'Source Serif 4',serif;font-weight:600;font-size:.88rem;color:var(--text-3)}
+    .score-cell{display:flex;align-items:center;justify-content:center;gap:2px}
+    .weight-bar{display:block}
+
+    /* Grade summary row at bottom of expanded card */
+    .pc-grade-summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 0 0;margin-top:12px;border-top:1.5px solid var(--divider)}
+    .pc-grade-summary-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .pc-grade-summary-label{font-size:.68rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em}
+    .pc-grade-summary-value{font-family:'Source Serif 4',serif;font-size:1.4rem;font-weight:700;line-height:1.1}
+    .pc-grade-summary-sub{font-size:.7rem;color:var(--text-2);font-weight:500}
+    .pc-grade-summary-divider{width:1px;height:44px;background:var(--divider);flex-shrink:0}
+    .pc-grade-summary-note{font-size:.72rem;color:var(--text-3);font-style:italic;flex:1;text-align:right;line-height:1.5}
+
+    /* RIGHT PANEL CARDS — simple CSS border */
+    .panel-card{background:var(--card-bg);border:none;border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);transition:box-shadow var(--ease),transform var(--ease);position:relative;overflow:visible}
+    .panel-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+    .panel-card-title{font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:14px;color:var(--text-1)}
+    .panel-card-title-icon{color:var(--orange);flex-shrink:0}
+
+    /* WAM overview card */
+    .wam-card{text-align:center;padding:32px 24px}
+    .wam-number{font-family:'Source Serif 4',Georgia,serif;font-size:2rem;font-weight:700;color:var(--orange);line-height:1.1;display:inline-block}
+    .wam-grade-badge{display:inline-block;font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:5px;background:var(--orange-soft);color:var(--orange);margin-top:8px}
+    .wam-gpa{font-size:.82rem;color:var(--text-2);margin-top:6px;font-weight:500}
+    .wam-gpa strong{font-family:'Source Serif 4',serif;font-weight:700;color:var(--text-1)}
+    .wam-basis{font-size:.72rem;color:var(--text-3);margin-top:6px}
+
+    /* Target WAM slider card */
+    .target-card{text-align:center}
+    .target-label{font-size:.7rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+    .target-number{font-family:'Source Serif 4',Georgia,serif;font-size:1.6rem;font-weight:700;color:var(--blue);line-height:1.1}
+    .target-band-badge{display:inline-block;font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:5px;background:var(--blue-soft);color:var(--blue);margin-top:6px}
+    .target-slider-wrap{margin-top:12px}
+    .target-slider{-webkit-appearance:none;appearance:none;width:100%;height:5px;background:var(--divider);border-radius:3px;outline:none;cursor:pointer;margin:0}
+    .target-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--orange);border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+    .target-slider::-moz-range-thumb{width:16px;height:16px;background:var(--orange);border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+    .target-gap-badge{display:inline-block;font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:5px;background:var(--blue-soft);color:var(--blue);margin-top:10px}
+
+    /* Required scores card */
+    .req-card .panel-card-title{margin-bottom:10px}
+    .req-note{font-size:.66rem;color:var(--text-3);font-style:italic;margin-bottom:10px}
+    .req-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--divider)}
+    .req-row:last-child{border-bottom:none}
+    .req-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .req-course{font-size:.78rem;font-weight:600;color:var(--text-1);flex:1;min-width:0}
+    .req-score{font-family:'Source Serif 4',serif;font-size:.92rem;font-weight:700;min-width:36px;text-align:right}
+    .req-icon{flex-shrink:0;width:16px;height:16px;display:grid;place-items:center}
+    .req-icon.feasible{color:var(--green)}
+    .req-icon.warning{color:var(--orange)}
+    .req-icon.impossible{color:var(--red)}
+
+    /* Semester progress card */
+    .progress-card .panel-card-title{margin-bottom:10px}
+    .prog-row{display:flex;align-items:center;gap:8px;padding:6px 0}
+    .prog-code{font-size:.74rem;font-weight:600;color:var(--text-1);min-width:72px}
+    .prog-bar-wrap{flex:1;min-width:0;height:12px}
+    .prog-bar-wrap canvas{display:block;width:100%;height:12px}
+    .prog-pct{font-size:.68rem;font-weight:500;color:var(--text-3);min-width:30px;text-align:right}
+    .prog-overall{font-size:.74rem;font-weight:600;color:var(--text-2);margin-top:10px;text-align:center;padding-top:8px;border-top:1px solid var(--divider)}
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.09s}.d3{animation-delay:.14s}
+    .d4{animation-delay:.19s}.d5{animation-delay:.28s}.d6{animation-delay:.38s}
+    .d7{animation-delay:.48s}.d8{animation-delay:.56s}.d9{animation-delay:.64s}
+    .d10{animation-delay:.72s}
+
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:3px}
+
+    /* RESPONSIVE */
+    @media(max-width:1200px){.right-panel{display:none}}
+    @media(max-width:900px){.content-area{padding:16px 12px}.pr-title-row{flex-direction:column;align-items:flex-start;gap:10px}}
+    @media(max-width:600px){.pc-header{flex-wrap:wrap;gap:10px}.pc-marks{gap:10px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">U</div><span class="logo-text">UniBoard</span></div>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a class="nav-item" href="dashboard.html"><i data-lucide="layout-dashboard" class="nav-icon"></i><span class="nav-label">Dashboard</span></a></li>
+      <li><a class="nav-item" href="timetable.html"><i data-lucide="table" class="nav-icon"></i><span class="nav-label">Timetable</span></a></li>
+      <li><a class="nav-item" href="courses.html"><i data-lucide="book-open" class="nav-icon"></i><span class="nav-label">Courses</span></a></li>
+      <li><a class="nav-item" href="deadline.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Deadlines</span></a></li>
+      <li><a class="nav-item active" href="predict.html"><i data-lucide="target" class="nav-icon"></i><span class="nav-label">Predict</span></a></li>
+      <li><a class="nav-item" href="#"><i data-lucide="radio" class="nav-icon"></i><span class="nav-label">Digest</span></a></li>
+    </ul>
+    <div class="sidebar-bottom"><a class="nav-item" href="#"><i data-lucide="settings" class="nav-icon"></i><span class="nav-label">Settings</span></a></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-brand">UniBoard</div>
+      <div class="header-right">
+        <div class="search-bar"><i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i><input type="text" placeholder="Search courses, files&hellip;"></div>
+        <button class="hdr-btn"><i data-lucide="bell" style="width:17px;height:17px"></i><span class="notif-dot"></span></button>
+        <div class="avatar">RQ</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="main-content">
+        <!-- TITLE ROW -->
+        <div class="pr-title-row anim d1">
+          <div class="pr-title-left">
+            <i data-lucide="target" class="pr-title-icon"></i>
+            <h1 class="pr-h1">Grade Predictor</h1>
+            <span class="pr-semester-badge">2026 S1</span>
+          </div>
+          <div class="pr-title-right">
+            <span class="pr-cp-badge">30 cp</span>
+          </div>
+        </div>
+
+        <!-- COURSE PREDICTION CARDS -->
+        <div id="course-cards">
+          <!-- Cards rendered by JS -->
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel" id="right-panel">
+        <!-- WAM Overview -->
+        <div class="panel-card wam-card anim d5" data-hand-border>
+          <div class="wam-number" id="wam-value">&mdash;</div>
+          <div><span class="wam-grade-badge" id="wam-band">Fill predictions</span></div>
+          <div class="wam-gpa" id="wam-gpa"><strong>GPA: &mdash;</strong> / 4.0</div>
+          <div class="wam-basis" id="wam-basis">Based on current marks (partial)</div>
+        </div>
+        <!-- Target WAM -->
+        <div class="panel-card target-card anim d6" data-hand-border>
+          <div class="target-label">Target WAM</div>
+          <div class="target-number" id="target-value">85</div>
+          <div><span class="target-band-badge" id="target-band">High Distinction</span></div>
+          <div class="target-slider-wrap">
+            <input type="range" class="target-slider" id="target-slider" min="50" max="100" step="1" value="85">
+          </div>
+          <div><span class="target-gap-badge" id="target-gap">+6.5 to go</span></div>
+        </div>
+        <!-- Required Scores -->
+        <div class="panel-card req-card anim d7" data-hand-border>
+          <div class="panel-card-title"><i data-lucide="target" class="panel-card-title-icon" style="width:16px;height:16px"></i> Min. Scores Needed</div>
+          <div class="req-note">Average on remaining assessments</div>
+          <div id="req-rows"><!-- filled by JS --></div>
+        </div>
+        <!-- Semester Progress -->
+        <div class="panel-card progress-card anim d8" data-hand-border>
+          <div class="panel-card-title"><i data-lucide="bar-chart-3" class="panel-card-title-icon" style="width:16px;height:16px"></i> Semester Progress</div>
+          <div id="prog-rows"><!-- filled by JS --></div>
+          <div class="prog-overall" id="prog-overall"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS = 'http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  // ============================================================
+  // COURSE DATA (5 courses, consistent with cards reference)
+  // ============================================================
+  var COURSES=[
+    {
+      id:'comp2017',code:'COMP2017',name:'Systems Programming',
+      color:'#d97757',colorSoft:'rgba(217,119,87,.11)',
+      level:2,cp:6,
+      assessments:[
+        {name:'Lab Average',weight:15,score:85,graded:true},
+        {name:'Assignment 1',weight:25,score:80,graded:true},
+        {name:'Mid-semester',weight:10,score:null,graded:false},
+        {name:'Final Exam',weight:50,score:null,graded:false}
+      ]
+    },
+    {
+      id:'comp3221',code:'COMP3221',name:'Distributed Systems',
+      color:'#6a9bcc',colorSoft:'rgba(106,155,204,.11)',
+      level:3,cp:6,
+      assessments:[
+        {name:'Quiz Average',weight:10,score:85,graded:true},
+        {name:'Assignment 1',weight:10,score:72,graded:true},
+        {name:'Assignment 2',weight:30,score:null,graded:false},
+        {name:'Final Exam',weight:50,score:null,graded:false}
+      ]
+    },
+    {
+      id:'stat2011',code:'STAT2011',name:'Probability & Estimation',
+      color:'#b08968',colorSoft:'rgba(176,137,104,.11)',
+      level:2,cp:6,
+      assessments:[
+        {name:'Quiz Average',weight:10,score:68,graded:true},
+        {name:'Assignment 1',weight:20,score:59,graded:true},
+        {name:'Mid-semester',weight:20,score:null,graded:false},
+        {name:'Final Exam',weight:50,score:null,graded:false}
+      ]
+    },
+    {
+      id:'edgu1003',code:'EDGU1003',name:'Diet & Nutrition',
+      color:'#788c5d',colorSoft:'rgba(120,140,93,.11)',
+      level:1,cp:6,
+      assessments:[
+        {name:'Journal',weight:20,score:90,graded:true},
+        {name:'Presentation',weight:15,score:88,graded:true},
+        {name:'Essay',weight:15,score:85,graded:true},
+        {name:'Final Exam',weight:50,score:null,graded:false}
+      ]
+    },
+    {
+      id:'math2021',code:'MATH2021',name:'Vector Calculus',
+      color:'#9b7bb8',colorSoft:'rgba(155,123,184,.11)',
+      level:2,cp:6,
+      assessments:[
+        {name:'Quiz Average',weight:15,score:82,graded:true},
+        {name:'Assignment 1',weight:15,score:78,graded:true},
+        {name:'Assignment 2',weight:15,score:76,graded:true},
+        {name:'Final Exam',weight:55,score:null,graded:false}
+      ]
+    }
+  ];
+
+  // ============================================================
+  // GRADE HELPERS
+  // ============================================================
+  function gradeLabel(pct){
+    if(pct>=85)return'HD';
+    if(pct>=75)return'D';
+    if(pct>=65)return'CR';
+    if(pct>=50)return'P';
+    return'F';
+  }
+  function gradeBand(wam){
+    if(wam>=85)return'High Distinction';
+    if(wam>=75)return'Distinction';
+    if(wam>=65)return'Credit';
+    if(wam>=50)return'Pass';
+    return'Fail';
+  }
+  function gradeColor(pct,courseColor){
+    if(pct>=75)return courseColor||'var(--blue)';
+    if(pct>=65)return'var(--amber)';
+    if(pct>=50)return'var(--text-2)';
+    return'var(--orange)';
+  }
+  function wamToGPA(wam){
+    if(wam>=85)return 4.0;
+    if(wam>=75)return 3.5;
+    if(wam>=65)return 2.5;
+    if(wam>=50)return 1.5;
+    return 0.0;
+  }
+  function levelWeight(level){
+    if(level>=3)return 3;
+    if(level===2)return 2;
+    return 1;
+  }
+
+  // ============================================================
+  // COMPUTE FUNCTIONS
+  // ============================================================
+  function computeCurrent(course){
+    var sumSW=0,sumW=0;
+    course.assessments.forEach(function(a){
+      if(a.graded&&a.score!==null){sumSW+=a.score*a.weight;sumW+=a.weight}
+    });
+    return sumW>0?sumSW/sumW:0;
+  }
+
+  function computeAssessedPct(course){
+    var sumW=0;
+    course.assessments.forEach(function(a){if(a.graded)sumW+=a.weight});
+    return sumW;
+  }
+
+  function getInputValues(courseIdx){
+    var vals=[];
+    COURSES[courseIdx].assessments.forEach(function(a,ai){
+      if(a.graded){
+        vals.push(null);
+      }else{
+        var inp=document.querySelector('.score-input[data-course-idx="'+courseIdx+'"][data-assess-idx="'+ai+'"]');
+        if(inp&&inp.value.trim()!==''){
+          var v=parseFloat(inp.value);
+          if(v<0)v=0;if(v>100)v=100;
+          vals.push(v);
+        }else{
+          vals.push(null);
+        }
+      }
+    });
+    return vals;
+  }
+
+  function computeProjected(course,inputs){
+    var sumSW=0,totalW=0,allFilled=true;
+    course.assessments.forEach(function(a,i){
+      totalW+=a.weight;
+      if(a.graded&&a.score!==null){
+        sumSW+=a.score*a.weight;
+      }else{
+        var val=inputs[i];
+        if(val!==null&&!isNaN(val)){
+          sumSW+=val*a.weight;
+        }else{
+          allFilled=false;
+        }
+      }
+    });
+    if(!allFilled)return null;
+    return sumSW/totalW;
+  }
+
+  // WAM = sum(projected_mark * cp * level_weight) / sum(cp * level_weight)
+  function computeWAM(){
+    var num=0,den=0,valid=true;
+    COURSES.forEach(function(c,idx){
+      var inputs=getInputValues(idx);
+      var proj=computeProjected(c,inputs);
+      var lw=levelWeight(c.level);
+      if(proj!==null){
+        num+=proj*c.cp*lw;
+        den+=c.cp*lw;
+      }else{
+        // Use current mark for courses with partial scores
+        var cur=computeCurrent(c);
+        num+=cur*c.cp*lw;
+        den+=c.cp*lw;
+        valid=false;
+      }
+    });
+    return{wam:den>0?num/den:0,allFilled:valid};
+  }
+
+  // Reverse calculation: what average does each course need on remaining
+  function computeRequired(targetWAM){
+    var totalDen=0;
+    COURSES.forEach(function(c){totalDen+=c.cp*levelWeight(c.level)});
+
+    var results=[];
+    COURSES.forEach(function(c,idx){
+      var lw=levelWeight(c.level);
+      var knownSum=0,knownWeight=0;
+      c.assessments.forEach(function(a){
+        if(a.graded&&a.score!==null){knownSum+=a.score*a.weight;knownWeight+=a.weight}
+      });
+      var remainWeight=100-knownWeight; // total weight is always 100
+
+      if(remainWeight<=0){
+        results.push({code:c.code,color:c.color,required:computeCurrent(c),locked:true});
+        return;
+      }
+
+      // Assume other courses contribute their current average on remaining work
+      var otherNum=0;
+      COURSES.forEach(function(o,oi){
+        if(oi===idx)return;
+        var oLw=levelWeight(o.level);
+        var oKnownSum=0,oKnownWeight=0;
+        o.assessments.forEach(function(a){
+          if(a.graded&&a.score!==null){oKnownSum+=a.score*a.weight;oKnownWeight+=a.weight}
+        });
+        var oRemain=100-oKnownWeight;
+        var oAvg=oKnownWeight>0?oKnownSum/oKnownWeight:targetWAM;
+        var oFinal=(oKnownSum+oAvg*oRemain)/100;
+        otherNum+=oFinal*o.cp*oLw;
+      });
+
+      var neededFinal=(targetWAM*totalDen-otherNum)/(c.cp*lw);
+      var req=(neededFinal*100-knownSum)/remainWeight;
+
+      results.push({code:c.code,color:c.color,required:req,locked:false});
+    });
+    return results;
+  }
+
+  function feasibilityClass(req){
+    if(req<=85)return'feasible';
+    if(req<=100)return'warning';
+    return'impossible';
+  }
+  function feasibilityColor(cls){
+    if(cls==='feasible')return'var(--green)';
+    if(cls==='warning')return'var(--orange)';
+    return'var(--red)';
+  }
+  function feasibilityIcon(cls){
+    if(cls==='feasible')return'check-circle';
+    if(cls==='warning')return'alert-triangle';
+    return'x-circle';
+  }
+
+  // ============================================================
+  // BUILD EXPANDABLE COURSE CARD (deadline.html pattern)
+  // ============================================================
+  function buildCard(course,index){
+    var assessed=computeAssessedPct(course);
+    var current=computeCurrent(course);
+
+    var card=document.createElement('div');
+    card.className='pc-card anim';
+    card.style.animationDelay=(0.06+index*0.06)+'s';
+    card.style.setProperty('--stripe-color',course.color);
+    card.dataset.courseIdx=index;
+
+    var wrap=document.createElement('div');
+    wrap.className='pc-card-wrap';
+
+    // ---- HEADER (always visible) ----
+    var header=document.createElement('div');
+    header.className='pc-header';
+
+    var dot=document.createElement('div');
+    dot.className='pc-color-dot';
+    dot.style.background=course.color;
+
+    var info=document.createElement('div');
+    info.className='pc-course-info';
+    var codeEl=document.createElement('div');
+    codeEl.className='pc-course-code';
+    codeEl.textContent=course.code+' \u2014 '+course.name;
+    var nameEl=document.createElement('div');
+    nameEl.className='pc-course-name';
+    nameEl.textContent='Level '+course.level+' \xb7 '+course.cp+' cp';
+    info.appendChild(codeEl);
+    info.appendChild(nameEl);
+
+    var assessedBadge=document.createElement('span');
+    assessedBadge.className='pc-assessed-badge';
+    assessedBadge.style.background=course.colorSoft;
+    assessedBadge.style.color=course.color;
+    assessedBadge.textContent=assessed+'% assessed';
+
+    var marks=document.createElement('div');
+    marks.className='pc-marks';
+
+    var currentItem=document.createElement('div');
+    currentItem.className='pc-mark-item';
+    var currentLabel=document.createElement('div');
+    currentLabel.className='pc-mark-label';
+    currentLabel.textContent='Current';
+    var currentValue=document.createElement('div');
+    currentValue.className='pc-mark-value';
+    currentValue.style.color=gradeColor(current,course.color);
+    currentValue.textContent=current.toFixed(1)+'%';
+    currentValue.dataset.role='current';
+    currentItem.appendChild(currentLabel);
+    currentItem.appendChild(currentValue);
+
+    var projItem=document.createElement('div');
+    projItem.className='pc-mark-item';
+    var projLabel=document.createElement('div');
+    projLabel.className='pc-mark-label';
+    projLabel.textContent='Projected';
+    var projValue=document.createElement('div');
+    projValue.className='pc-mark-value';
+    projValue.style.color='var(--text-3)';
+    projValue.textContent='\u2014';
+    projValue.dataset.role='projected';
+    projItem.appendChild(projLabel);
+    projItem.appendChild(projValue);
+
+    marks.appendChild(currentItem);
+    marks.appendChild(projItem);
+
+    var gradeBadgeEl=document.createElement('span');
+    gradeBadgeEl.className='pc-grade-badge';
+    gradeBadgeEl.style.background=course.colorSoft;
+    gradeBadgeEl.style.color=course.color;
+    gradeBadgeEl.textContent=gradeLabel(current);
+    gradeBadgeEl.dataset.role='grade-badge';
+
+    var chevron=document.createElement('i');
+    chevron.setAttribute('data-lucide','chevron-down');
+    chevron.className='pc-expand-chevron';
+
+    header.appendChild(dot);
+    header.appendChild(info);
+    header.appendChild(assessedBadge);
+    header.appendChild(marks);
+    header.appendChild(gradeBadgeEl);
+    header.appendChild(chevron);
+
+    // ---- EXPANDED SECTION ----
+    var expanded=document.createElement('div');
+    expanded.className='pc-expanded';
+    var expandedInner=document.createElement('div');
+    expandedInner.className='pc-expanded-inner';
+
+    // Assessment table
+    var table=document.createElement('table');
+    table.className='pc-assess-table';
+    var thead=document.createElement('thead');
+    var headerRow=document.createElement('tr');
+    ['Assessment','Weight','Score'].forEach(function(t,ci){
+      var th=document.createElement('th');
+      th.textContent=t;
+      if(ci===0)th.style.width='50%';
+      else if(ci===1)th.style.width='20%';
+      else th.style.width='30%';
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    var tbody=document.createElement('tbody');
+    course.assessments.forEach(function(a,ai){
+      var tr=document.createElement('tr');
+
+      var tdName=document.createElement('td');
+      var nameDiv=document.createElement('div');
+      nameDiv.className='assess-name';
+      nameDiv.textContent=a.name;
+      tdName.appendChild(nameDiv);
+
+      var tdWeight=document.createElement('td');
+      var canvas=document.createElement('canvas');
+      canvas.className='weight-bar';
+      canvas.width=80;canvas.height=8;
+      canvas.dataset.p=(a.weight/100).toString();
+      canvas.dataset.c=course.color;
+      tdWeight.appendChild(canvas);
+      var wtLabel=document.createElement('div');
+      wtLabel.style.cssText='font-size:.72rem;color:var(--text-2);margin-top:3px;text-align:center';
+      wtLabel.textContent=a.weight+'%';
+      tdWeight.appendChild(wtLabel);
+
+      var tdScore=document.createElement('td');
+      var scoreCell=document.createElement('div');
+      scoreCell.className='score-cell';
+      if(a.graded){
+        var scoreSpan=document.createElement('span');
+        scoreSpan.className='assess-score';
+        scoreSpan.style.color=course.color;
+        scoreSpan.textContent=a.score;
+        var denomSpan=document.createElement('span');
+        denomSpan.className='score-denominator';
+        denomSpan.textContent='/100';
+        var gradedBadge=document.createElement('span');
+        gradedBadge.className='assess-graded-badge';
+        gradedBadge.style.background=course.colorSoft;
+        gradedBadge.style.color=course.color;
+        gradedBadge.textContent='graded';
+        scoreCell.appendChild(scoreSpan);
+        scoreCell.appendChild(denomSpan);
+        scoreCell.appendChild(gradedBadge);
+      }else{
+        var input=document.createElement('input');
+        input.type='number';
+        input.className='score-input';
+        input.style.color=course.color;
+        input.placeholder='?';
+        input.min='0';input.max='100';
+        input.dataset.courseIdx=index;
+        input.dataset.assessIdx=ai;
+        input.addEventListener('click',function(e){e.stopPropagation()});
+        var denomSpan2=document.createElement('span');
+        denomSpan2.className='score-denominator';
+        denomSpan2.textContent='/100';
+        scoreCell.appendChild(input);
+        scoreCell.appendChild(denomSpan2);
+      }
+      tdScore.appendChild(scoreCell);
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdWeight);
+      tr.appendChild(tdScore);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    expandedInner.appendChild(table);
+
+    // Grade summary row
+    var summary=document.createElement('div');
+    summary.className='pc-grade-summary';
+
+    var sumCurrent=document.createElement('div');
+    sumCurrent.className='pc-grade-summary-item';
+    var scl=document.createElement('div');
+    scl.className='pc-grade-summary-label';
+    scl.textContent='Current';
+    var scv=document.createElement('div');
+    scv.className='pc-grade-summary-value';
+    scv.style.color=course.color;
+    scv.textContent=current.toFixed(1)+'%';
+    scv.dataset.role='sum-current';
+    var scs=document.createElement('div');
+    scs.className='pc-grade-summary-sub';
+    scs.textContent=assessed+'% assessed';
+    sumCurrent.appendChild(scl);
+    sumCurrent.appendChild(scv);
+    sumCurrent.appendChild(scs);
+
+    var divider1=document.createElement('div');
+    divider1.className='pc-grade-summary-divider';
+
+    var sumProjected=document.createElement('div');
+    sumProjected.className='pc-grade-summary-item';
+    var spl=document.createElement('div');
+    spl.className='pc-grade-summary-label';
+    spl.textContent='Projected';
+    var spv=document.createElement('div');
+    spv.className='pc-grade-summary-value';
+    spv.style.color='var(--text-3)';
+    spv.textContent='\u2014';
+    spv.dataset.role='sum-projected';
+    var sps=document.createElement('div');
+    sps.className='pc-grade-summary-sub';
+    sps.textContent='Enter scores above';
+    sps.dataset.role='sum-projected-sub';
+    sumProjected.appendChild(spl);
+    sumProjected.appendChild(spv);
+    sumProjected.appendChild(sps);
+
+    var divider2=document.createElement('div');
+    divider2.className='pc-grade-summary-divider';
+
+    var sumNote=document.createElement('div');
+    sumNote.className='pc-grade-summary-note';
+    sumNote.textContent='Projected grade updates live as you type predicted scores.';
+
+    summary.appendChild(sumCurrent);
+    summary.appendChild(divider1);
+    summary.appendChild(sumProjected);
+    summary.appendChild(divider2);
+    summary.appendChild(sumNote);
+    expandedInner.appendChild(summary);
+
+    expanded.appendChild(expandedInner);
+
+    // Assemble card
+    wrap.appendChild(header);
+    wrap.appendChild(expanded);
+    card.appendChild(wrap);
+
+    // Click to toggle expand (accordion)
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.score-input'))return;
+      document.querySelectorAll('.pc-card.expanded').forEach(function(c){
+        if(c!==card)c.classList.remove('expanded');
+      });
+      card.classList.toggle('expanded');
+      if(card.classList.contains('expanded')){
+        setTimeout(function(){lucide.createIcons({attrs:{nameAttr:'data-lucide'},node:card})},50);
+      }
+    });
+
+    return card;
+  }
+
+  // ============================================================
+  // BUILD RIGHT PANEL DYNAMIC ROWS
+  // ============================================================
+  function buildRightPanel(){
+    // Required scores rows
+    var reqRows=document.getElementById('req-rows');
+    COURSES.forEach(function(c){
+      var row=document.createElement('div');
+      row.className='req-row';
+      row.id='req-'+c.code;
+      var dot=document.createElement('div');
+      dot.className='req-dot';
+      dot.style.background=c.color;
+      var code=document.createElement('span');
+      code.className='req-course';
+      code.textContent=c.code;
+      var score=document.createElement('span');
+      score.className='req-score';
+      score.textContent='\u2014';
+      score.style.color='var(--text-3)';
+      var icon=document.createElement('span');
+      icon.className='req-icon feasible';
+      var iconI=document.createElement('i');
+      iconI.setAttribute('data-lucide','check-circle');
+      iconI.style.cssText='width:14px;height:14px';
+      icon.appendChild(iconI);
+      row.appendChild(dot);
+      row.appendChild(code);
+      row.appendChild(score);
+      row.appendChild(icon);
+      reqRows.appendChild(row);
+    });
+
+    // Semester progress rows
+    var progRowsEl=document.getElementById('prog-rows');
+    var totalAssessed=0,totalWeight=0;
+    COURSES.forEach(function(c){
+      var pct=computeAssessedPct(c);
+      totalAssessed+=pct*c.cp;
+      totalWeight+=100*c.cp;
+      var row=document.createElement('div');
+      row.className='prog-row';
+      var codeEl=document.createElement('span');
+      codeEl.className='prog-code';
+      codeEl.textContent=c.code;
+      var barWrap=document.createElement('div');
+      barWrap.className='prog-bar-wrap';
+      var canvas=document.createElement('canvas');
+      canvas.className='cpb';
+      canvas.dataset.p=(pct/100).toString();
+      canvas.dataset.c=c.color;
+      canvas.width=160;canvas.height=12;
+      barWrap.appendChild(canvas);
+      var pctEl=document.createElement('span');
+      pctEl.className='prog-pct';
+      pctEl.textContent=pct+'%';
+      row.appendChild(codeEl);
+      row.appendChild(barWrap);
+      row.appendChild(pctEl);
+      progRowsEl.appendChild(row);
+    });
+    var overallPct=totalWeight>0?Math.round(totalAssessed/totalWeight*100):0;
+    document.getElementById('prog-overall').textContent=overallPct+'% of semester assessed';
+
+    // Slider interaction
+    var slider=document.getElementById('target-slider');
+    slider.addEventListener('input',function(){
+      updateTarget();
+    });
+    updateSliderFill(slider);
+  }
+
+  function updateSliderFill(slider){
+    var pct=((slider.value-50)/50)*100;
+    slider.style.background='linear-gradient(to right,var(--orange) 0%,var(--orange) '+pct+'%,var(--divider) '+pct+'%,var(--divider) 100%)';
+  }
+
+  // ============================================================
+  // GLOBAL RECALC — triggered by any input change or slider move
+  // ============================================================
+  function recalcAll(){
+    // Update each card's header and summary
+    COURSES.forEach(function(course,idx){
+      var card=document.querySelector('.pc-card[data-course-idx="'+idx+'"]');
+      if(!card)return;
+
+      var inputs=getInputValues(idx);
+      var proj=computeProjected(course,inputs);
+      var current=computeCurrent(course);
+
+      var headerProj=card.querySelector('[data-role="projected"]');
+      var gradeBadgeEl=card.querySelector('[data-role="grade-badge"]');
+      var sumProj=card.querySelector('[data-role="sum-projected"]');
+      var sumProjSub=card.querySelector('[data-role="sum-projected-sub"]');
+
+      if(proj!==null){
+        headerProj.textContent=proj.toFixed(1)+'%';
+        headerProj.style.color=gradeColor(proj,course.color);
+        gradeBadgeEl.textContent=gradeLabel(proj);
+        sumProj.textContent=proj.toFixed(1)+'%';
+        sumProj.style.color=course.color;
+        sumProjSub.textContent=gradeLabel(proj)+' grade band';
+      }else{
+        headerProj.textContent='\u2014';
+        headerProj.style.color='var(--text-3)';
+        gradeBadgeEl.textContent=gradeLabel(current);
+        sumProj.textContent='\u2014';
+        sumProj.style.color='var(--text-3)';
+        sumProjSub.textContent='Enter scores above';
+      }
+    });
+
+    // Update WAM panel
+    var result=computeWAM();
+    var wamEl=document.getElementById('wam-value');
+    var wamBandEl=document.getElementById('wam-band');
+    var wamGpaEl=document.getElementById('wam-gpa');
+    var wamBasisEl=document.getElementById('wam-basis');
+
+    if(wamEl){
+      wamEl.textContent=result.wam.toFixed(1);
+      wamBandEl.textContent=gradeBand(result.wam);
+      wamGpaEl.querySelector('strong').textContent='GPA: '+wamToGPA(result.wam).toFixed(1);
+      if(result.allFilled){
+        wamBasisEl.textContent='Based on all predicted scores';
+      }else{
+        wamBasisEl.textContent='Based on current marks (partial)';
+      }
+    }
+
+    // Update target gap
+    updateTarget();
+  }
+
+  function updateTarget(){
+    var slider=document.getElementById('target-slider');
+    if(!slider)return;
+
+    var tv=parseInt(slider.value,10);
+    var targetValEl=document.getElementById('target-value');
+    var targetBandEl=document.getElementById('target-band');
+    var targetGapEl=document.getElementById('target-gap');
+
+    targetValEl.textContent=tv;
+    targetBandEl.textContent=gradeBand(tv);
+
+    var result=computeWAM();
+    var gap=tv-result.wam;
+    if(gap>0){
+      targetGapEl.textContent='+'+gap.toFixed(1)+' to go';
+      targetGapEl.style.background='var(--blue-soft)';
+      targetGapEl.style.color='var(--blue)';
+    }else{
+      targetGapEl.textContent='On track!';
+      targetGapEl.style.background='var(--green-soft)';
+      targetGapEl.style.color='var(--green)';
+    }
+
+    updateSliderFill(slider);
+    updateRequired(tv);
+  }
+
+  function updateRequired(targetWAM){
+    var reqs=computeRequired(targetWAM);
+    reqs.forEach(function(r){
+      var row=document.getElementById('req-'+r.code);
+      if(!row)return;
+
+      var scoreEl=row.querySelector('.req-score');
+      var iconWrap=row.querySelector('.req-icon');
+
+      if(r.locked){
+        scoreEl.textContent='\u2014';
+        scoreEl.style.color='var(--text-3)';
+        iconWrap.className='req-icon feasible';
+        while(iconWrap.firstChild)iconWrap.removeChild(iconWrap.firstChild);
+        var lockIcon=document.createElement('i');
+        lockIcon.setAttribute('data-lucide','lock');
+        lockIcon.style.cssText='width:14px;height:14px';
+        iconWrap.appendChild(lockIcon);
+      }else{
+        var cls=feasibilityClass(r.required);
+        var displayVal=r.required<0?'0.0':r.required.toFixed(1);
+        scoreEl.textContent=displayVal;
+        scoreEl.style.color=feasibilityColor(cls);
+        iconWrap.className='req-icon '+cls;
+
+        while(iconWrap.firstChild)iconWrap.removeChild(iconWrap.firstChild);
+        var fIcon=document.createElement('i');
+        fIcon.setAttribute('data-lucide',feasibilityIcon(cls));
+        fIcon.style.cssText='width:14px;height:14px';
+        iconWrap.appendChild(fIcon);
+      }
+    });
+    lucide.createIcons();
+  }
+
+  // ============================================================
+  // GLOBAL INPUT DELEGATION
+  // ============================================================
+  document.addEventListener('input',function(e){
+    if(e.target.classList.contains('score-input')){
+      recalcAll();
+    }
+  });
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+  var container=document.getElementById('course-cards');
+  COURSES.forEach(function(course,i){
+    var card=buildCard(course,i);
+    if(i===0)card.classList.add('expanded'); // First card expanded
+    container.appendChild(card);
+  });
+
+  buildRightPanel();
+
+  // Draw Rough.js weight bars
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    document.querySelectorAll('.weight-bar').forEach(function(c){
+      var p=parseFloat(c.dataset.p),col=c.dataset.c;
+      var w=c.width,h=c.height,rc=rough.canvas(c);
+      rc.rectangle(0,1,w,h-2,{fill:'#eae7e0',fillStyle:'solid',stroke:'#d5d2ca',strokeWidth:.5,roughness:1.2});
+      if(p>0)rc.rectangle(0,1,w*p,h-2,{fill:col,fillStyle:'solid',stroke:col,strokeWidth:.5,roughness:1.6});
+    });
+
+    // Draw semester progress bars
+    document.querySelectorAll('.cpb').forEach(function(c){
+      var p=parseFloat(c.dataset.p),col=c.dataset.c;
+      var w=c.width,h=c.height,rc=rough.canvas(c);
+      rc.rectangle(0,2,w,h-4,{fill:'#eae7e0',fillStyle:'solid',stroke:'#d5d2ca',strokeWidth:.7,roughness:1.2});
+      if(p>0)rc.rectangle(0,2,w*p,h-4,{fill:col,fillStyle:'solid',stroke:col,strokeWidth:.7,roughness:1.6});
+    });
+
+    // Draw hand-drawn borders on right panel cards (same as dashboard.html)
+    document.querySelectorAll('[data-hand-border]').forEach(function(el){
+      var w=el.offsetWidth,h=el.offsetHeight;
+      var svg=document.createElementNS(NS,'svg');
+      svg.setAttribute('class','hand-border-svg');
+      svg.setAttribute('viewBox','-4 -4 '+(w+8)+' '+(h+8));
+      el.prepend(svg);
+      svg.appendChild(rough.svg(svg).rectangle(0,0,w,h,{stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none'}));
+    });
+
+    lucide.createIcons();
+  })});
+
+  // Rough Notation — circle on WAM number
+  setTimeout(function(){
+    var RN=window.RoughNotation;
+    var wamEl=document.getElementById('wam-value');
+    if(!RN||!wamEl)return;
+    var annotation=RN.annotate(wamEl,{
+      type:'circle',color:'#d97757',strokeWidth:1.2,
+      padding:10,animationDuration:800
+    });
+    annotation.show();
+  },600);
+
+  // Initial calculation
+  recalcAll();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — My Courses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --sidebar-w:68px;--sidebar-w-expanded:224px;--header-h:56px;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+    }
+    html{font-size:15px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* LAYOUT */
+    .app{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;padding:20px 0;z-index:100;transition:width var(--ease);overflow:hidden;box-shadow:2px 0 16px rgba(20,20,19,.06)}
+    .sidebar:hover{width:var(--sidebar-w-expanded)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 17px 24px;white-space:nowrap}
+    .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:17px;color:#fff}
+    .logo-text{font-family:'Source Serif 4',serif;font-size:1.18rem;font-weight:700;color:#4a3f34;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .logo-text{opacity:1}
+    .sidebar-rule{width:26px;height:1px;background:rgba(60,50,40,.1);margin:0 auto 10px;transition:width var(--ease)}
+    .sidebar:hover .sidebar-rule{width:calc(100% - 44px)}
+    .sidebar-nav{list-style:none;width:100%;flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+    .nav-item{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:rgba(60,50,40,.65);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap;overflow:hidden;text-decoration:none}
+    .nav-item:hover{background:rgba(60,50,40,.06);color:rgba(60,50,40,.75)}
+    .nav-item.active{background:rgba(217,119,87,.18);color:var(--orange)}
+    .nav-icon{flex-shrink:0;width:20px;height:20px}
+    .nav-label{font-size:.84rem;font-weight:500;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .nav-label{opacity:1}
+    .sidebar-bottom{padding:0 10px;width:100%}
+
+    /* MAIN WRAPPER */
+    .main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* HEADER */
+    .header{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(250,249,245,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+    .header-brand{font-family:'Source Serif 4',serif;font-size:.95rem;font-weight:600;color:var(--text-2)}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:7px 14px;width:220px}
+    .search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.82rem;color:var(--text-1);width:100%}
+    .search-bar input::placeholder{color:var(--text-3)}
+    .search-icon{color:var(--text-3);flex-shrink:0}
+    .hdr-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast);position:relative}
+    .hdr-btn:hover{background:var(--card-bg-hover)}
+    .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--card-bg)}
+    .avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;cursor:pointer;margin-left:4px}
+
+    /* CONTENT AREA */
+    .content-area{flex:1;padding:20px 24px}
+    .main-content{display:flex;flex-direction:column;gap:16px}
+
+    /* CARD BASE */
+    .card{background:var(--card-bg);border:none;border-radius:var(--radius);box-shadow:var(--shadow);position:relative;overflow:visible}
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .card-title{font-size:.92rem;font-weight:600;display:flex;align-items:center;gap:8px}
+    .card-title-icon{color:var(--orange)}
+    .card-badge{font-size:.68rem;padding:3px 9px;border-radius:6px;font-weight:600;background:var(--orange-soft);color:var(--orange)}
+
+    /* TITLE ROW */
+    .cs-title-row{display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:4px}
+    .cs-title-left{display:flex;align-items:center;gap:10px}
+    .cs-title-icon{width:22px;height:22px;color:var(--orange);flex-shrink:0}
+    .cs-h1{font-family:'Source Serif 4',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--text-1);letter-spacing:-.02em}
+    .cs-semester-badge{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:6px;background:var(--orange-soft);color:var(--orange)}
+    .cs-title-right{display:flex;align-items:center;gap:8px}
+    .cs-filter-badge{font-size:.7rem;font-weight:600;padding:4px 12px;border-radius:6px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-2);cursor:default}
+
+    /* COURSE CARDS GRID */
+    .courses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+
+    /* COURSE CARD — outer is invisible, hand-drawn border is the only outline */
+    .course-card{background:transparent;border:none;border-radius:0;box-shadow:none;overflow:visible;cursor:pointer;transition:transform var(--ease);position:relative;padding:6px}
+    .course-card:hover{transform:translateY(-3px)}
+    .course-card-inner{background:var(--card-bg);overflow:hidden}
+
+    /* Banner */
+    .course-banner{position:relative;height:120px;overflow:hidden}
+    .course-banner-bg{width:100%;height:100%;position:absolute;inset:0}
+    .course-banner-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.35) 100%)}
+    .course-banner-deco{position:absolute;inset:0;pointer-events:none;overflow:visible}
+    .course-banner-text{position:absolute;bottom:0;left:0;right:0;padding:14px 18px;z-index:1}
+    .course-banner-name{font-family:'Source Serif 4',Georgia,serif;font-size:1.05rem;font-weight:700;color:#fff;line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,.2)}
+    .course-banner-code{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.85);margin-top:2px;text-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+    /* Info area */
+    .course-info{padding:14px 18px 16px}
+    .course-term{font-size:.7rem;color:var(--text-3);font-weight:500;margin-bottom:8px}
+    .course-grade-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .course-grade-label{font-size:.72rem;color:var(--text-2);font-weight:500}
+    .course-grade-value{font-family:'Source Serif 4',serif;font-size:1.1rem;font-weight:700}
+    .course-grade-badge{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:auto}
+    .course-progress-row{display:flex;align-items:center;gap:8px}
+    .course-progress-label{font-size:.66rem;color:var(--text-3);font-weight:500;white-space:nowrap}
+    .course-progress-bar{flex:1;height:10px}
+
+
+    /* Rough.js hand-border on course cards */
+    .course-card .hand-border-svg{z-index:10}
+
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.09s}.d3{animation-delay:.14s}
+    .d4{animation-delay:.19s}.d5{animation-delay:.28s}.d6{animation-delay:.38s}
+    .d7{animation-delay:.48s}.d8{animation-delay:.56s}
+
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:3px}
+
+    /* RESPONSIVE */
+    @media(max-width:1400px){.courses-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:900px){.courses-grid{grid-template-columns:1fr}.content-area{padding:16px 12px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">U</div><span class="logo-text">UniBoard</span></div>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a class="nav-item" href="dashboard.html"><i data-lucide="layout-dashboard" class="nav-icon"></i><span class="nav-label">Dashboard</span></a></li>
+      <li><a class="nav-item" href="timetable.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Timetable</span></a></li>
+      <li><a class="nav-item active" href="#"><i data-lucide="book-open" class="nav-icon"></i><span class="nav-label">Courses</span></a></li>
+      <li><a class="nav-item" href="deadline.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Deadlines</span></a></li>
+      <li><a class="nav-item" href="predict.html"><i data-lucide="target" class="nav-icon"></i><span class="nav-label">Predict</span></a></li>
+      <li><a class="nav-item" href="#"><i data-lucide="radio" class="nav-icon"></i><span class="nav-label">Digest</span></a></li>
+    </ul>
+    <div class="sidebar-bottom"><a class="nav-item" href="#"><i data-lucide="settings" class="nav-icon"></i><span class="nav-label">Settings</span></a></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-brand">UniBoard</div>
+      <div class="header-right">
+        <div class="search-bar"><i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i><input type="text" placeholder="Search courses, files&hellip;"></div>
+        <button class="hdr-btn"><i data-lucide="bell" style="width:17px;height:17px"></i><span class="notif-dot"></span></button>
+        <div class="avatar">RQ</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="main-content">
+        <!-- TITLE ROW -->
+        <div class="cs-title-row anim d1">
+          <div class="cs-title-left">
+            <i data-lucide="book-open" class="cs-title-icon"></i>
+            <h1 class="cs-h1">My Courses</h1>
+            <span class="cs-semester-badge">2026 S1</span>
+          </div>
+          <div class="cs-title-right">
+            <span class="cs-filter-badge">5 Published</span>
+          </div>
+        </div>
+
+        <!-- COURSE CARDS -->
+        <div class="courses-grid" id="courses-grid">
+          <!-- COMP2017 -->
+          <div class="course-card anim d2" data-hand-border>
+            <div class="course-card-inner">
+              <div class="course-banner">
+                <div class="course-banner-bg" style="background:#d97757"></div>
+                <div class="course-banner-overlay"></div>
+                <svg class="course-banner-deco" id="deco-0"></svg>
+                <div class="course-banner-text">
+                  <div class="course-banner-name">COMP2017</div>
+                  <div class="course-banner-code">Systems Programming</div>
+                </div>
+              </div>
+              <div class="course-info">
+                <div class="course-term">Term: 2026 Semester 1</div>
+                <div class="course-grade-row">
+                  <span class="course-grade-label">Grade:</span>
+                  <span class="course-grade-value" style="color:#d97757">82.5%</span>
+                  <span class="course-grade-badge" style="background:var(--blue-soft);color:var(--blue)">HD 85+</span>
+                </div>
+                <div class="course-progress-row">
+                  <span class="course-progress-label">40% assessed</span>
+                  <canvas class="course-progress-bar" data-p="0.40" data-c="#d97757" width="160" height="10"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COMP3221 -->
+          <div class="course-card anim d3" data-hand-border>
+            <div class="course-card-inner">
+              <div class="course-banner">
+                <div class="course-banner-bg" style="background:#6a9bcc"></div>
+                <div class="course-banner-overlay"></div>
+                <svg class="course-banner-deco" id="deco-1"></svg>
+                <div class="course-banner-text">
+                  <div class="course-banner-name">COMP3221</div>
+                  <div class="course-banner-code">Distributed Systems</div>
+                </div>
+              </div>
+              <div class="course-info">
+                <div class="course-term">Term: 2026 Semester 1</div>
+                <div class="course-grade-row">
+                  <span class="course-grade-label">Grade:</span>
+                  <span class="course-grade-value" style="color:#6a9bcc">76.0%</span>
+                  <span class="course-grade-badge" style="background:var(--blue-soft);color:var(--blue)">D 75+</span>
+                </div>
+                <div class="course-progress-row">
+                  <span class="course-progress-label">35% assessed</span>
+                  <canvas class="course-progress-bar" data-p="0.35" data-c="#6a9bcc" width="160" height="10"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STAT2011 -->
+          <div class="course-card anim d4" data-hand-border>
+            <div class="course-card-inner">
+              <div class="course-banner">
+                <div class="course-banner-bg" style="background:#b08968"></div>
+                <div class="course-banner-overlay"></div>
+                <svg class="course-banner-deco" id="deco-2"></svg>
+                <div class="course-banner-text">
+                  <div class="course-banner-name">STAT2011</div>
+                  <div class="course-banner-code">Probability &amp; Estimation</div>
+                </div>
+              </div>
+              <div class="course-info">
+                <div class="course-term">Term: 2026 Semester 1</div>
+                <div class="course-grade-row">
+                  <span class="course-grade-label">Grade:</span>
+                  <span class="course-grade-value" style="color:#b08968">62.0%</span>
+                  <span class="course-grade-badge" style="background:var(--orange-soft);color:var(--orange)">D 75+</span>
+                </div>
+                <div class="course-progress-row">
+                  <span class="course-progress-label">30% assessed</span>
+                  <canvas class="course-progress-bar" data-p="0.30" data-c="#b08968" width="160" height="10"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EDGU1003 -->
+          <div class="course-card anim d5" data-hand-border>
+            <div class="course-card-inner">
+              <div class="course-banner">
+                <div class="course-banner-bg" style="background:#788c5d"></div>
+                <div class="course-banner-overlay"></div>
+                <svg class="course-banner-deco" id="deco-3"></svg>
+                <div class="course-banner-text">
+                  <div class="course-banner-name">EDGU1003</div>
+                  <div class="course-banner-code">Diet &amp; Nutrition</div>
+                </div>
+              </div>
+              <div class="course-info">
+                <div class="course-term">Term: 2026 Semester 1</div>
+                <div class="course-grade-row">
+                  <span class="course-grade-label">Grade:</span>
+                  <span class="course-grade-value" style="color:#788c5d">88.0%</span>
+                  <span class="course-grade-badge" style="background:var(--green-soft);color:var(--green)">HD 85+</span>
+                </div>
+                <div class="course-progress-row">
+                  <span class="course-progress-label">50% assessed</span>
+                  <canvas class="course-progress-bar" data-p="0.50" data-c="#788c5d" width="160" height="10"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MATH2021 -->
+          <div class="course-card anim d6" data-hand-border>
+            <div class="course-card-inner">
+              <div class="course-banner">
+                <div class="course-banner-bg" style="background:#9b7bb8"></div>
+                <div class="course-banner-overlay"></div>
+                <svg class="course-banner-deco" id="deco-4"></svg>
+                <div class="course-banner-text">
+                  <div class="course-banner-name">MATH2021</div>
+                  <div class="course-banner-code">Vector Calculus</div>
+                </div>
+              </div>
+              <div class="course-info">
+                <div class="course-term">Term: 2026 Semester 1</div>
+                <div class="course-grade-row">
+                  <span class="course-grade-label">Grade:</span>
+                  <span class="course-grade-value" style="color:#9b7bb8">79.0%</span>
+                  <span class="course-grade-badge" style="background:var(--purple-soft);color:var(--purple)">D 75+</span>
+                </div>
+                <div class="course-progress-row">
+                  <span class="course-progress-label">45% assessed</span>
+                  <canvas class="course-progress-bar" data-p="0.45" data-c="#9b7bb8" width="160" height="10"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  // ---- Hand-drawn progress bars (Rough.js canvas) ----
+  document.querySelectorAll('.course-progress-bar').forEach(function(c){
+    var p=parseFloat(c.dataset.p),col=c.dataset.c;
+    var w=c.width,h=c.height,rc=rough.canvas(c);
+    rc.rectangle(0,1,w,h-2,{fill:'#eae7e0',fillStyle:'solid',stroke:'#d5d2ca',strokeWidth:.6,roughness:1.2});
+    if(p>0)rc.rectangle(0,1,w*p,h-2,{fill:col,fillStyle:'solid',stroke:col,strokeWidth:.6,roughness:1.6});
+  });
+
+  // ---- Hand-drawn card borders ----
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    document.querySelectorAll('[data-hand-border]').forEach(function(el){
+      var w=el.offsetWidth,h=el.offsetHeight;
+      var svg=document.createElementNS(NS,'svg');svg.setAttribute('class','hand-border-svg');
+      svg.setAttribute('viewBox','-4 -4 '+(w+8)+' '+(h+8));el.prepend(svg);
+      svg.appendChild(rough.svg(svg).rectangle(0,0,w,h,{stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none'}));
+    });
+  })});
+
+  // ---- Banner doodle decorations ----
+  var COLORS=['#d97757','#6a9bcc','#b08968','#788c5d','#9b7bb8'];
+  COLORS.forEach(function(col,i){
+    var svg=document.getElementById('deco-'+i);
+    if(!svg)return;
+    var rc=rough.svg(svg);
+
+    // Different decoration per card for variety
+    switch(i%5){
+      case 0: // Circle + sparkle (top-right)
+        svg.appendChild(rc.circle(220,30,40,{stroke:'rgba(255,255,255,.3)',strokeWidth:2,roughness:2.5,fill:'none'}));
+        svg.appendChild(rc.line(260,50,280,50,{stroke:'rgba(255,255,255,.25)',strokeWidth:2,roughness:2}));
+        svg.appendChild(rc.line(270,40,270,60,{stroke:'rgba(255,255,255,.25)',strokeWidth:2,roughness:2}));
+        break;
+      case 1: // Wave line
+        svg.appendChild(rc.path('M 180 20 Q 200 8, 220 20 Q 240 32, 260 20 Q 280 8, 300 20',{stroke:'rgba(255,255,255,.25)',strokeWidth:2,roughness:2}));
+        svg.appendChild(rc.circle(290,60,20,{stroke:'rgba(255,255,255,.2)',strokeWidth:1.5,roughness:2,fill:'none'}));
+        break;
+      case 2: // Star
+        var pts=[];
+        for(var j=0;j<10;j++){
+          var a=(Math.PI/5)*j-Math.PI/2,r=j%2===0?18:7;
+          pts.push([250+Math.cos(a)*r,35+Math.sin(a)*r]);
+        }
+        svg.appendChild(rc.polygon(pts,{stroke:'rgba(255,255,255,.3)',strokeWidth:2,roughness:2.5,fill:'none'}));
+        svg.appendChild(rc.circle(210,70,14,{stroke:'rgba(255,255,255,.2)',strokeWidth:1.5,roughness:2,fill:'none'}));
+        break;
+      case 3: // Dots cluster
+        svg.appendChild(rc.circle(240,30,16,{stroke:'rgba(255,255,255,.25)',strokeWidth:1.5,roughness:2,fill:'none'}));
+        svg.appendChild(rc.circle(265,45,12,{stroke:'rgba(255,255,255,.2)',strokeWidth:1.5,roughness:2,fill:'none'}));
+        svg.appendChild(rc.circle(225,55,10,{stroke:'rgba(255,255,255,.2)',strokeWidth:1.5,roughness:2,fill:'none'}));
+        break;
+      case 4: // Zigzag
+        svg.appendChild(rc.path('M 200 25 L 215 15 L 230 25 L 245 15 L 260 25',{stroke:'rgba(255,255,255,.25)',strokeWidth:2,roughness:2}));
+        svg.appendChild(rc.circle(280,50,18,{stroke:'rgba(255,255,255,.2)',strokeWidth:1.5,roughness:2.5,fill:'none'}));
+        break;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

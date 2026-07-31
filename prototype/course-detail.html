@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — COMP3221 Distributed Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --sidebar-w:68px;--sidebar-w-expanded:224px;--header-h:56px;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+      --course-color:#6a9bcc;--course-soft:rgba(106,155,204,.11);
+    }
+    html{font-size:15px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* LAYOUT */
+    .app{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;padding:20px 0;z-index:100;transition:width var(--ease);overflow:hidden;box-shadow:2px 0 16px rgba(20,20,19,.06)}
+    .sidebar:hover{width:var(--sidebar-w-expanded)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 17px 24px;white-space:nowrap}
+    .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:17px;color:#fff}
+    .logo-text{font-family:'Source Serif 4',serif;font-size:1.18rem;font-weight:700;color:#4a3f34;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .logo-text{opacity:1}
+    .sidebar-rule{width:26px;height:1px;background:rgba(60,50,40,.1);margin:0 auto 10px;transition:width var(--ease)}
+    .sidebar:hover .sidebar-rule{width:calc(100% - 44px)}
+    .sidebar-nav{list-style:none;width:100%;flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+    .nav-item{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:rgba(60,50,40,.65);cursor:pointer;transition:all var(--ease-fast);white-space:nowrap;overflow:hidden;text-decoration:none}
+    .nav-item:hover{background:rgba(60,50,40,.06);color:rgba(60,50,40,.75)}
+    .nav-item.active{background:rgba(217,119,87,.18);color:var(--orange)}
+    .nav-icon{flex-shrink:0;width:20px;height:20px}
+    .nav-label{font-size:.84rem;font-weight:500;opacity:0;transition:opacity var(--ease)}
+    .sidebar:hover .nav-label{opacity:1}
+    .sidebar-bottom{padding:0 10px;width:100%}
+
+    /* MAIN WRAPPER */
+    .main-wrapper{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* HEADER */
+    .header{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(250,249,245,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+    .header-brand{font-family:'Source Serif 4',serif;font-size:.95rem;font-weight:600;color:var(--text-2)}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:7px 14px;width:220px}
+    .search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.82rem;color:var(--text-1);width:100%}
+    .search-bar input::placeholder{color:var(--text-3)}
+    .search-icon{color:var(--text-3);flex-shrink:0}
+    .hdr-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:all var(--ease-fast);position:relative}
+    .hdr-btn:hover{background:var(--card-bg-hover)}
+    .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--card-bg)}
+    .avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#e8956e);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;cursor:pointer;margin-left:4px}
+
+    /* CONTENT AREA */
+    .content-area{flex:1;padding:20px 24px;display:flex;gap:22px}
+    .main-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:20px}
+    .right-panel{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(var(--header-h) + 20px);align-self:flex-start;max-height:calc(100vh - var(--header-h) - 40px);overflow-y:auto;overflow-x:hidden}
+
+    /* CARD BASE — hand-drawn border is the only visible outline */
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .card-title{font-size:.92rem;font-weight:600;display:flex;align-items:center;gap:8px}
+    .card-title-icon{color:var(--orange)}
+    .card-badge{font-size:.68rem;padding:3px 9px;border-radius:6px;font-weight:600;background:var(--orange-soft);color:var(--orange)}
+
+    /* BACK LINK */
+    .back-link{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500;color:var(--text-2);text-decoration:none;transition:color var(--ease-fast);margin-bottom:8px}
+    .back-link:hover{color:var(--course-color)}
+
+    /* COURSE BANNER */
+    .course-banner-card{background:transparent;border:none;border-radius:0;box-shadow:none;overflow:visible;position:relative;padding:10px}
+    .course-banner-inner{background:var(--card-bg);overflow:hidden}
+    .banner-color-strip{width:100%;position:relative;background:linear-gradient(135deg,#6a9bcc,#5a8ab8);padding:28px 32px;display:flex;align-items:center;justify-content:space-between}
+    .banner-deco{position:absolute;inset:0;pointer-events:none;overflow:visible}
+    .banner-left{position:relative;z-index:1}
+    .banner-code{font-family:'Source Serif 4',Georgia,serif;font-size:2rem;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.15;text-shadow:0 1px 4px rgba(0,0,0,.15)}
+    .banner-name{font-size:.92rem;font-weight:500;color:rgba(255,255,255,.88);margin-top:4px;text-shadow:0 1px 3px rgba(0,0,0,.1)}
+    .banner-right{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+    .banner-tag{font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px);white-space:nowrap}
+
+    /* SECTION CARD — transparent shell, inner has background */
+    .section-card{background:transparent;border:none;border-radius:0;box-shadow:none;overflow:visible;position:relative;padding:10px}
+    .section-card-inner{background:var(--card-bg);padding:22px 26px;overflow:hidden}
+
+    /* ASSESSMENT TABLE */
+    .assess-table{width:100%;border-collapse:collapse;table-layout:fixed}
+    .assess-table th{font-size:.7rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;text-align:left;border-bottom:1.5px solid var(--divider)}
+    .assess-table th:nth-child(2),.assess-table th:nth-child(4){text-align:center}
+    .assess-table th:nth-child(3){text-align:center}
+    .assess-table td{padding:14px 10px;font-size:.84rem;color:var(--text-2);border-bottom:1px solid var(--divider);vertical-align:middle}
+    .assess-table tr:last-child td{border-bottom:none}
+    .assess-table tr{transition:background var(--ease-fast)}
+    .assess-table tr:hover td{background:rgba(106,155,204,.03)}
+    .assess-table td:nth-child(2){text-align:center;font-weight:500}
+    .assess-table td:nth-child(3){text-align:center;font-size:.78rem;color:var(--text-3)}
+    .assess-table td:nth-child(4){text-align:center}
+    .assess-name{font-weight:600;color:var(--text-1);font-size:.84rem}
+    .assess-sub{font-size:.72rem;color:var(--text-3);margin-top:2px}
+    .assess-score{font-family:'Source Serif 4',serif;font-weight:700;font-size:1.05rem;color:var(--course-color)}
+    .assess-graded-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--course-soft);color:var(--course-color);margin-left:6px;vertical-align:middle}
+
+    /* Score input for predictions */
+    .score-input{width:60px;border:none;border-bottom:2px dashed var(--card-border);background:transparent;font-family:'Source Serif 4',serif;font-weight:700;font-size:1.05rem;color:var(--course-color);text-align:center;outline:none;padding:2px 4px;transition:border-color var(--ease-fast)}
+    .score-input::placeholder{color:var(--text-3);font-weight:500;font-size:.82rem}
+    .score-input:focus{border-bottom-color:var(--course-color)}
+    .score-denominator{font-family:'Source Serif 4',serif;font-weight:600;font-size:.88rem;color:var(--text-3)}
+    .score-cell{display:flex;align-items:center;justify-content:center;gap:2px}
+
+    /* Weight progress bar canvas */
+    .weight-bar{display:block}
+
+    /* Calculated grade summary */
+    .grade-summary-inner{background:var(--card-bg);padding:18px 26px;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .grade-summary-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .grade-summary-label{font-size:.7rem;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em}
+    .grade-summary-value{font-family:'Source Serif 4',serif;font-size:1.6rem;font-weight:700;color:var(--course-color);line-height:1.1}
+    .grade-summary-sub{font-size:.72rem;color:var(--text-2);font-weight:500}
+    .grade-summary-divider{width:1px;height:50px;background:var(--divider);flex-shrink:0}
+    .grade-summary-note{font-size:.72rem;color:var(--text-3);font-style:italic;flex:1;text-align:right;line-height:1.5}
+
+    /* MATERIALS */
+    .mat-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:var(--radius-sm);transition:background var(--ease-fast);cursor:pointer;border-bottom:1px solid var(--divider)}
+    .mat-item:last-child{border-bottom:none}
+    .mat-item:hover{background:var(--card-bg-hover)}
+    .mat-week{font-size:.66rem;font-weight:700;color:var(--course-color);background:var(--course-soft);padding:3px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;min-width:52px;text-align:center}
+    .mat-icon{width:32px;height:32px;border-radius:8px;background:rgba(106,155,204,.08);display:grid;place-items:center;color:var(--course-color);flex-shrink:0}
+    .mat-info{flex:1;min-width:0}
+    .mat-title{font-size:.84rem;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mat-type{font-size:.68rem;color:var(--text-3);margin-top:1px}
+    .mat-badge-new{font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--green-soft);color:var(--green);flex-shrink:0;text-transform:uppercase}
+
+    /* RIGHT PANEL */
+    .rp-card-inner{background:var(--card-bg);padding:16px 18px;overflow:hidden}
+    .rp-link{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;color:var(--text-1);text-decoration:none;transition:background var(--ease-fast);cursor:pointer;border-bottom:1px solid var(--divider)}
+    .rp-link:last-child{border-bottom:none}
+    .rp-link:hover{background:var(--card-bg-hover)}
+    .rp-link-icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;font-size:.8rem}
+    .rp-link-icon.canvas{background:rgba(217,60,50,.08);color:#d93c32}
+    .rp-link-icon.ed{background:var(--blue-soft);color:var(--blue)}
+    .rp-link-icon.edl{background:var(--green-soft);color:var(--green)}
+    .rp-dl-list{display:flex;flex-direction:column;gap:6px}
+    .rp-dl-item{display:flex;gap:10px;align-items:stretch;padding:10px;border-radius:var(--radius-sm);transition:background var(--ease-fast);cursor:pointer;position:relative}
+    .rp-dl-item:hover{background:var(--card-bg-hover)}
+    .rp-dl-item.soon{background:rgba(106,155,204,.04)}
+    .rp-dl-item.later{background:rgba(176,137,104,.04)}
+    .rp-dl-stripe{width:3px;border-radius:2px;flex-shrink:0}
+    .rp-dl-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+    .rp-dl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+    .rp-dl-name{font-size:.72rem;font-weight:600;color:var(--text-1);margin-bottom:1px}
+    .rp-dl-time{font-size:.64rem;color:var(--text-3)}
+    .rp-dl-badge{font-size:.66rem;font-weight:700;padding:2px 9px;border-radius:5px;white-space:nowrap;position:absolute;right:10px;top:50%;transform:translateY(-50%)}
+
+    /* AI ASSISTANT */
+    .ai-section{margin-top:8px;padding:0 2px}
+    .ai-title{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-size:.88rem;font-weight:600;color:var(--text-2);margin-bottom:10px}
+    .ai-input-row{display:flex;align-items:center;gap:10px}
+    .ai-input{flex:1;border:1.5px solid var(--card-border);border-radius:24px;background:var(--card-bg);padding:12px 20px;font-family:inherit;font-size:.84rem;color:var(--text-1);outline:none;transition:border-color var(--ease-fast),box-shadow var(--ease-fast)}
+    .ai-input::placeholder{color:var(--text-3)}
+    .ai-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft);background:#fff}
+    .ai-send{width:40px;height:40px;border-radius:50%;border:none;background:var(--orange);color:#fff;display:grid;place-items:center;cursor:pointer;transition:transform var(--ease-fast),background var(--ease-fast);flex-shrink:0}
+    .ai-send:hover{background:#c5674a;transform:scale(1.06)}
+    .ai-disclaimer{font-size:.66rem;color:var(--text-3);margin-top:8px;text-align:center;font-style:italic}
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.09s}.d3{animation-delay:.14s}
+    .d4{animation-delay:.19s}.d5{animation-delay:.28s}.d6{animation-delay:.38s}
+    .d7{animation-delay:.48s}.d8{animation-delay:.56s}
+
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:3px}
+
+    /* RESPONSIVE */
+    @media(max-width:1200px){.right-panel{display:none}}
+    @media(max-width:900px){.content-area{padding:16px 12px}.banner-code{font-size:1.5rem}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">U</div><span class="logo-text">UniBoard</span></div>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a class="nav-item" href="dashboard.html"><i data-lucide="layout-dashboard" class="nav-icon"></i><span class="nav-label">Dashboard</span></a></li>
+      <li><a class="nav-item" href="timetable.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Timetable</span></a></li>
+      <li><a class="nav-item active" href="courses.html"><i data-lucide="book-open" class="nav-icon"></i><span class="nav-label">Courses</span></a></li>
+      <li><a class="nav-item" href="deadline.html"><i data-lucide="calendar" class="nav-icon"></i><span class="nav-label">Deadlines</span></a></li>
+      <li><a class="nav-item" href="predict.html"><i data-lucide="target" class="nav-icon"></i><span class="nav-label">Predict</span></a></li>
+      <li><a class="nav-item" href="#"><i data-lucide="radio" class="nav-icon"></i><span class="nav-label">Digest</span></a></li>
+    </ul>
+    <div class="sidebar-bottom"><a class="nav-item" href="#"><i data-lucide="settings" class="nav-icon"></i><span class="nav-label">Settings</span></a></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-brand">UniBoard</div>
+      <div class="header-right">
+        <div class="search-bar"><i data-lucide="search" class="search-icon" style="width:15px;height:15px"></i><input type="text" placeholder="Search courses, files&hellip;"></div>
+        <button class="hdr-btn"><i data-lucide="bell" style="width:17px;height:17px"></i><span class="notif-dot"></span></button>
+        <div class="avatar">RQ</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="main-content">
+
+        <!-- BACK LINK -->
+        <a class="back-link anim d1" href="courses.html">
+          <i data-lucide="arrow-left" style="width:16px;height:16px"></i>
+          My Courses
+        </a>
+
+        <!-- 1. COURSE BANNER -->
+        <div class="course-banner-card anim d2" data-hand-border>
+          <div class="course-banner-inner">
+            <div class="banner-color-strip">
+              <svg class="banner-deco" id="banner-deco"></svg>
+              <div class="banner-left">
+                <div class="banner-code">COMP3221</div>
+                <div class="banner-name">Distributed Systems</div>
+              </div>
+              <div class="banner-right">
+                <span class="banner-tag">2026 S1</span>
+                <span class="banner-tag">6 cp</span>
+                <span class="banner-tag">Dr. Nguyen</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. ASSESSMENT TABLE -->
+        <div class="section-card anim d3" data-hand-border>
+          <div class="section-card-inner">
+            <div class="card-header">
+              <div class="card-title"><i data-lucide="graduation-cap" class="card-title-icon" style="width:18px;height:18px"></i> Assessment</div>
+              <div class="card-badge">2026 S1</div>
+            </div>
+            <table class="assess-table">
+              <thead>
+                <tr>
+                  <th style="width:40%">Assessment</th>
+                  <th style="width:15%">Weight</th>
+                  <th style="width:22%">Due</th>
+                  <th style="width:23%">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="assess-name">Quiz 1-3 (Average)</div><div class="assess-sub">Online quizzes across weeks 3, 6, 9</div></td>
+                  <td>
+                    <canvas class="weight-bar" data-p="0.10" data-c="#6a9bcc" width="80" height="8"></canvas>
+                    <div style="font-size:.72rem;color:var(--text-2);margin-top:3px">10%</div>
+                  </td>
+                  <td>Various</td>
+                  <td>
+                    <div class="score-cell">
+                      <span class="assess-score">85</span>
+                      <span class="score-denominator">/100</span>
+                      <span class="assess-graded-badge">graded</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="assess-name">Assignment 1 &mdash; Distributed Mutex</div><div class="assess-sub">Lamport clock implementation</div></td>
+                  <td>
+                    <canvas class="weight-bar" data-p="0.10" data-c="#6a9bcc" width="80" height="8"></canvas>
+                    <div style="font-size:.72rem;color:var(--text-2);margin-top:3px">10%</div>
+                  </td>
+                  <td>Week 5, Fri 28 Mar</td>
+                  <td>
+                    <div class="score-cell">
+                      <span class="assess-score">72</span>
+                      <span class="score-denominator">/100</span>
+                      <span class="assess-graded-badge">graded</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="assess-name">Assignment 2 &mdash; Distributed File System</div><div class="assess-sub">P2P file sync with consistency protocols</div></td>
+                  <td>
+                    <canvas class="weight-bar" data-p="0.30" data-c="#6a9bcc" width="80" height="8"></canvas>
+                    <div style="font-size:.72rem;color:var(--text-2);margin-top:3px">30%</div>
+                  </td>
+                  <td>Week 11, Fri 22 May</td>
+                  <td>
+                    <div class="score-cell">
+                      <input type="number" class="score-input" data-weight="30" placeholder="?" min="0" max="100">
+                      <span class="score-denominator">/100</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="assess-name">Final Exam</div><div class="assess-sub">Comprehensive, 2 hours, closed-book</div></td>
+                  <td>
+                    <canvas class="weight-bar" data-p="0.50" data-c="#6a9bcc" width="80" height="8"></canvas>
+                    <div style="font-size:.72rem;color:var(--text-2);margin-top:3px">50%</div>
+                  </td>
+                  <td>Exam Period</td>
+                  <td>
+                    <div class="score-cell">
+                      <input type="number" class="score-input" data-weight="50" placeholder="?" min="0" max="100">
+                      <span class="score-denominator">/100</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CALCULATED GRADE SUMMARY -->
+        <div class="section-card anim d4" data-hand-border style="margin-top:-10px">
+          <div class="grade-summary-inner">
+            <div class="grade-summary-item">
+              <div class="grade-summary-label">Current Average</div>
+              <div class="grade-summary-value" id="current-avg">78.5%</div>
+              <div class="grade-summary-sub">Based on 20% assessed</div>
+            </div>
+            <div class="grade-summary-divider"></div>
+            <div class="grade-summary-item">
+              <div class="grade-summary-label">Projected Final</div>
+              <div class="grade-summary-value" id="projected-avg">&mdash;</div>
+              <div class="grade-summary-sub" id="projected-sub">Enter predicted scores above</div>
+            </div>
+            <div class="grade-summary-divider"></div>
+            <div class="grade-summary-note">
+              Projected grade updates live as you type predicted scores for ungraded assessments.
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. COURSE MATERIALS -->
+        <div class="section-card anim d6" data-hand-border>
+          <div class="section-card-inner">
+            <div class="card-header">
+              <div class="card-title"><i data-lucide="folder" class="card-title-icon" style="width:18px;height:18px"></i> Course Materials</div>
+              <div class="card-badge">4 weeks</div>
+            </div>
+            <div class="mat-item">
+              <span class="mat-week">Wk 1</span>
+              <div class="mat-icon"><i data-lucide="file-text" style="width:16px;height:16px"></i></div>
+              <div class="mat-info">
+                <div class="mat-title">Introduction to Distributed Systems</div>
+                <div class="mat-type">Lecture Slides &middot; PDF</div>
+              </div>
+            </div>
+            <div class="mat-item">
+              <span class="mat-week">Wk 2</span>
+              <div class="mat-icon"><i data-lucide="file-text" style="width:16px;height:16px"></i></div>
+              <div class="mat-info">
+                <div class="mat-title">Communication &amp; Remote Procedure Calls</div>
+                <div class="mat-type">Lecture Slides &middot; PDF</div>
+              </div>
+            </div>
+            <div class="mat-item">
+              <span class="mat-week">Wk 3</span>
+              <div class="mat-icon"><i data-lucide="file-text" style="width:16px;height:16px"></i></div>
+              <div class="mat-info">
+                <div class="mat-title">Naming &amp; Discovery</div>
+                <div class="mat-type">Lecture Slides &middot; PDF</div>
+              </div>
+            </div>
+            <div class="mat-item">
+              <span class="mat-week">Wk 4</span>
+              <div class="mat-icon"><i data-lucide="file-text" style="width:16px;height:16px"></i></div>
+              <div class="mat-info">
+                <div class="mat-title">Synchronization</div>
+                <div class="mat-type">Lecture Slides &middot; PDF</div>
+              </div>
+              <span class="mat-badge-new">New</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. AI STUDY ASSISTANT -->
+        <div class="ai-section anim d7">
+          <div class="ai-title">Ask about this course</div>
+          <div class="ai-input-row">
+            <input type="text" class="ai-input" placeholder="Ask anything about COMP3221&hellip;">
+            <button class="ai-send"><i data-lucide="arrow-up" style="width:18px;height:18px"></i></button>
+          </div>
+          <div class="ai-disclaimer">AI responses are for study reference only</div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <!-- Quick Links -->
+        <div class="section-card anim d5" data-hand-border>
+          <div class="rp-card-inner">
+            <div class="card-title" style="margin-bottom:12px"><i data-lucide="external-link" class="card-title-icon" style="width:16px;height:16px"></i> Quick Links</div>
+            <a class="rp-link" href="#" target="_blank">
+              <div class="rp-link-icon canvas"><i data-lucide="layout-dashboard" style="width:15px;height:15px"></i></div>
+              Canvas Home
+            </a>
+            <a class="rp-link" href="#" target="_blank">
+              <div class="rp-link-icon ed"><i data-lucide="message-circle" style="width:15px;height:15px"></i></div>
+              Ed Discussion
+            </a>
+            <a class="rp-link" href="#" target="_blank">
+              <div class="rp-link-icon edl"><i data-lucide="book-open" style="width:15px;height:15px"></i></div>
+              Ed Lessons
+            </a>
+          </div>
+        </div>
+
+        <!-- Upcoming Deadlines -->
+        <div class="section-card anim d6" data-hand-border>
+          <div class="rp-card-inner">
+            <div class="card-title" style="margin-bottom:12px"><i data-lucide="clock" class="card-title-icon" style="width:16px;height:16px"></i> Upcoming</div>
+            <div class="rp-dl-list">
+            <div class="rp-dl-item soon">
+              <div class="rp-dl-stripe" style="background:#6a9bcc"></div>
+              <div class="rp-dl-info">
+                <div class="rp-dl-name">Assignment 2 &mdash; Distributed File System</div>
+                <div class="rp-dl-time">Fri 22 May &middot; 11:59 PM</div>
+              </div>
+              <span class="rp-dl-badge" style="background:var(--blue-soft);color:var(--blue)" id="dl-days-a2">63 days</span>
+            </div>
+            <div class="rp-dl-item later">
+              <div class="rp-dl-stripe" style="background:#b08968"></div>
+              <div class="rp-dl-info">
+                <div class="rp-dl-name">Final Exam</div>
+                <div class="rp-dl-time">Exam Period &middot; Jun 2026</div>
+              </div>
+              <span class="rp-dl-badge" style="background:var(--amber-soft);color:var(--amber)">TBD</span>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  // ---- Grade data ----
+  var GRADED=[
+    {score:85,weight:10},
+    {score:72,weight:10}
+  ];
+  // Weights for ungraded items correspond to the score-input fields in DOM order
+  var UNGRADED_WEIGHTS=[30,50];
+
+  // ---- Compute current average (graded items only) ----
+  function computeCurrent(){
+    var sumSW=0,sumW=0;
+    GRADED.forEach(function(g){sumSW+=g.score*g.weight;sumW+=g.weight});
+    if(sumW===0)return 0;
+    return sumSW/sumW;
+  }
+
+  // ---- Compute projected average (all items, using predicted scores) ----
+  function computeProjected(predictions){
+    var sumSW=0;
+    GRADED.forEach(function(g){sumSW+=g.score*g.weight});
+    var allFilled=true;
+    predictions.forEach(function(p,i){
+      if(p!==null&&!isNaN(p)){
+        sumSW+=p*UNGRADED_WEIGHTS[i];
+      }else{
+        allFilled=false;
+      }
+    });
+    if(!allFilled)return null;
+    // Projected = total weighted score / 100 (full weight is 10+10+30+50=100)
+    return sumSW/100;
+  }
+
+  function gradeLabel(pct){
+    if(pct>=85)return'HD';
+    if(pct>=75)return'D';
+    if(pct>=65)return'CR';
+    if(pct>=50)return'P';
+    return'F';
+  }
+
+  // ---- Update display ----
+  function updateGrades(){
+    var currentEl=document.getElementById('current-avg');
+    var projectedEl=document.getElementById('projected-avg');
+    var projectedSub=document.getElementById('projected-sub');
+
+    var cur=computeCurrent();
+    currentEl.textContent=cur.toFixed(1)+'%';
+
+    var inputs=document.querySelectorAll('.score-input');
+    var predictions=[];
+    inputs.forEach(function(inp){
+      var v=inp.value.trim();
+      if(v===''||isNaN(parseFloat(v))){
+        predictions.push(null);
+      }else{
+        var n=parseFloat(v);
+        if(n<0)n=0;if(n>100)n=100;
+        predictions.push(n);
+      }
+    });
+
+    var proj=computeProjected(predictions);
+    if(proj!==null){
+      projectedEl.textContent=proj.toFixed(1)+'%';
+      projectedSub.textContent=gradeLabel(proj)+' grade band';
+    }else{
+      // Use em-dash character directly instead of HTML entity
+      projectedEl.textContent='\u2014';
+      projectedSub.textContent='Enter predicted scores above';
+    }
+  }
+
+  // Listen to input events on score fields
+  document.querySelectorAll('.score-input').forEach(function(inp){
+    inp.addEventListener('input',updateGrades);
+  });
+
+  // ---- Days remaining calculation ----
+  (function(){
+    var today=new Date();
+    var a2Due=new Date(2026,4,22); // May 22, 2026
+    var diff=Math.ceil((a2Due-today)/(1000*60*60*24));
+    var badge=document.getElementById('dl-days-a2');
+    if(badge&&diff>0){
+      badge.textContent=diff+' days';
+    }else if(badge){
+      badge.textContent='Past due';
+    }
+  })();
+
+  // ---- Hand-drawn weight bars (Rough.js canvas) ----
+  document.querySelectorAll('.weight-bar').forEach(function(c){
+    var p=parseFloat(c.dataset.p),col=c.dataset.c;
+    var w=c.width,h=c.height,rc=rough.canvas(c);
+    rc.rectangle(0,1,w,h-2,{fill:'#eae7e0',fillStyle:'solid',stroke:'#d5d2ca',strokeWidth:.5,roughness:1.2});
+    if(p>0)rc.rectangle(0,1,w*p,h-2,{fill:col,fillStyle:'solid',stroke:col,strokeWidth:.5,roughness:1.6});
+  });
+
+  // ---- Hand-drawn card borders ----
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    document.querySelectorAll('[data-hand-border]').forEach(function(el){
+      var w=el.offsetWidth,h=el.offsetHeight;
+      var svg=document.createElementNS(NS,'svg');svg.setAttribute('class','hand-border-svg');
+      svg.setAttribute('viewBox','0 0 '+w+' '+h);el.prepend(svg);
+      svg.appendChild(rough.svg(svg).rectangle(0,0,w,h,{stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none'}));
+    });
+
+  })});
+
+  // ---- Banner doodle decorations ----
+  (function(){
+    var svg=document.getElementById('banner-deco');
+    if(!svg)return;
+    var rc=rough.svg(svg);
+    // Wave line decoration
+    svg.appendChild(rc.path('M 180 20 Q 200 8, 220 20 Q 240 32, 260 20 Q 280 8, 300 20',{stroke:'rgba(255,255,255,.25)',strokeWidth:2,roughness:2}));
+    svg.appendChild(rc.circle(290,60,20,{stroke:'rgba(255,255,255,.2)',strokeWidth:1.5,roughness:2,fill:'none'}));
+    // Extra sparkle
+    svg.appendChild(rc.line(340,25,355,25,{stroke:'rgba(255,255,255,.2)',strokeWidth:2,roughness:2}));
+    svg.appendChild(rc.line(347,18,347,32,{stroke:'rgba(255,255,255,.2)',strokeWidth:2,roughness:2}));
+    // Small circles
+    svg.appendChild(rc.circle(380,55,14,{stroke:'rgba(255,255,255,.15)',strokeWidth:1.5,roughness:2,fill:'none'}));
+  })();
+
+  // ---- Initial grade calculation ----
+  updateGrades();
+
+})();
+</script>
+</body>
+</html>

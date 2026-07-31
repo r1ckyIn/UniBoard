@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBoard — Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#e8ddd0;--cream:#faf9f5;
+      --orange:#d97757;--orange-soft:rgba(217,119,87,.11);
+      --blue:#6a9bcc;--blue-soft:rgba(106,155,204,.11);
+      --green:#788c5d;--green-soft:rgba(120,140,93,.11);
+      --amber:#b08968;--amber-soft:rgba(176,137,104,.11);
+      --purple:#9b7bb8;--purple-soft:rgba(155,123,184,.11);
+      --red:#c45;--red-soft:rgba(204,68,85,.11);
+      --card-bg:#f6f5f0;--card-bg-hover:#efede6;--card-border:#e8e5dd;
+      --text-1:#2d2d2a;--text-2:#6b6b65;--text-3:#9b9b94;--divider:#eae7e0;
+      --radius:14px;--radius-sm:8px;
+      --shadow:0 1px 3px rgba(20,20,19,.04),0 4px 14px rgba(20,20,19,.025);
+      --shadow-hover:0 2px 8px rgba(20,20,19,.06),0 8px 24px rgba(20,20,19,.04);
+      --ease:.28s cubic-bezier(.4,0,.2,1);--ease-fast:.15s ease;
+    }
+    html{font-size:15px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text-1);line-height:1.55;overflow-x:hidden;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+    body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(139,115,85,.02) 31px,rgba(139,115,85,.02) 32px)}
+    h1,h2,h3,h4,h5{font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:var(--text-1);letter-spacing:-.01em}
+
+    /* PAGE LAYOUT */
+    .setup-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;position:relative}
+    .setup-container{width:100%;max-width:640px;position:relative;z-index:2}
+
+    /* STEP INDICATOR */
+    .step-indicator{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:32px}
+    .step-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:600;transition:all .3s ease;flex-shrink:0}
+    .step-circle.completed{background:var(--green);color:#fff}
+    .step-circle.active{background:var(--orange);color:#fff}
+    .step-circle.upcoming{background:transparent;border:2px solid var(--card-border);color:var(--text-3)}
+    .step-circle .check-icon{display:none}
+    .step-circle .step-number{display:inline}
+    .step-circle.completed .check-icon{display:inline}
+    .step-circle.completed .step-number{display:none}
+    .step-line{width:48px;height:2px;margin:0 8px;transition:background .3s ease}
+    .step-line.completed{background:var(--green)}
+    .step-line.upcoming{background:var(--card-border)}
+
+    /* CARD */
+    .setup-card{position:relative;overflow:visible;padding:10px}
+    .setup-card-inner{background:var(--card-bg);padding:40px 36px;overflow:hidden}
+    .hand-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+
+    /* STEPS — crossfade, not display toggle */
+    .steps-wrapper{position:relative;overflow:hidden;transition:height .4s cubic-bezier(.4,0,.2,1)}
+    .step-content{width:100%;transition:opacity .3s ease}
+    .step-content.out{position:absolute;top:0;left:0;right:0;opacity:0;pointer-events:none}
+
+    /* STEP 1: WELCOME */
+    .welcome-logo{width:60px;height:60px;background:var(--orange);border-radius:16px;display:grid;place-items:center;font-family:'Source Serif 4',serif;font-weight:700;font-size:30px;color:#fff;margin:0 auto 20px}
+    .welcome-title{font-size:1.8rem;text-align:center;margin-bottom:10px}
+    .welcome-desc{font-size:.88rem;color:var(--text-2);text-align:center;max-width:420px;margin:0 auto 12px;line-height:1.7}
+    .welcome-features{display:flex;gap:16px;margin:28px 0 32px;justify-content:center}
+    .wf-item{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;max-width:150px}
+    .wf-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center}
+    .wf-label{font-size:.74rem;font-weight:600;color:var(--text-2);text-align:center}
+
+    /* STEP 2: TOKEN TUTORIAL */
+    .tutorial-title{font-size:1.4rem;text-align:center;margin-bottom:6px}
+    .tutorial-desc{font-size:.84rem;color:var(--text-2);text-align:center;margin-bottom:24px}
+    .guide-card{border-radius:var(--radius);padding:20px 22px;border:1px solid var(--card-border);margin-bottom:16px;transition:background var(--ease-fast)}
+    .guide-card:last-of-type{margin-bottom:0}
+    .guide-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer}
+    .guide-platform-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+    .guide-platform-name{font-family:'Source Serif 4',serif;font-size:1rem;font-weight:600;flex:1}
+    .guide-toggle-icon{color:var(--text-3);transition:transform var(--ease);flex-shrink:0}
+    .guide-card.collapsed .guide-toggle-icon{transform:rotate(-90deg)}
+    .guide-steps{list-style:none;display:flex;flex-direction:column;gap:12px;overflow:hidden;transition:height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease}
+    .guide-steps.collapsed-steps{height:0 !important;opacity:0}
+    .guide-step{display:flex;align-items:flex-start;gap:12px}
+    .step-num{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .step-content-inner{display:flex;align-items:center;gap:8px;padding-top:3px}
+    .step-icon{color:var(--text-3);flex-shrink:0}
+    .step-text{font-size:.84rem;color:var(--text-2);line-height:1.5}
+    .step-text a{color:var(--orange);text-decoration:none;font-weight:600}
+    .step-text a:hover{text-decoration:underline}
+    .step-text code{font-size:.78rem;background:rgba(217,119,87,.08);color:var(--orange);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Menlo,monospace}
+
+    /* STEP 3: PASTE TOKENS */
+    .paste-title{font-size:1.4rem;text-align:center;margin-bottom:6px}
+    .paste-desc{font-size:.84rem;color:var(--text-2);text-align:center;margin-bottom:24px}
+    .token-group{margin-bottom:20px}
+    .token-label{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .token-label-text{font-size:.82rem;font-weight:600;color:var(--text-2)}
+    .token-label-icon{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0}
+    .token-input-row{display:flex;align-items:center;gap:10px}
+    .token-input{flex:1;padding:11px 14px;font-family:'SF Mono',Menlo,monospace;font-size:.82rem;border:1.5px solid var(--card-border);border-radius:var(--radius-sm);background:var(--cream);color:var(--text-1);outline:none;transition:border-color var(--ease-fast),box-shadow var(--ease-fast)}
+    .token-input::placeholder{color:var(--text-3);font-family:'Inter',sans-serif}
+    .token-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+    .token-input.valid{border-color:var(--green)}
+    .token-input.invalid{border-color:var(--red)}
+    .token-status-wrap{width:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .token-status-wrap .ts-valid,.token-status-wrap .ts-invalid{display:none}
+    .token-status-wrap.show-valid .ts-valid{display:block;color:var(--green)}
+    .token-status-wrap.show-invalid .ts-invalid{display:block;color:var(--red)}
+    .token-error{font-size:.72rem;color:var(--red);margin-top:4px;display:none}
+    .token-error.visible{display:block}
+
+    /* Security note */
+    .security-note{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--radius-sm);background:rgba(120,140,93,.04);border:1px solid rgba(120,140,93,.12);margin-top:20px;margin-bottom:4px}
+    .security-note-icon{color:var(--green);flex-shrink:0;margin-top:1px}
+    .security-note-text{font-size:.76rem;color:var(--text-2);line-height:1.55}
+    .security-note-text strong{color:var(--text-1);font-weight:600}
+
+    /* BUTTONS */
+    .btn-row{display:flex;justify-content:space-between;margin-top:28px}
+    .btn-secondary{padding:10px 24px;font-family:inherit;font-size:.84rem;font-weight:600;color:var(--text-2);background:transparent;border:1.5px solid var(--card-border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--ease-fast)}
+    .btn-secondary:hover{background:var(--card-bg-hover);color:var(--text-1)}
+    .btn-primary{padding:10px 28px;font-family:inherit;font-size:.84rem;font-weight:600;color:#fff;background:var(--orange);border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--ease-fast)}
+    .btn-primary:hover{background:#c5674a;transform:translateY(-1px)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-primary:disabled{opacity:.6;cursor:default;transform:none}
+    .btn-primary-wide{width:100%;height:44px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+    /* SUCCESS STATE */
+    .success-state{display:none;text-align:center;padding:20px 0}
+    .success-state.active{display:block}
+    .success-check{width:64px;height:64px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;color:var(--green);margin:0 auto 20px}
+    .success-title{font-size:1.6rem;margin-bottom:8px}
+    .success-desc{font-size:.88rem;color:var(--text-2);margin-bottom:8px;line-height:1.65;max-width:400px;margin-left:auto;margin-right:auto}
+    .success-sync{font-size:.76rem;color:var(--text-3);margin-bottom:24px;font-style:italic;display:flex;align-items:center;justify-content:center;gap:6px}
+    .sync-spinner{width:14px;height:14px;border:2px solid var(--card-border);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ANIMATIONS */
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+    .d1{animation-delay:.04s}.d2{animation-delay:.12s}
+
+    /* SCROLLBAR — always visible track, thumb fades on hover */
+    html{overflow-y:scroll}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .3s ease}
+    html:hover::-webkit-scrollbar-thumb{background:var(--card-border)}
+    html::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+
+    /* BACKGROUND DOODLES */
+    .bg-doodles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:.07;overflow:visible}
+
+    /* RESPONSIVE */
+    @media(max-width:680px){
+      .setup-card-inner{padding:28px 20px}
+      .welcome-features{flex-direction:column;align-items:center}
+      .wf-item{max-width:none;flex-direction:row;gap:12px}
+      .wf-label{text-align:left}
+    }
+  </style>
+</head>
+<body>
+<svg class="bg-doodles" id="bg-doodles" preserveAspectRatio="none" viewBox="0 0 1200 700"></svg>
+
+<div class="setup-page">
+  <div class="setup-container">
+
+    <!-- STEP INDICATOR -->
+    <div class="step-indicator anim d1" id="step-indicator">
+      <div class="step-circle active" id="si-1">
+        <i data-lucide="check" class="check-icon" style="width:16px;height:16px"></i>
+        <span class="step-number">1</span>
+      </div>
+      <div class="step-line upcoming" id="sl-1"></div>
+      <div class="step-circle upcoming" id="si-2">
+        <i data-lucide="check" class="check-icon" style="width:16px;height:16px"></i>
+        <span class="step-number">2</span>
+      </div>
+      <div class="step-line upcoming" id="sl-2"></div>
+      <div class="step-circle upcoming" id="si-3">
+        <i data-lucide="check" class="check-icon" style="width:16px;height:16px"></i>
+        <span class="step-number">3</span>
+      </div>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="setup-card anim d2" data-hand-border id="setup-card">
+      <div class="setup-card-inner">
+
+        <div class="steps-wrapper" id="steps-wrapper">
+        <!-- STEP 1: WELCOME -->
+        <div class="step-content" id="step-1">
+          <div class="welcome-logo">U</div>
+          <h1 class="welcome-title">Welcome to UniBoard</h1>
+          <p class="welcome-desc">
+            Let&rsquo;s connect your Canvas LMS and Ed Discussion accounts so we can start tracking your grades, deadlines, and course materials in one place.
+          </p>
+          <p class="welcome-desc" style="font-size:.78rem;color:var(--text-3);font-style:italic;margin-bottom:0">
+            This takes about 2 minutes. You&rsquo;ll need access to Canvas and Ed.
+          </p>
+
+          <div class="welcome-features">
+            <div class="wf-item">
+              <div class="wf-icon" style="background:var(--orange-soft);color:var(--orange)">
+                <i data-lucide="shield-check" style="width:18px;height:18px"></i>
+              </div>
+              <span class="wf-label">Read-only access</span>
+            </div>
+            <div class="wf-item">
+              <div class="wf-icon" style="background:var(--blue-soft);color:var(--blue)">
+                <i data-lucide="lock" style="width:18px;height:18px"></i>
+              </div>
+              <span class="wf-label">AES-256 encrypted</span>
+            </div>
+            <div class="wf-item">
+              <div class="wf-icon" style="background:var(--green-soft);color:var(--green)">
+                <i data-lucide="trash-2" style="width:18px;height:18px"></i>
+              </div>
+              <span class="wf-label">Delete anytime</span>
+            </div>
+          </div>
+
+          <div class="btn-row" style="justify-content:center">
+            <button class="btn-primary" id="btn-start" style="padding:12px 40px;font-size:.88rem">
+              Get Started
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: TOKEN TUTORIAL -->
+        <div class="step-content out" id="step-2">
+          <h1 class="tutorial-title">How to get your API tokens</h1>
+          <p class="tutorial-desc">Follow these steps to generate tokens from Canvas and Ed. Don&rsquo;t worry, it&rsquo;s straightforward!</p>
+
+          <!-- Canvas Guide -->
+          <div class="guide-card" id="guide-canvas">
+            <div class="guide-header" id="guide-canvas-header">
+              <div class="guide-platform-icon" style="background:rgba(217,60,50,.08);color:#d93c32">
+                <i data-lucide="layout-dashboard" style="width:16px;height:16px"></i>
+              </div>
+              <span class="guide-platform-name">Canvas LMS</span>
+              <i data-lucide="chevron-down" class="guide-toggle-icon" style="width:18px;height:18px"></i>
+            </div>
+            <ol class="guide-steps">
+              <li class="guide-step">
+                <span class="step-num">1</span>
+                <div class="step-content-inner">
+                  <i data-lucide="external-link" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Go to <a href="https://canvas.sydney.edu.au" target="_blank">canvas.sydney.edu.au</a> and log in</span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">2</span>
+                <div class="step-content-inner">
+                  <i data-lucide="settings" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Click your profile picture (bottom-left) &rarr; <strong>Settings</strong></span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">3</span>
+                <div class="step-content-inner">
+                  <i data-lucide="key" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Scroll down to <strong>Approved Integrations</strong> &rarr; click <code>+ New Access Token</code></span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">4</span>
+                <div class="step-content-inner">
+                  <i data-lucide="key" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Enter purpose: <code>UniBoard</code>, leave expiry blank &rarr; click <strong>Generate Token</strong></span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">5</span>
+                <div class="step-content-inner">
+                  <i data-lucide="copy" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text"><strong>Copy the token immediately</strong> &mdash; it won&rsquo;t be shown again!</span>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <!-- Ed Guide -->
+          <div class="guide-card" id="guide-ed">
+            <div class="guide-header" id="guide-ed-header">
+              <div class="guide-platform-icon" style="background:var(--blue-soft);color:var(--blue)">
+                <i data-lucide="message-circle" style="width:16px;height:16px"></i>
+              </div>
+              <span class="guide-platform-name">Ed Discussion</span>
+              <i data-lucide="chevron-down" class="guide-toggle-icon" style="width:18px;height:18px"></i>
+            </div>
+            <ol class="guide-steps">
+              <li class="guide-step">
+                <span class="step-num">1</span>
+                <div class="step-content-inner">
+                  <i data-lucide="external-link" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Go to <a href="https://edstem.org" target="_blank">edstem.org</a> and log in</span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">2</span>
+                <div class="step-content-inner">
+                  <i data-lucide="settings" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Click your avatar (top-right) &rarr; <strong>Settings</strong></span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">3</span>
+                <div class="step-content-inner">
+                  <i data-lucide="key" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Navigate to the <strong>API Tokens</strong> section</span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">4</span>
+                <div class="step-content-inner">
+                  <i data-lucide="key" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text">Click <strong>Generate Token</strong> &rarr; name it <code>UniBoard</code></span>
+                </div>
+              </li>
+              <li class="guide-step">
+                <span class="step-num">5</span>
+                <div class="step-content-inner">
+                  <i data-lucide="copy" class="step-icon" style="width:14px;height:14px"></i>
+                  <span class="step-text"><strong>Copy the token</strong> &mdash; you&rsquo;ll paste it in the next step</span>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-secondary" id="btn-back-to-1">Back</button>
+            <button class="btn-primary" id="btn-to-3">I have my tokens</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: PASTE TOKENS -->
+        <div class="step-content out" id="step-3">
+          <h1 class="paste-title">Connect your accounts</h1>
+          <p class="paste-desc">Paste the API tokens you generated. We&rsquo;ll validate them instantly.</p>
+
+          <form id="token-form">
+            <!-- Canvas Token -->
+            <div class="token-group">
+              <div class="token-label">
+                <div class="token-label-icon" style="background:rgba(217,60,50,.08);color:#d93c32">
+                  <i data-lucide="layout-dashboard" style="width:12px;height:12px"></i>
+                </div>
+                <span class="token-label-text">Canvas API Token</span>
+              </div>
+              <div class="token-input-row">
+                <input type="text" class="token-input" id="canvas-token" placeholder="Paste your Canvas token here" required>
+                <div class="token-status-wrap" id="canvas-status-wrap">
+                  <i data-lucide="check-circle" class="ts-valid" style="width:20px;height:20px"></i>
+                  <i data-lucide="x-circle" class="ts-invalid" style="width:20px;height:20px"></i>
+                </div>
+              </div>
+              <div class="token-error" id="canvas-error">Invalid Canvas token. Please check and try again.</div>
+            </div>
+
+            <!-- Ed Token -->
+            <div class="token-group">
+              <div class="token-label">
+                <div class="token-label-icon" style="background:var(--blue-soft);color:var(--blue)">
+                  <i data-lucide="message-circle" style="width:12px;height:12px"></i>
+                </div>
+                <span class="token-label-text">Ed Discussion API Token</span>
+              </div>
+              <div class="token-input-row">
+                <input type="text" class="token-input" id="ed-token" placeholder="Paste your Ed token here" required>
+                <div class="token-status-wrap" id="ed-status-wrap">
+                  <i data-lucide="check-circle" class="ts-valid" style="width:20px;height:20px"></i>
+                  <i data-lucide="x-circle" class="ts-invalid" style="width:20px;height:20px"></i>
+                </div>
+              </div>
+              <div class="token-error" id="ed-error">Invalid Ed token. Please check and try again.</div>
+            </div>
+
+            <div class="security-note">
+              <i data-lucide="shield" class="security-note-icon" style="width:16px;height:16px"></i>
+              <div class="security-note-text">
+                <strong>Your tokens are safe.</strong> They are encrypted with AES-256-GCM and stored securely. UniBoard only uses read-only access &mdash; we never post, submit, or modify anything on your behalf.
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn-secondary" id="btn-back-to-2">Back</button>
+              <button type="submit" class="btn-primary" id="validate-btn">
+                Validate &amp; Connect
+              </button>
+            </div>
+          </form>
+        </div>
+
+        </div><!-- /steps-wrapper -->
+
+        <!-- SUCCESS STATE -->
+        <div class="success-state" id="step-success">
+          <div class="success-check">
+            <i data-lucide="check" style="width:30px;height:30px"></i>
+          </div>
+          <h1 class="success-title">You&rsquo;re all set!</h1>
+          <p class="success-desc">
+            Canvas and Ed are connected. We&rsquo;re syncing your courses, grades, and deadlines right now.
+          </p>
+          <div class="success-sync" id="sync-status">
+            <span class="sync-spinner"></span>
+            Syncing your data&hellip;
+          </div>
+          <a href="dashboard.html" class="btn-primary btn-primary-wide" style="text-decoration:none;display:inline-flex;width:auto;padding:12px 40px">
+            <i data-lucide="layout-dashboard" style="width:16px;height:16px"></i>
+            Go to Dashboard
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  lucide.createIcons();
+
+  // ---- Hand-drawn border (seed-based, reusable) ----
+  var setupCard=document.getElementById('setup-card');
+  var BORDER_SEED=42;
+  var BORDER_OPTS={stroke:'#d0cdc4',strokeWidth:.8,roughness:1,bowing:1,fill:'none',seed:BORDER_SEED};
+  var borderSvg=null;
+
+  function syncBorder(){
+    if(!borderSvg){
+      borderSvg=document.createElementNS(NS,'svg');
+      borderSvg.setAttribute('class','hand-border-svg');
+      setupCard.prepend(borderSvg);
+    }
+    var w=setupCard.offsetWidth,h=setupCard.offsetHeight;
+    while(borderSvg.firstChild)borderSvg.removeChild(borderSvg.firstChild);
+    borderSvg.setAttribute('viewBox','-4 -4 '+(w+8)+' '+(h+8));
+    borderSvg.appendChild(rough.svg(borderSvg).rectangle(0,0,w,h,BORDER_OPTS));
+  }
+
+  // ---- Step navigation (crossfade + height transition + RAF border) ----
+  var stepsWrapper=document.getElementById('steps-wrapper');
+  var stepAnimating=false;
+  var stepRaf=0;
+  var currentStepNum=1;
+
+  function goToStep(step){
+    if(stepAnimating||step===currentStepNum)return;
+    stepAnimating=true;
+
+    var hideSec=document.getElementById('step-'+currentStepNum);
+    var showSec=document.getElementById('step-'+step);
+
+    // 1. Measure current wrapper height
+    var h0=stepsWrapper.offsetHeight;
+
+    // 2. Old → absolute overlay, keep visible
+    hideSec.classList.add('out');
+    hideSec.style.opacity='1';
+
+    // 3. New → relative flow, start transparent
+    showSec.classList.remove('out');
+    showSec.style.opacity='0';
+
+    // 4. Update step indicator
+    for(var i=1;i<=3;i++){
+      var circle=document.getElementById('si-'+i);
+      circle.className='step-circle';
+      if(i<step)circle.classList.add('completed');
+      else if(i===step)circle.classList.add('active');
+      else circle.classList.add('upcoming');
+    }
+    for(var j=1;j<=2;j++){
+      document.getElementById('sl-'+j).className='step-line '+(j<step?'completed':'upcoming');
+    }
+
+    // 5. Measure target height
+    var h1=stepsWrapper.offsetHeight;
+
+    // 6. Lock at original, reflow, then animate
+    stepsWrapper.style.height=h0+'px';
+    stepsWrapper.offsetHeight;
+
+    stepsWrapper.style.height=h1+'px';
+    showSec.style.opacity='';
+    hideSec.style.opacity='';
+
+    // 7. RAF loop for border
+    function tick(){
+      syncBorder();
+      if(stepAnimating)stepRaf=requestAnimationFrame(tick);
+    }
+    stepRaf=requestAnimationFrame(tick);
+
+    // 8. Cleanup
+    function cleanup(){
+      stepsWrapper.removeEventListener('transitionend',onEnd);
+      cancelAnimationFrame(stepRaf);
+      stepsWrapper.style.height='';
+      syncBorder();
+      currentStepNum=step;
+      stepAnimating=false;
+    }
+    function onEnd(e){
+      if(e.target!==stepsWrapper||e.propertyName!=='height')return;
+      cleanup();
+    }
+    stepsWrapper.addEventListener('transitionend',onEnd);
+    setTimeout(function(){if(stepAnimating)cleanup()},600);
+  }
+
+  // Button bindings
+  document.getElementById('btn-start').addEventListener('click',function(){goToStep(2)});
+  document.getElementById('btn-back-to-1').addEventListener('click',function(){goToStep(1)});
+  document.getElementById('btn-to-3').addEventListener('click',function(){goToStep(3)});
+  document.getElementById('btn-back-to-2').addEventListener('click',function(){goToStep(2)});
+
+  // ---- Guide toggle (animated height + RAF border) ----
+  function toggleGuide(cardId){
+    var card=document.getElementById(cardId);
+    var steps=card.querySelector('.guide-steps');
+    var isCollapsing=!card.classList.contains('collapsed');
+
+    if(isCollapsing){
+      // Lock current height then collapse to 0
+      steps.style.height=steps.scrollHeight+'px';
+      steps.offsetHeight;
+      steps.classList.add('collapsed-steps');
+      card.classList.add('collapsed');
+    }else{
+      // Expand: remove collapsed, set explicit height, animate
+      card.classList.remove('collapsed');
+      steps.classList.remove('collapsed-steps');
+      var targetH=steps.scrollHeight;
+      steps.style.height='0px';
+      steps.offsetHeight;
+      steps.style.height=targetH+'px';
+    }
+
+    // RAF border sync during transition
+    var guideRaf=0;
+    var guideAnimating=true;
+    function tick(){
+      syncBorder();
+      if(guideAnimating)guideRaf=requestAnimationFrame(tick);
+    }
+    guideRaf=requestAnimationFrame(tick);
+
+    function done(){
+      steps.removeEventListener('transitionend',done);
+      cancelAnimationFrame(guideRaf);
+      guideAnimating=false;
+      steps.style.height='';
+      syncBorder();
+    }
+    steps.addEventListener('transitionend',done);
+    setTimeout(function(){if(guideAnimating)done()},500);
+  }
+
+  document.getElementById('guide-canvas-header').addEventListener('click',function(){toggleGuide('guide-canvas')});
+  document.getElementById('guide-ed-header').addEventListener('click',function(){toggleGuide('guide-ed')});
+
+  // ---- Token validation ----
+  document.getElementById('token-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var canvasInput=document.getElementById('canvas-token');
+    var edInput=document.getElementById('ed-token');
+    var canvasWrap=document.getElementById('canvas-status-wrap');
+    var edWrap=document.getElementById('ed-status-wrap');
+    var canvasError=document.getElementById('canvas-error');
+    var edError=document.getElementById('ed-error');
+    var btn=document.getElementById('validate-btn');
+
+    // Reset
+    canvasInput.classList.remove('valid','invalid');
+    edInput.classList.remove('valid','invalid');
+    canvasWrap.className='token-status-wrap';
+    edWrap.className='token-status-wrap';
+    canvasError.classList.remove('visible');
+    edError.classList.remove('visible');
+    btn.disabled=true;btn.textContent='Validating\u2026';
+
+    // Simulate Canvas validation
+    setTimeout(function(){
+      var canvasVal=canvasInput.value.trim();
+      if(canvasVal.length<10){
+        canvasInput.classList.add('invalid');
+        canvasWrap.className='token-status-wrap show-invalid';
+        canvasError.classList.add('visible');
+        btn.disabled=false;btn.textContent='Validate & Connect';
+        return;
+      }
+      canvasInput.classList.add('valid');
+      canvasWrap.className='token-status-wrap show-valid';
+
+      // Simulate Ed validation
+      setTimeout(function(){
+        var edVal=edInput.value.trim();
+        if(edVal.length<10){
+          edInput.classList.add('invalid');
+          edWrap.className='token-status-wrap show-invalid';
+          edError.classList.add('visible');
+          btn.disabled=false;btn.textContent='Validate & Connect';
+          return;
+        }
+        edInput.classList.add('valid');
+        edWrap.className='token-status-wrap show-valid';
+
+        // Both valid — show success with smooth transition
+        setTimeout(function(){
+          // Fade out step 3, collapse wrapper, show success
+          var step3=document.getElementById('step-3');
+          var h0=stepsWrapper.offsetHeight;
+          step3.classList.add('out');
+          stepsWrapper.style.display='none';
+          document.getElementById('step-success').classList.add('active');
+          stepsWrapper.offsetHeight;
+
+          // Mark all steps complete
+          for(var k=1;k<=3;k++){
+            document.getElementById('si-'+k).className='step-circle completed';
+          }
+          document.getElementById('sl-1').className='step-line completed';
+          document.getElementById('sl-2').className='step-line completed';
+
+          requestAnimationFrame(syncBorder);
+
+          // Simulate sync completion
+          setTimeout(function(){
+            var syncEl=document.getElementById('sync-status');
+            syncEl.textContent='';
+            var checkI=document.createElement('i');
+            checkI.setAttribute('data-lucide','check');
+            checkI.style.cssText='width:14px;height:14px';
+            syncEl.appendChild(checkI);
+            syncEl.appendChild(document.createTextNode(' 5 courses synced successfully'));
+            syncEl.style.color='var(--green)';
+            syncEl.style.fontStyle='normal';
+            syncEl.style.fontWeight='600';
+            lucide.createIcons();
+          },3000);
+        },500);
+      },800);
+    },800);
+  });
+
+  // ---- Initial border draw ----
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    syncBorder();
+  })});
+
+  // ---- Background doodles ----
+  (function(){
+    var svg=document.getElementById('bg-doodles');
+    if(!svg)return;
+    var rc=rough.svg(svg);
+    var col='#d0cdc4';
+
+    // Top-right star
+    svg.appendChild(rc.line(1050,80,1050,108,{stroke:col,strokeWidth:.8,roughness:1.5}));
+    svg.appendChild(rc.line(1036,94,1064,94,{stroke:col,strokeWidth:.8,roughness:1.5}));
+
+    // Top-left dots
+    [[80,60],[95,72],[85,88]].forEach(function(p){
+      svg.appendChild(rc.circle(p[0],p[1],4,{stroke:col,fill:col,fillStyle:'solid',roughness:1.2,strokeWidth:.5}));
+    });
+
+    // Bottom wave
+    svg.appendChild(rc.path('M 150 550 Q 180 535, 210 550 Q 240 565, 270 550 Q 300 535, 330 550',{stroke:col,strokeWidth:.8,roughness:1.5,fill:'none'}));
+
+    // Right circle
+    svg.appendChild(rc.circle(1120,350,18,{stroke:col,strokeWidth:.6,roughness:1.8,fill:'none'}));
+
+    // Bottom-right star
+    svg.appendChild(rc.line(1080,580,1080,600,{stroke:col,strokeWidth:.8,roughness:1.5}));
+    svg.appendChild(rc.line(1070,590,1090,590,{stroke:col,strokeWidth:.8,roughness:1.5}));
+
+    // Left circles
+    svg.appendChild(rc.circle(50,350,14,{stroke:col,strokeWidth:.6,roughness:2,fill:'none'}));
+    svg.appendChild(rc.circle(35,380,8,{stroke:col,strokeWidth:.5,roughness:1.5,fill:'none'}));
+
+    // Center-top zigzag
+    svg.appendChild(rc.path('M 550 40 L 565 28 L 580 40 L 595 28 L 610 40',{stroke:col,strokeWidth:.8,roughness:1.5,fill:'none'}));
+
+    // Bottom-left diamond
+    svg.appendChild(rc.polygon([[120,520],[132,508],[144,520],[132,532]],{stroke:col,strokeWidth:.7,roughness:1.5,fill:'none'}));
+
+    // Right-center wave
+    svg.appendChild(rc.path('M 1100 200 Q 1115 190, 1130 200 Q 1145 210, 1160 200',{stroke:col,strokeWidth:.7,roughness:1.5,fill:'none'}));
+  })();
+
+})();
+</script>
+</body>
+</html>
