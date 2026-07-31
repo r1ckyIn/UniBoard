@@ -1,6 +1,6 @@
 # Roadmap: UniBoard v3.0 (CANCELLED 2026-05-04)
 
-> ⚠️ **v3.0 CANCELLED** — Phase 39 (Design Token Foundation, PR #127) and Phase 40 (Shared Component Polish, PR #128) shipped to production then **reverted via PR #133 (12e218b) on 2026-05-04** after a UI regression on `uniboard.uk`. UI work paused indefinitely; user is prioritizing functional/backend stability. Phases 41/42/43 deferred to backlog (see Backlog section). All Phase 39+40 planning artifacts (CONTEXT/PLAN/SUMMARY/REVIEW/LEARNINGS) preserved on `chore/milestone-v3.0-init` branch (local-only, unpushed) for future reference.
+> ⚠️ **v3.0 CANCELLED** — Phase 39 (Design Token Foundation, PR #127) and Phase 40 (Shared Component Polish, PR #128) shipped to production then **reverted via PR #133 (12e218b) on 2026-05-04** after a UI regression on `uniboard.uk`. UI work paused indefinitely; user is prioritizing functional/backend stability. Phases 41/42/43 deferred to backlog (see Backlog section). All Phase 39+40 planning artifacts (CONTEXT/PLAN/SUMMARY/REVIEW/LEARNINGS) preserved on `chore/milestone-v3.0-init` branch (pushed to origin; planning docs also synced into main) for future reference.
 
 ## Overview
 
